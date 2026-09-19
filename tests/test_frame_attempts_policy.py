@@ -43,9 +43,9 @@ FRAME = "'{\"mode\": \"frame\", \"min\": \"country\", \"source\": \"чл. 108\"}
 INSERT = f"""
     insert into rule_frame_attempts
         (tenant_id, path, scope_type, wanted, country_value, frame, valid_from,
-         created_by_name)
+         created_by, created_by_name)
     values (%s, 'hour_types.night.pay_percent', 'tenant', '1.1'::jsonb,
-            '1.26'::jsonb, {FRAME}, date '2026-09-01', 'проверка')
+            '1.26'::jsonb, {FRAME}, date '2026-09-01', %s, 'проверка')
 """
 
 
@@ -55,7 +55,7 @@ def _attempt(conn, tenant: str = T1) -> str:
     Здесь это подготовка, а не обход: проверяется, что с ней смогут сделать
     роли, а не то, как она туда попала.
     """
-    return conn.execute(INSERT + " returning id", (tenant,)).fetchone()[0]
+    return conn.execute(INSERT + " returning id", (tenant, USER_ADMIN)).fetchone()[0]
 
 
 # --- пишет только тот, кто ведёт правила ---------------------------------------
@@ -71,14 +71,14 @@ def test_the_director_cannot_write_to_the_journal(db):
     with as_app_user(db, USER_DIRECTOR) as conn:
         conn.execute("savepoint attempt")
         with pytest.raises(DENIED):
-            conn.execute(INSERT, (T1,))
+            conn.execute(INSERT, (T1, USER_DIRECTOR))
         conn.execute("rollback to savepoint attempt")
 
 
 def test_the_admin_writes_and_reads_the_journal(db):
     """Администратор сети — тот, кто правила ведёт, — пишет и видит свою строку."""
     with as_app_user(db, USER_ADMIN) as conn:
-        conn.execute(INSERT, (T1,))
+        conn.execute(INSERT, (T1, USER_ADMIN))
         assert conn.execute(
             "select count(*) from rule_frame_attempts where tenant_id = %s", (T1,)
         ).fetchone()[0] == 1
@@ -121,7 +121,37 @@ def test_an_attempt_cannot_be_planted_for_another_partner(db):
     with as_app_user(db, USER_ADMIN) as conn:
         conn.execute("savepoint attempt")
         with pytest.raises(psycopg.errors.Error):
-            conn.execute(INSERT, (T2,))
+            conn.execute(INSERT, (T2, USER_ADMIN))
+        conn.execute("rollback to savepoint attempt")
+
+
+def test_an_attempt_cannot_be_written_under_another_name(db):
+    """Под чужим именем попытку не записать — это держит база, а не код формы.
+
+    Журнал существует ради доказательства «кто пробовал». Если строку можно
+    положить с любым автором, она не доказывает ничего. Сегодня писатель один —
+    форма правил, и имя она берёт из серверного контекста; но у функции записи
+    есть умолчание `actor_id=None`, и второй писатель (API, Telegram, чужой
+    скрипт с теми же доступами) обойдёт соглашение в коде, а политику — нет.
+    Замок взят по образцу `access_log`, где авторство защищено так же.
+    """
+    with as_app_user(db, USER_ADMIN) as conn:
+        conn.execute("savepoint attempt")
+        with pytest.raises(DENIED):
+            conn.execute(INSERT, (T1, USER_DIRECTOR))
+        conn.execute("rollback to savepoint attempt")
+
+
+def test_an_attempt_without_an_author_is_refused(db):
+    """Безымянная строка в журнал не ложится.
+
+    `created_by` в модели необязателен, и без замка строка с пустым автором
+    прошла бы молча — а читается она как «кто-то пробовал», то есть как ничто.
+    """
+    with as_app_user(db, USER_ADMIN) as conn:
+        conn.execute("savepoint attempt")
+        with pytest.raises(DENIED):
+            conn.execute(INSERT, (T1, None))
         conn.execute("rollback to savepoint attempt")
 
 

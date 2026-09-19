@@ -71,9 +71,19 @@ create policy rules_manage_read on rule_frame_attempts
     as restrictive for select
     using (app_has_permission(tenant_id, 'rules.manage'));
 
+-- Пишет тот, кто ведёт правила, — и ТОЛЬКО под своим именем. Журнал
+-- существует ради ответа «кто пробовал»; строка, которую можно положить с
+-- любым автором, на этот вопрос не отвечает. Сегодня писатель один и имя берёт
+-- из серверного контекста, но у функции записи есть умолчание `actor_id=None`,
+-- а соглашение в коде не удержит второго писателя — API, бота, чужой скрипт с
+-- теми же доступами к базе. Тот же замок и по той же причине стоит у
+-- `access_log` (0264): `actor_user_id = app_user_id()`.
 create policy rules_manage_insert on rule_frame_attempts
     as restrictive for insert
-    with check (app_has_permission(tenant_id, 'rules.manage'));
+    with check (
+        app_has_permission(tenant_id, 'rules.manage')
+        and created_by = app_user_id()
+    );
 """
 
 DROP_POLICIES = """
