@@ -222,6 +222,52 @@ def test_the_frame_holds_below_the_partner_too(
 # --- запертое правило -----------------------------------------------------------
 
 
+def test_the_page_survives_a_value_the_frame_cannot_compare(
+    client, sql, overrides_restored, attempts_restored,
+):
+    """Страница правила не падает, если действующее значение несравнимо с рамкой.
+
+    Так бывает после смены типа значения страной: рамка сравнивает числа, а у
+    партнёра с прошлой версии лежит текст. Падать здесь пятисотой — худший из
+    исходов: правило открывает не тот, кто это сломал, и увидит он не причину,
+    а белый экран. Продукт обязан сказать словами, что сравнить не может.
+    """
+    login_as(client, "admin")
+    post_rule(client, NIGHT, value="1,40")
+    sql.execute(
+        "update rule_overrides set value = '\"мягче\"'::jsonb where path = %s",
+        (NIGHT,),
+    )
+    html = content(client.get(f"/rules/{NIGHT}/"))
+    client.post("/logout/")
+
+    assert "рамк" in html.lower(), "страница не сказала про рамку ничего"
+    assert "сравнить" in html.lower(), html[:900]
+
+
+def test_a_value_the_frame_cannot_compare_is_not_written(
+    client, sql, overrides_restored, attempts_restored,
+):
+    """Непроверяемое рамкой значение не проходит: отказ, а не запись наугад.
+
+    Если сравнить с рамкой нельзя, «пропустить» — значит записать значение, про
+    которое неизвестно, внутри оно рамки или снаружи. Закон о раду от этого не
+    перестаёт действовать, поэтому дверь закрыта, а не открыта.
+    """
+    login_as(client, "admin")
+    post_rule(client, NIGHT, value="1,40")
+    sql.execute(
+        "update rule_overrides set value = '\"мягче\"'::jsonb where path = %s",
+        (NIGHT,),
+    )
+    before = overrides_of(sql, NIGHT)
+    html = content(post_rule(client, NIGHT, value="1,50"))
+    client.post("/logout/")
+
+    assert overrides_of(sql, NIGHT) == before, "значение записалось без проверки рамкой"
+    assert "сравнить" in html.lower(), html[:900]
+
+
 def test_a_locked_rule_has_no_form_at_all(client):
     """Формы у запертого законом правила нет, и вместо неё — объяснение.
 

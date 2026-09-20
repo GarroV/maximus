@@ -660,7 +660,20 @@ def frame_breach_now(frame, value: Any, country_value: Any) -> str:
     """
     if frame is None or country_value is None or value == country_value:
         return ""
-    breach = frames.check(frame, value, country_value)
+    try:
+        breach = frames.check(frame, value, country_value)
+    except frames.FrameMisconfigured:
+        # Сравнить нельзя — обычно после того, как страна сменила ТИП значения,
+        # а переопределение партнёра осталось с прошлой версии. Падать здесь
+        # пятисотой нельзя: правило открывает не тот, кто это сломал, и вместо
+        # причины он увидит белый экран.
+        return _(
+            "Сейчас действует %(value)s, и сравнить это с рамкой страны "
+            "(%(source)s) нельзя: значение другого вида, чем граница. Обычно "
+            "так бывает, когда страна сменила вид значения после того, как "
+            "переопределение было заведено. Расчёт берёт действующее значение; "
+            "чтобы вернуться в рамку, заведите новую версию."
+        ) % {"value": show(value), "source": frame.source}
     if breach is None:
         return ""
     if breach.kind == "locked":
@@ -737,7 +750,20 @@ def refuse_if_softer(tenant_id, path: str, value: Any, *, valid_from: date,
         country_value = value_at(body, path)
     except KeyError:
         country_value = None
-    breach = frames.check(frame, value, country_value)
+    try:
+        breach = frames.check(frame, value, country_value)
+    except frames.FrameMisconfigured:
+        # Пропустить — значит записать значение, про которое неизвестно, внутри
+        # оно рамки или снаружи; закон от этого действовать не перестаёт.
+        # Поэтому дверь закрыта. В журнал попыток это НЕ пишется: журнал
+        # отвечает на вопрос «кто пробовал обойти рамку», а здесь человек
+        # наткнулся на расхождение видов значения, а не обходил границу.
+        raise RuleInputRefused(_(
+            "Это значение нельзя сравнить с рамкой страны (%(source)s): оно "
+            "другого вида, чем граница. Так бывает, когда страна сменила вид "
+            "значения. Записать вслепую продукт не станет — сообщите тому, кто "
+            "ведёт правила страны."
+        ) % {"source": frame.source}) from None
     if breach is None:
         return
 
