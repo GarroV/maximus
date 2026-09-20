@@ -8635,3 +8635,22 @@ msgstr "Ko menja:"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Что читает правило, последствия правки и сравнение стран"
 msgstr "Šta čita pravilo, posledice izmene i poređenje zemalja"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Сейчас действует %(value)s, и сравнить это с рамкой страны (%(source)s) "
+"нельзя: значение другого вида, чем граница. Обычно так бывает, когда "
+"страна сменила вид значения после того, как переопределение было "
+"заведено. Расчёт берёт действующее значение; чтобы вернуться в рамку, "
+"заведите новую версию."
+msgstr "Trenutno važi %(value)s i to se ne može uporediti sa okvirom zemlje (%(source)s): vrednost je druge vrste nego granica. To se obično dešava kada zemlja promeni vrstu vrednosti nakon što je izmena već zavedena. Obračun uzima vrednost koja važi; da bi se vratila u okvir, potrebno je zavesti novu verziju."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Это значение нельзя сравнить с рамкой страны (%(source)s): оно другого "
+"вида, чем граница. Так бывает, когда страна сменила вид значения. "
+"Записать вслепую продукт не станет — сообщите тому, кто ведёт правила "
+"страны."
+msgstr "Ova vrednost se ne može uporediti sa okvirom zemlje (%(source)s): druge je vrste nego granica. To se dešava kada zemlja promeni vrstu vrednosti. Proizvod je neće upisati naslepo — obavestite onoga ko vodi pravila zemlje."

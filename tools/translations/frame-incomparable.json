@@ -1,0 +1,10 @@
+{
+ "Сейчас действует %(value)s, и сравнить это с рамкой страны (%(source)s) нельзя: значение другого вида, чем граница. Обычно так бывает, когда страна сменила вид значения после того, как переопределение было заведено. Расчёт берёт действующее значение; чтобы вернуться в рамку, заведите новую версию.": {
+  "en": "Currently in effect: %(value)s, and it cannot be compared with the country frame (%(source)s): the value is of a different kind than the bound. This usually happens when the country changed the kind of the value after the override had been created. The calculation uses the value in effect; to get back within the frame, create a new version.",
+  "sr": "Trenutno važi %(value)s i to se ne može uporediti sa okvirom zemlje (%(source)s): vrednost je druge vrste nego granica. To se obično dešava kada zemlja promeni vrstu vrednosti nakon što je izmena već zavedena. Obračun uzima vrednost koja važi; da bi se vratila u okvir, potrebno je zavesti novu verziju."
+ },
+ "Это значение нельзя сравнить с рамкой страны (%(source)s): оно другого вида, чем граница. Так бывает, когда страна сменила вид значения. Записать вслепую продукт не станет — сообщите тому, кто ведёт правила страны.": {
+  "en": "This value cannot be compared with the country frame (%(source)s): it is of a different kind than the bound. This happens when the country has changed the kind of the value. The product will not write it blindly — tell whoever maintains the country rules.",
+  "sr": "Ova vrednost se ne može uporediti sa okvirom zemlje (%(source)s): druge je vrste nego granica. To se dešava kada zemlja promeni vrstu vrednosti. Proizvod je neće upisati naslepo — obavestite onoga ko vodi pravila zemlje."
+ }
+}
