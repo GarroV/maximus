@@ -169,3 +169,85 @@ def test_postponing_without_a_reason_is_refused(client, calculated):
         "finding": "unit_hours", "reason": "  ",
     })
     assert response.status_code in (400, 422)
+
+
+def finding_of(state, code: str):
+    """Находка с этим кодом или `None` — включая отложенную."""
+    return next((found for found in state.findings if found.code == code), None)
+
+
+def test_a_salaried_person_short_of_the_norm_is_named_before_closing(
+    client, web_env, period_restored,
+):
+    """Оклад платится полностью, только если в табеле стоят ВСЕ часы месяца.
+
+    Решение владельца (Q025): «базово идет полная выплата по контракту. но
+    возможны больничные отпуска и прочее, т.е. друге средства влияния». Делают
+    это проценты типов часов: полная норма даёт ровно оклад, отпуск сто
+    процентов, больничный шестьдесят пять. Но держится оно на полноте табеля:
+    не проставили человеку 40 часов отсутствия — оклад посчитается по 136
+    часам, человек получит меньше договора, а расчёт при этом выглядит
+    успешным.
+
+    Поэтому проверка на две стороны, и вторая не менее важна первой: те же 136
+    часов, дополненные больничным, находки давать не должны — сторож, который
+    ругается на законный месяц, перестают читать вместе со всеми остальными.
+    """
+    from decimal import Decimal
+
+    from core.models import EmploymentTerm
+    from core.models import Timesheet as Row
+    from payrun import readiness
+    from web.format import money
+
+    row = (
+        Row.objects.filter(period=JUNE)
+        .select_related("employee")
+        .order_by("employee__external_id")
+        .first()
+    )
+    assert row is not None, "в сиде нет ни одного табеля за июнь"
+    term = (
+        EmploymentTerm.objects.filter(employee_id=row.employee_id)
+        .order_by("valid_from")
+        .last()
+    )
+    assert term is not None, "у человека с табелем нет условий найма"
+    kept = (term.work_measure, term.base_rate, term.coefficient)
+
+    EmploymentTerm.objects.filter(pk=term.pk).update(
+        work_measure="salary",
+        base_rate=Decimal("90000.00"),
+        coefficient=Decimal("1.0"),
+    )
+    Row.objects.filter(pk=row.pk).update(
+        hours={"regular": "136.00"}, norm_hours=Decimal("176.00"),
+    )
+    try:
+        found = finding_of(readiness.check(term.tenant_id, JUNE), "salary_hours")
+        assert found is not None, (
+            "окладнику не проставили 40 часов месяца, а закрытие месяца молчит"
+        )
+        said = f"{found.title} {found.detail}"
+        assert row.employee.last_name in said, f"не сказано, у кого дыра: {said}"
+        assert "40" in said, f"не сказано, скольких часов не хватает: {said}"
+        # 90 000 × 40 ч ÷ 176 ч — во столько эти часы обойдутся против контракта.
+        assert money(Decimal("20454.55")) in said, (
+            f"не сказано, во сколько денег обойдётся разрыв: {said}"
+        )
+        assert found.kind == readiness.BLOCKING, (
+            "находку не отложить с причиной: отложенное считается только у "
+            "блокирующего, а пропустить такое молча нельзя"
+        )
+
+        Row.objects.filter(pk=row.pk).update(
+            hours={"regular": "136.00", "sick": "40.00"},
+        )
+        assert finding_of(readiness.check(term.tenant_id, JUNE), "salary_hours") is None, (
+            "полный табель окладника считается дырой — сторож ругается на "
+            "законный месяц"
+        )
+    finally:
+        EmploymentTerm.objects.filter(pk=term.pk).update(
+            work_measure=kept[0], base_rate=kept[1], coefficient=kept[2],
+        )
