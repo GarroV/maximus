@@ -454,7 +454,12 @@
       {% endcomment %}
       <td>{{ row.employee }}{% if row.is_retro %}
         <span class="badge-retro">{% blocktranslate with title=row.retro_title %}Перерасчёт за {{ title }}{% endblocktranslate %}</span>{% endif %}</td>
-      <td>{{ row.unit }}</td>
+      {% comment %}
+      Куда идут деньги этого человека (D055, T221): колонка точки говорит, где
+      стоит строка ведомости, подпись — между какими точками сумма делится и что
+      сетевой человек не «без точки», а на всю сеть.
+      {% endcomment %}
+      <td>{{ row.unit }} {% if row.units_note %}<span class="hint">{{ row.units_note }}</span>{% endif %}</td>
       <td>{% ledger row.ledger %}</td>
       {% comment %}
       Заморозка спорной строки (T027). Метка стоит у каждой строки человека —

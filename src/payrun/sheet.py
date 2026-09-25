@@ -31,6 +31,8 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
+from core.people_units import units_by_person
+
 # Порядок регистров на экране — от самого «внешнего» к внутреннему, всегда
 # одинаковый: перескакивающие местами строки читаются как разные данные.
 LEDGER_ORDER = ["official", "supplementary", "internal"]
@@ -47,6 +49,10 @@ class Cell:
     title: str
     amount: Decimal
     key: str = ""  # чем различать однофамильцев; по умолчанию — имя
+    # Точки, между которыми делятся деньги этого человека (D055). Приезжает
+    # сюда, а не собирается в строке, потому что сумма и её точки читаются из
+    # одного места: разъехавшись, они показали бы деление там, где его нет.
+    cost_units: tuple[str, ...] = ()
     # Строка ведомости, к которой относится сумма, и её заморозка (T027).
     # Заморозка у сотрудника одна на все его регистры: морозится строка
     # ведомости целиком, а не отдельная её половина.
@@ -86,6 +92,10 @@ class Row:
     frozen: bool = False
     freeze_reason: str = ""
     retro_source: date | None = None
+    # Подписи («делится: …», «Вся сеть») здесь нет намеренно: слова берёт экран
+    # (`web.views`), как и названия групп колонок. Этот модуль — чистый Python
+    # без Django, и обращение отсюда к каталогу переводов втащило бы в него веб.
+    cost_units: tuple[str, ...] = ()
 
     @property
     def is_retro(self) -> bool:
@@ -180,7 +190,7 @@ def assemble(cells: list[Cell]) -> Sheet:
             (cell.employee_key, cell.ledger, cell.retro_source),
             {
                 "employee": cell.employee, "employee_key": cell.employee_key,
-                "unit": cell.unit, "amounts": {},
+                "unit": cell.unit, "cost_units": cell.cost_units, "amounts": {},
                 "payslip_id": cell.payslip_id, "frozen": cell.frozen,
                 "freeze_reason": cell.freeze_reason, "retro_source": cell.retro_source,
             },
@@ -194,7 +204,7 @@ def assemble(cells: list[Cell]) -> Sheet:
     rows = [
         Row(
             employee=body["employee"], employee_key=body["employee_key"],
-            unit=body["unit"], ledger=ledger,
+            unit=body["unit"], cost_units=body["cost_units"], ledger=ledger,
             amounts=body["amounts"], total=sum(body["amounts"].values(), Decimal(0)),
             payslip_id=body["payslip_id"], frozen=body["frozen"],
             freeze_reason=body["freeze_reason"], retro_source=body["retro_source"],
@@ -250,12 +260,16 @@ def collect_cells(tenant_id: UUID, period: date) -> list[Cell]:
     # Заморозки видны по тем же политикам, что и сами строки ведомости:
     # приложение выборку не сужает (D014).
     freezes = active_freezes(tenant_id, period)
+    # Точки людей — одним запросом на всю ведомость: людей три десятка, и запрос
+    # на каждого дал бы столько же обращений к базе за тем же ответом.
+    across = units_by_person(tenant_id, period)
 
     return [
         Cell(
             employee=f"{component.payslip.employee.last_name} "
                      f"{component.payslip.employee.first_name}".strip(),
             unit=component.payslip.unit.code if component.payslip.unit_id else "",
+            cost_units=across.get(component.payslip.employee_id, ()),
             ledger=component.ledger,
             code=component.code,
             title=component.title,

@@ -8654,3 +8654,8 @@ msgid ""
 "Записать вслепую продукт не станет — сообщите тому, кто ведёт правила "
 "страны."
 msgstr "Ova vrednost se ne može uporediti sa okvirom zemlje (%(source)s): druge je vrste nego granica. To se dešava kada zemlja promeni vrstu vrednosti. Proizvod je neće upisati naslepo — obavestite onoga ko vodi pravila zemlje."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "делится: %(codes)s"
+msgstr "deli se: %(codes)s"

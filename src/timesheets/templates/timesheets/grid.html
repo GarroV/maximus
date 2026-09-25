@@ -223,7 +223,13 @@
       {% for row in grid.rows %}
         <tr>
           <td class="who" title="{{ row.external_id }}">{{ row.employee }}</td>
-          <td>{{ row.unit }}</td>
+          {% comment %}
+          Куда идут деньги этого человека (D055, T221). Колонка точки говорит,
+          где стоит строка; подпись — между какими точками сумма делится и что
+          сетевой человек не «без точки», а на всю сеть. Управляющему подпись не
+          показывается сама собой: набор точек приезжает урезанным политикой.
+          {% endcomment %}
+          <td>{{ row.unit }} {% if row.units_note %}<span class="hint">{{ row.units_note }}</span>{% endif %}</td>
           {% for column in grid.columns %}
             {% comment %}
             hx-trigger="change" — ячейка уходит на сервер при потере фокуса,
