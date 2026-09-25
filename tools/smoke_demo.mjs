@@ -16,7 +16,7 @@
  * смысл проверки в том, что скачанный файл действительно сходится с расчётом —
  * кроме трёх расхождений, поставленных нарочно.
  *
- *     google-chrome --headless=new --remote-debugging-port=9352 \
+ *     chrome-for-testing --headless=new --remote-debugging-port=9352 \
  *         --user-data-dir=/tmp/chrome-smoke-demo &
  *     APP=http://127.0.0.1:8064 DOWNLOADS=/tmp/demo-downloads \
  *         node tools/smoke_demo.mjs

@@ -19,7 +19,7 @@
  * а материалы для команды — на русском.
  *
  *     docker compose up -d app                  # если ещё не поднят
- *     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+ *     chrome-for-testing \
  *         --headless=new --disable-gpu --hide-scrollbars \
  *         --remote-debugging-port=9341 --user-data-dir=/tmp/chrome-shots &
  *     APP=http://127.0.0.1:8000 USER_NAME=admin USER_PASS=dodo-dev \

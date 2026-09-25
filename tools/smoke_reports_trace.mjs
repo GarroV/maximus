@@ -8,7 +8,7 @@
  * порога. Отдельно — D023: у роли с одним регистром на обоих экранах не должно
  * встретиться ни строки, ни слова о чужих.
  *
- *     google-chrome --headless=new --remote-debugging-port=9341 \
+ *     chrome-for-testing --headless=new --remote-debugging-port=9341 \
  *         --user-data-dir=/tmp/chrome-smoke-rep2 &
  * Стенд смоук приводит к сиду сам — и в начале, и после себя (см. договор в
  * шапке `cdp.mjs`). Поэтому запускать его можно в любом порядке и в одиночку,
