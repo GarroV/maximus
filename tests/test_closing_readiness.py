@@ -251,3 +251,50 @@ def test_a_salaried_person_short_of_the_norm_is_named_before_closing(
         EmploymentTerm.objects.filter(pk=term.pk).update(
             work_measure=kept[0], base_rate=kept[1], coefficient=kept[2],
         )
+
+
+def test_the_short_salary_finding_is_visible_on_the_closing_screen(client, calculated):
+    """Находка про окладника видна там, где закрывают месяц, а не только в коде.
+
+    Проверка готовности отвечает двоим — экрану и самому утверждению, — и
+    разъехавшись, они дают худшее из возможного: страница говорит «всё чисто»,
+    а кнопка отвечает отказом. Поэтому находку смотрим глазами страницы.
+    """
+    from decimal import Decimal
+
+    from core.models import EmploymentTerm
+    from core.models import Timesheet as Row
+    from web.format import money
+
+    row = (
+        Row.objects.filter(period=JUNE)
+        .select_related("employee")
+        .order_by("employee__external_id")
+        .first()
+    )
+    term = (
+        EmploymentTerm.objects.filter(employee_id=row.employee_id)
+        .order_by("valid_from")
+        .last()
+    )
+    kept = (term.work_measure, term.base_rate, term.coefficient)
+    EmploymentTerm.objects.filter(pk=term.pk).update(
+        work_measure="salary",
+        base_rate=Decimal("90000.00"),
+        coefficient=Decimal("1.0"),
+    )
+    Row.objects.filter(pk=row.pk).update(
+        hours={"regular": "136.00"}, norm_hours=Decimal("176.00"),
+    )
+    try:
+        html = body(client.get(calculated))
+        assert row.employee.last_name in html, (
+            "экран закрытия месяца не называет окладника с неполным табелем"
+        )
+        assert money(Decimal("20454.55")) in html, (
+            "экран не говорит, во сколько денег обойдётся разрыв"
+        )
+    finally:
+        EmploymentTerm.objects.filter(pk=term.pk).update(
+            work_measure=kept[0], base_rate=kept[1], coefficient=kept[2],
+        )
