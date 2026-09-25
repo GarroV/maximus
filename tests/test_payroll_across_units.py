@@ -156,3 +156,36 @@ def test_the_units_of_a_person_are_versioned(sql, web_env):  # noqa: F811
     assert {"valid_from", "valid_to"} <= columns, (
         f"привязка к точкам не версионируется: {sorted(columns)}"
     )
+
+
+def test_the_office_payroll_does_not_hang_undistributed(client, sql, calculated):  # noqa: F811
+    """Точек нет — ФОТ доезжает до точек, а не остаётся ждать разнесения.
+
+    Строгая проверка рядом с той, что выше: та довольствуется «строка ушла из
+    одной точки» и зеленеет даже тогда, когда факт остался `pending` навсегда.
+    А остаться он может: правило разнесения ищется по контрагенту или по статье
+    расхода, а у зарплатного факта нет ни того, ни другого.
+
+    Разница видна только в P&L: сумма, висящая `pending`, в затраты точек не
+    входит вовсе — то есть офис как не ложился на точки, так и не ложится, и
+    жалоба issue #194 закрыта наполовину.
+    """
+    who = somebody(sql)
+    put_on_units(sql, who, [])
+    sql.execute(
+        """update payslips set unit_id = null
+            where employee_id = (select id from employees where external_id = %s)""",
+        (who,),
+    )
+
+    login_as(client, "director")
+    approve(client, calculated)
+
+    waiting = sql.execute(
+        """select count(*), coalesce(sum(f.amount), 0) from facts f
+            where f.dedup_key like 'payrun:%%' and f.superseded_at is null
+              and f.allocation = 'pending'"""
+    ).fetchone()
+    assert waiting[0] == 0, (
+        f"ФОТ офиса висит неразнесённым: {waiting[0]} строк на {waiting[1]}"
+    )
