@@ -214,6 +214,7 @@ def test_a_salaried_person_short_of_the_norm_is_named_before_closing(
     )
     assert term is not None, "у человека с табелем нет условий найма"
     kept = (term.work_measure, term.base_rate, term.coefficient)
+    kept_row = (row.hours, row.norm_hours)
 
     EmploymentTerm.objects.filter(pk=term.pk).update(
         work_measure="salary",
@@ -251,6 +252,9 @@ def test_a_salaried_person_short_of_the_norm_is_named_before_closing(
         EmploymentTerm.objects.filter(pk=term.pk).update(
             work_measure=kept[0], base_rate=kept[1], coefficient=kept[2],
         )
+        # Табель возвращается тоже: он общий для всех тестов этой базы, и
+        # перекроенный месяц уводит суммы у соседнего модуля.
+        Row.objects.filter(pk=row.pk).update(hours=kept_row[0], norm_hours=kept_row[1])
 
 
 def test_the_short_salary_finding_is_visible_on_the_closing_screen(client, calculated):
@@ -278,6 +282,7 @@ def test_the_short_salary_finding_is_visible_on_the_closing_screen(client, calcu
         .last()
     )
     kept = (term.work_measure, term.base_rate, term.coefficient)
+    kept_row = (row.hours, row.norm_hours)
     EmploymentTerm.objects.filter(pk=term.pk).update(
         work_measure="salary",
         base_rate=Decimal("90000.00"),
@@ -298,3 +303,6 @@ def test_the_short_salary_finding_is_visible_on_the_closing_screen(client, calcu
         EmploymentTerm.objects.filter(pk=term.pk).update(
             work_measure=kept[0], base_rate=kept[1], coefficient=kept[2],
         )
+        # Табель возвращается тоже: он общий для всех тестов этой базы, и
+        # перекроенный месяц уводит суммы у соседнего модуля.
+        Row.objects.filter(pk=row.pk).update(hours=kept_row[0], norm_hours=kept_row[1])
