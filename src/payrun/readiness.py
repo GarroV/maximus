@@ -74,6 +74,7 @@ def check(tenant_id: UUID, period: date) -> Readiness:
     findings += _unit_hours(tenant_id, period)
     findings += _papers(tenant_id, period)
     findings += _unclassified(tenant_id, period)
+    findings += _salary_hours(tenant_id, period)
     findings += _suspicious(tenant_id, period)
     return Readiness(findings=findings, postponed=_postponed(tenant_id, period))
 
@@ -158,6 +159,95 @@ def _unclassified(tenant_id: UUID, period: date) -> list[Finding]:
         title=_("Строк без статьи: %(count)s") % {"count": waiting},
         detail=_("Деньги в отчёте есть, но лежат не в той строке, где их "
                  "будут искать."),
+    )]
+
+
+def _salary_hours(tenant_id: UUID, period: date) -> list[Finding]:
+    """Окладники, у которых в табеле стоят не все часы месяца.
+
+    Оклад — это полная выплата по контракту (решение владельца, Q025: «базово
+    идет полная выплата по контракту. но возможны больничные отпуска и прочее,
+    т.е. друге средства влияния»). Держится она не на правиле пропорции, а на
+    процентах типов часов: полная норма даёт ровно оклад, отпуск сто процентов,
+    больничный шестьдесят пять. То есть на **полноте табеля**.
+
+    Отсюда дыра, которую не видит ни один другой сторож: человек отсутствовал,
+    а тип часов ему не проставили — оклад делится на норму и умножается на
+    меньшее число часов, человек получает меньше договора, и расчёт при этом
+    выглядит успешным. Ошибка вылезает не отказом, а правдоподобной суммой в
+    ведомости, поэтому она и блокирующая.
+
+    Деньги считаются тем же способом, что и в движке (`engine.rate_parts`):
+    ставка — `base_rate × coefficient`, делитель — норма месяца. Иначе сторож
+    назвал бы сумму, которой в ведомости нет.
+    """
+    from decimal import Decimal
+
+    from core.models import Timesheet
+    from payrun.calc import terms_in_force
+    from timesheets.totals import hours_of
+    from web.format import money
+
+    salaried = {
+        employee_id: term
+        for employee_id, term in terms_in_force(tenant_id, period).items()
+        if term.work_measure == "salary"
+    }
+    if not salaried:
+        return []
+
+    # Строк за месяц бывает две — перевод между точками. Часы складываются,
+    # норма берётся наибольшей: она календарная, одна на месяц.
+    worked: dict = {}
+    norms: dict = {}
+    rows = (
+        Timesheet.objects.filter(tenant_id=tenant_id, period=period)
+        .filter(employee_id__in=list(salaried))
+        .select_related("employee")
+    )
+    names: dict = {}
+    for row in rows:
+        worked[row.employee_id] = worked.get(row.employee_id, Decimal(0)) + hours_of(row)
+        norms[row.employee_id] = max(
+            norms.get(row.employee_id, Decimal(0)), row.norm_hours or Decimal(0)
+        )
+        names[row.employee_id] = row.employee
+
+    short = []
+    for employee_id, term in salaried.items():
+        norm = norms.get(employee_id, Decimal(0))
+        if norm <= 0:
+            # Нормы нет — считать не из чего, и это другая беда: движок на таком
+            # месяце откажется выводить часовую ставку и скажет об этом сам.
+            continue
+        missing = norm - worked.get(employee_id, Decimal(0))
+        if missing <= 0:
+            continue
+        person = names.get(employee_id)
+        cost = (Decimal(term.base_rate) * Decimal(term.coefficient) * missing) / norm
+        short.append((person, missing, cost))
+
+    if not short:
+        return []
+
+    said = ", ".join(
+        _("%(person)s — %(hours)s ч на %(money)s") % {
+            "person": person.last_name if person else "—",
+            "hours": f"{missing.normalize():f}",
+            "money": money(cost),
+        }
+        for person, missing, cost in short
+    )
+    return [Finding(
+        code="salary_hours",
+        kind=BLOCKING,
+        title=_("У окладников в табеле не все часы месяца: %(people)s") % {
+            "people": said,
+        },
+        detail=_("Оклад платится полностью, только если в табеле стоят все часы "
+                 "месяца — отработанные, отпуск, больничный. Незаполненные часы "
+                 "молча уменьшают выплату против контракта. Проставьте тип часов "
+                 "или отложите находку с причиной."),
     )]
 
 
