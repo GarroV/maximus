@@ -21,6 +21,8 @@
 """
 from __future__ import annotations
 
+from uuid import uuid4
+
 import psycopg
 import pytest
 
@@ -64,7 +66,7 @@ def units_of_people_removed(sql):
 # Точка управляющего сида и точка, которой он не видит. Обе из `seed_dev.UNITS`;
 # берутся именами, а не «первой попавшейся», потому что смысл теста — именно в
 # том, что одна своя, а другая чужая.
-MINE, ALIEN = "NS1", "BG1"
+MINE, ALIEN, THIRD = "NS1", "BG1", "NS2"
 
 
 def somebody_of(sql, code: str) -> tuple:
@@ -138,23 +140,40 @@ def test_a_person_bound_to_my_unit_is_mine_even_if_hired_elsewhere(rls, sql):
     )
 
 
-def test_an_office_person_without_terms_on_any_unit_is_reached_by_the_binding(rls, sql):
-    """Офисному условия найма точку не называют вовсе — виден он только привязкой.
+def test_the_territorial_manager_is_seen_by_both_of_his_units(rls, sql):
+    """Человек на двух точках — свой для обеих, а не только для той, где оформлен.
 
-    Это и есть случай, ради которого заведён D055: у офисного точек нет,
-    деньги его разносятся на сеть, и часть попадает на каждую точку.
+    Ровно случай владельца: «управляющий может быть на несколько пиццерий
+    один». Деньги его делятся между обеими (T197), и обе обязаны знать, чью
+    зарплату они несут.
+    """
+    person, _key = somebody_of(sql, MINE)
+    bind(sql, person, MINE)
+    bind(sql, person, ALIEN)
+
+    assert visible_to(rls, boss_of(sql, MINE), person), (
+        "человек перестал быть своим для точки, где оформлен"
+    )
+    assert visible_to(rls, _a_manager_of(sql, ALIEN), person), (
+        "вторая точка человека несёт его ФОТ и не видит его самого"
+    )
+
+
+def test_the_network_person_stays_visible_to_everyone(rls, sql):
+    """Точки в условиях найма нет — человек сетевой и виден каждому.
+
+    Так было и до T221: `app_unit_is_visible` читает пустую точку как «строка
+    ничья, видна всем в тенанте» (`0011`). Проверка стоит здесь сторожем —
+    сужать доступ этой задачей не просили, а правка правила «свой человек» это
+    ровно то место, где сужение прошло бы молча.
     """
     person, _key = somebody_of(sql, ALIEN)
-    boss = boss_of(sql, MINE)
     sql.execute(
         "update employment_terms set unit_id = null where employee_id = %s", (person,),
     )
-
-    assert not visible_to(rls, boss, person), (
-        "человек без точки в условиях найма виден управляющему и без привязки"
+    assert visible_to(rls, boss_of(sql, MINE), person), (
+        "сетевой человек пропал из справочника управляющего"
     )
-    bind(sql, person, MINE)
-    assert visible_to(rls, boss, person), "офисного не достаёт даже привязка к точке"
 
 
 # --- 2. Чужой доступ от этого не расширился -----------------------------------
@@ -166,48 +185,41 @@ def test_a_manager_of_another_unit_gets_nothing_from_my_binding(rls, sql):
     Иначе «виден тем, к чьей точке привязан» тихо превратилось бы в «виден
     всем, у кого есть хоть одна привязка».
     """
-    person, _key = somebody_of(sql, ALIEN)
-    sql.execute(
-        "update employment_terms set unit_id = null where employee_id = %s", (person,),
-    )
+    person, _key = somebody_of(sql, THIRD)
     bind(sql, person, MINE)
 
-    alien_boss = sql.execute(
-        """select m.user_id from memberships m
-             join units u on u.id = any(m.unit_ids)
-            where u.code = %s and m.unit_ids is not null limit 1""",
-        (ALIEN,),
-    ).fetchone()
-    if alien_boss is None:
-        # В сиде управляющий один, поэтому чужой заводится здесь — иначе
-        # проверка молча пропускалась бы и дыра жила бы непроверенной.
-        alien_boss = _a_manager_of(sql, ALIEN)
-    else:
-        alien_boss = str(alien_boss[0])
-
-    assert not visible_to(rls, alien_boss, person), (
+    assert not visible_to(rls, _a_manager_of(sql, ALIEN), person), (
         "управляющий чужой точки видит человека, привязанного не к нему"
     )
 
 
 def _a_manager_of(sql, code: str) -> str:
-    """Завести управляющего этой точки, скопировав роль управляющего из сида."""
-    user_id, tenant, role = sql.execute(
-        """select u.id, m.tenant_id, m.role_id from memberships m
+    """Завести управляющего этой точки по образцу управляющего из сида.
+
+    В сиде управляющий один и стоит на `NS1`; второго приходится заводить
+    здесь. Пропускать проверку, когда его нет, нельзя — «чужой доступ не
+    расширился» и есть половина смысла задачи, и молчаливый пропуск оставил бы
+    её непроверенной.
+    """
+    tenant, role, password = sql.execute(
+        """select m.tenant_id, m.role_id, u.password from memberships m
              join users u on u.id = m.user_id
             where m.unit_ids is not null limit 1"""
     ).fetchone()
+    # Имя с суффиксом: соединение `sql` идёт в `autocommit`, то есть заведённый
+    # человек переживает тест и достаётся следующему. Чистить его в конце —
+    # значит держать уборку в двух местах; дешевле не сталкиваться именами.
     new_user = sql.execute(
-        """insert into users (id, username, full_name, is_active)
-           values (gen_random_uuid(), 'manager_alien', 'Управляющий соседней точки', true)
-           returning id"""
+        """insert into users (id, username, full_name, password, is_active)
+           values (gen_random_uuid(), %s, 'Управляющий соседней точки', %s, true)
+           returning id""",
+        (f"manager_{code.lower()}_{uuid4().hex[:8]}", password),
     ).fetchone()[0]
     sql.execute(
         """insert into memberships (id, tenant_id, user_id, role_id, unit_ids)
            select gen_random_uuid(), %s, %s, %s, array[u.id] from units u where u.code = %s""",
         (tenant, new_user, role, code),
     )
-    assert user_id  # использован только как образец: роль и тенант берём оттуда
     return str(new_user)
 
 
@@ -231,7 +243,7 @@ def test_the_manager_still_cannot_rewrite_the_person_he_now_sees(rls, sql):
         rls.execute("savepoint probe")
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
             rls.execute(
-                "update employees set full_name = 'переименован управляющим' where id = %s",
+                "update employees set last_name = 'переименован управляющим' where id = %s",
                 (person,),
             )
         rls.execute("rollback to savepoint probe")
