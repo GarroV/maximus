@@ -8672,3 +8672,7 @@ msgstr "Plata se isplaćuje u celosti samo ako su u evidenciji svi sati meseca �
 #, python-format
 msgid "У окладников в табеле не все часы месяца: %(people)s"
 msgstr "Zaposlenima na platu nedostaju sati u evidenciji: %(people)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ручная корректировка"
+msgstr "Ručna korekcija"

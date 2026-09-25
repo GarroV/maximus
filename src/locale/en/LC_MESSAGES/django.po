@@ -8838,3 +8838,7 @@ msgstr "A salary is paid in full only when every hour of the month is in the tim
 #, python-format
 msgid "У окладников в табеле не все часы месяца: %(people)s"
 msgstr "Salaried people are missing hours in the timesheet: %(people)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ручная корректировка"
+msgstr "Manual correction"
