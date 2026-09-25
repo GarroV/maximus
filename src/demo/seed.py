@@ -28,6 +28,7 @@ from django.db import connection, transaction
 from django.utils.timezone import now
 
 from core import models
+from core.allocation_defaults import ensure_network_payroll_rules
 from core.role_delivery import product_shape
 from core.roles import ROLE_ORDER, ROLE_SHAPES, permission_states
 from core.rules import import_presets
@@ -350,6 +351,9 @@ def _pnl_items() -> dict[str, models.PnlItem]:
             defaults={"id": det_id("pnl_item", code), "title": title,
                       "kind": kind, "sort_order": order},
         )
+    # Правило «ФОТ сети делится поровну» — рядом со строками, к которым оно
+    # привязано (T221, D055), тем же доводом, что и в сиде разработки.
+    ensure_network_payroll_rules(items)
     return items
 
 

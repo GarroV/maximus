@@ -189,3 +189,13 @@ def test_the_office_payroll_does_not_hang_undistributed(client, sql, calculated)
     assert waiting[0] == 0, (
         f"ФОТ офиса висит неразнесённым: {waiting[0]} строк на {waiting[1]}"
     )
+
+    # И доехал он до КАЖДОЙ точки, а не до одной: «офис на всех работает».
+    # Без этой половины проверка зеленела бы и на правиле «всё на одну точку».
+    got = sql.execute(
+        """select count(distinct f.unit_id) from facts f
+            where f.dedup_key like 'payrun:%%' and f.superseded_at is null
+              and f.allocation = 'allocated' and f.unit_id is not null"""
+    ).fetchone()[0]
+    units = sql.execute("select count(*) from units").fetchone()[0]
+    assert got == units, f"ФОТ сети дошёл до {got} точек из {units}"

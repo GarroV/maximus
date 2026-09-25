@@ -725,7 +725,14 @@ class AllocationRule(models.Model):
     """
 
     id = uuid_pk()
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, db_column="tenant_id")
+    # Пусто — правило поставляется продуктом и действует у каждого партнёра.
+    # Так же устроены общие строки P&L и системные роли (`SHARED_ROW_TABLES`,
+    # `0004_rls`): единый справочник — цель проекта, и «поровну» для сетевого
+    # ФОТ (D055) не может зависеть от того, завёл ли партнёр себе строку.
+    # Своя строка партнёра перебивает общую.
+    tenant = models.ForeignKey(
+        Tenant, on_delete=models.CASCADE, db_column="tenant_id", null=True, blank=True,
+    )
     counterparty = models.ForeignKey(
         Counterparty, on_delete=models.CASCADE, db_column="counterparty_id",
         null=True, blank=True,
@@ -794,14 +801,31 @@ class AllocationRule(models.Model):
                     (validity_range(), RangeOperators.OVERLAPS),
                 ],
             ),
-            # Ровно один ключ: правило без ключа не найдётся никогда, правило с
-            # двумя ключами нашлось бы дважды и разнесло бы факт по спорному.
+            # Не больше одного ключа: правило с двумя нашлось бы дважды и
+            # разнесло бы факт по спорному. Ключей при этом три, а не два:
+            # пустые контрагент и статья означают, что ключ — сама строка P&L
+            # (T221, D055). Так адресуется зарплата сетевого человека: у неё нет
+            # ни контрагента, ни статьи, и до этой задачи правило для неё не
+            # находилось никогда — ФОТ офиса висел неразнесённым.
             models.CheckConstraint(
                 condition=(
-                    models.Q(counterparty__isnull=True, expense_item__isnull=False)
-                    | models.Q(counterparty__isnull=False, expense_item__isnull=True)
+                    models.Q(counterparty__isnull=True)
+                    | models.Q(expense_item__isnull=True)
                 ),
                 name="allocation_rules_one_key",
+            ),
+            # Третий ключ — строка P&L. Регистр в него не входит намеренно:
+            # строка отчёта уже названа, а набор точек сети от регистра не
+            # зависит (в отличие от поставщика, которому платят и официально, и
+            # из кассы, — там регистр различает два разных правила).
+            ExclusionConstraint(
+                name="allocation_rules_line_no_overlap",
+                expressions=[
+                    ("tenant", RangeOperators.EQUAL),
+                    ("pnl_item", RangeOperators.EQUAL),
+                    (validity_range(), RangeOperators.OVERLAPS),
+                ],
+                condition=models.Q(counterparty__isnull=True, expense_item__isnull=True),
             ),
         ]
 
