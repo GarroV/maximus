@@ -24,8 +24,14 @@
 **Раздел, которого роль не ведёт, не показывается вовсе.** Ссылка на экран,
 который ответит отказом, хуже отсутствующей кнопки.
 
-**Клавиатура и диктор.** Первая остановка табуляции — «к содержанию»; подпись
-пункта в свёрнутой панели прячется от глаза, но не от диктора.
+**Клавиатура и диктор.** Первая остановка табуляции — «к содержанию».
+
+**Всё видно и на планшете, ничего не режется** (сверка с эталоном по T222):
+панель от 720 до 1099 остаётся полной, подписи переносятся, а не обрезаются
+многоточием, у точки состояния есть название, служебное собрано в один пункт.
+Что все разделы влезают в экран 1440×900 и у каждого пункта есть имя для
+диктора, проверяется живым прогоном (`tools/smoke_sidenav.mjs`): это
+измеряется в браузере, а не в листе.
 
 Проверки оформления идут по файлам статики. Рядом стоит проверка, что страница
 эти файлы просит: правило в неподключённом листе не действует.
@@ -233,18 +239,94 @@ def test_the_panel_says_whose_eyes_these_numbers_are(client, web_env):
 
 
 def test_language_and_logout_live_in_the_foot_of_the_panel(client, web_env):
-    """Язык, тема и выход — подвал панели; выход — форма, а не ссылка."""
+    """Язык, тема и выход — низ панели; выход — форма, а не ссылка."""
     login_as(client, "accountant")
     nav = nav_of(body(client.get("/periods/")))
     foot = nav[nav.index('class="sidenav__foot"'):]
 
     assert 'action="/i18n/setlang/"' in foot, "переключателя языка нет в подвале"
     assert 'action="/theme/"' in foot, "переключателя темы нет в подвале"
-    assert re.search(r'<form class="sidenav__form" method="post" action="/logout/', foot), (
-        "выход не формой: его запустила бы картинка на чужой странице"
+    logout = re.search(
+        r'<form class="sidenav__form sidenav__logout" method="post" action="/logout/.*?</form>',
+        foot, flags=re.S,
     )
+    assert logout, "выход не формой: его запустила бы картинка на чужой странице"
+    # Выход — значком, поэтому название обязано быть у самой кнопки.
+    assert 'aria-label="Выйти"' in logout.group(0), "у кнопки выхода нет названия"
     # Выбранное не нажимается — тот же инвариант, что у текущего раздела.
     assert re.search(r'<span class="sidenav__choice" aria-current="true"[^>]*lang="ru"', foot)
+
+
+def test_password_and_guide_live_behind_one_service_item(client, web_env):
+    """Пароль и гайд — не отдельными пунктами подвала, а на странице учётной записи.
+
+    Сверка по T222: три служебных пункта в подвале выталкивали за нижний край
+    экрана 1440×900 целую область учёта. Служебный пункт один, как
+    «Настройки» в ядре.
+    """
+    login_as(client, "accountant")
+    nav = nav_of(body(client.get("/periods/")))
+    foot = nav[nav.index('class="sidenav__foot"'):]
+
+    assert 'href="/account/"' in foot, "служебного пункта нет"
+    for gone in ("/guide/", "/account/password/"):
+        assert f'href="{gone}"' not in foot, f"{gone} снова отдельным пунктом подвала"
+
+    page = body(client.get("/account/"))
+    assert 'href="/account/password/"' in page and 'href="/guide/"' in page, (
+        "со страницы учётной записи не дойти до пароля и гайда"
+    )
+    assert "Dodo Serbia" in page and 'class="role' in page, "страница не говорит, кто вы"
+    assert page.count('aria-current="page"') == 1, "служебный пункт не выделен на своей странице"
+
+
+def test_the_account_page_is_behind_the_login(client, web_env):
+    """Учётная запись без входа — вход, а не пустая страница."""
+    response = client.get("/account/")
+
+    assert response.status_code == 302 and "/login/" in response["Location"]
+
+
+def test_a_guest_still_finds_the_guide_in_the_panel(client, web_env):
+    """До входа гайд остаётся пунктом: половина его ответа — «кем входить»."""
+    nav = nav_of(body(client.get("/guide/")))
+
+    assert 'aria-current="page"' in nav and 'href="/login/"' in nav
+
+
+def test_the_role_is_named_once_and_in_the_page_language(client, web_env):
+    """У учёток сида имя совпадает с названием роли — на любом из языков.
+
+    Сверка по T222: на английской странице стояли жирное «Администратор сети»
+    (имя человека, записанное по-русски) и плашка «Network Administrator».
+    """
+    from django.utils import translation
+
+    login_as(client, "admin")
+    client.cookies["django_language"] = "en"
+    # Запрос включает английский в потоке теста и там его оставляет; без
+    # `override` соседние тесты читали бы названия разделов по-английски.
+    with translation.override(None):
+        try:
+            who = nav_of(body(client.get("/periods/")))
+        finally:
+            client.cookies.pop("django_language", None)
+    who = who[who.index('class="sidenav__user"'):]
+
+    assert "Администратор" not in who, "роль по-русски на английской странице"
+    assert "<b>" not in who, "имя повторяет роль: одно и то же сказано дважды"
+    assert len(re.findall(r'class="role(?: |")', who)) == 1
+
+
+@pytest.mark.parametrize(
+    ("name", "same"),
+    [("Администратор сети", True), ("Network Administrator", True),
+     ("Бухгалтер", True), ("", True), ("Ana Petrović", False)],
+)
+def test_a_name_that_is_a_role_title_in_any_language_is_not_repeated(name, same):
+    from web.templatetags.ui import is_role_name
+
+    assert is_role_name(name, "Network Administrator") is same, name
 
 
 def test_the_full_access_role_is_not_told_it_is_limited_to_a_unit(client, web_env):
@@ -329,22 +411,49 @@ def test_the_first_tab_stop_leads_to_the_content(client, web_env):
     assert '<main id="content"' in page
 
 
-def test_the_collapsed_panel_keeps_the_names_for_the_screen_reader():
-    """От 720 до 1099 подпись уходит от глаза, но не из дерева доступности.
+def test_the_tablet_keeps_the_full_panel():
+    """От 720 до 1099 панель остаётся полной, а не значками.
 
-    Ядро прячет подпись `display: none`, а это выкидывает её и для диктора:
-    пункт свёрнутой панели читался бы «ссылка» без названия. Продукт
-    перекрывает это в своём листе — проверяется именно перекрытие.
+    Ядро сворачивает её здесь до 56 пикселей. Сверка по T222 это сняла: на 900
+    не видно ни роли, ни партнёра, ни границ между группами, а подпись у значка
+    есть только в наведении. Проверяется, что продукт перекрывает каждое
+    правило свёртки, которое прятало смысл.
     """
     core = rules(CORE_CSS.read_text(encoding="utf-8"))
     assert ".sidenav__label" in media(core, "@media (max-width: 1099px)"), (
         "ядро больше не сворачивает панель — проверка не о том"
     )
-    rail = media(rules(APP_CSS.read_text(encoding="utf-8")),
-                 "@media (min-width: 720px) and (max-width: 1099px)")
-    label = block(rail, ".sidenav__label")
-    assert "display: block" in label and "clip:" in label, (
-        "в свёрнутой панели подпись пункта пропала и для диктора"
+    tablet = media(rules(APP_CSS.read_text(encoding="utf-8")),
+                   "@media (min-width: 720px) and (max-width: 1099px)")
+    assert "width: 216px" in block(tablet, ".sidenav"), "панель на планшете снова узкая"
+    shown = block(tablet, ".sidenav__label, .sidenav__group")
+    assert "display: block" in shown, "подписи и группы на планшете спрятаны"
+    assert "display: flex" in block(tablet, ".sidenav__name, .sidenav__who"), (
+        "на планшете не видно, кто смотрит"
+    )
+
+
+def test_section_names_wrap_instead_of_ending_in_an_ellipsis():
+    """«Инбокс докуме…» — не название. Подпись переносится, пункт растёт вниз."""
+    css = rules(APP_CSS.read_text(encoding="utf-8"))
+    item = block(css, ".sidenav__item, .sidenav__current")
+    label = block(css, ".sidenav__label")
+
+    assert "white-space: normal" in item and "height: auto" in item
+    assert "min-height: 34px" in item, "пункт стал ниже 34 пикселей"
+    assert "text-overflow: clip" in label, "подпись снова режется многоточием"
+
+
+def test_the_stage_of_a_screen_is_named_on_hover(client, web_env):
+    """Цветная точка состояния без слов глазу ничего не говорит."""
+    login_as(client, "admin")
+    nav = sections_of(body(client.get("/periods/")))
+
+    staged = re.findall(r'<a class="sidenav__item" href="[^"]*" title="([^"]*)">'
+                        r'(?:(?!</a>).)*sidenav__stage--', nav, flags=re.S)
+    assert staged, "у разделов нет состояния — проверка не о том"
+    assert all(" · " in title for title in staged), (
+        f"состояние экрана не названо в подсказке: {staged}"
     )
 
 
@@ -383,11 +492,13 @@ def test_the_tap_targets_of_the_unit_manager_are_finger_sized():
     phone = media(rules(APP_CSS.read_text(encoding="utf-8")), "@media (max-width: 719px)")
 
     item = block(phone, ".sidenav__list .sidenav__item, .sidenav__list .sidenav__current")
-    height = re.search(r"[;{\s]height:\s*(\d+)px", item)
+    height = re.search(r"min-height:\s*(\d+)px", item)
     assert height and int(height.group(1)) >= 44, "пункт полосы меньше пальца"
     assert "var(--tap-min)" in block(
-        phone, ".sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current"
-    ), "гайд, пароль и выход на телефоне меньше пальца"
+        phone,
+        ".sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,\n"
+        "  .sidenav__logout .sidenav__item",
+    ), "учётная запись и выход на телефоне меньше пальца"
     assert "var(--tap-min)" in block(phone, ".sidenav__theme button, .sidenav__choice"), (
         "язык и тема на телефоне меньше пальца"
     )

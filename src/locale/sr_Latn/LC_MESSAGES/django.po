@@ -4796,10 +4796,6 @@ msgstr "Platni spisak za štampu"
 msgid "Основная навигация"
 msgstr "Glavna navigacija"
 
-#: web/templates/web/components/header.html:148
-msgid "как это работает"
-msgstr "kako ovo radi"
-
 #: web/templates/web/components/header.html:164
 msgid "Как в системе"
 msgstr "Kao u sistemu"
@@ -4818,10 +4814,6 @@ msgid ""
 msgstr ""
 "Stranica za prijavu ima dugmad za brzu prijavu sa seed nalozima (DEV_LOGIN=1)"
 
-#: web/templates/web/components/header.html:191
-msgid "dev-вход"
-msgstr "dev prijava"
-
 #: web/templates/web/components/header.html:204
 msgid "Данные и итоги на всех страницах — только по этой точке"
 msgstr "Podaci i zbirovi na svim stranicama — samo za ovaj objekat"
@@ -4831,17 +4823,25 @@ msgstr "Podaci i zbirovi na svim stranicama — samo za ovaj objekat"
 msgid "точка: %(code)s"
 msgstr "objekat: %(code)s"
 
-#: web/templates/web/components/header.html:207
-msgid "пароль"
-msgstr "lozinka"
-
-#: web/templates/web/components/header.html:209
-msgid "выйти"
-msgstr "odjava"
-
 #: web/templates/web/components/sidenav.html:134
 msgid "Выйти"
 msgstr "Odjava"
+
+#: web/templates/web/components/sidenav.html
+msgid "Учётная запись"
+msgstr "Nalog"
+
+#: web/templates/web/account.html
+msgid "Кто вы в продукте и что вам видно. Один и тот же экран показывает разным людям разные числа."
+msgstr "Ko ste u proizvodu i šta vidite. Isti ekran različitim ljudima prikazuje različite brojeve."
+
+#: web/templates/web/account.html
+msgid "Видимые регистры"
+msgstr "Vidljivi registri"
+
+#: web/templates/web/account.html
+msgid "Сменить пароль"
+msgstr "Promeni lozinku"
 
 #: web/templates/web/components/sidenav.html:84
 msgid "Тема"
@@ -5677,11 +5677,11 @@ msgstr ""
 #: web/templates/web/guide.html:287
 #, python-format
 msgid ""
-"Вам сейчас видно: %(names)s. Тот же список стоит в левой панели на каждой "
-"странице."
+"Вам сейчас видно: %(names)s. Тот же список — цветными точками внизу левой "
+"панели и словами на странице «Учётная запись»."
 msgstr ""
-"Vama je sada vidljivo: %(names)s. Isti spisak stoji u levom panelu na "
-"svakoj stranici."
+"Vama je sada vidljivo: %(names)s. Isti spisak stoji kao obojene tačke na dnu "
+"levog panela i rečima na stranici „Nalog“."
 
 #: web/templates/web/guide.html:289
 msgid ""

@@ -303,3 +303,29 @@ def icon(name: str):
     if name.startswith("_") or name not in paths:
         raise template.TemplateSyntaxError(f"значка «{name}» нет в {ICONS_FILE.name}")
     return format_html(ICON_SVG, paths[name])
+
+
+@register.filter("is_role_name")
+def is_role_name(name, role_title) -> bool:
+    """Имя человека — это просто название его роли? `{{ name|is_role_name:role }}`.
+
+    У учёток сида имя совпадает с названием роли («Администратор сети»), и
+    панель тогда показывает роль один раз, а не «Администратор сети» жирным и
+    ту же роль плашкой рядом. Сравнивать приходится со всеми языками: имя в
+    базе записано по-русски, а плашка роли переведена, и на английской
+    странице простое сравнение строк выдало бы русское имя рядом с
+    «Network Administrator».
+    """
+    from django.conf import settings
+    from django.utils import translation
+
+    from web.i18n import ROLE_TITLES
+
+    name = str(name or "").strip()
+    if not name or name == str(role_title or "").strip():
+        return True
+    for code, _title in settings.LANGUAGES:
+        with translation.override(code):
+            if name in {str(title) for title in ROLE_TITLES.values()}:
+                return True
+    return False

@@ -1,0 +1,29 @@
+{% extends "web/base.html" %}{% load ui i18n %}{% comment %}
+Учётная запись (T222): кто вы и что вам видно — целиком, словами, — и куда
+идти, чтобы сменить пароль или прочитать, как устроен продукт. В подвале
+левой панели то же самое сказано одной строкой; здесь — полностью, потому
+что панель обязана оставаться короткой.
+{% endcomment %}
+{% block title %}{% translate "Учётная запись" %}{% endblock %}
+{% block content %}
+<h1>{% translate "Учётная запись" %}</h1>
+<p class="sub">{% translate "Кто вы в продукте и что вам видно. Один и тот же экран показывает разным людям разные числа." %}</p>
+
+<dl class="account">
+  <dt>{% translate "Роль" %}</dt>
+  <dd>{% if principal.role_title %}{% role_badge principal.role_title %}{% else %}—{% endif %}</dd>
+  {% if principal.tenant_title %}
+  <dt>{% translate "Партнёр" %}</dt>
+  <dd>{{ principal.tenant_title }}</dd>
+  {% endif %}
+  <dt>{% translate "Видимые регистры" %}</dt>
+  <dd>{% for name in visible_ledgers %}{% ledger name %} {% empty %}—{% endfor %}</dd>
+  <dt>{% translate "Точка" %}</dt>
+  <dd>{% if principal.units_title %}{{ principal.units_title }}{% else %}{% translate "все точки партнёра" %}{% endif %}</dd>
+</dl>
+
+<ul class="account__links">
+  <li><a href="{% url 'password-change' %}">{% translate "Сменить пароль" %}</a></li>
+  <li><a href="{% url 'guide' %}">{% translate "Как это работает" %}</a></li>
+</ul>
+{% endblock %}

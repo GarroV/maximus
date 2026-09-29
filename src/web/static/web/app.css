@@ -151,7 +151,7 @@ main:focus { outline: none; }
    группы): диктор называет область и число пунктов, входя в неё. Ядро
    рисует пункты прямо в `.sidenav__list`; список внутри повторяет его
    раскладку, чтобы шаг между пунктами остался тем же. */
-.sidenav__set { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.sidenav__set { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 
 /* Состояние экрана (D064): точкой, а не словом. Слово рядом с каждым
    вторым пунктом сделало бы панель нечитаемой; состояние читается
@@ -166,13 +166,41 @@ main:focus { outline: none; }
    посмотреть продукт чужими глазами. Разметку отдаёт тег демо, поэтому
    значка у пункта нет. */
 .sidenav .nav-offer {
-  display: flex; align-items: center; width: 100%; height: 34px;
-  padding: 0 var(--space-5); border: 1px dashed var(--line-strong);
+  display: flex; align-items: center; width: 100%; min-height: 34px;
+  padding: var(--space-2) var(--space-5); border: 1px dashed var(--line-strong);
   border-radius: var(--r-control); color: var(--ink-3);
-  font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 13px; line-height: 1.25;
 }
 .sidenav .nav-offer:hover { color: var(--accent); border-color: var(--accent-line); text-decoration: none; }
 .sidenav .nav-offer:hover::after { content: " →"; opacity: .6; }
+
+/* Подписи переносятся, а не режутся многоточием (сверка с эталоном по
+   T222). Ядро держит пункт в одну строку высотой 34 и обрезает хвост, и
+   в 216 пикселях «Инбокс документов» становился «Инбокс докуме…», а
+   «Reconciliation with the trainer» — загадкой. Пункт растёт вниз и не
+   бывает ниже 34: это нижняя граница, которую держит ядро. */
+.sidenav__item, .sidenav__current {
+  height: auto; min-height: 34px; padding-top: var(--space-2); padding-bottom: var(--space-2);
+  white-space: normal; line-height: 1.25;
+}
+.sidenav__label { overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+
+/* Плотность списка. Требование сверки: у самых тяжёлых ролей
+   (администратор, бухгалтер) все разделы влезают в экран 1440×900 без
+   прокрутки панели. Ядро отдаёт группе 12 пикселей сверху — на пяти
+   группах это лишние три десятка пикселей; 8 по-прежнему отделяют группу
+   от предыдущего пункта. Промежутки в 2 пикселя между пунктами ядро
+   ставит на случай соседних заливок; у пунктов по 34 пикселя и заливка
+   только у текущего, так что их место отдано разделам: на двадцати
+   строках это ещё сорок пикселей. */
+.sidenav__group { padding-top: var(--space-3); }
+.sidenav__list, .sidenav__set { gap: 0; }
+.sidenav__brand { padding-top: var(--space-5); padding-bottom: var(--space-5); }
+.sidenav__list { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+
+/* Тема и язык одной строкой, подписи групп — только диктору. */
+.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) var(--space-2) 0; }
+.sidenav__prefs .sidenav__theme { margin: 0; padding: 0; }
 
 /* Выбранная тема и выбранный язык — `span`, а не кнопка: нажимать на то,
    что уже выбрано, незачем, и кнопка обещала бы действие, которого нет.
@@ -184,46 +212,57 @@ main:focus { outline: none; }
 .sidenav__choice svg { width: 15px; height: 15px; }
 .sidenav__theme button, .sidenav__choice { font-family: var(--font-mono); font-size: 11px; }
 .sidenav__form { margin: 0; }
+.sidenav__dev { margin-left: auto; }
 
-/* Кто смотрит. Ядро даёт две строки (имя и подпись), у продукта их больше:
-   роль, партнёр, видимые регистры, точка. Сильная строка — имя человека,
-   дальше то, что ему видно. */
-.sidenav__who { gap: var(--space-2); }
-.sidenav__role { display: flex; }
-.sidenav__meta { font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
-/* Регистры — своими метками, как в таблицах: цвет связывает панель с
-   ведомостью, где у этих же строк те же цвета. */
-.sidenav__ledgers { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.sidenav__ledgers .ledger { padding: 0 var(--space-2); }
+/* Кто смотрит — две строки: «имя и роль», затем «партнёр · регистры ·
+   точка». Выход — значком справа в той же строке. */
+.sidenav__user { gap: var(--space-4); padding: var(--space-4) var(--space-4) var(--space-4) var(--space-6); }
+.sidenav__who { flex: 1; gap: var(--space-1); }
+.sidenav__whoami { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); min-width: 0; }
+.sidenav__whoami b { white-space: normal; }
+.sidenav__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-3); font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
+.sidenav__meta > * + *::before { content: "·"; margin-right: var(--space-3); color: var(--ink-3); }
+/* Регистры — точками тех же цветов, что метки регистров в ведомости:
+   цвет связывает панель с таблицей. Название — в `title` и у диктора. */
+.sidenav__ledgers { display: inline-flex; align-items: center; gap: var(--space-2); }
+.sidenav__reg { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.sidenav__logout .sidenav__item { justify-content: center; width: 34px; padding: 0; }
+.sidenav__logout .sidenav__label {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
 .sidenav__avatar { display: none; }
 
-/* Свёрнутая панель, 720–1099 (правило ядра). Ядро прячет подписи
-   `display: none`, а это выкидывает их и из дерева доступности: диктор
-   прочитал бы «ссылка» без названия. Здесь подпись уходит только от глаза.
-   Правка того же в ядро — предложение для `GarroV/forma`. */
+/* Планшет, 720–1099. Ядро сворачивает здесь панель до 56 пикселей
+   значков. Сверка по T222 это сняла: на 900 не видно ни роли, ни партнёра,
+   ни границ между группами, а подпись у значка есть только в наведении.
+   Выбор: панель остаётся полной — 216 пикселей из 720 и больше дают экрану
+   504+, а таблицы шире этого прокручиваются внутри себя и так. Правила ядра
+   для свёртки здесь отменяются по одному; предложение сделать свёртку
+   необязательной — в `GarroV/forma`. */
 @media (min-width: 720px) and (max-width: 1099px) {
-  .sidenav__label {
-    display: block; position: absolute; width: 1px; height: 1px; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
-  }
-  .sidenav__stage { position: absolute; bottom: 6px; right: 8px; }
-  .sidenav__avatar { display: inline-flex; }
-  /* Предложение демо без значка: в свёрнутой панели остаётся стрелка, а
-     название — в подписи при наведении и у диктора. */
-  .sidenav .nav-offer { justify-content: center; padding: 0; font-size: 0; }
-  .sidenav .nav-offer::before { content: "↗"; font-size: var(--fs-lead); }
-  .sidenav .nav-offer:hover::after { content: none; }
+  .sidenav { width: 216px; }
+  .sidenav__brand { justify-content: flex-start; padding-left: var(--space-7); padding-right: var(--space-7); }
+  .sidenav__name, .sidenav__who { display: flex; }
+  .sidenav__label, .sidenav__group { display: block; }
+  .sidenav__item, .sidenav__current { justify-content: flex-start; padding-left: var(--space-5); padding-right: var(--space-5); }
+  .sidenav__count { position: static; font-size: 11px; }
+  .sidenav__theme { flex-direction: row; }
+  .sidenav__user { justify-content: flex-start; padding-left: var(--space-6); }
+  .sidenav__logout .sidenav__item { justify-content: center; padding: 0; }
 }
 
 /* Телефон, до 720. Ядро здесь панели не рисует: «ниже 720px панели нет —
    там нижняя полоса вкладок продукта». Поэтому разделы уезжают в полосу у
    нижнего края — там, куда дотягивается большой палец, — а кто смотрит,
-   язык, тема и выход остаются строкой сверху.
+   язык, тема, учётная запись и выход остаются сверху, словами.
 
    Полоса разделов прокручивается вбок сама, а страница — нет: у
    управляющего разделов больше, чем влезает в 375, и спрятать часть значило
-   бы сделать их с телефона недостижимыми вовсе. Всё нажимаемое — не меньше
-   `--tap-min`: это физика пальца. */
+   бы сделать их с телефона недостижимыми вовсе. Что полоса едет, говорит
+   гаснущий правый край: последний видимый пункт уходит в прозрачность, как
+   у ленты, которую можно потянуть. Подписи переносятся в две строки, а не
+   режутся. Всё нажимаемое — не меньше `--tap-min`: это физика пальца. */
 @media (max-width: 719px) {
   .shell { display: block; }
   .shell > .sidenav { position: static; height: auto; }
@@ -240,36 +279,42 @@ main:focus { outline: none; }
     flex-direction: row; gap: 0; overflow-x: auto; overflow-y: hidden;
     padding: 0 0 env(safe-area-inset-bottom);
     background: var(--surface); border-top: 1px solid var(--line);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
   }
+  .sidenav__list .sidenav__group { display: none; }
   .sidenav__set { flex-direction: row; gap: 0; }
   .sidenav__list .sidenav__item, .sidenav__list .sidenav__current {
     flex-direction: column; justify-content: center; gap: var(--space-1);
-    width: auto; min-width: 76px; height: 56px; padding: 0 var(--space-4);
-    border-radius: 0; font-size: var(--fs-micro); line-height: 1.2;
+    width: 88px; min-height: 60px; padding: var(--space-3) var(--space-3);
+    border-radius: 0; font-size: var(--fs-micro); line-height: 1.2; text-align: center;
   }
   .sidenav__list .sidenav__current { box-shadow: inset 0 2px 0 var(--accent); }
-  .sidenav__list .sidenav__label { display: block; max-width: 96px; }
+  .sidenav__list .sidenav__label { display: block; flex: 0 0 auto; }
   .sidenav__list .sidenav__count { position: absolute; top: 4px; right: 10px; }
   .sidenav__list .sidenav__stage { position: absolute; top: 8px; left: 12px; }
-  .sidenav .nav-offer { height: 56px; min-width: 96px; border-radius: 0; border-width: 0 0 0 1px; }
+  .sidenav .nav-offer { height: 60px; width: 104px; white-space: normal; border-radius: 0; border-width: 0 0 0 1px; }
   /* Содержимое не прячется под полосой: снизу у страницы её высота. */
-  body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+  body { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
 
   .sidenav__foot {
     flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--space-2);
     margin-left: auto; padding: 0; border-top: 0;
   }
+  .sidenav__prefs { padding: 0; }
   .sidenav__theme { flex-direction: row; margin: 0; }
   .sidenav__theme button, .sidenav__choice { width: var(--tap-min); height: var(--tap-min); }
-  .sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current {
-    justify-content: center; width: var(--tap-min); height: var(--tap-min); padding: 0;
+  .sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,
+  .sidenav__logout .sidenav__item {
+    width: auto; min-height: var(--tap-min); padding: 0 var(--space-4);
   }
-  .sidenav__foot .sidenav__label {
-    display: block; position: absolute; width: 1px; height: 1px; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
-  }
+  /* Ядро прячет подписи ниже 1099 `display: none`; на телефоне служебные
+     пункты подписаны словами — значок замка или стрелки сам по себе ничего
+     не называет. */
+  .sidenav__foot .sidenav__label { display: inline; }
+  .sidenav__logout .sidenav__label { display: inline; position: static; width: auto; height: auto; margin: 0; clip: auto; }
   .sidenav__user { width: 100%; justify-content: flex-start; padding: 0; border-top: 0; }
-  .sidenav__who { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); }
+  .sidenav__who { display: flex; }
   .sidenav__avatar { display: none; }
 }
 
@@ -1600,3 +1645,15 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 .stage--planned .stage__name { color: var(--accent); }
 
 
+
+/* ── Учётная запись (T222) ─────────────────────────────────────
+   Кто вы и что вам видно — парами «название — значение», как карточка
+   сотрудника: читается сверху вниз, без таблицы ради четырёх строк. */
+.account {
+  display: grid; grid-template-columns: max-content 1fr; gap: var(--space-4) var(--space-9);
+  max-width: 640px; margin: var(--space-8) 0;
+}
+.account dt { color: var(--ink-3); }
+.account dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.account__links { display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.account__links a { display: inline-flex; align-items: center; min-height: var(--tap-min); }

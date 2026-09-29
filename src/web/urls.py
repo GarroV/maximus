@@ -2,6 +2,7 @@
 from django.urls import path
 
 from . import (
+    account,
     api,
     bulk_raise_views,
     cash_views,
@@ -103,6 +104,7 @@ urlpatterns = [
     ),
     path("login/", views.login_page, name="login"),
     path("logout/", views.logout_page, name="logout"),
+    path("account/", account.page, name="account"),
     path("account/password/", views.password_change, name="password-change"),
     # Вход-ярлык на время стройки. Не отдельный способ проверки личности:
     # подставляет пароль учётки сида и идёт тем же путём (см. web/auth.py).

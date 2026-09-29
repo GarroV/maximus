@@ -17,14 +17,16 @@
 экране — на следе расчёта, в табеле, на карточке счёта, — и пункт, потерявший
 выделение, читается как «вы ушли из раздела», хотя человек внутри него.
 
-**Подпись — в `title` тоже.** От 720 до 1099 пикселей панель сворачивается до
-значков (правило ядра), и подпись видна только наведением. Для диктора подпись
-остаётся в разметке всегда: `app.css` прячет её в свёрнутой панели так, что
-глазу её нет, а дерево доступности её сохраняет.
+**Подпись и состояние экрана — в `title` тоже.** Цветная точка состояния
+без слов ничего не говорит глазу (сверка с эталоном по T222), поэтому
+наведение на пункт называет и раздел, и его состояние: «Сверка с тренером ·
+Уточняется». Диктору то же сказано скрытой подписью внутри точки. Подписи в
+панели переносятся на вторую строку, а не обрезаются многоточием: обрезанное
+название раздела — это загадка, а не название.
 
 **Счётчик рисуется, только когда работа есть.** Ноль не показывается вовсе:
 «Инбокс документов · 0» сообщает «здесь очередь, и она пуста», а человеку нужно
 обратное — чтобы очередь бросалась в глаза, только когда в ней что-то лежит
 (правило модуля 10 эталона дословно). Число без слов диктор прочитал бы как
 часть названия, поэтому рядом стоит скрытое от глаза «ждёт работы».
-{% endcomment %}{% load i18n %}{% translate "ждёт работы" as waiting_hint %}{% if request.path|in_section:section_url %}<span class="sidenav__current" aria-current="page" title="{{ section_label }}">{% icon section_icon %}<span class="sidenav__label">{{ section_label }}</span>{% if section_stage %}<span class="sidenav__stage sidenav__stage--{{ section_stage.kind }}" title="{{ section_stage.label }}"><span class="sr-only">{{ section_stage.label }}</span></span>{% endif %}{% if section_waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section_waiting }}</span>{% endif %}</span>{% else %}<a class="sidenav__item" href="{{ section_url }}" title="{{ section_label }}">{% icon section_icon %}<span class="sidenav__label">{{ section_label }}</span>{% if section_stage %}<span class="sidenav__stage sidenav__stage--{{ section_stage.kind }}" title="{{ section_stage.label }}"><span class="sr-only">{{ section_stage.label }}</span></span>{% endif %}{% if section_waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section_waiting }}</span>{% endif %}</a>{% endif %}
+{% endcomment %}{% load i18n %}{% translate "ждёт работы" as waiting_hint %}{% if request.path|in_section:section_url %}<span class="sidenav__current" aria-current="page" title="{{ section_label }}{% if section_stage %} · {{ section_stage.label }}{% endif %}">{% icon section_icon %}<span class="sidenav__label">{{ section_label }}</span>{% if section_stage %}<span class="sidenav__stage sidenav__stage--{{ section_stage.kind }}" title="{{ section_stage.label }}"><span class="sr-only">{{ section_stage.label }}</span></span>{% endif %}{% if section_waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section_waiting }}</span>{% endif %}</span>{% else %}<a class="sidenav__item" href="{{ section_url }}" title="{{ section_label }}{% if section_stage %} · {{ section_stage.label }}{% endif %}">{% icon section_icon %}<span class="sidenav__label">{{ section_label }}</span>{% if section_stage %}<span class="sidenav__stage sidenav__stage--{{ section_stage.kind }}" title="{{ section_stage.label }}"><span class="sr-only">{{ section_stage.label }}</span></span>{% endif %}{% if section_waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section_waiting }}</span>{% endif %}</a>{% endif %}

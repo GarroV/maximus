@@ -14,6 +14,7 @@
 | Адрес | Имя | Код |
 |---|---|---|
 | `/` | `index` | `web.views.index` |
+| `/account/` | `account` | `web.account.page` |
 | `/account/password/` | `password-change` | `web.views.password_change` |
 | `/analytics/people/` | `planned-people-analytics` | `web.planned_views.planned` |
 | `/api/expenses/` | `api-expenses` | `web.api.expenses` |

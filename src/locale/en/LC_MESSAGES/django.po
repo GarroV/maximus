@@ -4882,10 +4882,6 @@ msgstr "Printable payroll sheet"
 msgid "Основная навигация"
 msgstr "Main navigation"
 
-#: web/templates/web/components/header.html:148
-msgid "как это работает"
-msgstr "how this works"
-
 #: web/templates/web/components/header.html:164
 msgid "Как в системе"
 msgstr "Follow the system"
@@ -4904,10 +4900,6 @@ msgid ""
 msgstr ""
 "The login page has quick sign-in buttons for seed accounts (DEV_LOGIN=1)"
 
-#: web/templates/web/components/header.html:191
-msgid "dev-вход"
-msgstr "dev login"
-
 #: web/templates/web/components/header.html:204
 msgid "Данные и итоги на всех страницах — только по этой точке"
 msgstr "Data and totals on all pages — for this unit only"
@@ -4917,17 +4909,25 @@ msgstr "Data and totals on all pages — for this unit only"
 msgid "точка: %(code)s"
 msgstr "unit: %(code)s"
 
-#: web/templates/web/components/header.html:207
-msgid "пароль"
-msgstr "password"
-
-#: web/templates/web/components/header.html:209
-msgid "выйти"
-msgstr "log out"
-
 #: web/templates/web/components/sidenav.html:134
 msgid "Выйти"
 msgstr "Log out"
+
+#: web/templates/web/components/sidenav.html
+msgid "Учётная запись"
+msgstr "Account"
+
+#: web/templates/web/account.html
+msgid "Кто вы в продукте и что вам видно. Один и тот же экран показывает разным людям разные числа."
+msgstr "Who you are in the product and what you can see. The same screen shows different people different numbers."
+
+#: web/templates/web/account.html
+msgid "Видимые регистры"
+msgstr "Visible ledgers"
+
+#: web/templates/web/account.html
+msgid "Сменить пароль"
+msgstr "Change password"
 
 #: web/templates/web/components/sidenav.html:84
 msgid "Тема"
@@ -5803,12 +5803,11 @@ msgstr ""
 #: web/templates/web/guide.html:287
 #, python-format
 msgid ""
-"Вам сейчас видно: %(names)s. Тот же список стоит в левой панели на каждой "
-"странице."
+"Вам сейчас видно: %(names)s. Тот же список — цветными точками внизу левой "
+"панели и словами на странице «Учётная запись»."
 msgstr ""
-"You can currently see: %(names)s. The same list is shown in the left panel "
-"on\n"
-"every page."
+"You can currently see: %(names)s. The same list is shown as coloured dots at "
+"the bottom of the left panel and in words on the Account page."
 
 #: web/templates/web/guide.html:289
 msgid ""
