@@ -364,6 +364,15 @@ def test_the_phone_scrolls_the_bar_and_not_the_page():
     assert "min-width" not in block(css, "html, body"), (
         "у body появилась фиксированная ширина — страница поедет вбок целиком"
     )
+    # Слой продукта из склада ставит body ширину эталона (1280). Если он её
+    # ставит, лист продукта обязан её снять — иначе на планшете страница едет
+    # вбок целиком (поймано живой проверкой на 900: +380 пикселей).
+    domain = rules((STATIC / "domain.css").read_text(encoding="utf-8"))
+    if re.search(r"body\s*\{[^}]*min-width", domain):
+        own = re.search(r"(?m)^body\s*\{([^}]*)\}", css)
+        assert own and "min-width: 0" in own.group(1), (
+            "domain.css фиксирует ширину body, а продукт её не снимает"
+        )
     assert "padding-bottom" in block(phone, "body"), (
         "низ страницы спрятан под полосой разделов"
     )

@@ -49,6 +49,14 @@ html, body {
    мобильные правила эталона включаются только с 767, и планшет получил бы
    страницу в 1280 с горизонтальной прокруткой всего, включая шапку. */
 
+/* Слой продукта из склада (`domain.css`) ставит `body { min-width: 1280px }` —
+   приём эталона, «страница держит 1280 и едет вбок целиком». Продукту так
+   нельзя (абзац выше), и живой проверкой T222 это и поймано: на 900 страница
+   уезжала вбок на 380 пикселей вместе с панелью. Перекрыто здесь, а не правкой
+   копии: копия правится только в `GarroV/forma` — туда же и предложение
+   снять это правило из слоя MAXIMUS. */
+body { min-width: 0; }
+
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-press); text-decoration: underline; }
 
@@ -224,7 +232,7 @@ main:focus { outline: none; }
     gap: var(--space-3) var(--space-5); padding: var(--space-4) var(--space-6);
     border-right: 0; border-bottom: 1px solid var(--line);
   }
-  .sidenav__brand { padding: 0; border-bottom: 0; justify-content: flex-start; }
+  .sidenav__brand { min-height: var(--tap-min); padding: 0; border-bottom: 0; justify-content: flex-start; }
   .sidenav__name { display: flex; }
 
   .sidenav__list {
