@@ -92,7 +92,10 @@ def test_the_reference_menu_is_covered():
     assert not missing, f"пункты эталона, которых нет в шапке: {missing}"
 
 
-@pytest.mark.parametrize("code", ["statement", "payouts", "people-analytics", "dodo-is"])
+# «Аналитика по людям» из этого списка ушла 25.09.2026: экран построен (T167) и
+# помечен доработкой в `stages.REFINED`, а не заглушкой. Список набран руками,
+# поэтому он и краснеет при таком переходе — это его работа, а не помеха.
+@pytest.mark.parametrize("code", ["statement", "payouts", "dodo-is"])
 def test_a_planned_screen_says_what_it_will_be(client, web_env, code):
     """Ненаписанный экран отвечает и объясняет себя, а не молчит пустотой."""
     from conftest import body, login_as
