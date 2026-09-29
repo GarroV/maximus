@@ -998,7 +998,10 @@ th {
   color: var(--ink-2); font-weight: var(--w-semibold);
 }
 tbody tr:hover { background: var(--surface-2); }
-tfoot td { font-weight: var(--w-semibold); border-top: 2px solid var(--line-strong); border-bottom: none; }
+/* Линия над итогом — у каждой ячейки строки, и у заголовочной тоже. Первая
+   колонка итога обычно `th` («Итого по 12 строкам»), и правило на одни `td`
+   обрывало линию ровно перед ней (сверка блока reports, T222). */
+tfoot td, tfoot th { font-weight: var(--w-semibold); border-top: 2px solid var(--line-strong); border-bottom: none; }
 
 /* Ведомость шире экрана — прокручивается сама, страница по горизонтали не едет. */
 /* Контейнер широкой таблицы — `table-wrap` эталона. Высота ограничена не ради
@@ -1645,6 +1648,12 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 .stage--planned .stage__name { color: var(--accent); }
 
 
+
+/* Переключатель среза ядра держит пункты в одну строку и шире своего
+   места не сжимается: на 390 он выходил за край экрана (сверка блока
+   reports, T222). Здесь он переносит пункты на следующую строку и не
+   бывает шире родителя; ядро об этом — предложение в `GarroV/forma`. */
+.seg { flex-wrap: wrap; max-width: 100%; }
 
 /* ── Учётная запись (T222) ─────────────────────────────────────
    Кто вы и что вам видно — парами «название — значение», как карточка

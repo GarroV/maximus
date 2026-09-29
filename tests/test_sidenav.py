@@ -502,3 +502,25 @@ def test_the_tap_targets_of_the_unit_manager_are_finger_sized():
     assert "var(--tap-min)" in block(phone, ".sidenav__theme button, .sidenav__choice"), (
         "язык и тема на телефоне меньше пальца"
     )
+
+
+# --- общие правила листа, найденные сверкой блока reports (T222) -------------
+
+
+def test_the_line_above_a_total_runs_under_every_cell():
+    """Первая ячейка итога — обычно `th` («Итого по 12 строкам»).
+
+    Правило только на `td` обрывало линию над итогом ровно перед ней, а у
+    итога P&L, где вся строка из `th`, линии не было вовсе.
+    """
+    css = rules(APP_CSS.read_text(encoding="utf-8"))
+    line = block(css, "tfoot td, tfoot th")
+
+    assert "border-top: 2px solid" in line, "у заголовочной ячейки итога нет линии"
+
+
+def test_the_segment_switch_wraps_instead_of_leaving_the_screen():
+    """Переключатель среза на 390 выходил за край: ядро держит его в строку."""
+    seg = block(rules(APP_CSS.read_text(encoding="utf-8")), ".seg")
+
+    assert "flex-wrap: wrap" in seg and "max-width: 100%" in seg
