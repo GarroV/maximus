@@ -4839,6 +4839,22 @@ msgstr "lozinka"
 msgid "выйти"
 msgstr "odjava"
 
+#: web/templates/web/components/sidenav.html:134
+msgid "Выйти"
+msgstr "Odjava"
+
+#: web/templates/web/components/sidenav.html:84
+msgid "Тема"
+msgstr "Tema"
+
+#: web/templates/web/components/sidenav.html:97
+msgid "Язык"
+msgstr "Jezik"
+
+#: web/templates/web/base.html:69
+msgid "К содержанию"
+msgstr "Pređi na sadržaj"
+
 #: web/templates/web/components/header.html:212 web/templates/web/login.html:61
 msgid "войти"
 msgstr "prijava"

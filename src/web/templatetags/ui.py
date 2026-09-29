@@ -21,6 +21,10 @@
 """
 from __future__ import annotations
 
+import json
+from functools import lru_cache
+from pathlib import Path
+
 from django import template
 from django.template.base import Node, token_kwargs
 from django.utils.html import escape, format_html
@@ -264,3 +268,38 @@ def ledger(title):
     code = getattr(title, "code", "")
     css = f"ledger reg--{code}" if code in ("official", "supplementary", "internal") else "ledger"
     return format_html('<span class="{}">{}</span>', css, title)
+
+
+# Иконки линейки (`icons.json`, набор Swarm Brain, решение forma 28.09.2026).
+# Файл приезжает из `GarroV/forma` раскаткой вместе с ядром и правится там же,
+# поэтому здесь его только читают: своя копия путей рядом разошлась бы с
+# соседними продуктами, и значок одного и того же действия у них стал бы разным.
+ICONS_FILE = Path(__file__).resolve().parent.parent / "static" / "web" / "icons.json"
+
+# Рисуется ровно так, как велит сам набор (`_about` в файле). `aria-hidden`
+# обязателен: значок повторяет подпись рядом, и диктор иначе прочитал бы его
+# вторым, бессмысленным словом.
+ICON_SVG = (
+    '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" '
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '
+    'focusable="false"><path d="{}"/></svg>'
+)
+
+
+@lru_cache(maxsize=1)
+def _icons() -> dict:
+    return json.loads(ICONS_FILE.read_text(encoding="utf-8"))
+
+
+@register.simple_tag
+def icon(name: str):
+    """Значок из набора линейки: `{% icon "clock" %}`.
+
+    Неизвестное имя — ошибка, а не пустое место. Пропавший значок не ломает
+    страницу, он оставляет в свёрнутой панели пустую кнопку без подписи, и
+    заметить это можно только глазом на планшете.
+    """
+    paths = _icons()
+    if name.startswith("_") or name not in paths:
+        raise template.TemplateSyntaxError(f"значка «{name}» нет в {ICONS_FILE.name}")
+    return format_html(ICON_SVG, paths[name])

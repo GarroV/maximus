@@ -25,6 +25,10 @@ ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = sorted(ROOT.glob("src/*/templates/**/*.html"))
 STYLESHEETS = (
     ROOT / "src/web/static/web/app.css",
+    # Ядро линейки и слой продукта из `GarroV/forma` (T222): левая панель и
+    # остальные общие компоненты описаны там, а не в листе продукта.
+    ROOT / "src/web/static/web/dodo-ds.css",
+    ROOT / "src/web/static/web/domain.css",
     ROOT / "src/web/static/web/tokens.css",
     # Печатные формы (T187) идут своим листом и намеренно не тянут `app.css`: на
     # бумаге нет ни шапки продукта, ни кнопок, ни прокрутки. Сторож обязан о нём
@@ -38,7 +42,6 @@ STYLESHEETS = (
 # правдой, а не способом погасить красный тест.
 NO_STYLE_NEEDED = {
     "htmx-indicator",   # состояние запроса, показывает сам htmx
-    "sr-only",          # видно только диктору
     "js",               # крючок скриптов
 }
 

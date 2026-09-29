@@ -1,0 +1,174 @@
+{% load ui i18n demo_ui %}{% comment %}
+Левая панель: куда идти, кем вошли и на каком языке читаем (T222, D081).
+
+До 29.09.2026 здесь была верхняя шапка, а разделы собирались областями в
+раскрывающиеся меню (T207). Владелец снял это дословно: «давай мы переведем
+навигацию в левую сторону, как это сделано в наших других проектах. никаких
+выпадающих списков - одна страница - один функционал.» Меню, которое надо
+раскрыть, прячет разделы: человек не видит, что в системе есть. Поэтому все
+разделы видны сразу, область учёта — подпись над своими пунктами.
+
+Разметка и оформление — компонент `.sidenav` общего ядра (`dodo-ds.css` из
+`GarroV/forma`, эталон линейки — Swarm Brain): у MAXIMUS, DECIMUS и MERIDIUS одна
+логика интерфейса. Что продукт добавил поверх ядра — в `app.css`, раздел
+«Левая панель», с причинами.
+
+Что панель обязана говорить и почему именно так.
+
+**Где человек сейчас.** Раздел, в котором он находится, — не ссылка, а
+`span[aria-current]`; см. `components/sidenav_item.html`, там же и почему.
+
+**Разделов ровно столько, сколько ведёт эта роль.** Справочники и правила — два
+разных права, и партнёр вправе развести их по разным людям. Показывать оба тому,
+у кого одно, значило бы обещать раздел, который сам же ответит отказом. Это не
+сокрытие адреса: `/directory/` по-прежнему отвечает отказом словами, проверка
+стоит в представлении и в политиках базы. Область, где роль не ведёт ни одного
+пункта, не рисуется вовсе — решает `web/navigation.py`, а не разметка.
+
+**В демо на месте чужого раздела — предложение открыть его ролью, которая его
+ведёт** (T163, тег `demo_switch` живёт в приложении демо). Посетитель видит
+продукт впервые и отсутствие раздела читает как отсутствие функциональности.
+Права при этом не меняются ни на копейку. Класс `nav-offer` — контракт между
+тегом и проверкой `tests/test_demo_role_switch.py`.
+
+**Группа — список с подписью.** Пункты области лежат в `<ul>`, который ссылается
+на подпись (`aria-labelledby`): диктор, входя в список, называет область и число
+пунктов в ней. Подпись видна глазу; в свёрнутой панели (720–1099) она уходит, но
+имя списка остаётся — ссылка на скрытый элемент имя даёт.
+
+**Роль и партнёр — всегда, внизу панели.** Один и тот же экран показывает разным
+людям разные числа, и человек должен видеть, чьими глазами смотрит, не нажимая
+ничего. Роль — **одна**: у учётной записи один уровень (решение владельца,
+расхождение с эталоном разбирается в #130 и оформлением не решается).
+
+**Регистры — перечислением того, что видно** (D023): не «регистры: все», а
+названия. Перечисляется только видимое — список названий и есть сообщение о
+том, что регистр существует.
+
+**Точка — только когда человек ею ограничен.** Объяснять надо срезанные данные,
+а не полные.
+
+**Язык и тема — формами с кнопками, а не ссылками.** Смена меняет состояние
+(cookie), и переходом по ссылке её делать нельзя: такую ссылку пройдёт любой
+предзагрузчик. Выбранное — `span[aria-current]`, а не нажимаемая кнопка, по той
+же причине, что и текущий раздел. При закреплённом языке (демо, UI_LANGUAGE)
+список языков пуст, и переключателя нет вовсе: выключенная ручка хуже
+отсутствующей.
+
+**Выход — форма, а не ссылка:** по ссылке его запустила бы картинка на чужой
+странице.
+{% endcomment %}{% translate "Как в системе" as theme_system %}{% translate "Светлая тема" as theme_light %}{% translate "Тёмная тема" as theme_dark %}
+<nav class="sidenav" aria-label="{% translate "Основная навигация" %}">
+  {% comment %}
+  Имя продукта ведёт на первый экран месяца: по имени продукта уходят «в
+  начало», это привычка, а не украшение. Знак `M` — то, что остаётся от марки в
+  свёрнутой панели: без него верх панели на планшете был бы пустым.
+  {% endcomment %}
+  <a class="sidenav__brand" href="{% url 'periods' %}" title="MAXIMUS · P&amp;L">
+    <span class="sidenav__logo sidenav__mark" aria-hidden="true">M</span>
+    <span class="sidenav__name"><b>MAXIMUS</b><small>P&amp;L</small></span>
+  </a>
+  <div class="sidenav__list">
+    {% for area in nav_areas %}
+      <span class="sidenav__group" id="nav-area-{{ area.number }}">{{ area.title }}</span>
+      <ul class="sidenav__set" aria-labelledby="nav-area-{{ area.number }}">
+        {% if area.offer %}
+          <li>{% demo_switch area.offer.needs area.offer.route area.title %}</li>
+        {% else %}
+          {% for section in area.items %}
+            {% if section.allowed %}
+              <li>{% with section_url=section.url section_label=section.title section_waiting=section.waiting section_stage=section.stage section_icon=section.icon %}{% include "web/components/sidenav_item.html" %}{% endwith %}</li>
+            {% elif principal and section.offer %}
+              <li>{% demo_switch section.needs section.route section.title %}</li>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </ul>
+    {% endfor %}
+  </div>
+
+  <div class="sidenav__foot">
+    {% comment %}
+    Тема и язык стоят рядом: обе ручки — про то, КАК человек читает продукт, а
+    не про то, что в нём лежит. Тему ставит сервер в атрибут `<html>`: выбранная
+    скриптом, она применялась бы после загрузки, и человек видел бы вспышку
+    светлого перед тёмным (issue #164).
+    {% endcomment %}
+    <form class="sidenav__theme" method="post" action="{% url 'set-theme' %}" role="group" aria-labelledby="nav-theme">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <span class="sidenav__theme-label" id="nav-theme">{% translate "Тема" %}</span>
+      {% for option in themes %}
+        {% if option.code == "system" %}{% firstof theme_system as theme_name %}{% elif option.code == "light" %}{% firstof theme_light as theme_name %}{% else %}{% firstof theme_dark as theme_name %}{% endif %}
+        {% if option.current %}
+          <span class="sidenav__choice" aria-current="true" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</span>
+        {% else %}
+          <button type="submit" name="theme" value="{{ option.code }}" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</button>
+        {% endif %}
+      {% endfor %}
+    </form>
+    {% if languages %}
+    <form class="sidenav__theme" method="post" action="{% url 'set_language' %}" role="group" aria-labelledby="nav-lang">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <span class="sidenav__theme-label" id="nav-lang">{% translate "Язык" %}</span>
+      {% for language in languages %}
+        {% if language.current %}
+          <span class="sidenav__choice" aria-current="true" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</span>
+        {% else %}
+          <button type="submit" name="language" value="{{ language.code }}" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</button>
+        {% endif %}
+      {% endfor %}
+    </form>
+    {% endif %}
+    {% comment %}
+    Гайд по продукту (T159) — с любого экрана и до входа: половина вопроса, на
+    который он отвечает, — «кем входить». В списке разделов ему места нет: там
+    то, что роль ведёт, а гайд не ведёт никто. На самой странице гайда он не
+    ссылка — тот же инвариант, что у текущего раздела.
+    {% endcomment %}
+    {% url 'guide' as guide_url %}
+    {% translate "Как это работает" as guide_label %}
+    {% with section_url=guide_url section_label=guide_label section_waiting=0 section_stage=None section_icon="info" %}{% include "web/components/sidenav_item.html" %}{% endwith %}
+    {% if principal %}
+      {% url 'password-change' as password_url %}
+      {% translate "Пароль" as password_label %}
+      {% with section_url=password_url section_label=password_label section_waiting=0 section_stage=None section_icon="lock" %}{% include "web/components/sidenav_item.html" %}{% endwith %}
+      <form class="sidenav__form" method="post" action="{% url 'logout' %}">{% csrf_token %}
+        {% translate "Выйти" as logout_label %}
+        <button class="sidenav__item" type="submit" title="{{ logout_label }}">{% icon "arrow" %}<span class="sidenav__label">{{ logout_label }}</span></button>
+      </form>
+    {% else %}
+      {% url 'login' as login_url %}
+      {% translate "Войти" as login_label %}
+      {% with section_url=login_url section_label=login_label section_waiting=0 section_stage=None section_icon="arrow" %}{% include "web/components/sidenav_item.html" %}{% endwith %}
+    {% endif %}
+  </div>
+
+  {% if principal %}
+  {% comment %}
+  Кто смотрит и на что. Сильная строка — имя человека, слабая — партнёр,
+  регистры и точка: сначала «кто я», потом «что мне видно». У учёток сида имя
+  совпадает с названием роли — тогда сильной строки нет, чтобы не писать одно и
+  то же дважды.
+
+  Кружок с буквой роли виден только в свёрнутой панели: там подписи уходят, и
+  без него низ панели не говорил бы, чьими глазами человек смотрит. В раскрытой
+  панели рядом стоит сама плашка роли, и кружок был бы вторым способом сказать
+  то же самое.
+  {% endcomment %}
+  <div class="sidenav__user">
+    <span class="avatar sidenav__avatar" role="img" aria-label="{{ principal.role_title }}{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}" title="{{ principal.role_title }}{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}">{{ principal.role_title|first|upper }}</span>
+    <div class="sidenav__who">
+      {% if principal.display_name != principal.role_title %}<b>{{ principal.display_name }}</b>{% endif %}
+      {% if principal.role_title %}<span class="sidenav__role">{% role_badge principal.role_title %}</span>{% endif %}
+      {% if principal.tenant_title %}<span class="sidenav__meta">{{ principal.tenant_title }}</span>{% endif %}
+      {% if visible_ledgers %}<span class="sidenav__ledgers">{% for name in visible_ledgers %}{% ledger name %}{% endfor %}</span>{% endif %}
+      {% if principal.units_title %}<span class="sidenav__meta" title="{% translate "Данные и итоги на всех страницах — только по этой точке" %}">{% blocktranslate with code=principal.units_title %}точка: {{ code }}{% endblocktranslate %}</span>{% endif %}
+      {% if dev_login %}<span class="badge dot" title="{% translate "На странице входа есть кнопки быстрого входа учётками сида (DEV_LOGIN=1)" %}" aria-label="{% translate "dev-вход" %}">dev</span>{% endif %}
+    </div>
+  </div>
+  {% elif dev_login %}
+  <div class="sidenav__user">
+    <span class="badge dot" title="{% translate "На странице входа есть кнопки быстрого входа учётками сида (DEV_LOGIN=1)" %}" aria-label="{% translate "dev-вход" %}">dev</span>
+  </div>
+  {% endif %}
+</nav>
