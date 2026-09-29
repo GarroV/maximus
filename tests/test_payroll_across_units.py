@@ -199,3 +199,134 @@ def test_the_office_payroll_does_not_hang_undistributed(client, sql, calculated)
     ).fetchone()[0]
     units = sql.execute("select count(*) from units").fetchone()[0]
     assert got == units, f"ФОТ сети дошёл до {got} точек из {units}"
+
+
+# --- набор точек решает, а не точка строки табеля (D055, D085) ---------------
+#
+# Правило владельца (D085, из таблицы случаев issue #194): набор точек задан —
+# он решает, куда идут деньги; одна точка — целиком на неё; несколько — делятся;
+# явно «вся сеть» — делится между всеми точками партнёра; набор не задан вовсе
+# — старое поведение, точка строки табеля. Исходная дыра #194 ровно здесь:
+# офисный человек, записанный в табеле на случайную пиццерию, ложился на неё
+# целиком.
+
+TOLERANCE = Decimal("0.10")  # копейки деления: по строке P&L и регистру отдельно
+
+
+def somebody_on(sql, code: str) -> str:  # noqa: F811
+    """Человек, чья строка ведомости стоит на этой точке."""
+    return sql.execute(
+        """select e.external_id from employees e
+             join payslips p on p.employee_id = e.id
+             join units u on u.id = p.unit_id
+            where u.code = %s
+            order by e.external_id limit 1""",
+        (code,),
+    ).fetchone()[0]
+
+
+def put_on_network(sql, employee_key: str) -> None:  # noqa: F811
+    """Явный набор «вся сеть» — строка привязки без точки, как пишет экран."""
+    put_on_units(sql, employee_key, [])
+    sql.execute(
+        """insert into employee_units (tenant_id, employee_id, unit_id, valid_from)
+           select e.tenant_id, e.id, null, '2020-01-01'
+             from employees e where e.external_id = %s""",
+        (employee_key,),
+    )
+
+
+def costs_without(sql, employee_key: str) -> tuple[dict, Decimal]:  # noqa: F811
+    """Стоимость остальных людей по точкам их строк — и полная стоимость этого."""
+    rows = sql.execute(
+        """select u.code, e.external_id = %s, sum(t.total_cost)
+             from payslip_totals t
+             join payslips p on p.id = t.payslip_id
+             join payruns r on r.id = p.payrun_id
+             join employees e on e.id = p.employee_id
+             join units u on u.id = p.unit_id
+            where r.period = '2026-06-01'
+            group by 1, 2""",
+        (employee_key,),
+    ).fetchall()
+    others = {code: amount for code, mine, amount in rows if not mine}
+    own = sum((amount for _code, mine, amount in rows if mine), Decimal("0"))
+    return others, own
+
+
+def assert_lands(by_unit: dict, expected: dict) -> None:
+    for code, amount in expected.items():
+        got = -by_unit.get(code, Decimal("0"))
+        assert abs(got - amount) <= TOLERANCE, (
+            f"на {code} легло {got}, ожидалось {amount}; всё по точкам: {by_unit}"
+        )
+
+
+def test_the_network_set_beats_the_timesheet_unit(client, sql, calculated):  # noqa: F811
+    """Офис со строкой табеля на NS2 и набором «вся сеть» — делится на всех.
+
+    На NS2 ложится только его доля, а не вся зарплата: табель говорит, где
+    человек отмечен, а набор — чьи это затраты.
+    """
+    who = somebody_on(sql, "NS2")
+    put_on_network(sql, who)
+    others, own = costs_without(sql, who)
+    assert own > 0, "у выбранного человека нет стоимости — проверять нечего"
+
+    login_as(client, "director")
+    approve(client, calculated)
+
+    waiting = sql.execute(
+        """select count(*) from facts where dedup_key like 'payrun:%%'
+              and superseded_at is null and allocation = 'pending'"""
+    ).fetchone()[0]
+    assert waiting == 0, f"ФОТ «вся сеть» висит неразнесённым: {waiting} строк"
+    units = [code for (code,) in sql.execute("select code from units").fetchall()]
+    assert_lands(
+        payroll_by_unit(sql),
+        {code: others.get(code, Decimal("0")) + own / len(units) for code in units},
+    )
+
+
+def test_the_set_of_units_beats_the_timesheet_unit(client, sql, calculated):  # noqa: F811
+    """Набор {NS1, NS2}, строка табеля на NS2 — делится между NS1 и NS2 поровну."""
+    who = somebody_on(sql, "NS2")
+    put_on_units(sql, who, ["NS1", "NS2"])
+    others, own = costs_without(sql, who)
+
+    login_as(client, "director")
+    approve(client, calculated)
+
+    assert_lands(payroll_by_unit(sql), {
+        "NS1": others.get("NS1", Decimal("0")) + own / 2,
+        "NS2": others.get("NS2", Decimal("0")) + own / 2,
+        "BG1": others.get("BG1", Decimal("0")),
+    })
+
+
+def test_one_unit_in_the_set_takes_it_all(client, sql, calculated):  # noqa: F811
+    """Набор {NS1}, строка табеля на NS2 — целиком на NS1, на NS2 ничего."""
+    who = somebody_on(sql, "NS2")
+    put_on_units(sql, who, ["NS1"])
+    others, own = costs_without(sql, who)
+
+    login_as(client, "director")
+    approve(client, calculated)
+
+    assert_lands(payroll_by_unit(sql), {
+        "NS1": others.get("NS1", Decimal("0")) + own,
+        "NS2": others.get("NS2", Decimal("0")),
+    })
+
+
+def test_no_set_keeps_the_timesheet_unit(client, sql, calculated):  # noqa: F811
+    """Набор не задан вовсе (люди до T221) — старое поведение: точка строки."""
+    who = somebody_on(sql, "NS2")
+    others, own = costs_without(sql, who)
+
+    login_as(client, "director")
+    approve(client, calculated)
+
+    assert_lands(payroll_by_unit(sql), {
+        "NS2": others.get("NS2", Decimal("0")) + own,
+    })
