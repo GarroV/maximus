@@ -61,7 +61,7 @@ def june_url(client) -> str:
 
 
 def post_rule(client, path: str, *, value: str, valid_from: str):
-    return client.post(f"/rules/{path}/", {"value": value, "valid_from": valid_from})
+    return client.post(f"/rules/{path}/new/", {"value": value, "valid_from": valid_from})
 
 
 # =============================================================================
@@ -165,7 +165,7 @@ def test_the_form_no_longer_promises_a_refusal(
     """
     approve_june(client, web_env)
     login_as(client, "admin")
-    html = body(client.get(f"/rules/{NET_FACTOR}/"))
+    html = body(client.get(f"/rules/{NET_FACTOR}/new/"))
     client.post("/logout/")
 
     assert "будет отклонена" not in html, (
