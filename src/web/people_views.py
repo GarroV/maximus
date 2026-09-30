@@ -15,16 +15,24 @@
 «все»: отказ и пустая таблица одинаково отвечают на вопрос, которого человеку
 задавать не давали.
 
-**Вкладки — обычные ссылки.** Состояние экрана целиком лежит в адресе, поэтому
-его можно прислать другому человеку, и оно переживает перезагрузку. JS ради
-переключения трёх таблиц здесь не нужен.
+**Три режима — три страницы** (T226, D081): «Стоимость труда», «Кто уходит»,
+«Часы и переработки». Эталон рисует их вкладками одного экрана; владелец решил
+иначе — одна страница, одна функция, и каждая стоит своим пунктом левой панели.
+У каждой свой корень адреса: пункт панели выделяется по корню (`in_section`), и
+общий корень выделил бы все три разом.
+
+**Выбор точки — обычные ссылки.** Состояние страницы целиком лежит в адресе,
+поэтому его можно прислать другому человеку, и оно переживает перезагрузку.
+Прежний адрес с вкладкой в параметре (`/analytics/people/?tab=…`) не умирает:
+присланная ссылка ведёт на ту страницу, которую имел в виду отправитель.
 """
 from __future__ import annotations
 
 from decimal import Decimal
+from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_noop
@@ -35,14 +43,16 @@ from .format import EMPTY, hours, money, separators
 from .i18n import month_title
 from .principal import get_current_principal
 
-__all__ = ["analytics"]
+__all__ = ["analytics", "churn_page", "cost_page", "hours_page"]
 
-# Вкладки эталона в его же порядке: сначала деньги, потом люди, потом часы.
-TABS = (
-    ("cost", gettext_noop("Стоимость труда")),
-    ("churn", gettext_noop("Кто уходит")),
-    ("hours", gettext_noop("Часы и переработки")),
-)
+# Страницы в порядке вкладок эталона: сначала деньги, потом люди, потом часы.
+# Код — прежнее значение `?tab=`, по нему старый адрес находит свою страницу.
+PAGES = {
+    "cost": ("people-cost", gettext_noop("Стоимость труда")),
+    "churn": ("people-churn", gettext_noop("Кто уходит")),
+    "hours": ("people-hours", gettext_noop("Часы и переработки")),
+}
+FIRST_PAGE = "cost"
 
 # Самый большой месяц занимает всю полосу. Мерится он по показанным месяцам, а
 # не по абсолютной шкале: у партнёра ФОТ месяцев отличается на проценты, и
@@ -81,58 +91,87 @@ def _group_title(code: str, title: str) -> str:
 
 @login_required
 def analytics(request):
-    """Аналитика по кадрам за последние месяцы (модуль 12 эталона).
+    """Прежний адрес экрана: ведёт на страницу, которую называла его вкладка.
 
-    Права у экрана своего нет и не заводится: он ничего не пишет, а видит ровно
-    то, что база отдаёт роли открывшего (D014). Управляющий точки увидит здесь
-    свою точку — и не потому, что мы отфильтровали, а потому что политики базы
-    больше ему не дали.
+    Ссылки вида `/analytics/people/?tab=churn&unit=NS1` уже разосланы и лежат в
+    закладках; ответить на них «нет такой страницы» значило бы сломать то, ради
+    чего состояние и держалось в адресе. Неизвестная вкладка — первая страница,
+    как и было на прежнем экране.
+    """
+    code = request.GET.get("tab", FIRST_PAGE)
+    route, _title = PAGES.get(code, PAGES[FIRST_PAGE])
+    return redirect(_url(route, unit=request.GET.get("unit", ALL_UNITS)))
+
+
+@login_required
+def cost_page(request):
+    """Стоимость труда: динамика ФОТ, плитки, разрезы по точке и группе."""
+    report, context = _frame(request, "cost")
+    return render(request, "web/reports/people_cost.html", {
+        **context, "subtitle": _range_title(report), **_cost(report),
+    })
+
+
+@login_required
+def churn_page(request):
+    """Кто уходит: приняли и ушли, текучесть с базой рядом, ушедшие поимённо."""
+    report, context = _frame(request, "churn")
+    return render(request, "web/reports/people_churn.html", {
+        **context, "subtitle": _range_title(report), **_churn(report),
+    })
+
+
+@login_required
+def hours_page(request):
+    """Часы и переработки за последний показанный месяц."""
+    report, context = _frame(request, "hours")
+    data = _hours(report)
+    return render(request, "web/reports/people_hours.html", {
+        **context, "subtitle": data["hours_month"], **data,
+    })
+
+
+def _frame(request, code: str):
+    """Общее у трёх страниц: отчёт на выбранную точку и ссылки выбора точки.
+
+    Права у страниц своего нет и не заводится: они ничего не пишут, а видят
+    ровно то, что база отдаёт роли открывшего (D014). Управляющий точки увидит
+    здесь свою точку — и не потому, что мы отфильтровали, а потому что политики
+    базы больше ему не дали.
+
+    Полный отчёт собирается один раз без фильтра: из него берётся и список точек
+    (только тех, где кто-то показан), и проверка, что спрошенная точка вообще
+    существует для этой роли.
     """
     who = get_current_principal(request)
     tenant_id = who.tenant_id if who else None
+    route, title = PAGES[code]
 
     asked = request.GET.get("unit", ALL_UNITS)
-    tab = request.GET.get("tab", TABS[0][0])
-    if tab not in dict(TABS):
-        tab = TABS[0][0]
-
-    # Полный отчёт собирается один раз без фильтра: из него берётся и список
-    # точек (только тех, где кто-то показан), и проверка, что спрошенная точка
-    # вообще существует для этой роли.
     whole = people.build(tenant_id)
     known = {row.code for row in whole.by_unit}
     chosen = asked if asked in known else ALL_UNITS
     report = whole if chosen == ALL_UNITS else people.build(tenant_id, unit_filter=chosen)
 
-    return render(request, "web/reports/people.html", {
-        "tab": tab,
-        "tabs": [
-            {"code": code, "title": _(title), "selected": code == tab,
-             "url": _url(tab=code, unit=chosen)}
-            for code, title in TABS
-        ],
+    return report, {
+        "page_title": _(title),
         "units": [
             {"code": ALL_UNITS, "title": _("Все точки"),
-             "selected": chosen == ALL_UNITS, "url": _url(tab=tab, unit=ALL_UNITS)},
+             "selected": chosen == ALL_UNITS, "url": _url(route, unit=ALL_UNITS)},
         ] + [
             {"code": row.code, "title": _unit_title(row.code, row.title),
-             "selected": chosen == row.code, "url": _url(tab=tab, unit=row.code)}
+             "selected": chosen == row.code, "url": _url(route, unit=row.code)}
             for row in sorted(whole.by_unit, key=lambda row: row.title)
         ],
-        "range_title": _range_title(report),
         "months_count": len(report.months),
         "empty": not report.months,
-        **_cost(report),
-        **_churn(report),
-        **_hours(report),
-    })
+    }
 
 
-def _url(*, tab: str, unit: str) -> str:
-    """Адрес экрана с выбранными вкладкой и точкой — состояние живёт здесь."""
-    address = reverse("people-analytics")
-    query = [f"tab={tab}"] + ([f"unit={unit}"] if unit else [])
-    return f"{address}?{'&'.join(query)}"
+def _url(route: str, *, unit: str) -> str:
+    """Адрес страницы с выбранной точкой — состояние живёт здесь."""
+    address = reverse(route)
+    return f"{address}?{urlencode({'unit': unit})}" if unit else address
 
 
 def _range_title(report) -> str:

@@ -1,6 +1,9 @@
 {% extends "web/base.html" %}{% load ui i18n static %}
 {% comment %}
-Аналитика по людям (T167, модуль 12 эталона).
+Каркас трёх страниц аналитики по людям (T167, T226, модуль 12 эталона):
+«Стоимость труда», «Кто уходит», «Часы и переработки». Каждая — своя страница
+и свой пункт левой панели (D081): эталон рисует их вкладками одного экрана, но
+одна страница — одна функция. Своё у страницы — блок `people_body`.
 
 Первый экран продукта, который смотрит сквозь время. Три вещи, без которых он
 вводит в заблуждение, а не помогает:
@@ -20,298 +23,40 @@
 Полосы динамики лежат, а не стоят, — общее решение продукта (`app.css`, `.chart`):
 месяцев бывает и шесть, и тридцать, а рядом с каждым обязана стоять сумма.
 {% endcomment %}
-{% block title %}{% translate "Аналитика по людям" %}{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 {% block head %}<link rel="stylesheet" href="{% static 'web/people.css' %}">{% endblock %}
 {% block content %}
 <div class="people-page">
-<h1>{% translate "Аналитика по людям" %}</h1>
+<h1>{{ page_title }}</h1>
 
 {% if empty %}
   {% translate "Считать пока нечего" as nothing %}
   {% notice "empty" title=nothing %}{% blocktranslate %}Ни одного месяца с табелем или расчётом ещё нет. Аналитика появится, как только будет закрыт первый месяц.{% endblocktranslate %}{% endnotice %}
 {% else %}
 
-{% comment %}Вкладка «Часы» — про один месяц, и подзаголовок у неё — этот месяц, а
-не диапазон: иначе при одном посчитанном месяце «Июнь 2026» стоял бы дважды.{% endcomment %}
-<p class="sub">{% if tab == "hours" %}{{ hours_month }}{% else %}{{ range_title }}{% endif %}</p>
+{% comment %}Подзаголовок — за какие месяцы страница. У «Часов» это один месяц, а не
+диапазон: иначе при одном посчитанном месяце «Июнь 2026» стоял бы дважды.{% endcomment %}
+<p class="sub">{{ subtitle }}</p>
 
 {% comment %}
-Разрезы — обычные ссылки, состояние экрана целиком в адресе. Список точек собран
-из показанных строк, а не из справочника: кнопка точки, которой человек не видит,
-сама по себе сообщение о том, что такая точка есть (D023).
+Выбор точки — обычные ссылки, состояние страницы целиком в адресе. Список точек
+собран из показанных строк, а не из справочника: кнопка точки, которой человек не
+видит, сама по себе сообщение о том, что такая точка есть (D023). Переключателя
+«что показать» здесь больше нет: три режима модуля 12 — три страницы и три пункта
+левой панели (D081, T226).
 {% endcomment %}
-<div class="people-switch">
-<nav class="seg" aria-label="{% translate "Что показать" %}">
-  {% for item in tabs %}
-  {% if item.selected %}<span class="seg__current" aria-current="page">{{ item.title }}</span>
-  {% else %}<a class="seg__item" href="{{ item.url }}">{{ item.title }}</a>{% endif %}
-  {% endfor %}
-</nav>
-
 {% if units|length > 2 %}
+<div class="people-switch">
 <nav class="seg" aria-label="{% translate "Точка" %}">
   {% for item in units %}
   {% if item.selected %}<span class="seg__current" aria-current="true">{{ item.title }}</span>
   {% else %}<a class="seg__item" href="{{ item.url }}">{{ item.title }}</a>{% endif %}
   {% endfor %}
 </nav>
-{% endif %}
 </div>
-
-{% if tab == "cost" %}
-{% comment %}
-Плитка отвечает на вопрос, который иначе считают глазами по таблице. Под числом
-подписано, из чего оно посчитано: доля без базы врёт (эталон модуля 12).
-{% endcomment %}
-<section class="kpi">
-  {% for card in kpis %}
-  <div class="kpi__cell">
-    <div class="kpi__label">{{ card.label }}</div>
-    <div class="people-kpi__line">
-      <span class="kpi__value {{ card.value|numclass }}">{{ card.value }}</span>
-      {% if card.delta %}<span class="people-kpi__delta {{ card.delta_class }}">{{ card.delta }}</span>{% endif %}
-    </div>
-    <div class="kpi__about">{{ card.base }}</div>
-  </div>
-  {% endfor %}
-</section>
-
-{% if not revenue_known %}
-<p class="note">{% blocktranslate %}Выручки в продукте пока нет — она приедет с коннектором Dodo IS. До тех пор доля ФОТ от выручки показана прочерком: ноль в этой строке читался бы как посчитанный ответ.{% endblocktranslate %}</p>
 {% endif %}
 
-<h2>{% translate "Фонд оплаты труда по месяцам" %}</h2>
-<section class="chart">
-  {% for bar in bars %}
-  <div class="chart__row" data-month="{{ bar.code }}" data-payroll="{{ bar.value }}">
-    <div class="chart__month">{{ bar.month }} <span class="hint">{{ bar.sub }}</span></div>
-    <div class="chart__track"><div class="chart__fill" style="width: {{ bar.width }}%"></div></div>
-    <div class="chart__value {{ bar.value|numclass }}">{{ bar.value }}</div>
-  </div>
-  {% endfor %}
-</section>
-
-<h2>{% translate "По точкам" %}</h2>
-{% scroll %}<table class="report">
-  <thead>
-    <tr>
-      <th>{% translate "Точка" %}</th>
-      <th class="num">{% translate "ФОТ за период" %}</th>
-      <th class="num">{% translate "Часов" %}</th>
-      <th class="num">{% translate "Стоимость часа" %}</th>
-      <th class="num">{% translate "Людей" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in cost_rows %}
-    <tr data-unit="{{ row.code }}">
-      <td>{{ row.title }}</td>
-      <td class="num" data-payroll="{{ row.payroll }}">{{ row.payroll }}</td>
-      <td class="num num--muted">{{ row.hours }}</td>
-      <td class="num">{{ row.hour_cost }}</td>
-      <td class="num num--muted">{{ row.heads }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-  <tfoot>
-    <tr data-unit="total">
-      <th>{% translate "Всего" %}</th>
-      <td class="num num--total" data-payroll="{{ cost_total.payroll }}">{{ cost_total.payroll }}</td>
-      <td class="num num--total">{{ cost_total.hours }}</td>
-      <td class="num num--total">{{ cost_total.hour_cost }}</td>
-      <td class="num num--total">{{ cost_total.heads }}</td>
-    </tr>
-  </tfoot>
-</table>{% endscroll %}
-
-<h2>{% translate "По группам" %}</h2>
-{% scroll %}<table class="report">
-  <thead>
-    <tr>
-      <th>{% translate "Группа" %}</th>
-      <th class="num">{% translate "ФОТ за период" %}</th>
-      <th class="num">{% translate "Часов" %}</th>
-      <th class="num">{% translate "Стоимость часа" %}</th>
-      <th class="num">{% translate "Людей" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in group_rows %}
-    <tr data-group="{{ row.code }}">
-      <td>{{ row.title }}</td>
-      <td class="num" data-payroll="{{ row.payroll }}">{{ row.payroll }}</td>
-      <td class="num num--muted">{{ row.hours }}</td>
-      <td class="num">{{ row.hour_cost }}</td>
-      <td class="num num--muted">{{ row.heads }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>{% endscroll %}
-{% endif %}
-
-{% if tab == "churn" %}
-<p class="sub">{{ churn_meta }}</p>
-
-{% comment %}
-Предупреждение стоит ПЕРЕД таблицами, а не под ними: человек, прочитавший
-проценты, уже сделал вывод, и оговорка после него не работает.
-{% endcomment %}
-{% translate "Проценты здесь считаются от единиц людей" as small %}
-{% notice "alert" title=small %}{% blocktranslate with base=min_base %}Один лишний уход сдвигает показатель на несколько пунктов. Поэтому рядом с процентом всегда стоит база, а там, где база меньше {{ base }} человек, процента нет вовсе — стоит «мало данных».{% endblocktranslate %}{% endnotice %}
-
-<h2>{% translate "По точкам" %}</h2>
-{% scroll %}<table class="report">
-  <thead>
-    <tr>
-      <th>{% translate "Точка" %}</th>
-      <th class="num">{% translate "Приняли" %}</th>
-      <th class="num">{% translate "Ушли" %}</th>
-      <th class="num">{% translate "Текучесть" %}</th>
-      <th class="num">{% translate "База" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in churn_rows %}
-    <tr data-unit="{{ row.code }}">
-      <td>{{ row.title }}</td>
-      <td class="num num--muted">{{ row.hired }}</td>
-      <td class="num">{{ row.left }}</td>
-      <td class="num" data-turnover="{{ row.turnover }}">{% if row.enough %}{{ row.turnover }}{% else %}<span class="hint">{% translate "мало данных" %}</span>{% endif %}</td>
-      <td class="num num--muted">{{ row.base }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-  <tfoot>
-    <tr data-unit="total">
-      <th>{% translate "Всего" %}</th>
-      <td class="num num--total">{{ churn_total.hired }}</td>
-      <td class="num num--total">{{ churn_total.left }}</td>
-      <td class="num num--total" data-turnover="{{ churn_total.turnover }}">{% if churn_total.enough %}{{ churn_total.turnover }}{% else %}<span class="hint">{% translate "мало данных" %}</span>{% endif %}</td>
-      <td class="num num--total">{{ churn_total.base }}</td>
-    </tr>
-  </tfoot>
-</table>{% endscroll %}
-
-<p class="note">{% blocktranslate %}Текучесть считается как ушедшие за показанные месяцы к средней численности за них же. Переводы между точками уходом не считаются: уход — это увольнение, а перевод меняет только условия найма.{% endblocktranslate %}</p>
-
-<h2>{% translate "По группам" %}</h2>
-{% scroll %}<table class="report">
-  <thead>
-    <tr>
-      <th>{% translate "Группа" %}</th>
-      <th class="num">{% translate "Сейчас" %}</th>
-      <th class="num">{% translate "Ушли" %}</th>
-      <th class="num">{% translate "Текучесть" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in churn_groups %}
-    <tr data-group="{{ row.code }}">
-      <td>{{ row.title }}</td>
-      <td class="num num--muted">{{ row.heads }}</td>
-      <td class="num">{{ row.left }}</td>
-      <td class="num" data-turnover="{{ row.turnover }}">{% if row.enough %}{{ row.turnover }}{% else %}<span class="hint">{% blocktranslate with base=row.base %}мало данных · база {{ base }}{% endblocktranslate %}</span>{% endif %}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>{% endscroll %}
-
-<h2>{% translate "Ушли за показанные месяцы" %}</h2>
-{% if leavers %}
-<p class="sub">{% translate "поимённо — пока их можно назвать по именам" %}</p>
-{% scroll %}<table class="report">
-  <thead>
-    <tr>
-      <th>{% translate "Человек" %}</th>
-      <th>{% translate "Группа" %}</th>
-      <th>{% translate "Точка" %}</th>
-      <th class="num">{% translate "Отработал" %}</th>
-      <th>{% translate "Ушёл" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in leavers %}
-    <tr>
-      <td>{{ row.name }}</td>
-      <td>{{ row.group }}</td>
-      <td>{{ row.unit }}</td>
-      <td class="num">{{ row.tenure }}</td>
-      <td>{{ row.left }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>{% endscroll %}
-<p class="note">{% blocktranslate with tenure=avg_tenure %}Средний срок работы ушедших: {{ tenure }}{% endblocktranslate %}</p>
-{% else %}
-{% notice "empty" %}{% translate "За показанные месяцы никто не уволился." %}{% endnotice %}
-{% endif %}
-{% endif %}
-
-{% if tab == "hours" %}
-{% comment %}
-Плитки и пояснение стоят всегда, как в эталоне: месяц без переработок — это
-ответ «ноль часов сверх нормы», а не пустая вкладка. Пустое состояние остаётся
-только у списка людей.
-{% endcomment %}
-<section class="kpi people-kpi--three">
-  <div class="kpi__cell{% if over_warn %} people-kpi--warn{% endif %}">
-    <div class="kpi__label">{% translate "Часов сверх нормы" %}</div>
-    <div class="kpi__value {{ over_hours|numclass }}">{{ over_hours }}</div>
-    <div class="kpi__about">{{ over_people }}</div>
-  </div>
-  <div class="kpi__cell">
-    <div class="kpi__label">{% translate "Стоило переработок" %}</div>
-    <div class="kpi__value num--empty">—</div>
-    <div class="kpi__about">{% translate "коэффициент переработки в правилах страны не проверен" %}</div>
-  </div>
-  <div class="kpi__cell">
-    <div class="kpi__label">{% translate "Доля в часах месяца" %}</div>
-    <div class="kpi__value {{ over_share|numclass }}">{{ over_share }}</div>
-    <div class="kpi__about">{% translate "от всех отработанных часов" %}</div>
-  </div>
-</section>
-
-<h2>{% translate "Кто вышел за норму" %}</h2>
-{% if over_rows %}
-{% scroll %}<table class="report">
-  <thead>
-    <tr>
-      <th>{% translate "Человек" %}</th>
-      <th>{% translate "Точка" %}</th>
-      <th class="num">{% translate "Часы" %}</th>
-      <th class="num">{% translate "Норма" %}</th>
-      <th class="num">{% translate "Сверх нормы" %}</th>
-      <th class="num">{% translate "Начислено за месяц" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in over_rows %}
-    <tr>
-      <td>{{ row.name }}</td>
-      <td>{{ row.unit }}</td>
-      <td class="num">{{ row.hours }}</td>
-      <td class="num num--muted">{{ row.norm }}</td>
-      <td class="num">{{ row.over }}</td>
-      <td class="num">{{ row.payroll }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>{% endscroll %}
-{% else %}
-{% notice "empty" %}{% translate "В этом месяце никто не вышел за свою норму часов." %}{% endnotice %}
-{% endif %}
-
-{% comment %}
-Денег по коэффициенту переработки здесь нет намеренно: эталон считает их по 1,5,
-а в правилах Сербии коэффициент 1,26 и помечен как непроверенный — вопрос к
-бухгалтеру ещё открыт. Число, посчитанное по непроверенному коэффициенту,
-выглядит как знание. Поэтому рядом с часами стоит начисление человека за месяц —
-то самое, что в ведомости.
-{% endcomment %}
-<p class="note">{% blocktranslate %}Сверх нормы — это отработанные часы минус норма самого человека: у работающего на полставки она своя. Во что обошлись именно эти часы, экран не считает — коэффициент переработки в правилах страны помечен как непроверенный, и число по нему выглядело бы как знание. Рядом стоит начисление человека за месяц — то самое, что в ведомости.{% endblocktranslate %}</p>
-
-<p class="note">{% blocktranslate %}Что с этим делать — решает не отчёт. Переработка бывает дешевле, чем нанять человека на полставки, но только пока это не выгорание. Экран показывает часы и деньги и не предлагает вывод.{% endblocktranslate %}</p>
-{% endif %}
+{% block people_body %}{% endblock %}
 
 {% endif %}
 </div>
