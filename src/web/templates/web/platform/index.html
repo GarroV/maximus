@@ -10,6 +10,10 @@
 Форма заведения — своей страницей `/platform/new/` (T225, D081: одна страница —
 одна функция). Кнопка к ней стоит над списком: заводят партнёра редко, но
 всегда глядя на список — не появился ли он уже.
+
+На узком экране строки складываются карточками (`table.stack`, T233): семь
+столбцов на 390 уходили во внутреннюю прокрутку вбок, и справа пропадало
+самое нужное — кто и когда входил.
 {% endcomment %}
 {% block title %}{% translate "Пространства" %}{% endblock %}
 {% block content %}
@@ -21,7 +25,7 @@
 
 <p><a class="btn primary" href="{% url 'platform-space-create' %}">{% translate "Завести пространство" %}</a></p>
 
-{% scroll %}<table>
+{% scroll %}<table class="stack">
   <thead>
     <tr>
       <th>{% translate "Пространство" %}</th>
@@ -36,17 +40,17 @@
   <tbody>
     {% for space in spaces %}
     <tr>
-      <td><a href="{% url 'platform-space' tenant_id=space.id %}">{{ space.title }}</a></td>
-      <td>{{ space.code }}</td>
-      <td>{{ space.country_code }}</td>
-      <td>{{ space.base_currency }}</td>
-      <td class="num">{{ space.people }}</td>
-      <td class="num">{{ space.active }}</td>
+      <td data-label="{% translate "Пространство" %}"><a href="{% url 'platform-space' tenant_id=space.id %}">{{ space.title }}</a></td>
+      <td data-label="{% translate "Код" %}">{{ space.code }}</td>
+      <td data-label="{% translate "Страна" %}">{{ space.country_code }}</td>
+      <td data-label="{% translate "Валюта учёта" %}">{{ space.base_currency }}</td>
+      <td class="num" data-label="{% translate "Людей" %}">{{ space.people }}</td>
+      <td class="num" data-label="{% translate "Действующих" %}">{{ space.active }}</td>
       {% comment %}
       Пусто — ответ, а не пробел: словами, потому что пустая ячейка в этой
       колонке читается как сбой выборки, а не как «никто не заходил».
       {% endcomment %}
-      <td>{% if space.last_seen %}{{ space.last_seen|date:"SHORT_DATE_FORMAT" }}{% else %}<span class="muted">{% translate "не входили" %}</span>{% endif %}</td>
+      <td data-label="{% translate "Последний вход" %}">{% if space.last_seen %}{{ space.last_seen|date:"SHORT_DATE_FORMAT" }}{% else %}<span class="muted">{% translate "не входили" %}</span>{% endif %}</td>
     </tr>
     {% empty %}
     <tr><td colspan="7">{% translate "Ни одного пространства ещё нет." %}</td></tr>
