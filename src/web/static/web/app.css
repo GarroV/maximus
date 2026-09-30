@@ -1069,6 +1069,10 @@ th {
   font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro);
   color: var(--ink-2); font-weight: var(--w-semibold);
 }
+/* Шапка таблицы залита целиком, как `.table thead th` эталона. Раньше фон
+   был только у первой колонки там, где её закрепляли (аналитика по людям),
+   и шапка читалась как одна серая ячейка и строка текста (issue #268). */
+thead th { background: var(--surface-head); }
 tbody tr:hover { background: var(--surface-2); }
 /* Линия над итогом — у каждой ячейки строки, и у заголовочной тоже. Первая
    колонка итога обычно `th` («Итого по 12 строкам»), и правило на одни `td`
@@ -1086,10 +1090,24 @@ tfoot td, tfoot th { font-weight: var(--w-semibold); border-top: 2px solid var(-
 .scroll {
   overflow: auto;
   max-height: 70vh;
-  background: var(--surface);
   border: 1px solid var(--line-strong);
   border-radius: var(--r-block);
+  /* Тень у края, за которым ещё есть колонки (issue #268). На планшете рядом
+     с панелью и на телефоне широкая таблица прокручивается внутри себя, а
+     полоса прокрутки в macOS и на телефоне не видна, пока её не тронешь, —
+     и таблица выглядела обрезанной: «правые колонки табеля пропали». Приём
+     тот же, что у аналитики по людям (people.css): заслонки цветом таблицы
+     едут с содержимым (`local`) и гасят тень у края, до которого дошли. */
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) left / 24px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right / 24px 100% no-repeat local,
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 22%, transparent), transparent) left / 14px 100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in srgb, var(--ink) 22%, transparent), transparent) right / 14px 100% no-repeat scroll,
+    var(--surface);
 }
+/* Таблица внутри прозрачна, иначе её белый фон закрыл бы тень. Липкие
+   ячейки (шапка, закреплённые колонки, итоги) свой фон сохраняют. */
+.scroll > table { background: transparent; }
 
 table.sheet { font-size: var(--fs-dense); }
 /* Плотность строки — `--row` эталона, 30 пикселей. Замер показал 45: высота

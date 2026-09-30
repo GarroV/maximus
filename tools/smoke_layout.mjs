@@ -105,12 +105,23 @@ const probe = (phone) => evalIn(`(() => {
     const tops = new Set([...row.children].filter(shown).map((c) => Math.round(c.getBoundingClientRect().top)));
     if (tops.size > 1) r.wraps.push(name(row).slice(0, 60));
   }
+  // Слово, разорванное переносом: у его отрезка текста больше одного
+  // прямоугольника строки. Число строк само по себе не дефект — длинный
+  // заголовок имеет право на две строки, а «ФО/Т» столбиком нет.
   for (const th of main.querySelectorAll('th')) {
-    if (!shown(th)) continue;
-    const lh = parseFloat(cs(th).lineHeight) || 18;
-    const words = (th.innerText || '').trim().split(/\\s+/).filter(Boolean).length;
-    const lines = Math.round((th.clientHeight - parseFloat(cs(th).paddingTop) - parseFloat(cs(th).paddingBottom)) / lh);
-    if (lines > Math.max(words, 1) + 0 && lines > 2) r.thBroken.push(name(th) + ' строк ' + lines);
+    if (!shown(th) || sr(th)) continue;
+    const walker = document.createTreeWalker(th, NodeFilter.SHOW_TEXT);
+    let broken = null;
+    for (let n = walker.nextNode(); n && !broken; n = walker.nextNode()) {
+      if (sr(n.parentElement)) continue;
+      const re = /\S+/g; let m;
+      while ((m = re.exec(n.data)) && !broken) {
+        const rg = document.createRange(); rg.setStart(n, m.index); rg.setEnd(n, m.index + m[0].length);
+        const tops = new Set([...rg.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top)));
+        if (tops.size > 1) broken = m[0];
+      }
+    }
+    if (broken) r.thBroken.push(name(th) + ' — слово «' + broken + '» разорвано');
   }
   for (const t of main.querySelectorAll('table')) {
     if (!shown(t)) continue;
@@ -124,6 +135,16 @@ const probe = (phone) => evalIn(`(() => {
       const rt = firstRow.getBoundingClientRect().top;
       if (hb > rt + 1) r.stickyOverlap.push(name(t).slice(0, 40) + ' на ' + Math.round(hb - rt) + 'px');
     }
+    // Ярусы шапки при прокрутке таблицы вниз: каждый следующий ряд
+    // прилипает под предыдущим, а не поверх него (у ведомости два яруса —
+    // группы колонок и сами колонки, и оба стояли на top: 0).
+    const box = scroller(t);
+    if (box && head.rows.length > 1 && box.scrollHeight > box.clientHeight + 40) {
+      box.scrollTop = 200;
+      const rows = [...head.rows].filter(shown).map((row) => row.getBoundingClientRect());
+      for (let i = 1; i < rows.length; i++) if (rows[i].top < rows[i - 1].bottom - 1) r.stickyOverlap.push(name(t).slice(0, 40) + ' ярус ' + (i + 1) + ' поверх яруса ' + i + ' на ' + Math.round(rows[i - 1].bottom - rows[i].top) + 'px');
+      box.scrollTop = 0;
+    }
     const lastRow = [...head.rows].pop();
     const fills = new Set([...lastRow.cells].filter(shown).map((th) => { let bg = cs(th).backgroundColor; if (bg === 'rgba(0, 0, 0, 0)') bg = cs(lastRow).backgroundColor; if (bg === 'rgba(0, 0, 0, 0)') bg = cs(head).backgroundColor; return bg; }));
     if (fills.size > 1) r.thFill.push(name(t).slice(0, 40) + ' ' + [...fills].join(' / '));
@@ -136,7 +157,10 @@ const probe = (phone) => evalIn(`(() => {
     r.headTop = Math.round(mr.top + window.scrollY);
     const bar = document.querySelector('.sidenav__list');
     window.scrollTo(0, document.documentElement.scrollHeight);
-    const last = all.filter((e) => e.children.length === 0 && e.getBoundingClientRect().height > 0).pop();
+    // Последний видимый блок страницы, а не последняя ячейка: ячейка внутри
+    // прокручиваемой таблицы может лежать ниже края своего контейнера и
+    // никому не видна — она не «закрыта полосой».
+    const last = [...main.children].filter(shown).pop();
     if (bar && last) r.barCovers = Math.max(0, Math.round(last.getBoundingClientRect().bottom - bar.getBoundingClientRect().top));
     window.scrollTo(0, 0);
   }

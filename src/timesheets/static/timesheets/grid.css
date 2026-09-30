@@ -143,6 +143,10 @@ table.grid th:first-child, table.grid td:first-child {
   position: sticky; left: 0; background: var(--surface); z-index: 1;
 }
 table.grid tbody tr:hover td:first-child { background: var(--surface-2); }
+/* Угол шапки — залит как остальная шапка и выше всех: правило выше делало
+   его белым, а `z-index: 1` опускало под прилипшие имена строк, и при
+   прокрутке вниз имена наезжали на подпись «Сотрудник» (issue #268). */
+table.grid thead th:first-child { background: var(--surface-head); z-index: 4; }
 
 #cell-error { margin-top: 16px; }
 

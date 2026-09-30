@@ -41,7 +41,7 @@
   background: var(--surface);
   box-shadow: 1px 0 0 var(--line-strong);
 }
-.people-page .scroll thead th:first-child { z-index: 2; background: var(--surface-3); }
+.people-page .scroll thead th:first-child { z-index: 2; background: var(--surface-head); }
 
 @media (max-width: 1023px) {
   .kpi.people-kpi--three { grid-template-columns: repeat(2, 1fr); }
