@@ -9051,20 +9051,40 @@ msgstr "by name — while there are few enough to list"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
-msgid "против %(value)s в %(month)s"
-msgstr "vs %(value)s in %(month)s"
-
-#: новые строки, добавлены tools/apply_translations.py
-#, python-format
-msgid "у %(who)s"
-msgstr "for %(who)s"
-
-#: новые строки, добавлены tools/apply_translations.py
-#, python-format
 msgid "ушло %(left)s из %(base)s в среднем"
 msgstr "%(left)s left out of %(base)s on average"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
-msgid "часов отработано: %(hours)s"
-msgstr "hours worked: %(hours)s"
+msgid "%(over)s из %(heads)s"
+msgstr "%(over)s of %(heads)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(share)s от выручки %(revenue)s"
+msgstr "%(share)s of revenue %(revenue)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоило переработок"
+msgstr "Overtime cost"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "доля от выручки — выручки в продукте пока нет"
+msgstr "share of revenue — no revenue in the product yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "коэффициент переработки в правилах страны не проверен"
+msgstr "the overtime rate in the country rules is not verified"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "п.п."
+msgstr "pp"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "прошлого месяца в отчёте нет — сравнить не с чем"
+msgstr "no previous month in the report — nothing to compare with"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "против %(value)s (%(month)s)"
+msgstr "vs %(value)s (%(month)s)"

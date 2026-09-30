@@ -8885,20 +8885,40 @@ msgstr "poimenično — dok ih ima dovoljno malo da se mogu nabrojati"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
-msgid "против %(value)s в %(month)s"
-msgstr "u odnosu na %(value)s u %(month)s"
-
-#: новые строки, добавлены tools/apply_translations.py
-#, python-format
-msgid "у %(who)s"
-msgstr "kod %(who)s"
-
-#: новые строки, добавлены tools/apply_translations.py
-#, python-format
 msgid "ушло %(left)s из %(base)s в среднем"
 msgstr "otišlo %(left)s od %(base)s u proseku"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
-msgid "часов отработано: %(hours)s"
-msgstr "odrađeno sati: %(hours)s"
+msgid "%(over)s из %(heads)s"
+msgstr "%(over)s od %(heads)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(share)s от выручки %(revenue)s"
+msgstr "%(share)s od prihoda %(revenue)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоило переработок"
+msgstr "Trošak prekovremenog rada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "доля от выручки — выручки в продукте пока нет"
+msgstr "udeo u prihodu — prihoda u proizvodu još nema"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "коэффициент переработки в правилах страны не проверен"
+msgstr "koeficijent prekovremenog rada u pravilima zemlje nije proveren"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "п.п."
+msgstr "p.p."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "прошлого месяца в отчёте нет — сравнить не с чем"
+msgstr "u izveštaju nema prethodnog meseca — nema s čim da se uporedi"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "против %(value)s (%(month)s)"
+msgstr "u odnosu na %(value)s (%(month)s)"

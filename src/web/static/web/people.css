@@ -1,0 +1,68 @@
+/* Аналитика по людям (модуль 12 эталона) — только то, чего нет в общем app.css.
+   Отдельным листом, потому что app.css в этой волне ведёт блок visual, а эти
+   правила нужны одному экрану. Цвета и отступы — только токены. */
+
+/* Два ряда переключателей (вкладки и точки) — одна группа управления: между
+   собой они стоят с зазором, а от плиток отделены воздухом, как в эталоне.
+   Без этого два ряда читались как один длинный переключатель, прилипший к
+   плиткам. */
+.people-switch {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: var(--space-4) var(--space-6);
+  margin: 0 0 var(--space-7);
+}
+/* На узком экране ряд точек не помещается: он прокручивается внутри себя, а
+   страница вбок не едет. */
+.people-switch .seg { max-width: 100%; overflow-x: auto; }
+
+/* Число и изменение к прошлому месяцу — на одной линии, как в эталоне. */
+.people-kpi__line {
+  display: flex; align-items: baseline; flex-wrap: wrap;
+  gap: var(--space-4); margin-top: var(--space-3);
+}
+.people-kpi__line .kpi__value { margin-top: 0; }
+.people-kpi__delta {
+  font-family: var(--font-num); font-size: var(--fs-meta);
+  font-weight: var(--w-semibold); white-space: nowrap;
+}
+
+/* Вкладка «Часы»: плиток три, а не четыре. */
+.kpi.people-kpi--three { grid-template-columns: repeat(3, 1fr); }
+/* Переработка есть — плитка на тёплом фоне, как в эталоне. */
+.people-kpi--warn { background: var(--warn-soft); border-color: var(--warn-line); }
+
+/* Широкая таблица на телефоне прокручивается внутри своего блока. Чтобы это
+   было видно, первая колонка (точка, группа, человек) закреплена: она остаётся
+   на месте, а числа уезжают под неё, — прокрутка видна по самим данным, и
+   строка не теряет подписи. */
+.people-page .scroll th:first-child,
+.people-page .scroll td:first-child {
+  position: sticky; left: 0; z-index: 1;
+  background: var(--surface);
+  box-shadow: 1px 0 0 var(--line-strong);
+}
+.people-page .scroll thead th:first-child { z-index: 2; background: var(--surface-3); }
+
+@media (max-width: 1023px) {
+  .kpi.people-kpi--three { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 767px) {
+  .kpi.people-kpi--three { grid-template-columns: 1fr; }
+}
+
+/* Справа есть ещё колонки — это видно по тени у правого края, пока таблица
+   не докручена до конца (приём «тень, которая прокручивается»: светлые
+   заслонки едут вместе с содержимым и гасят тень у края, до которого дошли). */
+.people-page .scroll {
+  background:
+    linear-gradient(to left, var(--surface) 30%, transparent) right / 24px 100% no-repeat local,
+    linear-gradient(to left, var(--line-strong), transparent) right / 10px 100% no-repeat scroll,
+    var(--surface);
+}
+
+/* Ячейки тела прозрачны, иначе их белый фон закрывает эту тень. Первая колонка
+   (закреплённая), шапка и строка итогов свой фон сохраняют: они липкие. */
+.people-page .scroll tbody td:not(:first-child) { background: transparent; }
+
+/* Численность под месяцем не рвётся посередине («35 / чел.»). */
+.people-page .chart__month .hint { white-space: nowrap; }

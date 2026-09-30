@@ -1,4 +1,4 @@
-{% extends "web/base.html" %}{% load ui i18n %}
+{% extends "web/base.html" %}{% load ui i18n static %}
 {% comment %}
 Аналитика по людям (T167, модуль 12 эталона).
 
@@ -21,7 +21,9 @@
 месяцев бывает и шесть, и тридцать, а рядом с каждым обязана стоять сумма.
 {% endcomment %}
 {% block title %}{% translate "Аналитика по людям" %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'web/people.css' %}">{% endblock %}
 {% block content %}
+<div class="people-page">
 <h1>{% translate "Аналитика по людям" %}</h1>
 
 {% if empty %}
@@ -29,13 +31,16 @@
   {% notice "empty" title=nothing %}{% blocktranslate %}Ни одного месяца с табелем или расчётом ещё нет. Аналитика появится, как только будет закрыт первый месяц.{% endblocktranslate %}{% endnotice %}
 {% else %}
 
-<p class="sub">{{ range_title }}</p>
+{% comment %}Вкладка «Часы» — про один месяц, и подзаголовок у неё — этот месяц, а
+не диапазон: иначе при одном посчитанном месяце «Июнь 2026» стоял бы дважды.{% endcomment %}
+<p class="sub">{% if tab == "hours" %}{{ hours_month }}{% else %}{{ range_title }}{% endif %}</p>
 
 {% comment %}
 Разрезы — обычные ссылки, состояние экрана целиком в адресе. Список точек собран
 из показанных строк, а не из справочника: кнопка точки, которой человек не видит,
 сама по себе сообщение о том, что такая точка есть (D023).
 {% endcomment %}
+<div class="people-switch">
 <nav class="seg" aria-label="{% translate "Что показать" %}">
   {% for item in tabs %}
   {% if item.selected %}<span class="seg__current" aria-current="page">{{ item.title }}</span>
@@ -51,6 +56,7 @@
   {% endfor %}
 </nav>
 {% endif %}
+</div>
 
 {% if tab == "cost" %}
 {% comment %}
@@ -61,7 +67,10 @@
   {% for card in kpis %}
   <div class="kpi__cell">
     <div class="kpi__label">{{ card.label }}</div>
-    <div class="kpi__value {{ card.value|numclass }}">{{ card.value }}</div>
+    <div class="people-kpi__line">
+      <span class="kpi__value {{ card.value|numclass }}">{{ card.value }}</span>
+      {% if card.delta %}<span class="people-kpi__delta {{ card.delta_class }}">{{ card.delta }}</span>{% endif %}
+    </div>
     <div class="kpi__about">{{ card.base }}</div>
   </div>
   {% endfor %}
@@ -239,23 +248,31 @@
 {% endif %}
 
 {% if tab == "hours" %}
-<p class="sub">{{ hours_month }}</p>
-
-{% if over_rows %}
-<section class="kpi">
-  <div class="kpi__cell">
+{% comment %}
+Плитки и пояснение стоят всегда, как в эталоне: месяц без переработок — это
+ответ «ноль часов сверх нормы», а не пустая вкладка. Пустое состояние остаётся
+только у списка людей.
+{% endcomment %}
+<section class="kpi people-kpi--three">
+  <div class="kpi__cell{% if over_warn %} people-kpi--warn{% endif %}">
     <div class="kpi__label">{% translate "Часов сверх нормы" %}</div>
-    <div class="kpi__value">{{ over_hours }}</div>
+    <div class="kpi__value {{ over_hours|numclass }}">{{ over_hours }}</div>
     <div class="kpi__about">{{ over_people }}</div>
   </div>
   <div class="kpi__cell">
+    <div class="kpi__label">{% translate "Стоило переработок" %}</div>
+    <div class="kpi__value num--empty">—</div>
+    <div class="kpi__about">{% translate "коэффициент переработки в правилах страны не проверен" %}</div>
+  </div>
+  <div class="kpi__cell">
     <div class="kpi__label">{% translate "Доля в часах месяца" %}</div>
-    <div class="kpi__value">{{ over_share }}</div>
+    <div class="kpi__value {{ over_share|numclass }}">{{ over_share }}</div>
     <div class="kpi__about">{% translate "от всех отработанных часов" %}</div>
   </div>
 </section>
 
 <h2>{% translate "Кто вышел за норму" %}</h2>
+{% if over_rows %}
 {% scroll %}<table class="report">
   <thead>
     <tr>
@@ -280,6 +297,9 @@
     {% endfor %}
   </tbody>
 </table>{% endscroll %}
+{% else %}
+{% notice "empty" %}{% translate "В этом месяце никто не вышел за свою норму часов." %}{% endnotice %}
+{% endif %}
 
 {% comment %}
 Денег по коэффициенту переработки здесь нет намеренно: эталон считает их по 1,5,
@@ -291,10 +311,8 @@
 <p class="note">{% blocktranslate %}Сверх нормы — это отработанные часы минус норма самого человека: у работающего на полставки она своя. Во что обошлись именно эти часы, экран не считает — коэффициент переработки в правилах страны помечен как непроверенный, и число по нему выглядело бы как знание. Рядом стоит начисление человека за месяц — то самое, что в ведомости.{% endblocktranslate %}</p>
 
 <p class="note">{% blocktranslate %}Что с этим делать — решает не отчёт. Переработка бывает дешевле, чем нанять человека на полставки, но только пока это не выгорание. Экран показывает часы и деньги и не предлагает вывод.{% endblocktranslate %}</p>
-{% else %}
-{% notice "empty" %}{% translate "В этом месяце никто не вышел за свою норму часов." %}{% endnotice %}
-{% endif %}
 {% endif %}
 
 {% endif %}
+</div>
 {% endblock %}

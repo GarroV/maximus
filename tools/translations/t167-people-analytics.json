@@ -171,14 +171,6 @@
     "en": "Payroll cost per person",
     "sr": "Fond zarada po osobi"
   },
-  "часов отработано: %(hours)s": {
-    "en": "hours worked: %(hours)s",
-    "sr": "odrađeno sati: %(hours)s"
-  },
-  "против %(value)s в %(month)s": {
-    "en": "vs %(value)s in %(month)s",
-    "sr": "u odnosu na %(value)s u %(month)s"
-  },
   "ушло %(left)s из %(base)s в среднем": {
     "en": "%(left)s left out of %(base)s on average",
     "sr": "otišlo %(left)s od %(base)s u proseku"
@@ -186,10 +178,6 @@
   "%(count)s мес.": {
     "en": "%(count)s mo.",
     "sr": "%(count)s mes."
-  },
-  "у %(who)s": {
-    "en": "for %(who)s",
-    "sr": "kod %(who)s"
   },
   "Стоимость труда": {
     "en": "Labour cost",
@@ -206,5 +194,37 @@
   "Доля ФОТ от выручки: ждёт коннектора Dodo IS": {
     "en": "Payroll cost's share of revenue: waiting for the Dodo IS connector",
     "sr": "Udeo fonda zarada u prihodu: čeka konektor Dodo IS"
+  },
+  "прошлого месяца в отчёте нет — сравнить не с чем": {
+    "en": "no previous month in the report — nothing to compare with",
+    "sr": "u izveštaju nema prethodnog meseca — nema s čim da se uporedi"
+  },
+  "п.п.": {
+    "en": "pp",
+    "sr": "p.p."
+  },
+  "доля от выручки — выручки в продукте пока нет": {
+    "en": "share of revenue — no revenue in the product yet",
+    "sr": "udeo u prihodu — prihoda u proizvodu još nema"
+  },
+  "%(share)s от выручки %(revenue)s": {
+    "en": "%(share)s of revenue %(revenue)s",
+    "sr": "%(share)s od prihoda %(revenue)s"
+  },
+  "%(over)s из %(heads)s": {
+    "en": "%(over)s of %(heads)s",
+    "sr": "%(over)s od %(heads)s"
+  },
+  "Стоило переработок": {
+    "en": "Overtime cost",
+    "sr": "Trošak prekovremenog rada"
+  },
+  "коэффициент переработки в правилах страны не проверен": {
+    "en": "the overtime rate in the country rules is not verified",
+    "sr": "koeficijent prekovremenog rada u pravilima zemlje nije proveren"
+  },
+  "против %(value)s (%(month)s)": {
+    "en": "vs %(value)s (%(month)s)",
+    "sr": "u odnosu na %(value)s (%(month)s)"
   }
 }

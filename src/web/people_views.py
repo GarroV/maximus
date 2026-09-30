@@ -168,6 +168,7 @@ def _cost(report) -> dict:
             {
                 "label": _("ФОТ к выручке"),
                 "value": _share(last.share) if last else EMPTY,
+                **_change(last, before, "share", points=True),
                 "base": (_("за %(month)s") % {"month": month_title(last.period)}
                          if last and last.share is not None
                          else _("выручка приедет с коннектором Dodo IS")),
@@ -175,17 +176,18 @@ def _cost(report) -> dict:
             {
                 "label": _("Стоимость часа"),
                 "value": money(last.hour_cost) if last else EMPTY,
-                "base": _delta_note(last, before, "hour_cost"),
+                **_change(last, before, "hour_cost"),
             },
             {
                 "label": _("ФОТ на человека"),
                 "value": money(last.per_head) if last else EMPTY,
-                "base": _delta_note(last, before, "per_head"),
+                **_change(last, before, "per_head"),
             },
             {
                 "label": _("ФОТ за период"),
                 "value": money(report.payroll),
-                "base": _("часов отработано: %(hours)s") % {"hours": hours(report.hours)},
+                "delta": "",
+                "base": _period_share(report),
             },
         ],
         "revenue_known": report.revenue_known,
@@ -200,15 +202,48 @@ def _cost(report) -> dict:
     }
 
 
-def _delta_note(last, before, field: str) -> str:
-    """«против 412,00 в мае» — одно число ни о чём не говорит без прошлого месяца."""
-    if last is None or before is None:
-        return ""
-    was = getattr(before, field)
+def _change(last, before, field: str, *, points: bool = False) -> dict:
+    """Изменение к прошлому месяцу: знак, величина и подпись «против чего».
+
+    Одно число ни о чём не говорит без прошлого месяца (эталон модуля 12). Нет
+    прошлого месяца или значения в нём — изменения нет, и это сказано словами:
+    пустое место под числом читалось бы как «не изменилось».
+
+    Цвет: рост стоимости — красный, падение — зелёный. Это не вывод отчёта, а
+    направление денег: плитки здесь все про затраты.
+    """
+    now = getattr(last, field) if last else None
+    if now is None:
+        return {"delta": "", "base": ""}
+    was = getattr(before, field) if before else None
     if was is None:
-        return ""
-    return _("против %(value)s в %(month)s") % {
-        "value": money(was), "month": month_title(before.period),
+        return {"delta": "", "base": _("прошлого месяца в отчёте нет — сравнить не с чем")}
+    diff = Decimal(now) - Decimal(was)
+    size = (_one(abs(diff)) + " " + _("п.п.")) if points else money(abs(diff))
+    return {
+        "delta": ("+" if diff > 0 else "\u2212" if diff < 0 else "±") + size,
+        "delta_class": "num--down" if diff > 0 else "num--up" if diff < 0 else "num--muted",
+        # Месяц в скобках, а не «в мае»: название месяца приходит в именительном
+        # падеже, и «в Май 2026» читалось бы как ошибка.
+        "base": _("против %(value)s (%(month)s)") % {
+            "value": _share(was) if points else money(was),
+            "month": month_title(before.period),
+        },
+    }
+
+
+def _period_share(report) -> str:
+    """Подпись под ФОТ за период — доля от выручки тех же месяцев, как в эталоне.
+
+    Считается только если выручка есть в КАЖДОМ показанном месяце: доля от
+    выручки половины месяцев завышала бы ответ вдвое и выглядела бы как знание.
+    """
+    revenue = [month.revenue for month in report.months]
+    if not revenue or not all(revenue):
+        return _("доля от выручки — выручки в продукте пока нет")
+    total = sum(revenue, Decimal("0"))
+    return _("%(share)s от выручки %(revenue)s") % {
+        "share": _share(report.payroll / total * 100), "revenue": money(total),
     }
 
 
@@ -286,7 +321,10 @@ def _hours(report) -> dict:
     return {
         "hours_month": month_title(last.period) if last else "",
         "over_hours": hours(report.over_hours),
-        "over_people": _("у %(who)s") % {"who": _people(len(report.over_norm))},
+        "over_people": _("%(over)s из %(heads)s") % {
+            "over": len(report.over_norm), "heads": _people(last.heads if last else 0),
+        },
+        "over_warn": bool(report.over_norm),
         "over_share": _share(
             report.over_hours / last.hours * 100
             if last and last.hours else None
