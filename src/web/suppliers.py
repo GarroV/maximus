@@ -718,7 +718,7 @@ def invoice_fact(document) -> Fact | None:
 def invoice_lines(document) -> list[Fact]:
     """Все действующие строки счёта: исходная и исправления рядом с ней."""
     return list(
-        Fact.objects.select_related("unit")
+        Fact.objects.select_related("unit", "expense_item")
         .filter(document_id=document.id, dedup_key__startswith=INVOICE_PREFIX,
                 superseded_at__isnull=True)
         .exclude(allocation="allocated")
