@@ -1,0 +1,95 @@
+{% extends "web/reports/people.html" %}{% load ui i18n %}
+{% comment %}
+Стоимость труда (модуль 12 эталона): динамика ФОТ по месяцам, плитки и два
+разреза — по точкам и по группам. Каркас страницы — `people.html`.
+{% endcomment %}
+{% block people_body %}
+{% comment %}
+Плитка отвечает на вопрос, который иначе считают глазами по таблице. Под числом
+подписано, из чего оно посчитано: доля без базы врёт (эталон модуля 12).
+{% endcomment %}
+<section class="kpi">
+  {% for card in kpis %}
+  <div class="kpi__cell">
+    <div class="kpi__label">{{ card.label }}</div>
+    <div class="people-kpi__line">
+      <span class="kpi__value {{ card.value|numclass }}">{{ card.value }}</span>
+      {% if card.delta %}<span class="people-kpi__delta {{ card.delta_class }}">{{ card.delta }}</span>{% endif %}
+    </div>
+    <div class="kpi__about">{{ card.base }}</div>
+  </div>
+  {% endfor %}
+</section>
+
+{% if not revenue_known %}
+<p class="note">{% blocktranslate %}Выручки в продукте пока нет — она приедет с коннектором Dodo IS. До тех пор доля ФОТ от выручки показана прочерком: ноль в этой строке читался бы как посчитанный ответ.{% endblocktranslate %}</p>
+{% endif %}
+
+<h2>{% translate "Фонд оплаты труда по месяцам" %}</h2>
+<section class="chart">
+  {% for bar in bars %}
+  <div class="chart__row" data-month="{{ bar.code }}" data-payroll="{{ bar.value }}">
+    <div class="chart__month">{{ bar.month }} <span class="hint">{{ bar.sub }}</span></div>
+    <div class="chart__track"><div class="chart__fill" style="width: {{ bar.width }}%"></div></div>
+    <div class="chart__value {{ bar.value|numclass }}">{{ bar.value }}</div>
+  </div>
+  {% endfor %}
+</section>
+
+<h2>{% translate "По точкам" %}</h2>
+{% scroll %}<table class="report">
+  <thead>
+    <tr>
+      <th>{% translate "Точка" %}</th>
+      <th class="num">{% translate "ФОТ за период" %}</th>
+      <th class="num">{% translate "Часов" %}</th>
+      <th class="num">{% translate "Стоимость часа" %}</th>
+      <th class="num">{% translate "Людей" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in cost_rows %}
+    <tr data-unit="{{ row.code }}">
+      <td>{{ row.title }}</td>
+      <td class="num" data-payroll="{{ row.payroll }}">{{ row.payroll }}</td>
+      <td class="num num--muted">{{ row.hours }}</td>
+      <td class="num">{{ row.hour_cost }}</td>
+      <td class="num num--muted">{{ row.heads }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr data-unit="total">
+      <th>{% translate "Всего" %}</th>
+      <td class="num num--total" data-payroll="{{ cost_total.payroll }}">{{ cost_total.payroll }}</td>
+      <td class="num num--total">{{ cost_total.hours }}</td>
+      <td class="num num--total">{{ cost_total.hour_cost }}</td>
+      <td class="num num--total">{{ cost_total.heads }}</td>
+    </tr>
+  </tfoot>
+</table>{% endscroll %}
+
+<h2>{% translate "По группам" %}</h2>
+{% scroll %}<table class="report">
+  <thead>
+    <tr>
+      <th>{% translate "Группа" %}</th>
+      <th class="num">{% translate "ФОТ за период" %}</th>
+      <th class="num">{% translate "Часов" %}</th>
+      <th class="num">{% translate "Стоимость часа" %}</th>
+      <th class="num">{% translate "Людей" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in group_rows %}
+    <tr data-group="{{ row.code }}">
+      <td>{{ row.title }}</td>
+      <td class="num" data-payroll="{{ row.payroll }}">{{ row.payroll }}</td>
+      <td class="num num--muted">{{ row.hours }}</td>
+      <td class="num">{{ row.hour_cost }}</td>
+      <td class="num num--muted">{{ row.heads }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% endblock %}

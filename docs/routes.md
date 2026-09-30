@@ -80,6 +80,7 @@
 | `/invoices/<uuid:document_id>/pay/` | `invoice-pay` | `web.suppliers_views.invoice_pay` |
 | `/invoices/<uuid:document_id>/positions/` | `invoice-positions` | `web.suppliers_views.invoice_positions` |
 | `/invoices/new/` | `invoice-new` | `web.suppliers_views.invoice` |
+| `/labor-cost/` | `people-cost` | `web.people_views.cost_page` |
 | `/login/` | `login` | `web.views.login_page` |
 | `/logout/` | `logout` | `web.views.logout_page` |
 | `/papers/` | `papers` | `web.papers_views.paper_list` |
@@ -132,3 +133,5 @@
 | `/timesheets/<uuid:period_id>/insured/` | `timesheet-insured` | `timesheets.views.insured` |
 | `/timesheets/<uuid:period_id>/piece/` | `timesheet-piece` | `timesheets.views.piece` |
 | `/timesheets/<uuid:period_id>/reopen/` | `timesheet-reopen` | `timesheets.views.reopen` |
+| `/turnover/` | `people-churn` | `web.people_views.churn_page` |
+| `/work-hours/` | `people-hours` | `web.people_views.hours_page` |
