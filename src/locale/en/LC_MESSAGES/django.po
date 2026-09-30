@@ -4119,12 +4119,12 @@ msgstr ""
 msgid ""
 "Правила страны — общая база для всех партнёров этой страны, поэтому их ведёт "
 "не партнёр, а администратор платформы. Для себя любое из них можно "
-"переопределить формой ниже: правило страны от этого не меняется."
+"переопределить своей новой версией: правило страны от этого не меняется."
 msgstr ""
 "Country rules are the shared base for every partner in that country, so "
 "they're managed by the platform administrator, not the partner. You can "
-"override any of them for yourself using the form below — the country rule "
-"itself doesn't change."
+"override any of them for yourself with a new version of your own — the "
+"country rule itself doesn't change."
 
 #: web/rules_country.py:123
 msgid ""
@@ -7172,10 +7172,10 @@ msgstr "No one has overridden this rule."
 
 #: web/templates/web/rules/rule.html:143
 msgid ""
-"Значение приходит из правил страны. Первая же версия ниже станет "
+"Значение приходит из правил страны. Первая же новая версия станет "
 "переопределением — на том уровне и с той даты, которые вы укажете."
 msgstr ""
-"The value comes from the country rules. The first version below becomes an "
+"The value comes from the country rules. The first new version becomes an "
 "override — at the level and from the date you specify."
 
 #: web/templates/web/rules/rule.html:146
@@ -8424,17 +8424,12 @@ msgid "Выплаты"
 msgstr "Payouts"
 
 #: web/navigation.py
-msgid "Аналитика по людям"
-msgstr "People analytics"
-
-#: web/navigation.py
 msgid "Интеграция с Dodo IS"
 msgstr "Dodo IS integration"
 
 #: web/templates/web/planned.html
 msgid "Очередь: %(when)s"
 msgstr "Planned for: %(when)s"
-
 
 #: web/stages.py
 msgid "Карточки находок, готовность в процентах, подтверждение закрытия"
@@ -8444,17 +8439,13 @@ msgstr "Finding cards, readiness in percent, closing confirmation"
 msgid "Консолидация сети в EUR по курсу на конец периода"
 msgstr "Network consolidation in EUR at the period-end rate"
 
-
 #: web/stages.py
 msgid "Приглашение человека, история доступов, настраиваемые наборы прав"
 msgstr "Inviting a person, access history, configurable permission sets"
 
-
-
 #: web/stages.py
 msgid "Именованные надбавки и вилка ставки должности"
 msgstr "Named allowances and a rate range for the position"
-
 
 #: web/stages.py
 msgid "Шестая очередь продуктовой карты"
@@ -8506,8 +8497,7 @@ msgid ""
 "  не дотягивает, и рядом написано, чего именно не хватает. «Разработка в\n"
 "  процессе» — экрана ещё нет, а вместо него страница с описанием, что "
 "здесь\n"
-"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» "
-"и\n"
+"  будет: так устроены «Банковская выписка», «Выплаты» и\n"
 "  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в левой панели, и "
 "плашкой\n"
 "  наверху самого экрана. Раздел без пометки готов."
@@ -8516,7 +8506,7 @@ msgstr ""
 "yet match what was designed, and the note beside it says what exactly is "
 "missing. “In development” means the screen does not exist yet — instead "
 "there is a page describing what will be here: that is how “Bank statement”, "
-"“Payouts”, “People analytics” and “Dodo IS integration” work. The mark "
+"“Payouts” and “Dodo IS integration” work. The mark "
 "appears both as a dot next to the item in the left panel and as a banner at "
 "the top of the screen itself. A section without a mark is ready."
 
@@ -8570,14 +8560,6 @@ msgid ""
 "и рядом с заданной это дало бы не те проценты, которые вы имели в виду. "
 "Оставьте все доли пустыми — поделится поровну."
 msgstr "Shares are set either for all chosen units or for none of them. Right now %(named)s has a share, but %(silent)s does not: an empty share counts as one, and next to a share you did set, that would give percentages you did not mean. Leave all shares empty — the split will be even."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у "
-"всех отмеченных точек сразу: пустая доля считается единицей, и рядом с "
-"0,7 это дало бы не те проценты, которые вы имели в виду. Не отмечено ни "
-"одной точки — человек работает на всю сеть."
-msgstr "Shares can be left unset entirely — then the split is even. If you do set them, set them for all checked units at once: an empty share counts as one, and next to 0.7 that would give percentages you did not mean. No unit is checked — the person works for the whole network."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Доля"
@@ -8641,26 +8623,12 @@ msgid "Сохранить точки"
 msgstr "Save units"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Точек у человека не осталось — с этой даты он работает на всю сеть. Его "
-"затраты пойдут на разнесение общим правилом, как расход юрлица, а не на "
-"одну пиццерию."
-msgstr "The person has no units left — from this date they work for the whole network. Their costs will go to allocation by the general rule, like a legal-entity expense, rather than to one pizzeria."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Точки действуют с"
 msgstr "Units effective from"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Точки не заданы."
 msgstr "Units not set."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Точки нет и в условиях найма — значит человек работает на всю сеть. Его "
-"затраты уходят на разнесение общим правилом, как расход юрлица, а не на "
-"одну пиццерию."
-msgstr "There is no unit in the employment terms either — so the person works for the whole network. Their costs go to allocation by the general rule, like a legal-entity expense, rather than to one pizzeria."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
@@ -8718,6 +8686,22 @@ msgstr "Who changes it"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Попытки выйти за рамку"
 msgstr "Attempts to go beyond the frame"
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "← К правилу"
+msgstr "← To the rule"
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Значения, которые рамка страны не пропустила. Свежие сверху."
+msgstr "Values the country frame did not let through. Newest first."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Попыток не было."
+msgstr "No attempts."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Никто не пробовал поставить этому правилу значение за рамкой страны."
+msgstr "Nobody has tried to set this rule to a value outside the country frame."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Поставить можно столько же или больше."
@@ -8815,6 +8799,58 @@ msgstr "This value cannot be compared with the country frame (%(source)s): it is
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
+msgid "делится: %(codes)s"
+msgstr "split across: %(codes)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "«Вся сеть» задаёт тот, кому видны все точки партнёра."
+msgstr "\"Entire network\" can only be set by someone who sees all of the partner's units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вся сеть — затраты делятся между всеми точками поровну"
+msgstr "Entire network — costs are split evenly across all units"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у "
+"всех отмеченных точек сразу: пустая доля считается единицей, и рядом с "
+"0,7 это дало бы не те проценты, которые вы имели в виду."
+msgstr "Shares can be left unset entirely — then the split is even. If you do set them, set them for all checked units at once: an empty share counts as one, and next to 0.7 that would give percentages you did not mean."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Не отмечено ни одной точки. Отметьте точки, между которыми делятся "
+"затраты на человека, или «Вся сеть», если он работает на всех."
+msgstr "No unit is checked. Check the units the person's costs are split between, or \"Entire network\" if they work for all of them."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмечены и «Вся сеть», и отдельные точки. Выберите что-то одно: человек "
+"либо работает на всю сеть, либо на отмеченные точки."
+msgstr "Both \"Entire network\" and individual units are checked. Choose one: the person works either for the whole network or for the checked units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"С этой даты человек работает на всю сеть: его затраты делятся между "
+"всеми точками поровну, где бы ни стояла его строка табеля."
+msgstr "From this date the person works for the whole network: their costs are split evenly across all units, wherever their timesheet row is."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Точки нет и в условиях найма — затраты идут на ту точку, где стоит его "
+"строка табеля. Если человек работает на всех, отметьте ниже «Вся сеть»: "
+"тогда затраты разделятся между всеми точками."
+msgstr "There is no unit in the employment terms either — costs go to the unit where their timesheet row is. If the person works for all units, check \"Entire network\" below: then costs will be split across all of them."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "делится между всеми точками партнёра поровну"
+msgstr "split evenly across all of the partner's units"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "целиком на %(code)s"
+msgstr "all to %(code)s"
+
 msgid "%(person)s — %(hours)s ч на %(money)s"
 msgstr "%(person)s — %(hours)s h worth %(money)s"
 
@@ -8858,6 +8894,10 @@ msgstr "Base"
 msgid "Без группы"
 msgstr "No group"
 
+#: src/web/templates/web/reports/people_hours.html
+msgid "Переработок нет"
+msgstr "No overtime"
+
 #: новые строки, добавлены tools/apply_translations.py
 msgid "В этом месяце никто не вышел за свою норму часов."
 msgstr "No one went over their hours standard this month."
@@ -8880,6 +8920,10 @@ msgstr "Payroll cost's share of revenue: waiting for the Dodo IS connector"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Доля в часах месяца"
 msgstr "Share of the month's hours"
+
+#: src/web/templates/web/reports/people_churn.html
+msgid "Увольнений не было"
+msgstr "No leavers"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "За показанные месяцы никто не уволился."
@@ -9015,10 +9059,6 @@ msgstr "Hours over standard"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Часы и переработки"
 msgstr "Hours and overtime"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Что показать"
-msgstr "What to show"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
@@ -9181,3 +9221,28 @@ msgstr "Enter the country as a two-letter Latin code, for example RS."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Этой роли у человека нет."
 msgstr "This person does not hold this role."
+
+msgid ""
+"Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
+"«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
+"утверждён — сообщите администратору продукта."
+msgstr "Payroll of network-wide employees was not allocated to units: there is no allocation rule for the \"Payroll\" and \"Payroll taxes\" lines. The month was not approved — tell the product administrator."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Утвердить месяц может только тот, кому видны все точки и все регистры "
+"партнёра: зарплата переносится в P&L целиком, и по части сети она легла "
+"бы не на те точки."
+msgstr "Only someone who sees all of the partner's units and ledgers can approve the month: payroll is carried into the P&L as a whole, and from part of the network it would land on the wrong units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У сотрудника доли всех точек нулевые — зарплату не на что разделить. "
+"Задайте доли на карточке сотрудника."
+msgstr "All unit shares of this employee are zero, so the salary cannot be split. Set the shares on the employee card."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Набор точек этого сотрудника меняет роль, которой видны все точки "
+"партнёра. Обратитесь к оперативному директору или бухгалтеру."
+msgstr "The units of this employee can only be changed by a role that sees all of the partner's units. Contact the operations director or the accountant."

@@ -177,7 +177,7 @@
 
 ## Модуль 17 — Правила страны
 
-Продукт: `web/rules/index.html`, `rule.html`, `src/payroll/presets/*.yaml`, `core/rules.py`.
+Продукт: `web/rules/index.html`, `rule.html` (карточка), `rule_new.html` (новая версия), `rule_attempts.html` (попытки выйти за рамку), `src/payroll/presets/*.yaml`, `core/rules.py`.
 
 | Что в эталоне | Вердикт | Подробности |
 |---|---|---|

@@ -1,0 +1,103 @@
+{% extends "web/reports/people.html" %}{% load ui i18n %}
+{% comment %}
+Кто уходит (модуль 12 эталона): движение людей, текучесть с базой рядом и
+ушедшие поимённо. Каркас страницы — `people.html`.
+{% endcomment %}
+{% block people_body %}
+<p class="sub">{{ churn_meta }}</p>
+
+{% comment %}
+Предупреждение стоит ПЕРЕД таблицами, а не под ними: человек, прочитавший
+проценты, уже сделал вывод, и оговорка после него не работает.
+{% endcomment %}
+{% translate "Проценты здесь считаются от единиц людей" as small %}
+{% notice "alert" title=small %}{% blocktranslate with base=min_base %}Один лишний уход сдвигает показатель на несколько пунктов. Поэтому рядом с процентом всегда стоит база, а там, где база меньше {{ base }} человек, процента нет вовсе — стоит «мало данных».{% endblocktranslate %}{% endnotice %}
+
+<h2>{% translate "По точкам" %}</h2>
+{% scroll %}<table class="report">
+  <thead>
+    <tr>
+      <th>{% translate "Точка" %}</th>
+      <th class="num">{% translate "Приняли" %}</th>
+      <th class="num">{% translate "Ушли" %}</th>
+      <th class="num">{% translate "Текучесть" %}</th>
+      <th class="num">{% translate "База" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in churn_rows %}
+    <tr data-unit="{{ row.code }}">
+      <td>{{ row.title }}</td>
+      <td class="num num--muted">{{ row.hired }}</td>
+      <td class="num">{{ row.left }}</td>
+      <td class="num" data-turnover="{{ row.turnover }}">{% if row.enough %}{{ row.turnover }}{% else %}<span class="hint">{% translate "мало данных" %}</span>{% endif %}</td>
+      <td class="num num--muted">{{ row.base }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr data-unit="total">
+      <th>{% translate "Всего" %}</th>
+      <td class="num num--total">{{ churn_total.hired }}</td>
+      <td class="num num--total">{{ churn_total.left }}</td>
+      <td class="num num--total" data-turnover="{{ churn_total.turnover }}">{% if churn_total.enough %}{{ churn_total.turnover }}{% else %}<span class="hint">{% translate "мало данных" %}</span>{% endif %}</td>
+      <td class="num num--total">{{ churn_total.base }}</td>
+    </tr>
+  </tfoot>
+</table>{% endscroll %}
+
+<p class="note">{% blocktranslate %}Текучесть считается как ушедшие за показанные месяцы к средней численности за них же. Переводы между точками уходом не считаются: уход — это увольнение, а перевод меняет только условия найма.{% endblocktranslate %}</p>
+
+<h2>{% translate "По группам" %}</h2>
+{% scroll %}<table class="report">
+  <thead>
+    <tr>
+      <th>{% translate "Группа" %}</th>
+      <th class="num">{% translate "Сейчас" %}</th>
+      <th class="num">{% translate "Ушли" %}</th>
+      <th class="num">{% translate "Текучесть" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in churn_groups %}
+    <tr data-group="{{ row.code }}">
+      <td>{{ row.title }}</td>
+      <td class="num num--muted">{{ row.heads }}</td>
+      <td class="num">{{ row.left }}</td>
+      <td class="num" data-turnover="{{ row.turnover }}">{% if row.enough %}{{ row.turnover }}{% else %}<span class="hint">{% blocktranslate with base=row.base %}мало данных · база {{ base }}{% endblocktranslate %}</span>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+
+<h2>{% translate "Ушли за показанные месяцы" %}</h2>
+{% if leavers %}
+<p class="sub">{% translate "поимённо — пока их можно назвать по именам" %}</p>
+{% scroll %}<table class="report">
+  <thead>
+    <tr>
+      <th>{% translate "Человек" %}</th>
+      <th>{% translate "Группа" %}</th>
+      <th>{% translate "Точка" %}</th>
+      <th class="num">{% translate "Отработал" %}</th>
+      <th>{% translate "Ушёл" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in leavers %}
+    <tr>
+      <td>{{ row.name }}</td>
+      <td>{{ row.group }}</td>
+      <td>{{ row.unit }}</td>
+      <td class="num">{{ row.tenure }}</td>
+      <td>{{ row.left }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+<p class="note">{% blocktranslate with tenure=avg_tenure %}Средний срок работы ушедших: {{ tenure }}{% endblocktranslate %}</p>
+{% else %}
+{% translate "Увольнений не было" as no_leavers %}
+{% notice "empty" title=no_leavers %}{% translate "За показанные месяцы никто не уволился." %}{% endnotice %}
+{% endif %}
+{% endblock %}

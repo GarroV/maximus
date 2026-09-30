@@ -1,0 +1,41 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Отвергнутые рамкой попытки по одному правилу — своей страницей (T227, D081).
+Эталон модуля 17 объясняет, зачем они на экране: «Отказ, который никуда не
+записан, повторят завтра» — это след для аудита, а не защита от дурака.
+
+С карточки правила сюда ведёт ссылка только тогда, когда в журнале есть строки.
+Пришедший по адресу напрямую при пустом журнале видит спокойное «попыток не
+было», а не пустую таблицу.
+{% endcomment %}
+{% block title %}{% translate "Попытки выйти за рамку" %} · {{ heading }}{% endblock %}
+{% block content %}
+<p class="back"><a href="{{ back_url }}">{% translate "← К правилу" %}</a></p>
+<h1>{% translate "Попытки выйти за рамку" %}</h1>
+<p class="sub"><code>{{ heading }}</code> · {% translate "Значения, которые рамка страны не пропустила. Свежие сверху." %}</p>
+{% if attempts %}
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Когда" %}</th>
+      <th>{% translate "Кто" %}</th>
+      <th>{% translate "Уровень" %}</th>
+      <th>{% translate "Ставили" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for attempt in attempts %}
+    <tr>
+      <td>{{ attempt.at }}</td>
+      <td>{{ attempt.who }}</td>
+      <td>{{ attempt.level }}</td>
+      <td class="{{ attempt.wanted|numclass }}">{{ attempt.wanted }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% else %}
+{% translate "Попыток не было." as no_attempts %}
+{% notice "empty" title=no_attempts %}{% translate "Никто не пробовал поставить этому правилу значение за рамкой страны." %}{% endnotice %}
+{% endif %}
+{% endblock %}

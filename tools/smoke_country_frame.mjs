@@ -71,7 +71,7 @@ async function visit(url, ready, seconds = 20) {
  * ожиданием новой страницы, что и у `visit()`: POST через форму тоже
  * навигация, и той же болезни (#206) подвержена та же лечёба. */
 async function clickAndWait(buttonText, ready, seconds = 20) {
-  const finder = `[...document.querySelectorAll("button")]
+  const finder = `[...document.querySelectorAll("button, a.btn, main a")]
       .find(b => b.textContent.includes(${JSON.stringify(buttonText)}))`;
   await clickOn(finder, `кнопка «${buttonText}»`);
   for (let i = 0; i < seconds * 4; i++) {
@@ -239,6 +239,8 @@ await visit(
 
 // --- 4. Мягче страны — отказ словами --------------------------------------------
 
+// Форма новой версии — своей страницей (T227): с карточки её открывает кнопка.
+await clickAndWait("Завести версию", `!!document.querySelector("#valid_from")`);
 await fillFields({ valid_from: "2026-09-01", value: "1.10" });
 await clickAndWait(
   "Завести версию",
@@ -275,19 +277,25 @@ check("шапка называет роль вошедшего admin", !!adminWh
 // страницы служит не сам заголовок журнала, а исчезновение баннера отказа
 // («Не сохранено.» рисуется только у `{% if error %}`, а обычный GET его не
 // несёт) вместе с журналом.
+// Журнал — своей страницей (T227); на карточке — ссылка с числом попыток.
 await visit(
   `${APP}/rules/${NIGHT}/`,
-  `!document.body.innerText.includes("Не сохранено.") &&
-   document.body.innerText.includes("Попытки выйти за рамку")`,
+  `document.body.innerText.includes("Попытки выйти за рамку: 1")`,
+);
+check("на карточке — ссылка на журнал с числом попыток", true);
+await clickAndWait(
+  "Попытки выйти за рамку: 1",
+  `document.body.innerText.includes("Свежие сверху")`,
 );
 page = await text();
-check("после перезагрузки виден заголовок «Попытки выйти за рамку»", page.includes("Попытки выйти за рамку"));
+check("журнал открылся своей страницей", page.includes("Попытки выйти за рамку"));
 check("в журнале — отвергнутое значение 1.1", page.includes("1.1"));
 check("в журнале назван автор попытки", adminWho.length > 0 && page.includes(adminWho), adminWho);
 await shot("frame-attempts", "Попытки выйти за рамку");
 
 // --- 7. Строже страны — проходит -------------------------------------------------
 
+await visit(`${APP}/rules/${NIGHT}/new/`, `!!document.querySelector("#valid_from")`);
 await fillFields({ valid_from: "2026-09-01", value: "1.40" });
 // Успешная правка уводит редиректом на список: `_back_to_list` возвращает на
 // `/rules/`, а у карточки правила такой метки (label поля даты) нет вовсе —
@@ -303,10 +311,15 @@ check("строгая правка легла в rule_overrides", overrides === 
 
 await visit(
   `${APP}/rules/${GUARANTEE}/`,
-  `document.body.innerText.includes("Это правило не переопределяется.")`,
+  `document.body.innerText.includes("Кто меняет")`,
 );
 page = await text();
 check("у запертого правила нет кнопки «Завести версию»", !page.includes("Завести версию"));
+await visit(
+  `${APP}/rules/${GUARANTEE}/new/`,
+  `document.body.innerText.includes("Это правило не переопределяется.")`,
+);
+page = await text();
 check("вместо формы — «Это правило не переопределяется»", page.includes("Это правило не переопределяется."));
 check("назван источник запрета", page.includes("Закон о раду, чл. 111"));
 // Пустая история переопределений у запертого правила не должна звать к
@@ -314,7 +327,7 @@ check("назван источник запрета", page.includes("Закон 
 // версию ниже», хотя ставить её было нечем.
 check(
   "пустая история не зовёт к форме, которой у запертого правила нет",
-  !page.includes("Первая же версия ниже"),
+  !page.includes("Первая же новая версия"),
 );
 await shot("frame-locked", "Это правило не переопределяется.");
 

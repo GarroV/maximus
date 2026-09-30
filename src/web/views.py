@@ -37,6 +37,7 @@ from core.models import (
     Tenant,
     Timesheet,
 )
+from core.people_units import units_note
 
 # Демо спрашивают ровно об одном: показывать ли путь внутрь (T160).
 # Импортируется `demo.access`, а не `demo.views`: тот сам зовёт `web.auth`, и
@@ -561,6 +562,12 @@ def period_page(
                     {
                         "employee": row.employee,
                         "unit": row.unit,
+                        # Куда идут деньги этого человека (D055, T221): колонка
+                        # называет точку строки, подпись — что сумма делится
+                        # между несколькими точками или уходит на всю сеть.
+                        # Слова берутся здесь по тому же доводу, что и названия
+                        # групп колонок выше.
+                        "units_note": units_note(row.cost_units, row.unit),
                         "ledger": ledger_title(row.ledger),
                         "cells": [
                             money(row.amounts.get(column.code)) for column in sheet.columns

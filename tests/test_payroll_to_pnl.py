@@ -73,9 +73,14 @@ def test_the_amount_matches_the_payslips(client, sql, calculated):  # noqa: F811
     login_as(client, "director")
     approve(client, calculated)
 
+    # Разнесённая строка (`split`) не считается: её сумма уже лежит в дочерних
+    # строках по точкам. Посчитанная вместе с ними, она удваивала бы ФОТ офиса —
+    # проверка краснела бы на правильных данных, как только в месяце есть
+    # человек на «вся сеть» (D085).
     in_facts = sql.execute(
         """select coalesce(sum(-amount), 0) from facts
-            where dedup_key like 'payrun:%%' and superseded_at is null"""
+            where dedup_key like 'payrun:%%' and superseded_at is null
+              and allocation <> 'split'"""
     ).fetchone()[0]
     in_payslips = sql.execute(
         """select coalesce(sum(t.total_cost), 0) from payslip_totals t
