@@ -814,3 +814,20 @@ def pay_component(conn, *, ledger: str, amount: str = "1000.00", code: str = "ho
            values (%s, %s, %s, %s, %s, %s) returning id""",
         (tenant, payslip_id, code, "Часы", amount, ledger),
     ).fetchone()[0]
+
+
+@pytest.fixture(autouse=True)
+def _default_language_after_test():
+    """Язык потока возвращается к языку по умолчанию после каждого теста.
+
+    Запрос тестового клиента с `django_language=en` включает английский через
+    `LocaleMiddleware` и не выключает его: язык живёт в потоке, а поток у всех
+    тестов один. Без этого тест, идущий после i18n-тестов, видел английские
+    названия и падал только в таком порядке (#266).
+    """
+    yield
+    try:
+        from django.utils import translation
+    except ImportError:
+        return
+    translation.deactivate()
