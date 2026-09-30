@@ -106,7 +106,8 @@ def months(chosen: dict, *, base: str, query: dict) -> dict:
     return {
         "name": "period",
         "choices": [
-            {"title": month_title(before[0]), "selected": False, "url": link(before), "rel": "prev"},
+            {"title": month_title(before[0]), "selected": False,
+             "url": link(before), "rel": "prev"},
             {"title": current, "selected": True, "url": "", "rel": ""},
             {"title": month_title(after[0]), "selected": False, "url": link(after), "rel": "next"},
         ],
