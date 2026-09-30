@@ -165,12 +165,11 @@ main:focus { outline: none; }
 .sidenav__stage { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; }
 .sidenav__stage--refining { background: var(--warn-mark); }
 .sidenav__stage--planned { background: var(--accent); }
-/* Легенда точек (issue #268) — под последней группой, мелко и тише
-   подписей групп: она поясняет, а не называет раздел. Прокручивается вместе
-   со списком, места в подвале не занимает. */
+/* Легенда точек (issue #268) — первой строкой подвала, мелко и тише
+   подписей групп: она поясняет, а не называет раздел. */
 .sidenav__legend {
   display: flex; flex-wrap: wrap; gap: 0 var(--space-5);
-  margin: var(--space-3) 0 0; padding: 0 var(--space-5);
+  margin: 0 0 var(--space-2); padding: 0 var(--space-5);
   list-style: none;
   font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-3);
 }
@@ -224,8 +223,8 @@ main:focus { outline: none; }
   background:
     linear-gradient(var(--surface-2) 30%, transparent) center top / 100% 32px no-repeat local,
     linear-gradient(transparent, var(--surface-2) 70%) center bottom / 100% 32px no-repeat local,
-    radial-gradient(farthest-side at 50% 0, color-mix(in srgb, var(--ink) 16%, transparent), transparent) center top / 100% 12px no-repeat scroll,
-    radial-gradient(farthest-side at 50% 100%, color-mix(in srgb, var(--ink) 16%, transparent), transparent) center bottom / 100% 12px no-repeat scroll;
+    linear-gradient(color-mix(in srgb, var(--ink) 10%, transparent), transparent) center top / 100% 10px no-repeat scroll,
+    linear-gradient(transparent, color-mix(in srgb, var(--ink) 10%, transparent)) center bottom / 100% 10px no-repeat scroll;
 }
 
 /* Тема и язык одной строкой, подписи групп — только диктору. */
@@ -1075,6 +1074,14 @@ th {
   font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro);
   color: var(--ink-2); font-weight: var(--w-semibold);
 }
+/* Подпись числовой колонки — подпись, а не число. Класс `.num` ядра ставит
+   ячейке шрифт цифр целиком (`font: var(--num)`), и в шапке правые
+   колонки («ЧАСЫ», «ФОТ») выходили крупнее и тоньше левых — шапка читалась
+   двумя гарнитурами (сверка T223). Выравнивание по правому краю остаётся. */
+th.num {
+  font-family: var(--font-ui); font-size: var(--fs-micro); font-weight: var(--w-semibold);
+  line-height: inherit; color: var(--ink-2); font-variant-numeric: normal;
+}
 /* Шапка таблицы залита целиком, как `.table thead th` эталона. Раньше фон
    был только у первой колонки там, где её закрепляли (аналитика по людям),
    и шапка читалась как одна серая ячейка и строка текста (issue #268). */
@@ -1107,8 +1114,8 @@ tfoot td, tfoot th { font-weight: var(--w-semibold); border-top: 2px solid var(-
   background:
     linear-gradient(to right, var(--surface) 30%, transparent) left / 24px 100% no-repeat local,
     linear-gradient(to left, var(--surface) 30%, transparent) right / 24px 100% no-repeat local,
-    linear-gradient(to right, color-mix(in srgb, var(--ink) 22%, transparent), transparent) left / 14px 100% no-repeat scroll,
-    linear-gradient(to left, color-mix(in srgb, var(--ink) 22%, transparent), transparent) right / 14px 100% no-repeat scroll,
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 12%, transparent), transparent) left / 12px 100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in srgb, var(--ink) 12%, transparent), transparent) right / 12px 100% no-repeat scroll,
     var(--surface);
 }
 /* Таблица внутри прозрачна, иначе её белый фон закрыл бы тень. Липкие
