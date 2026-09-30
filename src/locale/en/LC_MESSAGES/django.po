@@ -9371,3 +9371,16 @@ msgstr "The legal entity of these rows has no unit that you manage."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "разнесена по точкам — доли сохранятся"
 msgstr "split across units — the shares will be kept"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Среди долей есть точка, на которую эту накладную разнести нельзя: "
+"делится она только на точки своего юрлица, которые вы ведёте."
+msgstr "One of the shares is on a unit this delivery note cannot be split to: it is split only across the units of its own legal entity that you manage."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из "
+"пачки не записано — откройте инбокс заново."
+msgstr "The row “%(what)s” was not split: it has already been split or sorted out. Nothing from the batch was saved — open the inbox again."

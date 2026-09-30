@@ -239,3 +239,102 @@ def test_the_manager_cannot_split_from_the_inbox(
     assert answer.status_code in (403, 404), answer.status_code
     login_as(client, "accountant")
     assert shares_of(sql, "SPL-9") == {}
+
+
+# --- разбор денег после ревизии (M1–M3, L1) -----------------------------------
+
+
+def test_a_share_on_a_unit_that_is_not_offered_is_refused(
+    client, sql, counterparty, units, invoices_removed,  # noqa: F811
+):
+    """Доля на точке, которой нет среди предложенных, — отказ словами.
+
+    База молча выбрасывала такую долю и нормировала остальные: 60% на BG1 и 40%
+    на выдуманный номер давали всю сумму на BG1 с ответом «разнесено».
+    """
+    import uuid
+
+    login_as(client, "accountant")
+    fact_id = network_invoice(client, sql, counterparty, units, "SPL-10")
+    answer = client.post("/expenses/split/", {
+        "fact": fact_id, f"share:{units['BG1']}": "60", f"share:{uuid.uuid4()}": "40",
+    })
+    assert answer.status_code == 400, answer.status_code
+    assert "точк" in body(answer).lower()
+    assert shares_of(sql, "SPL-10") == {}, "доля на чужой точке молча ушла на другие"
+
+
+def test_the_batch_refuses_a_share_on_a_unit_that_is_not_offered(
+    client, sql, counterparty, units, invoices_removed,  # noqa: F811
+):
+    """Пачка наследует ту же проверку: ничего не разнесено."""
+    import uuid
+
+    login_as(client, "accountant")
+    fact_id = network_invoice(client, sql, counterparty, units, "SPL-11")
+    answer = client.post("/inbox/split/", {
+        "facts": [fact_id], "apply": "1",
+        f"share:{units['BG1']}": "60", f"share:{uuid.uuid4()}": "40",
+    })
+    assert answer.status_code == 400, answer.status_code
+    assert shares_of(sql, "SPL-11") == {}
+
+
+def test_a_batch_line_that_writes_nothing_rolls_the_batch_back(
+    client, sql, counterparty, units, invoices_removed, monkeypatch,  # noqa: F811
+):
+    """Ноль записанных строк — не успех: пачка откатывается целиком и говорит словами."""
+    from web import cash as cash_module
+
+    login_as(client, "accountant")
+    first = network_invoice(client, sql, counterparty, units, "SPL-12")
+    second = network_invoice(client, sql, counterparty, units, "SPL-13")
+    real = cash_module.split_by_hand
+    monkeypatch.setattr(cash_module, "split_by_hand",
+                        lambda fact_id, shares, actor: 0 if str(fact_id) == second
+                        else real(fact_id, shares, actor))
+
+    answer = client.post("/inbox/split/", {"facts": [first, second], "evenly": "1",
+                                           "apply": "1"})
+    assert answer.status_code in (400, 409), answer.status_code
+    assert shares_of(sql, "SPL-12") == {}, "пачка разнесена наполовину"
+
+
+def test_a_split_credit_note_is_sorted_out_with_its_shares(
+    client, sql, counterparty, units, item, invoices_removed,  # noqa: F811
+):
+    """Кредит-нота (отрицательная сумма), разнесённая по точкам, разбирается с долями.
+
+    Веса долей отрицательные, а база берёт только положительные — разбор всегда
+    получал отказ с ложной причиной «часть точек вам не видна».
+    """
+    login_as(client, "accountant")
+    fact_id = network_invoice(client, sql, counterparty, units, "SPL-14")
+    sql.execute("update facts set amount = -24000 where id = %s", (fact_id,))
+    answer = client.post("/expenses/split/", {"fact": fact_id, "evenly": "1"})
+    assert answer.status_code == 302, body(answer)[:300]
+    before = shares_of(sql, "SPL-14")
+    assert before and all(amount < 0 for amount, _c in before.values()), before
+
+    answer = client.post(f"/inbox/{fact_id}/classify/", {"item": item})
+    assert "failed" not in answer["Location"], "кредит-ноту разобрать не дали"
+    after = shares_of(sql, "SPL-14")
+    assert {u: a for u, (a, _c) in after.items()} == {u: a for u, (a, _c) in before.items()}
+    assert counted(sql, "SPL-14") == Decimal("-24000.00")
+
+
+def test_a_refused_sort_leaves_no_memory_of_the_supplier(
+    client, sql, item, split_row, monkeypatch,  # noqa: F811
+):
+    """Разбор отказан — «поставщик → статья» не запоминается: строка не разобрана."""
+    from web import cash as cash_module
+
+    fact_id, _before = split_row
+    sql.execute("delete from classification_rules")
+    monkeypatch.setattr(cash_module, "split_by_hand", lambda *args: None)
+
+    answer = client.post(f"/inbox/{fact_id}/classify/", {"item": item})
+    assert "failed" in answer["Location"], "предохранитель: отказа не было"
+    assert sql.execute("select count(*) from classification_rules").fetchone()[0] == 0, (
+        "отказанный разбор оставил подсказку"
+    )

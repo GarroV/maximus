@@ -9209,3 +9209,16 @@ msgstr "Pravno lice ovih redova nema nijedan objekat koji vodite."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "разнесена по точкам — доли сохранятся"
 msgstr "raspoređeno po objektima — udeli će se sačuvati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Среди долей есть точка, на которую эту накладную разнести нельзя: "
+"делится она только на точки своего юрлица, которые вы ведёте."
+msgstr "Među udelima je objekat na koji se ova otpremnica ne može rasporediti: deli se samo na objekte svog pravnog lica koje vodite."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из "
+"пачки не записано — откройте инбокс заново."
+msgstr "Red „%(what)s“ nije raspoređen: već je raspoređen ili razvrstan. Ništa iz grupe nije sačuvano — ponovo otvorite prijemno sanduče."

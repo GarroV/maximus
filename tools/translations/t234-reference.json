@@ -50,5 +50,13 @@
   "разнесена по точкам — доли сохранятся": {
     "en": "split across units — the shares will be kept",
     "sr": "raspoređeno po objektima — udeli će se sačuvati"
+  },
+  "Среди долей есть точка, на которую эту накладную разнести нельзя: делится она только на точки своего юрлица, которые вы ведёте.": {
+    "en": "One of the shares is on a unit this delivery note cannot be split to: it is split only across the units of its own legal entity that you manage.",
+    "sr": "Među udelima je objekat na koji se ova otpremnica ne može rasporediti: deli se samo na objekte svog pravnog lica koje vodite."
+  },
+  "Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из пачки не записано — откройте инбокс заново.": {
+    "en": "The row “%(what)s” was not split: it has already been split or sorted out. Nothing from the batch was saved — open the inbox again.",
+    "sr": "Red „%(what)s“ nije raspoređen: već je raspoređen ili razvrstan. Ništa iz grupe nije sačuvano — ponovo otvorite prijemno sanduče."
   }
 }
