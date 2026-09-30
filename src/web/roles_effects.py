@@ -66,4 +66,6 @@ def role_effects(held_ids: list[str], roles: list) -> dict:
          "gains": _words(_abilities(role) - has)}
         for role in roles if str(role.pk) not in {str(h.pk) for h in held}
     ]
-    return {"now": _words(has), "loses": loses, "offers": offers}
+    # «Чего не даёт» — как в эталоне: всё, чего нет ни в одной роли человека.
+    return {"now": _words(has), "cannot": _words(set(_ORDER) - has),
+            "loses": loses, "offers": offers}

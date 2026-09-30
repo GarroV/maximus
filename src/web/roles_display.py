@@ -74,6 +74,16 @@ _SHORT = {
 }
 _SHORT_LETTERS = 3
 
+# Подпись под сокращением — кто это обычно, как в эталоне («партнёр»,
+# «бухгалтер», «точка»). У роли, заведённой партнёром, подписи нет: угадывать
+# за него, кто её носит, продукт не берётся.
+_NOTE = {
+    "admin": gettext_noop("партнёр"),
+    "director": gettext_noop("директор"),
+    "accountant": gettext_noop("бухгалтер"),
+    "manager": gettext_noop("точка"),
+}
+
 
 def role_short(code: str, title: str) -> str:
     """Сокращение роли: своё у ролей продукта, у роли партнёра — первые буквы."""
@@ -129,7 +139,9 @@ def rights_matrix(roles: list) -> dict:
     """Сетка «право × роль» для экрана прав: столбцы и группы строк."""
     roles = sorted(roles, key=_column_key)
     columns = [
-        {**role_choice(role), "short": role_short(role.code, role.title)} for role in roles
+        {**role_choice(role), "short": role_short(role.code, role.title),
+         "note": _(_NOTE[role.code]) if role.code in _NOTE else ""}
+        for role in roles
     ]
     groups = [
         {"title": _(title), "rows": [_right_row(code, columns, roles) for code in codes]}

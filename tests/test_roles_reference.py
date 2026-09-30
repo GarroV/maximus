@@ -179,3 +179,12 @@ def test_a_formula_in_a_reason_does_not_run_in_the_spreadsheet(client, web_env):
 def test_the_export_is_refused_to_whoever_does_not_lead_roles(client, web_env):
     login_as(client, "manager")
     assert client.get("/roles/history/export/").status_code == 403
+
+
+def test_the_person_page_says_what_the_roles_do_not_give(client, web_env):
+    """Как в эталоне — «чего не даёт»: у бухгалтера нет ведения ролей."""
+    login_as(client, "admin")
+    html = _person_page(client, "Бухгалтер")
+    cannot = re.search(r"Не может:([^<]*)</p>", html)
+    assert cannot and "Ведение ролей" in cannot.group(1)
+    assert "Расчёт периода" not in cannot.group(1)

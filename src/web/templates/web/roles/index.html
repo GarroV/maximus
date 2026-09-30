@@ -23,7 +23,7 @@
 <p class="sub">{% blocktranslate %}Роль — это набор прав, а человеку можно дать несколько ролей сразу. Так бухгалтер, который ведёт весь проект, становится ещё и администратором, а там, где это разные люди, разделение обязанностей остаётся.{% endblocktranslate %}</p>
 
 <p class="note under matrix-legend">
-  <span><input type="checkbox" checked disabled aria-hidden="true"> {% translate "право выдано — партнёр выдаёт и снимает его сам" %}</span>
+  <span><input type="checkbox" checked tabindex="-1" aria-hidden="true"> {% translate "право выдано — партнёр выдаёт и снимает его сам" %}</span>
   <span><span class="wall">–</span> {% translate "у этой роли такого права не бывает: нужны права старшей роли — человеку выдают старшую роль" %}</span>
 </p>
 <p class="note matrix-legend">{% for column in columns %}<span><b>{{ column.short }}</b> — {{ column.title }}</span>{% endfor %}</p>
@@ -33,7 +33,7 @@
   <thead>
     <tr>
       <th scope="col" class="matrix-right">{% translate "Право" %}</th>
-      {% for column in columns %}<th scope="col" title="{{ column.title }}" data-role="{{ column.code }}" data-role-id="{{ column.id }}">{{ column.short }}</th>{% endfor %}
+      {% for column in columns %}<th scope="col" title="{{ column.title }}" data-role="{{ column.code }}" data-role-id="{{ column.id }}">{{ column.short }}{% if column.note %}<small>{{ column.note }}</small>{% endif %}</th>{% endfor %}
     </tr>
   </thead>
   <tbody>
