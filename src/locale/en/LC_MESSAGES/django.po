@@ -8617,14 +8617,6 @@ msgid ""
 msgstr "Shares are set either for all chosen units or for none of them. Right now %(named)s has a share, but %(silent)s does not: an empty share counts as one, and next to a share you did set, that would give percentages you did not mean. Leave all shares empty — the split will be even."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у "
-"всех отмеченных точек сразу: пустая доля считается единицей, и рядом с "
-"0,7 это дало бы не те проценты, которые вы имели в виду. Не отмечено ни "
-"одной точки — человек работает на всю сеть."
-msgstr "Shares can be left unset entirely — then the split is even. If you do set them, set them for all checked units at once: an empty share counts as one, and next to 0.7 that would give percentages you did not mean. No unit is checked — the person works for the whole network."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Доля"
 msgstr "Share"
 
@@ -8686,26 +8678,12 @@ msgid "Сохранить точки"
 msgstr "Save units"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Точек у человека не осталось — с этой даты он работает на всю сеть. Его "
-"затраты пойдут на разнесение общим правилом, как расход юрлица, а не на "
-"одну пиццерию."
-msgstr "The person has no units left — from this date they work for the whole network. Their costs will go to allocation by the general rule, like a legal-entity expense, rather than to one pizzeria."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Точки действуют с"
 msgstr "Units effective from"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Точки не заданы."
 msgstr "Units not set."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Точки нет и в условиях найма — значит человек работает на всю сеть. Его "
-"затраты уходят на разнесение общим правилом, как расход юрлица, а не на "
-"одну пиццерию."
-msgstr "There is no unit in the employment terms either — so the person works for the whole network. Their costs go to allocation by the general rule, like a legal-entity expense, rather than to one pizzeria."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
@@ -8876,6 +8854,58 @@ msgstr "This value cannot be compared with the country frame (%(source)s): it is
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
+msgid "делится: %(codes)s"
+msgstr "split across: %(codes)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "«Вся сеть» задаёт тот, кому видны все точки партнёра."
+msgstr "\"Entire network\" can only be set by someone who sees all of the partner's units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вся сеть — затраты делятся между всеми точками поровну"
+msgstr "Entire network — costs are split evenly across all units"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у "
+"всех отмеченных точек сразу: пустая доля считается единицей, и рядом с "
+"0,7 это дало бы не те проценты, которые вы имели в виду."
+msgstr "Shares can be left unset entirely — then the split is even. If you do set them, set them for all checked units at once: an empty share counts as one, and next to 0.7 that would give percentages you did not mean."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Не отмечено ни одной точки. Отметьте точки, между которыми делятся "
+"затраты на человека, или «Вся сеть», если он работает на всех."
+msgstr "No unit is checked. Check the units the person's costs are split between, or \"Entire network\" if they work for all of them."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмечены и «Вся сеть», и отдельные точки. Выберите что-то одно: человек "
+"либо работает на всю сеть, либо на отмеченные точки."
+msgstr "Both \"Entire network\" and individual units are checked. Choose one: the person works either for the whole network or for the checked units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"С этой даты человек работает на всю сеть: его затраты делятся между "
+"всеми точками поровну, где бы ни стояла его строка табеля."
+msgstr "From this date the person works for the whole network: their costs are split evenly across all units, wherever their timesheet row is."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Точки нет и в условиях найма — затраты идут на ту точку, где стоит его "
+"строка табеля. Если человек работает на всех, отметьте ниже «Вся сеть»: "
+"тогда затраты разделятся между всеми точками."
+msgstr "There is no unit in the employment terms either — costs go to the unit where their timesheet row is. If the person works for all units, check \"Entire network\" below: then costs will be split across all of them."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "делится между всеми точками партнёра поровну"
+msgstr "split evenly across all of the partner's units"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "целиком на %(code)s"
+msgstr "all to %(code)s"
+
 msgid "%(person)s — %(hours)s ч на %(money)s"
 msgstr "%(person)s — %(hours)s h worth %(money)s"
 
@@ -9158,3 +9188,29 @@ msgstr "no previous month in the report — nothing to compare with"
 #, python-format
 msgid "против %(value)s (%(month)s)"
 msgstr "vs %(value)s (%(month)s)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
+"«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
+"утверждён — сообщите администратору продукта."
+msgstr "Payroll of network-wide employees was not allocated to units: there is no allocation rule for the \"Payroll\" and \"Payroll taxes\" lines. The month was not approved — tell the product administrator."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Утвердить месяц может только тот, кому видны все точки и все регистры "
+"партнёра: зарплата переносится в P&L целиком, и по части сети она легла "
+"бы не на те точки."
+msgstr "Only someone who sees all of the partner's units and ledgers can approve the month: payroll is carried into the P&L as a whole, and from part of the network it would land on the wrong units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У сотрудника доли всех точек нулевые — зарплату не на что разделить. "
+"Задайте доли на карточке сотрудника."
+msgstr "All unit shares of this employee are zero, so the salary cannot be split. Set the shares on the employee card."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Набор точек этого сотрудника меняет роль, которой видны все точки "
+"партнёра. Обратитесь к оперативному директору или бухгалтеру."
+msgstr "The units of this employee can only be changed by a role that sees all of the partner's units. Contact the operations director or the accountant."

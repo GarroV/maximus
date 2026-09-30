@@ -287,7 +287,16 @@ def test_seed_survives_an_allocation_rule(seeded, conn):
 
     run_manage(seeded, "seed_dev")
 
-    assert conn.execute("select count(*) from allocation_rules").fetchone()[0] == 0
+    # Правила партнёра сид убирает. Общие правила продукта (пустой `tenant_id`,
+    # «поровну» для ФОТ сети, T221) остаются — и ровно по одному на строку:
+    # повторный сид не должен их размножать.
+    assert conn.execute(
+        "select count(*) from allocation_rules where tenant_id is not null"
+    ).fetchone()[0] == 0
+    assert conn.execute(
+        "select count(*), count(distinct pnl_item_id) from allocation_rules"
+        " where tenant_id is null"
+    ).fetchone() == (2, 2)
     assert conn.execute("select count(*) from expense_items").fetchone()[0] == 0
     assert conn.execute("select count(*) from employees").fetchone()[0] > 0
 

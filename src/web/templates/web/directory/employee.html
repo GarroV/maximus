@@ -265,7 +265,7 @@
 <p class="note">{% blocktranslate %}Пустая доля — поровну с остальными точками того же периода. Деление берётся по состоянию на первое число считаемого месяца: набор, заведённый серединой месяца, подействует со следующего.{% endblocktranslate %}</p>
 {% else %}
 {% translate "Точки не заданы." as no_units %}
-{% notice "empty" title=no_units %}{% if units_home %}{% blocktranslate with home=units_home %}Все затраты на человека идут на одну точку — ту, что стоит в его условиях найма ({{ home }}). Задайте набор ниже, если он работает на несколько пиццерий: тогда деньги разделятся между ними.{% endblocktranslate %}{% else %}{% blocktranslate %}Точки нет и в условиях найма — значит человек работает на всю сеть. Его затраты уходят на разнесение общим правилом, как расход юрлица, а не на одну пиццерию.{% endblocktranslate %}{% endif %}{% endnotice %}
+{% notice "empty" title=no_units %}{% if units_home %}{% blocktranslate with home=units_home %}Все затраты на человека идут на одну точку — ту, что стоит в его условиях найма ({{ home }}). Задайте набор ниже, если он работает на несколько пиццерий: тогда деньги разделятся между ними.{% endblocktranslate %}{% else %}{% blocktranslate %}Точки нет и в условиях найма — затраты идут на ту точку, где стоит его строка табеля. Если человек работает на всех, отметьте ниже «Вся сеть»: тогда затраты разделятся между всеми точками.{% endblocktranslate %}{% endif %}{% endnotice %}
 {% endif %}
 
 {% if may_manage %}
@@ -289,6 +289,18 @@
   <p class="field">
     <fieldset class="checks">
       <legend class="field-label">{% translate "Точки" %}</legend>
+      {% comment %}
+      «Вся сеть» — явная галка, а не пустой набор (D085): пустой набор неотличим
+      от «не задан», а тогда деньги идут на точку строки табеля. Урезанной роли
+      галки нет — выбрать сеть она не может (`0271`).
+      {% endcomment %}
+      {% if network_option %}
+      <span class="check">
+        <input type="checkbox" id="units_network" name="network" value="1"
+               {% if network_option.checked %}checked{% endif %}>
+        <label for="units_network">{% translate "Вся сеть — затраты делятся между всеми точками поровну" %}</label>
+      </span>
+      {% endif %}
       {% for option in unit_options %}
       <span class="check share-pick">
         <input type="checkbox" id="unit_{{ option.id }}" name="units" value="{{ option.id }}"
@@ -301,7 +313,7 @@
         </span>
       </span>
       {% endfor %}
-      <span class="note">{% blocktranslate %}Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у всех отмеченных точек сразу: пустая доля считается единицей, и рядом с 0,7 это дало бы не те проценты, которые вы имели в виду. Не отмечено ни одной точки — человек работает на всю сеть.{% endblocktranslate %}</span>
+      <span class="note">{% blocktranslate %}Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у всех отмеченных точек сразу: пустая доля считается единицей, и рядом с 0,7 это дало бы не те проценты, которые вы имели в виду.{% endblocktranslate %}</span>
     </fieldset>
   </p>
   <button type="submit" class="primary">{% translate "Сохранить точки" %}</button>

@@ -120,9 +120,8 @@ def _saved_notices() -> dict:
             "в истории — по нему посчитаны прошлые месяцы."
         ),
         "units_office": _(
-            "Точек у человека не осталось — с этой даты он работает на всю "
-            "сеть. Его затраты пойдут на разнесение общим правилом, как расход "
-            "юрлица, а не на одну пиццерию."
+            "С этой даты человек работает на всю сеть: его затраты делятся "
+            "между всеми точками поровну, где бы ни стояла его строка табеля."
         ),
         "units_same": _("Набор точек не изменился — новая версия не заведена."),
         # Заведение (T164) — свой ответ, а не «карточка сохранена»: человек
@@ -1022,6 +1021,27 @@ def _wanted_units(request, who) -> list[tuple]:
     заставлять партнёра пересчитывать доли при каждой новой точке.
     """
     allowed = {unit.id: unit for unit in _units_for_choice(who)}
+    # «Вся сеть» — явный выбор, а не пустые галки (D085). Пустая форма и «сеть»
+    # раньше были одним и тем же, и это же было неотличимо от «набор не задан»,
+    # при котором деньги идут на точку строки табеля, — то есть офисный
+    # человек, отмеченный на пиццерии, ложился на неё целиком.
+    if request.POST.get("network") == "1":
+        if who.unit_ids:
+            # Урезанная роль «сеть» не выбирает: это сняло бы затраты её
+            # человека с её точки на всех. База отвергла бы запись и сама
+            # (`0271`), но отказ должен быть словами.
+            raise BadInput(_("«Вся сеть» задаёт тот, кому видны все точки партнёра."))
+        if request.POST.getlist("units"):
+            raise BadInput(
+                _("Отмечены и «Вся сеть», и отдельные точки. Выберите что-то одно: "
+                  "человек либо работает на всю сеть, либо на отмеченные точки.")
+            )
+        return list(directory.NETWORK)
+    if not request.POST.getlist("units"):
+        raise BadInput(
+            _("Не отмечено ни одной точки. Отметьте точки, между которыми делятся "
+              "затраты на человека, или «Вся сеть», если он работает на всех.")
+        )
     wanted: dict = {}
     named, silent = [], []
     for raw in request.POST.getlist("units"):
@@ -1089,10 +1109,9 @@ def _save_units(request, who, person: Employee) -> tuple[str, str]:
     carried = "&posted=1" if directory.touches_closed_month(
         who.tenant_id, valid_from,
     ) else ""
-    # Пустой набор — не «ничего не задали», а осознанный офис: человек работает
-    # на всю сеть. Ответ у него свой, иначе человек уйдёт со страницы уверенным,
-    # что точки просто не сохранились.
-    return ("units" if wanted else "units_office"), carried
+    # «Вся сеть» — осознанный офис, и ответ у него свой: иначе человек уйдёт со
+    # страницы уверенным, что точки просто не сохранились.
+    return ("units_office" if wanted == list(directory.NETWORK) else "units"), carried
 
 
 def _unit_rows(person: Employee) -> list[dict]:
@@ -1106,8 +1125,11 @@ def _unit_rows(person: Employee) -> list[dict]:
 
     return [
         {
-            "code": row.unit.code,
-            "title": row.unit.title,
+            # Строка без точки — «вся сеть» (D085), а не пропавшая точка.
+            "code": row.unit.code if row.unit_id else _("Вся сеть"),
+            "title": row.unit.title if row.unit_id else _(
+                "делится между всеми точками партнёра поровну"
+            ),
             # Доля как есть, без округления до копеек: это основание деления, а
             # не деньги (`format.exact`, T116). Пустая — прочерк, а что он
             # значит, сказано словами под таблицей: «поровну».
@@ -1148,6 +1170,19 @@ def _unit_options(who, person: Employee) -> list[dict]:
         }
         for unit in _units_for_choice(who)
     ]
+
+
+def _network_option(who, person: Employee) -> dict | None:
+    """Галка «Вся сеть»: отмечена, если сегодня действует именно она.
+
+    Урезанной роли её нет вовсе — выбрать «сеть» она не может (`0271`), а
+    галка, которая гарантированно откажет, отнимает работу до того, как её
+    сделали.
+    """
+    if who.unit_ids:
+        return None
+    now = directory.units_at(who.tenant_id, person.id, date.today())
+    return {"checked": bool(now) and all(row.unit_id is None for row in now)}
 
 
 def _plain(value: Decimal | None) -> str:
@@ -1428,6 +1463,7 @@ def _employee_context(
         # свои, не `closed_note`: у точек закрытый месяц ведёт себя иначе —
         # разницы по ним не бывает вовсе, см. `web/directory.py`.
         "unit_options": _unit_options(who, person),
+        "network_option": _network_option(who, person),
         "units_posted_note": directory.split_already_posted_warning(who.tenant_id),
         "person_fields": [
             *_person_fields(person),
