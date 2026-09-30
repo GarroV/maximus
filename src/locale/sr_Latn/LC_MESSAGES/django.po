@@ -4796,10 +4796,6 @@ msgstr "Platni spisak za štampu"
 msgid "Основная навигация"
 msgstr "Glavna navigacija"
 
-#: web/templates/web/components/header.html:148
-msgid "как это работает"
-msgstr "kako ovo radi"
-
 #: web/templates/web/components/header.html:164
 msgid "Как в системе"
 msgstr "Kao u sistemu"
@@ -4818,10 +4814,6 @@ msgid ""
 msgstr ""
 "Stranica za prijavu ima dugmad za brzu prijavu sa seed nalozima (DEV_LOGIN=1)"
 
-#: web/templates/web/components/header.html:191
-msgid "dev-вход"
-msgstr "dev prijava"
-
 #: web/templates/web/components/header.html:204
 msgid "Данные и итоги на всех страницах — только по этой точке"
 msgstr "Podaci i zbirovi na svim stranicama — samo za ovaj objekat"
@@ -4831,13 +4823,37 @@ msgstr "Podaci i zbirovi na svim stranicama — samo za ovaj objekat"
 msgid "точка: %(code)s"
 msgstr "objekat: %(code)s"
 
-#: web/templates/web/components/header.html:207
-msgid "пароль"
-msgstr "lozinka"
+#: web/templates/web/components/sidenav.html:134
+msgid "Выйти"
+msgstr "Odjava"
 
-#: web/templates/web/components/header.html:209
-msgid "выйти"
-msgstr "odjava"
+#: web/templates/web/components/sidenav.html
+msgid "Учётная запись"
+msgstr "Nalog"
+
+#: web/templates/web/account.html
+msgid "Кто вы в продукте и что вам видно. Один и тот же экран показывает разным людям разные числа."
+msgstr "Ko ste u proizvodu i šta vidite. Isti ekran različitim ljudima prikazuje različite brojeve."
+
+#: web/templates/web/account.html
+msgid "Видимые регистры"
+msgstr "Vidljivi registri"
+
+#: web/templates/web/account.html
+msgid "Сменить пароль"
+msgstr "Promeni lozinku"
+
+#: web/templates/web/components/sidenav.html:84
+msgid "Тема"
+msgstr "Tema"
+
+#: web/templates/web/components/sidenav.html:97
+msgid "Язык"
+msgstr "Jezik"
+
+#: web/templates/web/base.html:69
+msgid "К содержанию"
+msgstr "Pređi na sadržaj"
 
 #: web/templates/web/components/header.html:212 web/templates/web/login.html:61
 msgid "войти"
@@ -5385,11 +5401,11 @@ msgid ""
 "Роль — это набор прав, и у каждого набора своя работа и свой первый\n"
 "  экран. Один и тот же экран показывает разным людям разные числа, поэтому "
 "в\n"
-"  шапке всегда написано, чьими глазами вы смотрите."
+"  левой панели всегда написано, чьими глазами вы смотрите."
 msgstr ""
 "Uloga je skup prava, i svaki skup ima svoj posao i svoj prvi ekran. Isti "
-"ekran prikazuje različitim ljudima različite brojeve, zato u zaglavlju uvek "
-"stoji čijim očima gledate."
+"ekran prikazuje različitim ljudima različite brojeve, zato u levom panelu "
+"uvek stoji čijim očima gledate."
 
 #: web/templates/web/guide.html:171
 msgid ""
@@ -5465,20 +5481,21 @@ msgid ""
 "Права режет сама база, а не экран. Строку, которой роль не видит, она не\n"
 "  получит ни на странице, ни в выгрузке, ни через API — поэтому раздел, "
 "которого\n"
-"  у роли нет, в шапке не показывается вовсе, а не отвечает отказом по "
-"нажатию."
+"  у роли нет, в левой панели не показывается вовсе, а не отвечает отказом "
+"по нажатию."
 msgstr ""
-"Prava reže sama baza, a ne ekran. Red koji uloga ne vidi, ona neće dobiti ni "
-"na stranici, ni u izvozu, ni preko API-ja — zato se odeljak koji uloga nema "
-"u zaglavlju ne prikazuje uopšte, a ne odgovara odbijanjem na klik."
+"Prava reže sama baza, a ne ekran. Red koji uloga ne vidi, ona neće dobiti "
+"ni na stranici, ni u izvozu, ni preko API-ja — zato se odeljak koji uloga "
+"nema u levom panelu ne prikazuje uopšte, a ne odgovara odbijanjem na klik."
 
 #: web/templates/web/guide.html:202
 msgid ""
 "Кому что выдано и что из этого следует — раздел «Роли и права». Он открыт\n"
-"  тому, у кого есть право вести роли; остальным его в шапке не видно."
+"  тому, у кого есть право вести роли; остальным его в левой панели не видно."
 msgstr ""
-"Kome je šta dodeljeno i šta iz toga sledi — odeljak „Uloge i prava“. Otvoren "
-"je onome ko ima pravo da vodi uloge; ostalima se u zaglavlju uopšte ne vidi."
+"Kome je šta dodeljeno i šta iz toga sledi — odeljak „Uloge i prava“. "
+"Otvoren je onome ko ima pravo da vodi uloge; ostalima se u levom panelu "
+"uopšte ne vidi."
 
 #: web/templates/web/guide.html:208
 msgid "Наличные, расходы и поставщики"
@@ -5497,14 +5514,15 @@ msgstr ""
 
 #: web/templates/web/guide.html:213
 msgid ""
-"В шапке это два раздела: «Наличные расходы» — то, что вышло из кассы точки,\n"
+"В левой панели это два раздела: «Наличные расходы» — то, что вышло из кассы "
+"точки,\n"
 "  и «Инбокс документов» — очередь того, что продукт не смог отнести сам.\n"
 "  Список счетов открывается из инбокса и живёт в том же разделе."
 msgstr ""
-"U zaglavlju su to dva odeljka: „Gotovinski troškovi“ — ono što je izašlo iz "
-"kase objekta — i „Prijemno sanduče dokumenata“ — red onoga što proizvod nije "
-"uspeo sam da razvrsta. Spisak računa otvara se iz sandučeta i živi u istom "
-"odeljku."
+"U levom panelu su to dva odeljka: „Gotovinski troškovi“ — ono što je izašlo "
+"iz kase objekta — i „Prijemno sanduče dokumenata“ — red onoga što proizvod "
+"nije uspeo sam da razvrsta. Spisak računa otvara se iz sandučeta i živi u "
+"istom odeljku."
 
 #: web/templates/web/guide.html:219
 msgid "Расход из кассы."
@@ -5659,15 +5677,18 @@ msgstr ""
 #: web/templates/web/guide.html:287
 #, python-format
 msgid ""
-"Вам сейчас видно: %(names)s. Тот же список стоит в шапке на каждой странице."
+"Вам сейчас видно: %(names)s. Тот же список — цветными точками внизу левой "
+"панели и словами на странице «Учётная запись»."
 msgstr ""
-"Vama je sada vidljivo: %(names)s. Isti spisak stoji u zaglavlju na svakoj "
-"stranici."
+"Vama je sada vidljivo: %(names)s. Isti spisak stoji kao obojene tačke na dnu "
+"levog panela i rečima na stranici „Nalog“."
 
 #: web/templates/web/guide.html:289
-msgid "Какие регистры видны именно вам, будет написано в шапке после входа."
+msgid ""
+"Какие регистры видны именно вам, будет написано в левой панели после входа."
 msgstr ""
-"Koje su knjige vidljive upravo vama, biće napisano u zaglavlju nakon prijave."
+"Koje su knjige vidljive upravo vama, biće napisano u levom panelu nakon "
+"prijave."
 
 #: web/templates/web/guide.html:295
 msgid "С чего начать"
@@ -8343,12 +8364,20 @@ msgstr "Razvrstavanje u dve ruke: direktor raspoređuje, knjigovođa potvrđuje"
 msgid ""
 "Часть разделов помечена. «Доработка» — экран работает, но до задуманного\n"
 "  не дотягивает, и рядом написано, чего именно не хватает. «Разработка в\n"
-"  процессе» — экрана ещё нет, а вместо него страница с описанием, что здесь\n"
-"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» и\n"
-"  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в шапке, и плашкой\n"
+"  процессе» — экрана ещё нет, а вместо него страница с описанием, что "
+"здесь\n"
+"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» "
+"и\n"
+"  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в левой панели, и "
+"плашкой\n"
 "  наверху самого экрана. Раздел без пометки готов."
 msgstr ""
-"Neki odeljci su označeni. „Dorada“ znači da ekran radi, ali ne dostiže ono što je zamišljeno, a pored piše šta tačno nedostaje. „U izradi“ znači da ekrana još nema — umesto njega stoji stranica sa opisom šta će ovde biti: tako su rešeni „Bankovni izvod“, „Isplate“, „Analitika o ljudima“ i „Integracija sa Dodo IS“. Oznaka stoji i kao tačka pored stavke u zaglavlju i kao traka na vrhu samog ekrana. Odeljak bez oznake je gotov."
+"Neki odeljci su označeni. „Dorada“ znači da ekran radi, ali ne dostiže ono "
+"što je zamišljeno, a pored piše šta tačno nedostaje. „U izradi“ znači da "
+"ekrana još nema — umesto njega stoji stranica sa opisom šta će ovde biti: "
+"tako su rešeni „Bankovni izvod“, „Isplate“, „Analitika o ljudima“ i "
+"„Integracija sa Dodo IS“. Oznaka stoji i kao tačka pored stavke u levom "
+"panelu i kao traka na vrhu samog ekrana. Odeljak bez oznake je gotov."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""

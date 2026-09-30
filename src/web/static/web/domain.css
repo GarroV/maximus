@@ -1,0 +1,80 @@
+/* forma dodo/maximus/domain.css sha256:6b499cef8b5a41b5ba14c893a0a7127dbd19fa6c039bf417b51643d2d8e2eb01 — не править здесь, правка идёт в GarroV/forma */
+/* ═══════════════════════════════════════════════════════════════════════════
+   MAXIMUS — слой продукта поверх ядра (слой 3).
+   Подключается ПОСЛЕ dodo-ds.css:
+       <link rel="stylesheet" href="{% static 'ds/dodo-ds.css' %}">
+       <link rel="stylesheet" href="{% static 'maximus/domain.css' %}">
+
+   Здесь живут смыслы, которых нет у остальных двух продуктов: регистры учёта,
+   состояния периода, происхождение числа. Правило слоя: доменный токен
+   назначается значением ядра, а не собственным хексом, — тогда тёмная тема
+   работает сама и правка ядра доезжает сюда без переписывания.
+   Исключение допускается там, где ядру такого значения взять неоткуда;
+   каждое такое место объяснено прямо здесь.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Регистры учёта ───────────────────────────────────────────
+     Три регистра — свойство сотрудника, группы или операции. Цвет
+     различает вид сущности, а не её важность: официальный делит тон
+     с акцентом, потому что это основной регистр, остальные два взяты
+     из категорийной пары ядра. */
+  --reg-official:      var(--accent);
+  --reg-official-soft: var(--accent-soft);
+  --reg-official-line: var(--accent-line);
+  --reg-supp:          var(--cat-violet);
+  --reg-supp-soft:     var(--cat-violet-soft);
+  --reg-supp-line:     var(--cat-violet-line);
+  --reg-internal:      var(--cat-teal);
+  --reg-internal-soft: var(--cat-teal-soft);
+  --reg-internal-line: var(--cat-teal-line);
+
+  /* ── Состояния расчётного периода ─────────────────────────────
+     Черновик → рассчитан → утверждён; переоткрытый выделяется тоном
+     внимания, потому что это отход от нормального хода месяца. */
+  --st-draft:        var(--ink-2);
+  --st-calculated:   var(--accent);
+  --st-approved:     var(--ok);
+  --st-reopened:     var(--warn);
+
+  /* ── Происхождение числа ──────────────────────────────────────
+     Подкраска строки говорит, ОТКУДА значение (перенесено с прошлого
+     периода), и никогда — какое оно по величине.
+     Тон собственный, а не var(--warn-soft): красится целая строка
+     таблицы, и плашечный тон на всю ширину читается как тревога.
+     В тёмной теме по той же причине глуше, чем warn-soft ядра. */
+  --origin-carried:       #FFF9EC;
+  --origin-carried-hover: #FFF4DE;
+  --origin-mark:          var(--warn-mark);
+}
+
+[data-theme="dark"] {
+  --origin-carried:       #241E12;
+  --origin-carried-hover: #2E2717;
+}
+
+/* ── Роли как частный случай метки ──────────────────────────────
+   Ядро даёт форму (.tag), продукт — значения. Разметку продукта
+   переписывать не надо: классы .role--* остаются рабочими. */
+.role--accountant { color: var(--reg-supp);     background: var(--reg-supp-soft);     border: 1px solid var(--reg-supp-line); }
+.role--ops        { color: var(--reg-internal); background: var(--reg-internal-soft); border: 1px solid var(--reg-internal-line); }
+
+/* ── Регистр строкой ────────────────────────────────────────────
+   Смешанный регистр — не четвёртый цвет, а отсутствие определённости:
+   набирается нейтрально, иначе «смешанный» читается как отдельный вид. */
+.reg--official      { color: var(--reg-official); }
+.reg--supplementary { color: var(--reg-supp); }
+.reg--internal      { color: var(--reg-internal); }
+.reg--mixed         { color: var(--ink-2); border-color: var(--line-control-2); }
+
+/* ── Состояние периода ──────────────────────────────────────── */
+.status--draft      { color: var(--st-draft);      background: var(--surface-3);  border: 1px solid var(--line-control); }
+.status--calculated { color: var(--st-calculated); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.status--approved   { color: var(--st-approved);   background: var(--ok-soft);    border: 1px solid var(--ok-line); }
+.status--reopened   { color: var(--st-reopened);   background: var(--warn-soft);  border: 1px solid var(--warn-line); }
+
+/* ── Ширина страницы ────────────────────────────────────────────
+   Ядро ширину не назначает — это решение экрана. Реестр MAXIMUS
+   рассчитан на таблицу во всю ширину; мобильные сценарии управляющего
+   живут в медиазапросе ядра (375). */
+body { min-width: var(--page-min, 1280px); }

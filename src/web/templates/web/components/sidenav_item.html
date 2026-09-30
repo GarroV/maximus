@@ -1,0 +1,32 @@
+{% load ui %}{% comment %}
+Пункт левой панели: ссылка — или не ссылка, если человек уже здесь.
+
+Ждёт в контексте `section_url` (куда ведёт), `section_label` (что написано),
+`section_icon` (значок из набора линейки) и необязательные `section_waiting` —
+сколько работы ждёт человека в этом разделе — и `section_stage` — состояние
+экрана (D064).
+
+**Текущее значение не ссылка вовсе.** Ссылка на страницу, которая уже открыта,
+обманывает дважды: мышь обещает переход, которого не будет, а клавиатура и
+экранный диктор перечисляют её наравне с остальными, не сообщая, где человек
+находится. Отсюда `span` и `aria-current="page"`. Тот же инвариант живёт у
+переключателя разреза ведомости и записан в самом ядре.
+
+Как определяется «уже здесь»: по корню адреса, а не по совпадению страницы
+целиком (фильтр `in_section`). Иначе выделение пропадало бы на каждом вложенном
+экране — на следе расчёта, в табеле, на карточке счёта, — и пункт, потерявший
+выделение, читается как «вы ушли из раздела», хотя человек внутри него.
+
+**Подпись и состояние экрана — в `title` тоже.** Цветная точка состояния
+без слов ничего не говорит глазу (сверка с эталоном по T222), поэтому
+наведение на пункт называет и раздел, и его состояние: «Сверка с тренером ·
+Уточняется». Диктору то же сказано скрытой подписью внутри точки. Подписи в
+панели переносятся на вторую строку, а не обрезаются многоточием: обрезанное
+название раздела — это загадка, а не название.
+
+**Счётчик рисуется, только когда работа есть.** Ноль не показывается вовсе:
+«Инбокс документов · 0» сообщает «здесь очередь, и она пуста», а человеку нужно
+обратное — чтобы очередь бросалась в глаза, только когда в ней что-то лежит
+(правило модуля 10 эталона дословно). Число без слов диктор прочитал бы как
+часть названия, поэтому рядом стоит скрытое от глаза «ждёт работы».
+{% endcomment %}{% load i18n %}{% translate "ждёт работы" as waiting_hint %}{% if request.path|in_section:section_url %}<span class="sidenav__current" aria-current="page" title="{{ section_label }}{% if section_stage %} · {{ section_stage.label }}{% endif %}">{% icon section_icon %}<span class="sidenav__label">{{ section_label }}</span>{% if section_stage %}<span class="sidenav__stage sidenav__stage--{{ section_stage.kind }}" title="{{ section_stage.label }}"><span class="sr-only">{{ section_stage.label }}</span></span>{% endif %}{% if section_waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section_waiting }}</span>{% endif %}</span>{% else %}<a class="sidenav__item" href="{{ section_url }}" title="{{ section_label }}{% if section_stage %} · {{ section_stage.label }}{% endif %}">{% icon section_icon %}<span class="sidenav__label">{{ section_label }}</span>{% if section_stage %}<span class="sidenav__stage sidenav__stage--{{ section_stage.kind }}" title="{{ section_stage.label }}"><span class="sr-only">{{ section_stage.label }}</span></span>{% endif %}{% if section_waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section_waiting }}</span>{% endif %}</a>{% endif %}
