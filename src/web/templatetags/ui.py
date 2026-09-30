@@ -78,7 +78,11 @@ class NoticeNode(Node):
         # Пустое состояние — абзац, а не блок: это текст на месте данных, и
         # рамка вокруг него уже нарисована стилем `.empty`.
         tag = "p" if kind == "empty" else "div"
-        head = format_html("<strong>{}</strong> ", title) if title else ""
+        # Заголовок плашки — своей строкой, как `.note__title` эталона: в одну
+        # строку с текстом он сливался с ним и читался первым словом абзаца
+        # (сверка аналитики по людям, issue #268). Пробел после оставлен:
+        # без оформления — в письме, в выгрузке текста — слова не слипаются.
+        head = format_html('<strong class="notice__title">{}</strong> ', title) if title else ""
         return mark_safe(f'<{tag} class="{classes}">{head}{body}</{tag}>')
 
 
