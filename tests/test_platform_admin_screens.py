@@ -171,15 +171,18 @@ def test_inside_a_space_people_and_their_roles_are_visible(client, platform_admi
 
 def test_a_role_can_be_granted_and_revoked(client, platform_admin, spaces_restored):
     """Выдача и снятие роли — то, ради чего экран и заводился."""
-    from core.models import Membership, Role, Tenant, User
+    from core.models import Membership, Role, Tenant, Unit, User
 
     tenant = Tenant.objects.get(code="rs-dev")
     person = User.objects.create_user(username="new-hand", password="secret-1")
     role = Role.objects.filter(tenant=tenant, code="manager").first()
+    # Управляющий ведёт одну точку — без неё выдача отказывает (разбор прав T225).
+    unit = Unit.objects.filter(tenant=tenant).order_by("code").first()
 
     login_as(client, "admin")
     client.post(f"/platform/{tenant.pk}/roles/", {
         "action": "grant", "user_id": str(person.pk), "role_id": str(role.pk),
+        "unit": str(unit.pk),
     })
     assert Membership.objects.filter(tenant=tenant, user_id=person.pk, role=role).exists()
 
@@ -342,3 +345,68 @@ def test_revoking_for_someone_outside_the_space_is_refused(client, platform_admi
         "action": "revoke", "user_id": str(outsider.pk), "role_id": str(role.pk),
     }, follow=True)
     assert "Такого человека в этом пространстве нет" in body(response)
+
+
+# --- точка у роли, которая ведёт одну точку (как на странице партнёра) --------
+
+
+def test_platform_grants_a_unit_role_only_with_a_unit(client, platform_admin, spaces_restored):
+    """Управляющий точки без точки получил бы все точки партнёра — отказ.
+
+    С точкой — в членстве ровно она. Правило то же, что у приглашения на
+    странице партнёра: одна развилка на обе поверхности.
+    """
+    from core.models import Membership, Role, Tenant, Unit, User
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    manager = Role.objects.get(tenant=tenant, code="manager")
+    unit = Unit.objects.filter(tenant=tenant).order_by("code").first()
+    person = User.objects.create_user(username="m2-hand", password="secret-1")
+    login_as(client, "admin")
+
+    refused = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": str(person.pk), "role_id": str(manager.pk),
+    })
+    assert refused.status_code == 400
+    assert "выберите её" in body(refused)
+    assert not Membership.objects.filter(user_id=person.pk).exists()
+
+    client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": str(person.pk), "role_id": str(manager.pk),
+        "unit": str(unit.pk),
+    })
+    held = Membership.objects.get(user_id=person.pk)
+    assert [str(u) for u in held.unit_ids] == [str(unit.pk)]
+    held.delete()
+
+
+def test_platform_gives_no_unit_to_a_whole_partner_role(client, platform_admin, spaces_restored):
+    from core.models import Membership, Role, Tenant, Unit, User
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    accountant = Role.objects.get(tenant=tenant, code="accountant")
+    unit = Unit.objects.filter(tenant=tenant).first()
+    person = User.objects.create_user(username="m2-acc", password="secret-1")
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": str(person.pk), "role_id": str(accountant.pk),
+        "unit": str(unit.pk),
+    })
+    assert response.status_code == 400
+    assert "точка для неё не выбирается" in body(response)
+    assert not Membership.objects.filter(user_id=person.pk).exists()
+
+
+def test_a_new_space_does_not_start_with_a_unit_manager(client, platform_admin, spaces_restored):
+    """У нового пространства точек нет — управляющий точки первым получил бы все."""
+    from core.models import Tenant
+
+    login_as(client, "admin")
+    response = client.post("/platform/new/", {
+        "title": "Точечный", "code": "unit-first", "country_code": "RS",
+        "base_currency": "RSD", "report_currency": "EUR",
+        "admin_username": "unit-first-boss", "admin_password": "secret-1",
+        "role_code": "manager",
+    })
+    assert response.status_code == 400
+    assert not Tenant.objects.filter(code="unit-first").exists()
