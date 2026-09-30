@@ -18,6 +18,10 @@
 именно он открыл, вместе с историей версий — до того, как наберёт новое
 значение.
 
+Карточка правила, новая версия и журнал попыток выйти за рамку — тремя
+адресами (T227, D081/D087): одна страница — одна функция. Карточка только
+читается; форма и журнал открываются с неё ссылками.
+
 **Выбор уровня: партнёр, группа, человек** (T165). Раньше уровень был один и
 зашит константой, хотя база умела все четыре, а расчёт их применял. Значение
 «сейчас действует» и проверка «а изменилось ли» считаются для выбранного
@@ -45,6 +49,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.views.decorators.http import require_http_methods
 
 from core.rules import PresetNotFound, load_rules_at
 
@@ -315,78 +320,177 @@ def _save_country(request, who, path: str, on_date: date, *, valid_from: date):
     return _back_to_list(who, on_date, valid_from)
 
 
+def _resolve(who, path: str, on_date: date):
+    """Правило на дату: собранный набор и действующее значение — или 404.
+
+    Одна на три страницы правила (карточка, новая версия, попытки): решение
+    «есть ли такое правило для этой роли» не может звучать по-разному на
+    соседних адресах одного и того же правила.
+
+    Скрытое роли правило и несуществующее отвечают одинаково (D023): «нельзя
+    смотреть» и «нет такого» отличались бы кодом ответа, и по нему можно было бы
+    перебрать, какие группы существуют.
+    """
+    assembled, hidden = _assembled_at(who, on_date)
+    if assembled is None:
+        raise Http404("правил страны на эту дату нет")
+    if not rules.is_visible(path, hidden) or path.split(".")[0] in rules.NOT_RULES:
+        raise Http404("правило не найдено")
+    try:
+        current = rules.value_at(assembled.base, path)
+    except KeyError:
+        raise Http404("правило не найдено") from None
+    return assembled, current
+
+
+def _rule_url(name: str, path: str, on_date: date) -> str:
+    """Адрес страницы правила с той же датой, на которую человек смотрит.
+
+    Дата едет со всеми переходами между страницами правила: иначе с карточки
+    на 1 сентября человек попадал бы в форму «на сегодня» и заводил версию,
+    глядя на другое действующее значение.
+    """
+    return f"{reverse(name, args=[path])}?on={on_date.isoformat()}"
+
+
+def _now_in_force(preset, path: str, current) -> dict:
+    """Что действует сейчас и откуда — одинаково на карточке и на форме."""
+    where = preset.origin_of(path)
+    return {
+        "value": rules.show(current),
+        "origin": rules.level_title(where.level),
+        "since": where.valid_from.isoformat() if where.valid_from else "",
+    }
+
+
 @login_required
+@require_http_methods(["GET", "HEAD"])
 def rule(request, path: str):
+    """Карточка правила: что действует, кто решает, история версий (T227).
+
+    Только чтение. Новая версия и журнал отвергнутых попыток — своими
+    страницами (D081, D087): прежде всё это стояло одной простынёй, и человек,
+    открывший правило ради «а сколько сейчас», пролистывал две формы и журнал.
+    """
     who, denied = _guard(request)
     if denied is not None:
         return denied
 
     on_date = _on_date(request)
-    assembled, hidden = _assembled_at(who, on_date)
-    if assembled is None:
-        raise Http404("правил страны на эту дату нет")
+    assembled, current = _resolve(who, path, on_date)
     preset = assembled.base
+    frame = _frame_block(who, path, on_date, current)
+    country = _country_block(who, path, on_date)
+    # Ссылка на форму — только если форма что-то даст этому человеку. У
+    # запертого правила переопределения нет, и ссылка вела бы на страницу со
+    # словами «нельзя»; администратору платформы там остаётся правило страны.
+    may_add = not frame["frame_locked"] or (
+        country.get("country_may_edit") and not country.get("country_locked")
+    )
+    attempts = rules.frame_attempts(who.tenant_id, path).count()
+    names = rule_targets.titles_of_targets(who, on_date)
+    return render(request, "web/rules/rule.html", {
+        "heading": path,
+        "on_date": on_date.isoformat(),
+        "back_url": f"{reverse('rules')}?on={on_date.isoformat()}",
+        "new_url": _rule_url("rule-new", path, on_date) if may_add else "",
+        # Ссылка на журнал — только когда в нём есть строки. Пустой журнал
+        # рассказывал бы о механизме тому, кто с ним не сталкивался (эталон
+        # модуля 17 показывает попытку, а не её отсутствие).
+        "attempts_url": _rule_url("rule-attempts", path, on_date) if attempts else "",
+        "attempts_count": attempts,
+        **_now_in_force(preset, path, current),
+        "versions": [
+            {
+                "from": row.valid_from.isoformat(),
+                "to": row.valid_to.isoformat() if row.valid_to else "—",
+                "value": rules.show(row.value),
+                "level": rules.level_title(row.scope_type),
+                # Имя объекта, а не его uuid: строка истории должна читаться
+                # («группе Курьеры»), а не расшифровываться. У уровня партнёра
+                # объекта нет, и шаблон ставит прочерк — пустая ячейка читалась
+                # бы как потерянное название.
+                "who": names.get((row.scope_type, row.scope_id), ""),
+            }
+            for row in rule_targets.visible_only(rules.versions(who.tenant_id, path), names)
+        ],
+        **country,
+        **frame,
+    })
 
-    # Скрытое роли правило и несуществующее отвечают одинаково (D023): «нельзя
-    # смотреть» и «нет такого» отличались бы кодом ответа, и по нему можно было
-    # бы перебрать, какие группы существуют.
-    if not rules.is_visible(path, hidden) or path.split(".")[0] in rules.NOT_RULES:
-        raise Http404("правило не найдено")
-    try:
-        current = rules.value_at(preset, path)
-    except KeyError:
-        raise Http404("правило не найдено") from None
 
+def _save_tenant_layer(request, who, assembled, path: str, on_date: date, valid_from):
+    """Завести версию на уровне партнёра, группы или человека.
+
+    Возвращает `(ответ, адресат)`: ответ — переход к списку после записи или
+    `None`, если версия не заведена, потому что правило и так такое.
+    """
+    preset = assembled.base
+    # Адресат разбирается ДО значения: список допустимых значений тот же на
+    # всех уровнях, но отказ «нет такой группы» человеку понятнее, чем отказ про
+    # значение, набранное для этой группы.
+    target = rule_targets.target_from(
+        who, request.POST.get("target", ""), path=path, on_date=on_date,
+    )
+    for_target = _preset_for(who, assembled, target, on_date)
+    current = rules.value_at(for_target, path)
+    wanted = rules.parse(
+        request.POST.get("value", ""), current, path,
+        allowed=tuple(code for code, _title in rules.choices_for(preset, path, who=who)),
+    )
+    # Запись целиком внутри `saving()` — тем же приёмом, что на шести формах
+    # справочников (T136, T142). Пересечение версий здесь отсекает сама
+    # `save_override`, поэтому ограничение базы `rule_overrides_no_overlap`
+    # стоит последним рубежом: пока логика верна, человек его не видит, а
+    # ошибётся логика — прочитает «поправьте даты» вместо белой страницы
+    # (issue #111). Внутрь попадает вся запись одной кнопки: `save_override`
+    # закрывает прежнюю версию и заводит новую, и отвергнутая форма не должна
+    # оставлять за собой закрытую версию без пришедшей ей на смену.
+    with saving():
+        change = rules.save_override(
+            who.tenant_id, path, wanted,
+            scope_type=target.scope_type, scope_id=target.scope_id,
+            valid_from=valid_from, actor_id=who.user_id,
+            # Имя автора уезжает снимком в журнал отвергнутых попыток: право
+            # вести правила не даёт читать чужие строки `users`, и подписать
+            # строку журнала было бы нечем (T192).
+            actor_name=who.display_name, effective=current,
+        )
+    if not change.changed:
+        return None, target
+    return _back_to_list(who, on_date, valid_from), target
+
+
+@login_required
+@require_http_methods(["GET", "HEAD", "POST"])
+def rule_new(request, path: str):
+    """Новая версия правила с даты — своей страницей (T227, D081).
+
+    Две формы на ней — «переопределить для себя» и «поменять правило страны»
+    (вторая только администратору платформы), — и это одна функция, а не две:
+    обе отвечают на один вопрос «что станет с этим правилом с такого-то числа»,
+    и объяснения у них общие (закрытый месяц, помесячное действие). Слой
+    приходит полем `level`, а не отдельным адресом, по той же причине.
+    """
+    who, denied = _guard(request)
+    if denied is not None:
+        return denied
+
+    on_date = _on_date(request)
+    assembled, current = _resolve(who, path, on_date)
     error, status, notice = "", 200, ""
     target = rule_targets.TENANT_TARGET
     if request.method == "POST":
         try:
             valid_from = _posted_date(request)
-            # Двумя формами на одной странице: «переопределить для себя» и
-            # «поменять правило страны». Слой приходит полем, а не отдельным
-            # адресом, потому что решение это одно и то же — что станет с этим
-            # правилом с такого-то числа, — и объяснения у обеих форм общие
-            # (закрытый месяц, помесячное действие). Разными адресами их пришлось
-            # бы дублировать.
             if request.POST.get("level") == "country":
                 return _save_country(request, who, path, on_date, valid_from=valid_from)
-            # Адресат разбирается ДО значения: список допустимых значений тот же
-            # на всех уровнях, но отказ «нет такой группы» человеку понятнее,
-            # чем отказ про значение, набранное для этой группы.
-            target = rule_targets.target_from(
-                who, request.POST.get("target", ""), path=path, on_date=on_date,
+            done, target = _save_tenant_layer(
+                request, who, assembled, path, on_date, valid_from,
             )
-            for_target = _preset_for(who, assembled, target, on_date)
-            current = rules.value_at(for_target, path)
-            wanted = rules.parse(
-                request.POST.get("value", ""), current, path,
-                allowed=tuple(
-                    code for code, _title in rules.choices_for(preset, path, who=who)
-                ),
-            )
-            # Запись целиком внутри `saving()` — тем же приёмом, что на шести
-            # формах справочников (T136, T142). Пересечение версий здесь
-            # отсекает сама `save_override`, поэтому ограничение базы
-            # `rule_overrides_no_overlap` стоит последним рубежом: пока логика
-            # верна, человек его не видит, а ошибётся логика — прочитает
-            # «поправьте даты» вместо белой страницы (issue #111). Внутрь
-            # попадает вся запись одной кнопки: `save_override` закрывает
-            # прежнюю версию и заводит новую, и отвергнутая форма не должна
-            # оставлять за собой закрытую версию без пришедшей ей на смену.
-            with saving():
-                change = rules.save_override(
-                    who.tenant_id, path, wanted,
-                    scope_type=target.scope_type, scope_id=target.scope_id,
-                    valid_from=valid_from, actor_id=who.user_id,
-                    # Имя автора уезжает снимком в журнал отвергнутых попыток:
-                    # право вести правила не даёт читать чужие строки `users`,
-                    # и подписать строку журнала было бы нечем (T192).
-                    actor_name=who.display_name, effective=current,
-                )
-            if not change.changed:
-                notice = _("Ничего не изменилось — новая версия не заведена.")
-            else:
-                return _back_to_list(who, on_date, valid_from)
+            if done is not None:
+                return done
+            notice = _("Ничего не изменилось — новая версия не заведена.")
         # Раньше `RuleInputRefused`: родства между ними нет, но порядок тот же,
         # что на справочниках, — сначала отказ базы, потом разбор ввода. Оба
         # отвечают 400: для того, кто смотрит на код ответа, «набрано не то» и
@@ -412,20 +516,15 @@ def rule(request, path: str):
             notice = same.message
         # Значение могло поменяться этим же запросом — перечитываем, чтобы
         # страница показывала базу, а не то, что было до неё.
-        assembled, hidden = _assembled_at(who, on_date)
-        preset = assembled.base
-        current = rules.value_at(preset, path)
+        assembled, current = _resolve(who, path, on_date)
 
-    where = preset.origin_of(path)
+    preset = assembled.base
     options = rules.choices_for(preset, path, who=who)
-    names = rule_targets.titles_of_targets(who, on_date)
-    return render(request, "web/rules/rule.html", {
+    return render(request, "web/rules/rule_new.html", {
         "heading": path,
         "on_date": on_date.isoformat(),
-        "back_url": f"{reverse('rules')}?on={on_date.isoformat()}",
-        "value": rules.show(current),
-        "origin": rules.level_title(where.level),
-        "since": where.valid_from.isoformat() if where.valid_from else "",
+        "back_url": _rule_url("rule", path, on_date),
+        **_now_in_force(preset, path, current),
         "error": error,
         "notice": notice,
         "kind": rules.kind_of(current),
@@ -448,28 +547,45 @@ def rule(request, path: str):
         # Уровни, на которых это правило не заводится, названы словами — до
         # правки, а не отказом после. Пусто, если заводится на всех.
         "scope_note": rule_targets.scope_refusal(path, "group"),
-        "versions": [
-            {
-                "from": row.valid_from.isoformat(),
-                "to": row.valid_to.isoformat() if row.valid_to else "—",
-                "value": rules.show(row.value),
-                "level": rules.level_title(row.scope_type),
-                # Имя объекта, а не его uuid: строка истории должна читаться
-                # («группе Курьеры»), а не расшифровываться. У уровня партнёра
-                # объекта нет, и шаблон ставит прочерк — пустая ячейка читалась
-                # бы как потерянное название.
-                "who": names.get((row.scope_type, row.scope_id), ""),
-            }
-            for row in rule_targets.visible_only(rules.versions(who.tenant_id, path), names)
-        ],
         "closed_note": directory.closed_month_warning(who.tenant_id),
         **_country_block(who, path, on_date),
         **_frame_block(who, path, on_date, current),
     }, status=status)
 
 
+@login_required
+@require_http_methods(["GET", "HEAD"])
+def rule_attempts(request, path: str):
+    """Журнал отвергнутых рамкой попыток по правилу — своей страницей (T227).
+
+    Эталон модуля 17 объясняет, зачем журнал вообще на экране: «Отказ, который
+    никуда не записан, повторят завтра» — это след для аудита, а не защита от
+    дурака. Своей страницей потому, что это другая работа, чем смотреть правило:
+    её открывает тот, кто разбирается, кто и что пытался поставить.
+    """
+    who, denied = _guard(request)
+    if denied is not None:
+        return denied
+
+    on_date = _on_date(request)
+    _resolve(who, path, on_date)
+    return render(request, "web/rules/rule_attempts.html", {
+        "heading": path,
+        "back_url": _rule_url("rule", path, on_date),
+        "attempts": [
+            {
+                "at": timezone.localtime(row.created_at).strftime("%Y-%m-%d %H:%M"),
+                "who": row.created_by_name or EMPTY,
+                "wanted": rules.show(row.wanted),
+                "level": rules.level_title(row.scope_type),
+            }
+            for row in rules.frame_attempts(who.tenant_id, path)
+        ],
+    })
+
+
 def _frame_block(who, path: str, on_date: date, current) -> dict:
-    """Рамка правила на карточке: что разрешено, откуда это и кто уже пробовал.
+    """Рамка правила на карточке: что разрешено и откуда это.
 
     Рамка и её граница читаются из ТЕЛА СТРАНЫ, а не из собранного пресета, и
     это не мелочь. Сам раздел `frames` в обоих один и тот же — переопределить
@@ -504,15 +620,6 @@ def _frame_block(who, path: str, on_date: date, current) -> dict:
         # Не «что можно», а «что уже не так»: действующее значение бывает мягче
         # рамки, если рамка появилась или поднялась после него.
         "frame_breach": rules.frame_breach_now(frame, current, country_value),
-        "attempts": [
-            {
-                "at": timezone.localtime(row.created_at).strftime("%Y-%m-%d %H:%M"),
-                "who": row.created_by_name or EMPTY,
-                "wanted": rules.show(row.wanted),
-                "level": rules.level_title(row.scope_type),
-            }
-            for row in rules.frame_attempts(who.tenant_id, path)
-        ],
     }
 
 
@@ -524,7 +631,8 @@ def _country_block(who, path: str, on_date: date) -> dict:
     задачи ночные часы и ставки взносов жили в YAML, и человек, искавший их в
     продукте, видел только «правила страны» без ответа на «а где они и кто их
     меняет». Теперь ответ на экране: вот значение, вот с какого числа, вот кто
-    его ведёт (`explain_refusal`), а для себя переопределите формой ниже.
+    его ведёт (`explain_refusal`), а для себя — переопределите на странице новой
+    версии.
     """
     country = directory.country_of(who.tenant_id)
     version = rules_country.in_force_at(country, on_date)

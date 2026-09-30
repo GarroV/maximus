@@ -443,6 +443,11 @@ urlpatterns = [
     # на страницу правила, а не искать её глазами.
     path("rules/", rules_views.index, name="rules"),
     path("rules/<str:path>/", rules_views.rule, name="rule"),
+    # Шаги внутри правила, а не разделы (T227, D081): новая версия и журнал
+    # отвергнутых рамкой попыток — своими страницами, с карточки правила
+    # ссылками. В левой панели их нет: панель ведёт к разделу, а не к шагу.
+    path("rules/<str:path>/new/", rules_views.rule_new, name="rule-new"),
+    path("rules/<str:path>/attempts/", rules_views.rule_attempts, name="rule-attempts"),
     # Месяц календаря адресуется самим месяцем, а не uuid: строка одна на
     # страну и месяц, и `2026-06` в адресе читается человеком, в отличие от
     # случайного ключа.

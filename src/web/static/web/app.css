@@ -85,6 +85,11 @@ h2 { font-size: var(--fs-title); line-height: var(--lh-title); margin: var(--spa
    которого на экран пришли, не должно искаться глазами ниже фильтров. */
 .head { display: flex; align-items: center; gap: var(--space-7); margin: 0 0 var(--space-2); }
 .head h1 { margin: 0; }
+/* Заголовок-код без пробелов (путь правила `hour_types.night.pay_percent`)
+   рядом с кнопкой распирал строку, и телефон ужимал всю страницу до 627 px
+   ширины (T227). Переносится в любом месте, только если иначе не влезает. */
+.head { flex-wrap: wrap; row-gap: var(--space-2); }
+.head h1 { min-width: 0; overflow-wrap: anywhere; }
 .head .btn { margin-left: auto; }
 
 /* Дорога назад со вложенного экрана. Отдельно от `.note`, потому что это не
