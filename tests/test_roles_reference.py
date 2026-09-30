@@ -107,3 +107,24 @@ def test_a_loss_counts_only_what_no_other_role_of_the_person_gives():
     assert "Ведение ролей" in effects["loses"]["a"]
     assert "Расчёт периода" not in effects["loses"]["a"]
     assert effects["offers"] == []
+
+
+def test_the_people_list_shows_the_unit_and_the_last_visit(client, web_env):
+    """Как в эталоне: у человека видно, какие точки он ведёт и был ли он в системе.
+
+    Без этого список людей не отвечал на главный вопрос администратора — кто
+    из выданных доступов живой, а кто висит без дела.
+    """
+    from core.models import Membership, Unit
+
+    login_as(client, "admin")
+    html = body(client.get("/roles/people/"))
+    assert "Точка" in html and "Последний вход" in html
+    manager = Membership.objects.filter(role__code="manager").exclude(unit_ids=None).first()
+    assert manager, "в сиде нет управляющего с точкой"
+    unit = Unit.objects.get(pk=manager.unit_ids[0])
+    assert unit.title in person_row(html, "Управляющий"), "точка управляющего не названа"
+    assert "все точки" in person_row(html, "Бухгалтер")
+    assert "не входил" not in person_row(html, "Администратор сети"), (
+        "администратор только что вошёл, а список говорит, что он не входил"
+    )
