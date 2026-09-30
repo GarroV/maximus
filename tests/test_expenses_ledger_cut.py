@@ -139,7 +139,7 @@ def test_the_screen_offers_only_the_ledgers_the_role_sees(
     login_as(client, "manager")
     try:
         page = body(client.get(LIST, WIDE))
-        assert 'name="ledger"' in page, "срез по регистру с экрана недоступен вовсе"
-        assert 'value="internal"' not in page, "предложен регистр, которого роль не видит"
+        assert 'data-filter="ledger"' in page, "срез по регистру с экрана недоступен вовсе"
+        assert "ledger=internal" not in page, "предложен регистр, которого роль не видит"
     finally:
         client.post("/logout/")
