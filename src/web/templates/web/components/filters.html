@@ -9,8 +9,9 @@
 Три вида ряда, собираются в `filter_links.py`:
 - `choices` без `label` — период: соседние месяцы по бокам от выбранного;
 - `choices` с `label` — ряд вариантов (точки, регистры, оплата);
-- `pick_url` — вариантов много: выбранное словами, «выбрать…» ведёт на страницу
-  выбора, «все» снимает отбор.
+- `pick_url` — вариантов много: тот же ряд капсул, но в нём только «все»
+  (снимает отбор), выбранное и «выбрать…» — на страницу выбора. Вид — как у
+  остальных рядов, чтобы ряд читался переключателем, а не подписью со ссылкой.
 
 Варианты приезжают готовыми и только из видимого роли (D023): компонент
 справочников не знает.
@@ -29,11 +30,11 @@
       {% endfor %}
     </nav>
     {% else %}
-    <span class="filters__pick">
-      <span class="filters__value" aria-current="true">{{ f.current }}</span>
-      <a href="{{ f.pick_url }}">{% translate "выбрать…" %}</a>
-      {% if f.is_set %}<a href="{{ f.reset_url }}">{{ f.everything }}</a>{% endif %}
-    </span>
+    <nav class="seg" aria-label="{{ f.label }}">
+      {% if f.is_set %}<a class="seg__item" href="{{ f.reset_url }}">{{ f.everything }}</a>{% endif %}
+      <span class="seg__current" aria-current="true">{{ f.current }}</span>
+      <a class="seg__item seg__item--pick" href="{{ f.pick_url }}">{% translate "выбрать…" %}</a>
+    </nav>
     {% endif %}
   </div>
   {% endfor %}

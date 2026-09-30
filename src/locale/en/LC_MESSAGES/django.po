@@ -4729,6 +4729,9 @@ msgstr "Find by name"
 msgid "Ничего не нашлось. Попробуйте часть названия."
 msgstr "Nothing found. Try part of the name."
 
+msgid "Сбросить поиск"
+msgstr "Clear search"
+
 #: web/templates/web/cash/expenses.html:185
 #: web/templates/web/suppliers/invoices.html:96
 msgid "Показать весь месяц"
