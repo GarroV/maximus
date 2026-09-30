@@ -29,10 +29,10 @@ from conftest import body, login_as
 
 
 def people_table(html: str) -> str:
-    """Вторая таблица экрана — «У кого какая роль»."""
-    parts = html.split("У кого какая роль", 1)
-    assert len(parts) == 2, "на экране нет таблицы людей"
-    return parts[1]
+    """Тело таблицы людей со страницы «Люди и их роли» (`/roles/people/`)."""
+    parts = html.split("<tbody>", 1)
+    assert len(parts) == 2, "на странице нет таблицы людей"
+    return parts[1].split("</tbody>", 1)[0]
 
 
 def test_the_viewer_is_always_in_the_list_so_it_is_never_empty(client):
@@ -44,7 +44,7 @@ def test_the_viewer_is_always_in_the_list_so_it_is_never_empty(client):
     """
     login_as(client, "admin")
     try:
-        shown = people_table(body(client.get("/roles/")))
+        shown = people_table(body(client.get("/roles/people/")))
         rows = re.findall(r"<tr>", shown)
         assert rows, "список людей пуст — значит пустое состояние всё-таки нужно"
     finally:
@@ -59,7 +59,7 @@ def test_the_screen_says_that_people_without_roles_are_not_listed(client):
     """
     login_as(client, "admin")
     try:
-        html = body(client.get("/roles/"))
+        html = body(client.get("/roles/people/"))
         assert "кому уже выдана хотя бы одна роль" in html, (
             "экран не говорит, что показывает только тех, у кого роли есть"
         )
