@@ -8466,10 +8466,6 @@ msgid "Шестая очередь продуктовой карты"
 msgstr "Sixth stage of the product map"
 
 #: web/stages.py
-msgid "Десятая очередь продуктовой карты"
-msgstr "Tenth stage of the product map"
-
-#: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Once payroll is complete"
 
@@ -8484,10 +8480,6 @@ msgstr "Uploading the bank statement and matching payments to supplier invoices:
 #: web/stages.py
 msgid "Что и когда ушло людям: ведомость к выплате, отметки о переводе, остаток задолженности по каждому человеку."
 msgstr "What went to people and when: the payout sheet, transfer marks, the remaining debt for each person."
-
-#: web/stages.py
-msgid "Стоимость труда и текучесть в динамике: как меняется ФОТ на точку, кто уходит и сколько стоит замена."
-msgstr "Labour cost and turnover over time: how payroll per unit changes, who leaves and what a replacement costs."
 
 #: web/stages.py
 msgid "Отработанные часы приезжают из Dodo IS вместо ручного ввода. Механизм подключения уже есть: каждый поток включается отдельно и по умолчанию выключен. Не хватает экрана и самого доступа к API."
@@ -8842,3 +8834,261 @@ msgstr "Salaried people are missing hours in the timesheet: %(people)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Ручная корректировка"
 msgstr "Manual correction"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s мес."
+msgstr "%(count)s mo."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s чел."
+msgstr "%(count)s people"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(since)s — %(until)s"
+msgstr "%(since)s — %(until)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "База"
+msgstr "Base"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без группы"
+msgstr "No group"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В этом месяце никто не вышел за свою норму часов."
+msgstr "No one went over their hours standard this month."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Всего"
+msgstr "Total"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выручки в продукте пока нет — она приедет с коннектором Dodo IS. До тех "
+"пор доля ФОТ от выручки показана прочерком: ноль в этой строке читался "
+"бы как посчитанный ответ."
+msgstr "There is no revenue in the product yet — it will arrive with the Dodo IS connector. Until then, payroll cost's share of revenue is shown as a dash: a zero in this row would read as a calculated answer."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля ФОТ от выручки: ждёт коннектора Dodo IS"
+msgstr "Payroll cost's share of revenue: waiting for the Dodo IS connector"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля в часах месяца"
+msgstr "Share of the month's hours"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "За показанные месяцы никто не уволился."
+msgstr "No one left during the shown months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кто вышел за норму"
+msgstr "Who went over standard"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кто уходит"
+msgstr "Who is leaving"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Начислено за месяц"
+msgstr "Accrued for the month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ни одного месяца с табелем или расчётом ещё нет. Аналитика появится, как "
+"только будет закрыт первый месяц."
+msgstr "There isn't a single month with a timesheet or a calculation yet. Analytics will appear as soon as the first month is closed."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Один лишний уход сдвигает показатель на несколько пунктов. Поэтому рядом "
+"с процентом всегда стоит база, а там, где база меньше %(base)s человек, "
+"процента нет вовсе — стоит «мало данных»."
+msgstr "One extra departure shifts the figure by several points. That's why the base always sits next to the percentage, and where the base is under %(base)s people, there is no percentage at all — it says \"not enough data\"."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отработал"
+msgstr "Worked"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "По группам"
+msgstr "By group"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "По точкам"
+msgstr "By unit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Приняли"
+msgstr "Hires"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Проценты здесь считаются от единиц людей"
+msgstr "Percentages here are counted per whole person, not by share"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверх нормы"
+msgstr "Over standard"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сверх нормы — это отработанные часы минус норма самого человека: у "
+"работающего на полставки она своя. Во что обошлись именно эти часы, "
+"экран не считает — коэффициент переработки в правилах страны помечен как "
+"непроверенный, и число по нему выглядело бы как знание. Рядом стоит "
+"начисление человека за месяц — то самое, что в ведомости."
+msgstr "Over standard is hours worked minus the person's own standard: someone working part-time has their own. The screen doesn't calculate what exactly these hours cost — the overtime coefficient in the country rules is marked unverified, and a number based on it would look like knowledge. Next to it is the person's accrual for the month — the same figure that's in the payroll sheet."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сейчас"
+msgstr "Now"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Средний срок работы ушедших: %(tenure)s"
+msgstr "Average tenure of those who left: %(tenure)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоимость труда"
+msgstr "Labour cost"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоимость часа"
+msgstr "Cost per hour"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Считать пока нечего"
+msgstr "Nothing to count yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Текучесть"
+msgstr "Turnover"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Текучесть считается как ушедшие за показанные месяцы к средней "
+"численности за них же. Переводы между точками уходом не считаются: уход "
+"— это увольнение, а перевод меняет только условия найма."
+msgstr "Turnover is calculated as those who left during the shown months against the average headcount over the same months. Transfers between units don't count as leaving: leaving means dismissal, while a transfer only changes the employment terms."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ушли"
+msgstr "Leavers"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ушли за показанные месяцы"
+msgstr "Left during the shown months"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ушёл"
+msgstr "Left"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ФОТ за период"
+msgstr "Payroll cost for the period"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ФОТ к выручке"
+msgstr "Payroll cost to revenue"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ФОТ на человека"
+msgstr "Payroll cost per person"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Фонд оплаты труда по месяцам"
+msgstr "Payroll cost by month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часов"
+msgstr "Hours"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часов сверх нормы"
+msgstr "Hours over standard"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часы и переработки"
+msgstr "Hours and overtime"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что показать"
+msgstr "What to show"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Что с этим делать — решает не отчёт. Переработка бывает дешевле, чем "
+"нанять человека на полставки, но только пока это не выгорание. Экран "
+"показывает часы и деньги и не предлагает вывод."
+msgstr "What to do about it isn't for the report to decide. Overtime can be cheaper than hiring someone part-time, but only until it turns into burnout. The screen shows the hours and the money and offers no conclusion."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выручка приедет с коннектором Dodo IS"
+msgstr "revenue will arrive with the Dodo IS connector"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "за %(month)s"
+msgstr "for %(month)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "мало данных"
+msgstr "not enough data"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "мало данных · база %(base)s"
+msgstr "not enough data · base %(base)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "от всех отработанных часов"
+msgstr "of all hours worked"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "поимённо — пока их можно назвать по именам"
+msgstr "by name — while there are few enough to list"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "ушло %(left)s из %(base)s в среднем"
+msgstr "%(left)s left out of %(base)s on average"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(over)s из %(heads)s"
+msgstr "%(over)s of %(heads)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(share)s от выручки %(revenue)s"
+msgstr "%(share)s of revenue %(revenue)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоило переработок"
+msgstr "Overtime cost"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "доля от выручки — выручки в продукте пока нет"
+msgstr "share of revenue — no revenue in the product yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "коэффициент переработки в правилах страны не проверен"
+msgstr "the overtime rate in the country rules is not verified"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "п.п."
+msgstr "pp"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "прошлого месяца в отчёте нет — сравнить не с чем"
+msgstr "no previous month in the report — nothing to compare with"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "против %(value)s (%(month)s)"
+msgstr "vs %(value)s (%(month)s)"

@@ -15,7 +15,7 @@
 |---|---|---|
 | `/` | `index` | `web.views.index` |
 | `/account/password/` | `password-change` | `web.views.password_change` |
-| `/analytics/people/` | `planned-people-analytics` | `web.planned_views.planned` |
+| `/analytics/people/` | `people-analytics` | `web.people_views.analytics` |
 | `/api/expenses/` | `api-expenses` | `web.api.expenses` |
 | `/api/expenses/<uuid:fact_id>/` | `api-expense` | `web.api.expense` |
 | `/api/expenses/<uuid:fact_id>/delete/` | `api-expense-delete` | `web.api.expense_delete` |

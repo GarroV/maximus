@@ -129,7 +129,7 @@ GROUPS = [
     Group(_("Отчёты"), [
         Item(_("P&L"), "reports-pnl"),
         Item(_("Сверка с таблицей"), "reports-reconcile"),
-        Item(_("Аналитика по людям"), "planned-people-analytics"),
+        Item(_("Аналитика по людям"), "people-analytics"),
     ]),
     Group(_("Справочники"), [
         # Сотрудники стоят пунктом только у того, у кого нет раздела

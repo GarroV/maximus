@@ -11,6 +11,7 @@ from . import (
     expenses_views,
     guide,
     papers_views,
+    people_views,
     person_views,
     planned_views,
     platform_views,
@@ -466,6 +467,10 @@ urlpatterns = [
     path("payroll/closing/", planned_views.closing, name="month-closing"),
     path("reports/pnl/", planned_views.pnl, name="reports-pnl"),
     path("reports/reconcile/", planned_views.reconcile, name="reports-reconcile"),
+    # Аналитика по кадрам (T167, модуль 12 эталона). Единственный отчёт, который
+    # НЕ живёт внутри периода: он отвечает на вопрос не про месяц, а про полгода,
+    # и выбор месяца на входе означал бы, что за него уже ответили.
+    path("analytics/people/", people_views.analytics, name="people-analytics"),
     # Экраны, которых ещё нет: маршруты собираются из того же списка, что и сами
     # страницы (`web/stages.py`), — иначе экран заводился бы в двух местах и
     # однажды был бы заведён в одном.
