@@ -8447,9 +8447,6 @@ msgstr "Bank statement"
 msgid "Выплаты"
 msgstr "Payouts"
 
-#: web/navigation.py
-msgid "Аналитика по людям"
-msgstr "People analytics"
 
 #: web/navigation.py
 msgid "Интеграция с Dodo IS"
@@ -8530,8 +8527,7 @@ msgid ""
 "  не дотягивает, и рядом написано, чего именно не хватает. «Разработка в\n"
 "  процессе» — экрана ещё нет, а вместо него страница с описанием, что "
 "здесь\n"
-"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» "
-"и\n"
+"  будет: так устроены «Банковская выписка», «Выплаты» и\n"
 "  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в левой панели, и "
 "плашкой\n"
 "  наверху самого экрана. Раздел без пометки готов."
@@ -8540,7 +8536,7 @@ msgstr ""
 "yet match what was designed, and the note beside it says what exactly is "
 "missing. “In development” means the screen does not exist yet — instead "
 "there is a page describing what will be here: that is how “Bank statement”, "
-"“Payouts”, “People analytics” and “Dodo IS integration” work. The mark "
+"“Payouts” and “Dodo IS integration” work. The mark "
 "appears both as a dot next to the item in the left panel and as a banner at "
 "the top of the screen itself. A section without a mark is ready."
 
@@ -9044,9 +9040,6 @@ msgstr "Hours over standard"
 msgid "Часы и переработки"
 msgstr "Hours and overtime"
 
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Что показать"
-msgstr "What to show"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
