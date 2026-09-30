@@ -7315,26 +7315,10 @@ msgid_plural "ждут разбора %(counter)s бумаг"
 msgstr[0] "%(counter)s paper is waiting to be sorted out"
 msgstr[1] "%(counter)s papers are waiting to be sorted out"
 
-#: web/templates/web/suppliers/inbox.html:141
-msgid "суммы со слов управляющих, в P&L их нет"
-msgstr "amounts as stated by managers, not in the P&L"
-
 #: web/templates/web/suppliers/inbox.html:151
 #: web/templates/web/suppliers/papers.html:42
 msgid "Сумма со слов"
 msgstr "Amount as stated"
-
-#: web/templates/web/suppliers/inbox.html:164
-msgid "Открыть бумагу"
-msgstr "Open the paper"
-
-#: web/templates/web/suppliers/inbox.html:170
-msgid "Бумаг на разбор нет."
-msgstr "There are no papers waiting to be sorted out."
-
-#: web/templates/web/suppliers/inbox.html:171
-msgid "Всё, что принесли с точек, разобрано."
-msgstr "Everything brought in from the units has been sorted out."
 
 #: web/templates/web/suppliers/invoice.html:32
 #, python-format
@@ -9214,3 +9198,59 @@ msgid ""
 "Набор точек этого сотрудника меняет роль, которой видны все точки "
 "партнёра. Обратитесь к оперативному директору или бухгалтеру."
 msgstr "The units of this employee can only be changed by a role that sees all of the partner's units. Contact the operations director or the accountant."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на "
+"бумаге."
+msgstr "One paper, several P&L items. The line items must add up to the amount on the paper."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Позиции счёта"
+msgstr "Line items of the invoice"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Позиции счёта %(number)s"
+msgstr "Line items of invoice %(number)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Позиция добавлена и учтена в периоде %(month)s."
+msgstr "Line item added and counted in the period %(month)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Позиция не добавлена."
+msgstr "Line item not added."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "их в P&L ещё нет, разбираются на своей странице"
+msgstr "they are not in the P&L yet and are sorted out on their own page"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не сходится с бумагой на %(left)s"
+msgstr "differs from the paper by %(left)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сумма позиций сходится с бумагой"
+msgstr "the line items add up to the paper"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "← К карточке: %(card)s"
+msgstr "← Back to %(card)s"
+
+#: web/templates/web/suppliers/invoice.html
+#, python-format
+msgid "%(counter)s позиция"
+msgid_plural "%(counter)s позиций"
+msgstr[0] "%(counter)s line item"
+msgstr[1] "%(counter)s line items"
+
+#: web/templates/web/suppliers/inbox.html
+#, python-format
+msgid "Бумаги с точек: ждёт разбора %(counter)s"
+msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
+msgstr[0] "Papers from the units: %(counter)s waiting to be sorted out"
+msgstr[1] "Papers from the units: %(counter)s waiting to be sorted out"

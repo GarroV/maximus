@@ -1,0 +1,75 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Позиции счёта: разбор бумаги на статьи (T204, модуль эталона 3; T232).
+
+Своей страницей, а не блоком карточки счёта (D081: одна страница — одна
+функция). Карточка правит сам счёт, здесь бумагу раскладывают на статьи: две
+формы записи денег на одном экране однажды перепутают.
+
+Одна бумага — несколько статей: накладная из Метро это еда и канцелярия, и в
+P&L это разные строки. Внизу таблицы стоит сверка суммы позиций с суммой на
+бумаге: без неё разложить можно, а потерянную позицию заметить нечем —
+расхождение всплывёт на сборке P&L, когда сходиться уже поздно.
+
+Ключ записи — скрытым полем: повторная отправка той же формы узнаётся по нему и
+не удваивает позицию.
+{% endcomment %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<p class="note"><a href="{{ card_url }}">{% blocktranslate with card=card_title %}← К карточке: {{ card }}{% endblocktranslate %}</a></p>
+<h1>{{ heading }}</h1>
+<p class="sub">{% translate "Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на бумаге." %}</p>
+
+{% if error %}
+{% translate "Позиция не добавлена." as not_saved %}
+{% notice "alert" title=not_saved %}{{ error }}{% endnotice %}
+{% endif %}
+{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "№" %}</th>
+      <th>{% translate "Что это" %}</th>
+      <th>{% translate "Статья расхода" %}</th>
+      <th>{% translate "Точка" %}</th>
+      <th class="num">{% translate "Сумма" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in positions %}
+    <tr data-amount="{{ row.amount_raw }}">
+      <td>{{ row.line_no }}</td>
+      <td>{{ row.title }}</td>
+      <td>{{ row.item }}</td>
+      <td>{{ row.unit }}</td>
+      <td class="{{ row.amount_text|numclass }}">{{ row.amount_text }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr data-difference="{{ difference_raw }}">
+      <th colspan="4">{% translate "Сумма позиций" %}</th>
+      <th class="{{ positions_text|numclass }}">{{ positions_text }}</th>
+    </tr>
+    <tr>
+      <th colspan="4">{% translate "По бумаге" %}</th>
+      <th class="{{ stated_text|numclass }}">{{ stated_text }}</th>
+    </tr>
+  </tfoot>
+</table>{% endscroll %}
+
+{% if balanced %}
+<p class="note">{% translate "Сумма позиций сходится с суммой на бумаге." %}</p>
+{% else %}
+{% translate "Позиции не сходятся с бумагой" as not_balanced %}
+{% notice "alert" title=not_balanced %}{% blocktranslate with left=difference_text %}Не сходится с позициями на {{ left }}: значит позицию потеряли или сумма в шапке набрана неверно.{% endblocktranslate %}{% endnotice %}
+{% endif %}
+
+<form class="card wide" method="post" action="{{ positions_url }}">{% csrf_token %}
+  <input type="hidden" name="entry_key" value="{{ entry_key }}">
+  <h2>{% translate "Добавить позицию" %}</h2>
+  {% include "web/directory/fields.html" with fields=position_fields %}
+  <p class="actions"><button type="submit" class="primary">{% translate "Добавить позицию" %}</button></p>
+</form>
+{% endblock %}
