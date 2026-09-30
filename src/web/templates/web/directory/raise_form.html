@@ -1,33 +1,54 @@
-{% load i18n %}
+{% extends "web/base.html" %}{% load ui i18n %}
 {% comment %}
-Индексация ставок (issue #181). Кнопка ведёт на предпросмотр, а не сразу на
-применение: отменить массовую правку нечем — тридцать заведённых версий
-пришлось бы снимать по одной.
+Индексация ставок группе (issue #181) — своя страница (D081, T228).
+
+Прежде форма раскрывалась `<details>` на списке групп, и это были две функции на
+одном экране: список справочника и массовая правка условий найма. Теперь в
+списке стоит ссылка сюда, а здесь — только индексация.
+
+Кнопка ведёт на предпросмотр, а не сразу на применение: отменить массовую правку
+нечем — тридцать заведённых версий пришлось бы снимать по одной.
+
+Отказ рисуется этой же страницей с тем, что человек уже ввёл: дату, проценты и
+группу он набирал руками, и терять их из-за ошибки в одном поле он не должен.
 {% endcomment %}
-<details class="card">
-  <summary><b>{% translate "Поднять ставки группе" %}</b></summary>
-  <p class="note">{% blocktranslate %}Каждому человеку группы будет заведена своя версия условий найма с выбранной даты. Сначала покажем, кого затронет.{% endblocktranslate %}</p>
-  <form method="post" action="{% url 'directory-groups-raise' %}" class="search row">
-    {% csrf_token %}
-    <input type="hidden" name="preview" value="1">
-    <p class="field">
-      <label for="raise-group">{% translate "Группа" %}</label>
-      <select id="raise-group" name="group" required>
-        {% for item in extra.groups %}<option value="{{ item.id }}">{{ item.title }}</option>{% endfor %}
-      </select>
-    </p>
-    <p class="field">
-      <label for="raise-from">{% translate "Действует с" %}</label>
-      <input type="date" id="raise-from" name="valid_from" required>
-    </p>
-    <p class="field">
-      <label for="raise-percent">{% translate "Проценты" %}</label>
-      <input type="text" inputmode="decimal" id="raise-percent" name="percent" placeholder="10">
-    </p>
-    <p class="field">
-      <label for="raise-amount">{% translate "или сумма" %}</label>
-      <input type="text" inputmode="decimal" id="raise-amount" name="amount" placeholder="25">
-    </p>
-    <button class="primary" type="submit">{% translate "Показать, кого затронет" %}</button>
-  </form>
-</details>
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<p class="note"><a href="{{ back_url }}">{% translate "← К группам" %}</a></p>
+<h1>{{ heading }}</h1>
+<p class="sub">{% blocktranslate %}Каждому человеку группы будет заведена своя версия условий найма с выбранной даты. Сначала покажем, кого затронет.{% endblocktranslate %}</p>
+
+{% if error %}
+{% translate "Ставки не изменены" as not_raised %}
+{% notice "alert" title=not_raised %}{{ error }}{% endnotice %}
+{% endif %}
+
+{% if groups %}
+<form method="post" action="{% url 'directory-groups-raise' %}" class="card">
+  {% csrf_token %}
+  <input type="hidden" name="preview" value="1">
+  <p class="field">
+    <label for="raise-group">{% translate "Группа" %}</label>
+    <select id="raise-group" name="group" required>
+      {% for item in groups %}<option value="{{ item.id }}"{% if item.selected %} selected{% endif %}>{{ item.title }}</option>{% endfor %}
+    </select>
+  </p>
+  <p class="field">
+    <label for="raise-from">{% translate "Действует с" %}</label>
+    <input type="date" id="raise-from" name="valid_from" value="{{ entered.valid_from }}" required>
+  </p>
+  <p class="field">
+    <label for="raise-percent">{% translate "Проценты" %}</label>
+    <input type="text" inputmode="decimal" id="raise-percent" name="percent" value="{{ entered.percent }}" placeholder="10">
+  </p>
+  <p class="field">
+    <label for="raise-amount">{% translate "или сумма" %}</label>
+    <input type="text" inputmode="decimal" id="raise-amount" name="amount" value="{{ entered.amount }}" placeholder="25">
+  </p>
+  <button class="primary" type="submit">{% translate "Показать, кого затронет" %}</button>
+</form>
+{% else %}
+{% translate "Групп нет." as no_groups %}
+{% notice "empty" title=no_groups %}{% translate "Поднимать ставки некому: сначала заведите группу." %} <a class="next" href="{% url 'directory-group-new' %}">{% translate "Завести группу" %}</a>{% endnotice %}
+{% endif %}
+{% endblock %}

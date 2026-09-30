@@ -14,6 +14,10 @@
 тридцать заведённых версий придётся снимать по одной. Поэтому продукт сперва
 показывает поимённо, кого затронет и как изменится ставка, — а список даёт
 проверить себя, чего «затронет 12 человек» не даёт.
+
+**Форма — своя страница** (D081, T228): `GET` этого адреса рисует её, `POST` —
+предпросмотр или применение. Прежде форма раскрывалась на списке групп; теперь
+там ссылка сюда.
 """
 from __future__ import annotations
 
@@ -23,13 +27,13 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods
 
-from core.models import EmployeeGroup, EmploymentTerm
+from core.models import EmploymentTerm
 
 from . import directory
 from .dbrefusal import BadInput, ConstraintRefused, saving
-from .directory_views import _date, _guard, _number
+from .directory_views import _date, _guard, _number, _visible_groups
 from .format import day, exact
 
 __all__ = ["raise_rates"]
@@ -47,15 +51,20 @@ def _new_rate(current: Decimal, percent: Decimal | None, amount: Decimal | None)
 
 
 @login_required
-@require_POST
+@require_http_methods(["GET", "POST"])
 def raise_rates(request):
     who, denied = _guard(request)
     if denied is not None:
         return denied
+    if request.method == "GET":
+        return _form_page(request, who)
 
     try:
         group_id = request.POST.get("group") or ""
-        group = EmployeeGroup.objects.filter(pk=group_id).first()
+        # Группа ищется среди видимых роли — тем же отбором, что и в списке
+        # формы: группа чужого регистра отвечает «такой нет», как несуществующая
+        # (D023).
+        group = _visible_groups(who).filter(pk=group_id).first()
         if group is None:
             raise BadInput(_("Такой группы нет."))
         valid_from = _date(request, "valid_from", _("Действует с"), required=True)
@@ -101,7 +110,7 @@ def raise_rates(request):
             "rows": rows,
             "percent": exact(percent) if percent else "",
             "amount": exact(amount) if amount else "",
-            "back_url": reverse("directory-groups"),
+            "back_url": reverse("directory-groups-raise"),
         })
 
     changed = 0
@@ -125,10 +134,29 @@ def raise_rates(request):
     return redirect(f"{reverse('directory-groups')}?raised={changed}")
 
 
-def _refusal(request, who, message: str, status: int):
-    """Отказ на своей странице: человек не должен терять введённое."""
-    return render(request, "web/directory/raise_refused.html", {
-        "heading": _("Ставки не изменены"),
-        "error": message,
+def _form_page(request, who, *, error: str = "", status: int = 200):
+    """Страница индексации: форма и, если был, отказ — с тем, что уже введено.
+
+    Одна функция на показ и на отказ: две сборки одной формы однажды покажут
+    разное. Введённое возвращается в поля — человек набирал дату и проценты
+    руками и терять их из-за ошибки в одном поле не должен.
+    """
+    entered = request.POST if request.method == "POST" else {}
+    chosen = str(entered.get("group") or "")
+    return render(request, "web/directory/raise_form.html", {
+        "heading": _("Поднять ставки группе"),
         "back_url": reverse("directory-groups"),
+        "error": error,
+        "groups": [
+            {"id": group.id, "title": group.title, "selected": str(group.id) == chosen}
+            for group in _visible_groups(who).order_by("title")
+        ],
+        "entered": {
+            name: entered.get(name, "") for name in ("valid_from", "percent", "amount")
+        },
     }, status=status)
+
+
+def _refusal(request, who, message: str, status: int):
+    """Отказ на странице формы: человек не должен терять введённое."""
+    return _form_page(request, who, error=message, status=status)
