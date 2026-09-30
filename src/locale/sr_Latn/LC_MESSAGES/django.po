@@ -9005,3 +9005,9 @@ msgid ""
 "У сотрудника доли всех точек нулевые — зарплату не на что разделить. "
 "Задайте доли на карточке сотрудника."
 msgstr "Svi udeli objekata ovog zaposlenog su nula, pa zaradu nije moguće podeliti. Unesite udele na kartici zaposlenog."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Набор точек этого сотрудника меняет роль, которой видны все точки "
+"партнёра. Обратитесь к оперативному директору или бухгалтеру."
+msgstr "Objekte ovog zaposlenog može da menja samo uloga koja vidi sve objekte partnera. Obratite se operativnom direktoru ili knjigovođi."

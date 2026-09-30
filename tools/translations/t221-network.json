@@ -46,5 +46,9 @@
   "У сотрудника доли всех точек нулевые — зарплату не на что разделить. Задайте доли на карточке сотрудника.": {
     "en": "All unit shares of this employee are zero, so the salary cannot be split. Set the shares on the employee card.",
     "sr": "Svi udeli objekata ovog zaposlenog su nula, pa zaradu nije moguće podeliti. Unesite udele na kartici zaposlenog."
+  },
+  "Набор точек этого сотрудника меняет роль, которой видны все точки партнёра. Обратитесь к оперативному директору или бухгалтеру.": {
+    "en": "The units of this employee can only be changed by a role that sees all of the partner's units. Contact the operations director or the accountant.",
+    "sr": "Objekte ovog zaposlenog može da menja samo uloga koja vidi sve objekte partnera. Obratite se operativnom direktoru ili knjigovođi."
   }
 }

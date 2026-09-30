@@ -73,7 +73,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
 
 from core.models import EmployeeUnit, EmploymentTerm, Payrun
@@ -508,11 +508,34 @@ def save_units(tenant_id, employee_id, *, valid_from: date, wanted: list[tuple])
         else:
             EmployeeUnit.objects.filter(pk=row.pk).update(valid_to=valid_from)
 
-    EmployeeUnit.objects.bulk_create([
-        EmployeeUnit(
-            tenant_id=tenant_id, employee_id=employee_id, unit_id=unit_id,
-            share=share, valid_from=valid_from, valid_to=edge,
-        )
-        for unit_id, share in wanted
-    ])
+    try:
+        with transaction.atomic():
+            EmployeeUnit.objects.bulk_create([
+                EmployeeUnit(
+                    tenant_id=tenant_id, employee_id=employee_id, unit_id=unit_id,
+                    share=share, valid_from=valid_from, valid_to=edge,
+                )
+                for unit_id, share in wanted
+            ])
+    except IntegrityError as refusal:
+        if _constraint_of(refusal) != NETWORK_ALONE:
+            raise
+        # Строку «вся сеть» видит только роль без ограничения по точкам
+        # (`0271`), а урезанная упирается в неё ограничением. Сырой отказ
+        # базы («период уже занят») сказал бы ей, что у человека есть скрытая
+        # привязка, и какая. Слова — без упоминания сети: кто может поменять
+        # набор, тот увидит его целиком.
+        raise DirectoryRefused(
+            _("Набор точек этого сотрудника меняет роль, которой видны все точки "
+              "партнёра. Обратитесь к оперативному директору или бухгалтеру.")
+        ) from refusal
     return UnitsChange(changed=True, previous=previous)
+
+
+# Ограничение «вся сеть не соседствует ни с чем» (`0271`).
+NETWORK_ALONE = "employee_units_network_alone"
+
+
+def _constraint_of(refusal: IntegrityError) -> str:
+    diagnosis = getattr(getattr(refusal, "__cause__", None), "diag", None)
+    return getattr(diagnosis, "constraint_name", "") or ""

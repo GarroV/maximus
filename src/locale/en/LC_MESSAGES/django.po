@@ -9170,3 +9170,9 @@ msgid ""
 "У сотрудника доли всех точек нулевые — зарплату не на что разделить. "
 "Задайте доли на карточке сотрудника."
 msgstr "All unit shares of this employee are zero, so the salary cannot be split. Set the shares on the employee card."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Набор точек этого сотрудника меняет роль, которой видны все точки "
+"партнёра. Обратитесь к оперативному директору или бухгалтеру."
+msgstr "The units of this employee can only be changed by a role that sees all of the partner's units. Contact the operations director or the accountant."
