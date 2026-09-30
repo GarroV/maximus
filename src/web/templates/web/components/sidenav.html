@@ -85,15 +85,17 @@
         {% endif %}
       </ul>
     {% endfor %}
-    {% comment %}
-    Легенда цветных точек состояния (issue #268): без неё точка у пункта
-    говорит только тому, кто навёл мышь. Рисуется, только когда точки в панели
-    есть, и только для тех цветов, что есть (`navigation._legend`).
-    {% endcomment %}
-    {% if nav_stages %}<ul class="sidenav__legend" aria-label="{% translate "Состояние" %}">{% for stage in nav_stages %}<li><span class="sidenav__stage sidenav__stage--{{ stage.kind }}" aria-hidden="true"></span>{{ stage.label }}</li>{% endfor %}</ul>{% endif %}
   </div>
 
   <div class="sidenav__foot">
+    {% comment %}
+    Легенда цветных точек состояния (issue #268): без неё точка у пункта
+    говорит только тому, кто навёл мышь. Рисуется, только когда точки в панели
+    есть, и только для тех цветов, что есть (`navigation._legend`). Стоит в
+    подвале, а не в конце списка: у администратора список длиннее окна, и
+    легенда в его конце не видна, пока не докрутишь (сверка T223).
+    {% endcomment %}
+    {% if nav_stages %}<ul class="sidenav__legend" aria-label="{% translate "Состояние" %}">{% for stage in nav_stages %}<li><span class="sidenav__stage sidenav__stage--{{ stage.kind }}" aria-hidden="true"></span>{{ stage.label }}</li>{% endfor %}</ul>{% endif %}
     {% comment %}
     Один служебный пункт вместо трёх (сверка с эталоном по T222, как
     «Настройки» в ядре). Пароль и гайд человек открывает редко, а место в
