@@ -42,10 +42,16 @@ FILES = [
     ("web/tokens.css", b"--canvas", "web/base.html"),
     ("web/app.css", b"var(--ink)", "web/base.html"),
     ("web/people.css", b"people-switch", "web/reports/people.html"),
+    # Ядро линейки и слой продукта из `GarroV/forma` (T222): в ядре живёт левая
+    # панель, и без него каркас продукта — голый список ссылок.
+    ("web/dodo-ds.css", b".sidenav", "web/base.html"),
+    ("web/domain.css", b"--reg-official", "web/base.html"),
     # Шрифты локально: внешние загрузки в проде запрещены, а без файла продукт
     # молча уезжает на системный шрифт — метрики другие, вёрстка «почти та же».
     ("web/fonts/golos-text-cyrillic.woff2", b"wOF2", "web/tokens.css"),
     ("web/fonts/ibm-plex-mono-400-latin.woff2", b"wOF2", "web/tokens.css"),
+    ("web/fonts/golos-text-cyrillic-ext.woff2", b"wOF2", "web/dodo-ds.css"),
+    ("web/fonts/ibm-plex-mono-latin-400.woff2", b"wOF2", "web/dodo-ds.css"),
 ]
 
 
