@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 
-from conftest import body, login_as
+from conftest import body, login_as, person_row
 
 
 def test_role_titles_follow_the_page_language(client, web_env):
@@ -59,3 +59,51 @@ def test_the_rights_matrix_is_a_grid_of_rights_by_roles(client, web_env):
     assert "Внутренний" in rows
     boxes = re.findall(r'<input type="checkbox" name="right:([a-z.]+)" form="rights-', html)
     assert len(boxes) >= len(set(boxes)) * 2, "галочки не разложены по столбцам ролей"
+
+
+def _person_page(client, name: str) -> str:
+    person = re.search(r"/roles/people/([0-9a-f-]+)/", person_row(
+        body(client.get("/roles/people/")), name))
+    assert person, f"человека «{name}» нет в списке"
+    return body(client.get(f"/roles/people/{person.group(1)}/"))
+
+
+def test_removing_a_role_says_what_the_person_loses(client, web_env):
+    """Прежде «Снять роль» не говорило, чего человек лишится: права видны были
+    только на соседней странице, а сложить их с другими ролями человек должен
+    был в уме."""
+    login_as(client, "admin")
+    html = _person_page(client, "Бухгалтер")
+    card = re.search(r'<form[^>]*class="card held-role".*?</form>', html, flags=re.S)
+    assert card, "нет карточки выданной роли"
+    assert "потеряет" in card.group(0)
+    assert "Расчёт периода" in card.group(0), "не названо, что уходит вместе с ролью"
+
+
+def test_granting_a_role_says_what_the_person_gains(client, web_env):
+    """Выдача старшей роли называет только новое — то, чего у человека нет."""
+    login_as(client, "admin")
+    html = _person_page(client, "Бухгалтер")
+    offers = re.search(r'<ul class="role-offers">.*?</ul>', html, flags=re.S)
+    assert offers, "не сказано, что даст каждая роль"
+    admin = re.search(r"<li[^>]*>\s*<b>Администратор сети</b>.*?</li>", offers.group(0), re.S)
+    assert admin and "Ведение ролей" in admin.group(0)
+    assert "Расчёт периода" not in admin.group(0), "названо то, что у человека уже есть"
+
+
+def test_a_loss_counts_only_what_no_other_role_of_the_person_gives():
+    """Роли складываются (D047): снять роль — потерять лишь то, чего нет в других."""
+    from types import SimpleNamespace
+
+    from web.roles_effects import role_effects
+
+    wide = SimpleNamespace(pk="a", code="x", title="Широкая",
+                           permissions=["payrun.calculate", "roles.manage"],
+                           visible_ledgers=["official", "internal"])
+    narrow = SimpleNamespace(pk="b", code="y", title="Узкая",
+                             permissions=["payrun.calculate"], visible_ledgers=["official"])
+    effects = role_effects(["a", "b"], [wide, narrow])
+    assert effects["loses"]["b"] == [], "названо как потеря то, что остаётся в другой роли"
+    assert "Ведение ролей" in effects["loses"]["a"]
+    assert "Расчёт периода" not in effects["loses"]["a"]
+    assert effects["offers"] == []

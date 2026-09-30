@@ -9154,3 +9154,35 @@ msgstr "ova uloga nikad nema takvo pravo: ako je osobi potrebno, dodelite joj st
 #: новые строки, добавлены tools/apply_translations.py
 msgid "этого права у роли не бывает"
 msgstr "ova uloga nikad nema ovo pravo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Если снять, человек ничего не потеряет: всё это есть в других его ролях."
+msgstr "Ako se ukloni, osoba ništa ne gubi: sve to daju njene druge uloge."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Если снять, человек потеряет:"
+msgstr "Ako se ukloni, osoba gubi:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сейчас у человека нет ни одного права — только просмотр того, что "
+"открывают его роли."
+msgstr "Trenutno osoba nema nijedno pravo — samo pregled onoga što otvaraju njene uloge."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сейчас человек может:"
+msgstr "Trenutno osoba može:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ничего нового: всё это у человека уже есть"
+msgstr "ništa novo: osoba sve to već ima"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "регистр «%(ledger)s»"
+msgstr "registar „%(ledger)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "человек получит:"
+msgstr "osoba dobija:"

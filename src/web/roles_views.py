@@ -67,6 +67,7 @@ from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, leads_one_unit
 from . import permissions
 from .principal import get_current_principal
 from .roles_display import rights_matrix, role_choice, shown_role_title
+from .roles_effects import role_effects
 
 # Права, которые можно выдать с экрана, — ВСЕ права продукта, а не их список
 # рядом (T203). Список здесь был своей копией, и она успела разъехаться: право
@@ -310,8 +311,18 @@ def _people_page(request, who, *, error: str = "", status: int = 200):
 
 
 def _person_page(request, who, person, *, error: str = "", status: int = 200):
+    roles = list(Role.objects.filter(tenant_id=who.tenant_id).order_by("title"))
+    effects = role_effects([str(held["id"]) for held in person["roles"]], roles)
+    shown = {
+        **person,
+        "roles": [
+            {**held, "loses": effects["loses"].get(str(held["id"]), [])}
+            for held in person["roles"]
+        ],
+    }
     return _show(request, "web/roles/person.html", "",
-                 {"person": person, **_choices(who)}, error=error, status=status)
+                 {"person": shown, "now": effects["now"], "offers": effects["offers"],
+                  **_choices(who)}, error=error, status=status)
 
 
 def _invite_page(request, who, *, error: str = "", status: int = 200):
