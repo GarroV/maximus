@@ -8227,10 +8227,6 @@ msgid ""
 msgstr "Osoba se odmah pojavljuje na spisku, već sa ulogom. Još ne može da se prijavi: kako osoba dobija prvu prijavu, za proizvod još nije odlučeno — do tada pristup otvara administrator platforme."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Человек с такой почтой уже заведён."
-msgstr "Osoba sa ovom e-poštom već postoji."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Что произошло"
 msgstr "Šta se dogodilo"
 
@@ -8997,3 +8993,9 @@ msgid ""
 "Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. "
 "Первым заведите того, кто ведёт партнёра целиком."
 msgstr "Uloga „%(role)s“ vodi jedan objekat, a novi prostor još nema objekata. Prvo dodajte osobu koja vodi celog partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в "
+"списке людей; если нет — проверьте адрес."
+msgstr "Ovu adresu nije moguće pozvati. Ako osoba već radi kod vas, nalazi se na spisku ljudi; ako ne — proverite adresu."

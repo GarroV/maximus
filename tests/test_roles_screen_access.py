@@ -106,8 +106,36 @@ def test_a_person_is_not_invited_twice_by_the_same_mail(client, web_env):
     }
     client.post("/roles/invite/", payload)
     response = client.post("/roles/invite/", payload)
-    assert response.status_code == 409
-    assert "уже" in body(response)
+    assert response.status_code == 400
+    assert "Эту почту пригласить нельзя" in body(response)
+
+
+def test_a_mail_of_another_partner_is_refused_the_same_way(client, web_env):
+    """Почта учётки чужого партнёра: тот же отказ, что у своей, — не 500 и не иной.
+
+    Учётку чужого партнёра политики не показывают, и прежде проверка её не
+    видела: вставка падала на уникальности почты ошибкой сервера. Разница
+    «ошибка / успех» и выдавала, что такая почта в системе есть. Теперь ответ
+    один на свою и на чужую — по нему не понять, чья это почта и есть ли она.
+    """
+    from core.models import Membership, User
+
+    elsewhere = User.objects.create_user(
+        username="elsewhere-m3@example.test", email="elsewhere-m3@example.test",
+        password="x-secret-1",
+    )
+    try:
+        login_as(client, "admin")
+        html = roles_pages(client)
+        response = client.post("/roles/invite/", {
+            "full_name": "Чужой", "email": "elsewhere-m3@example.test",
+            "role": role_option(html, "Бухгалтер"), "reason": "проверка",
+        })
+        assert response.status_code == 400
+        assert "Эту почту пригласить нельзя" in body(response)
+        assert not Membership.objects.filter(user_id=elsewhere.pk).exists()
+    finally:
+        elsewhere.delete()
 
 
 def test_only_the_one_who_leads_roles_invites(client, web_env):

@@ -55,7 +55,7 @@ from uuid import uuid4
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -505,6 +505,24 @@ def _insert_person(person_id, *, full_name: str, email: str) -> None:
         )
 
 
+def _mail_refused(request, who):
+    """Отказ по почте — один на «уже есть у вас» и «занята у другого партнёра».
+
+    Учётки чужих партнёров политики не показывают, поэтому проверка выше видит
+    только своих, а чужая почта всплывает на вставке. Отвечать по-разному значит
+    сообщать, что такая почта в системе есть — у кого-то. Поэтому текст и код
+    ответа одни, те же 400, что у прочих отказов ввода, и по ним нельзя понять
+    ни чья почта, ни есть ли она вовсе (решение блока, 30.09.2026; как D023).
+    Своего человека администратор найдёт в списке людей — туда текст и ведёт.
+    """
+    return _invite_page(
+        request, who,
+        error=_("Эту почту пригласить нельзя. Если человек уже работает у вас, "
+                "он есть в списке людей; если нет — проверьте адрес."),
+        status=400,
+    )
+
+
 @login_required
 def invite(request):
     """Завести человека партнёра и сразу дать ему роль (T188, issue #178).
@@ -544,11 +562,7 @@ def invite(request):
             status=400,
         )
     if User.objects.filter(email=email).exists() or User.objects.filter(username=email).exists():
-        return _invite_page(
-            request, who,
-            error=_("Человек с такой почтой уже заведён."),
-            status=409,
-        )
+        return _mail_refused(request, who)
 
     until, refused_term = _term(request)
     if refused_term:
@@ -559,8 +573,14 @@ def invite(request):
         return _invite_page(request, who, error=refused_unit, status=400)
 
     person_id = uuid4()
+    try:
+        with transaction.atomic():
+            _insert_person(person_id, full_name=full_name, email=email)
+    except IntegrityError:
+        # Почта занята учёткой, которую политики этому партнёру не показывают,
+        # — то есть чужой. Ответ тот же, что на свою (`_mail_refused`).
+        return _mail_refused(request, who)
     with transaction.atomic():
-        _insert_person(person_id, full_name=full_name, email=email)
         Membership.objects.create(
             tenant_id=who.tenant_id, user_id=person_id, role_id=role.pk, expires_at=until,
             unit_ids=unit_ids,

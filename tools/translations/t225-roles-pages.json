@@ -54,5 +54,9 @@
   "Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. Первым заведите того, кто ведёт партнёра целиком.": {
     "en": "The role “%(role)s” leads a single unit, and a new space has no units yet. Create someone who leads the whole partner first.",
     "sr": "Uloga „%(role)s“ vodi jedan objekat, a novi prostor još nema objekata. Prvo dodajte osobu koja vodi celog partnera."
+  },
+  "Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в списке людей; если нет — проверьте адрес.": {
+    "en": "This e-mail cannot be invited. If the person already works with you, they are in the list of people; if not, check the address.",
+    "sr": "Ovu adresu nije moguće pozvati. Ako osoba već radi kod vas, nalazi se na spisku ljudi; ako ne — proverite adresu."
   }
 }
