@@ -32,10 +32,7 @@
 
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 
-<form class="search row" method="get">
-  {% include "web/directory/fields.html" with fields=filters %}
-  <button type="submit">{% translate "Показать" %}</button>
-</form>
+{% include "web/components/filters.html" %}
 
 {% if rows %}
 {% scroll %}<table>
@@ -92,8 +89,8 @@
 {% if narrowed %}
 {% translate "Счетов нет." as empty %}
 {% notice "empty" title=empty %}<span data-total="{{ total_raw }}">{% blocktranslate %}Под выбранный отбор ничего не подошло. Снимите контрагента, регистр или
-состояние оплаты, либо раздвиньте даты — и станет видно всё, что есть за месяц.{% endblocktranslate %}</span>
-  <a class="btn next" href="{% url 'invoices' %}">{% translate "Показать весь месяц" %}</a>
+состояние оплаты, либо выберите другой месяц — и станет видно всё, что есть.{% endblocktranslate %}</span>
+  <a class="btn next" href="{{ reset_url }}">{% translate "Показать весь месяц" %}</a>
 {% endnotice %}
 {% else %}
 {% translate "За этот месяц счетов ещё нет" as empty %}
