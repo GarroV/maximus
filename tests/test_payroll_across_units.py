@@ -27,6 +27,7 @@ import pytest
 from conftest import body, login_as
 from test_closing_readiness import calculated  # noqa: F401
 from test_directory import sql  # noqa: F401
+from test_platform_admin_screens import platform_admin, spaces_restored  # noqa: F401
 
 
 @pytest.fixture(autouse=True)
@@ -423,3 +424,41 @@ def test_posting_under_the_app_role_without_a_person_is_refused(sql, calculated)
             posting.post(payrun)
 
     assert payrun_facts(sql) == 0, "проводка без человека записала строки"
+
+
+def test_a_new_space_finds_the_shared_payroll_rule(client, platform_admin, spaces_restored):  # noqa: F811
+    """Пространство, заведённое с экрана платформы, сразу видит правило «поровну».
+
+    Правило общее (`tenant_id` пуст, `0270`), поэтому заведение пространства
+    своего не создаёт — и не должно: четвёртый путь рождения партнёра молча
+    остался бы без него. Проверяется ролью `app_user` глазами первого человека
+    нового пространства — ровно так правило ищет разнесение его ФОТ сети.
+    """
+    from core.models import User
+    from web.dbcontext import db_context
+
+    login_as(client, "admin")
+    client.post("/platform/new/", {
+        "title": "Dodo Network Check", "code": "net-rule-check",
+        "country_code": "HR", "base_currency": "EUR", "report_currency": "EUR",
+        "admin_username": "net-rule-boss", "admin_full_name": "Первый человек",
+        "admin_password": "very-secret-1", "role_code": "admin",
+    })
+    client.post("/logout/")
+    first = User.objects.get(username="net-rule-boss")
+
+    with db_context(first.pk) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            """select pi.code from allocation_rules ar
+                 join pnl_items pi on pi.id = ar.pnl_item_id
+                where ar.tenant_id is null and ar.method = 'even'
+                  and ar.counterparty_id is null and ar.expense_item_id is null
+                  and ar.valid_from <= current_date
+                  and (ar.valid_to is null or ar.valid_to > current_date)
+                order by pi.code"""
+        )
+        seen = [code for (code,) in cursor.fetchall()]
+
+    assert seen == ["labour_cost", "payroll_taxes"], (
+        f"новое пространство не видит общего правила ФОТ сети: {seen}"
+    )
