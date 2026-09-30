@@ -1,0 +1,53 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Загрузка статей расходов файлом (T147, D041) — своя страница (D081, T228).
+
+Прежде форма стояла на самом справочнике, над таблицей: список и первичное
+наполнение одним экраном. Теперь в списке ссылка сюда, а здесь — только
+загрузка.
+
+Поля разреза (строка P&L, язык названий, дата начала) стоят рядом с кнопкой, а не
+прячутся в умолчаниях: они применяются ко всем строкам файла, где своих значений
+нет, и человек обязан их видеть до загрузки, а не узнавать по результату.
+
+Отказ по файлу рисуется этой же страницей с кодом 400: человек только что выбрал
+файл и должен выбрать другой, не возвращаясь назад руками. Итог удачной загрузки
+показывает список — там видно, что завелось.
+{% endcomment %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<p class="note"><a href="{{ back_url }}">{% translate "← К статьям расходов" %}</a></p>
+<h1>{{ heading }}</h1>
+<p class="sub">{{ about }}</p>
+
+{% if error %}
+{% translate "Не загружено." as not_loaded %}
+{% notice "alert" title=not_loaded %}{{ error }}{% endnotice %}
+{% endif %}
+
+<form class="upload card" method="post" action="{% url 'directory-expense-items-upload' %}" enctype="multipart/form-data">
+  {% csrf_token %}
+  <p class="field">
+    <label for="upload-file">{% translate "Файл бухгалтера (.xlsx)" %}</label>
+    <input type="file" id="upload-file" name="file" accept=".xlsx" required>
+  </p>
+  <p class="field">
+    <label for="upload-pnl">{% translate "Строка P&L для статей, где её нет в файле" %}</label>
+    <select id="upload-pnl" name="pnl_item">
+      <option value="">{% translate "Не задана — такие строки будут пропущены" %}</option>
+      {% for line in lines %}<option value="{{ line.id }}">{{ line.title }}</option>{% endfor %}
+    </select>
+  </p>
+  <p class="field">
+    <label for="upload-language">{% translate "Язык названий в файле" %}</label>
+    <select id="upload-language" name="language">
+      {% for language in languages %}<option value="{{ language.code }}"{% if language.selected %} selected{% endif %}>{{ language.title }}</option>{% endfor %}
+    </select>
+  </p>
+  <p class="field">
+    <label for="upload-from">{% translate "Статьи действуют с" %}</label>
+    <input type="date" id="upload-from" name="valid_from" value="{{ starts }}">
+  </p>
+  <button class="primary" type="submit">{% translate "Загрузить из файла" %}</button>
+</form>
+{% endblock %}

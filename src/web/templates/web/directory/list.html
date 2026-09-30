@@ -18,9 +18,7 @@
 шаблона не изменилось ни на строку — и это ровно то, ради чего оно так и
 написано: у читателя, который сотрудников не ведёт, кнопки по-прежнему нет.
 {% endcomment %}
-{% block title %}{{ heading }}
-{% if extra %}{% include extra.template %}{% endif %}
-{% endblock %}
+{% block title %}{{ heading }}{% endblock %}
 {% block content %}
 {% comment %}
 Ссылка возврата: по умолчанию — в справочники, но экран вправе назвать своё
@@ -47,37 +45,14 @@
 </form>
 {% endif %}
 
-{% if add_url %}
-<p><a class="btn" href="{{ add_url }}">{{ add_label }}</a></p>
-{% endif %}
-
 {% comment %}
-Загрузка справочника файлом (T147, D041). Рисуется только там, где представление
-дало `upload_url`: это первичное наполнение статей расходов списком бухгалтера, а
-не общая возможность всех пяти справочников. Поля разреза (строка P&L, язык
-названий, дата начала) стоят рядом с кнопкой, а не прячутся в умолчаниях: они
-применяются ко всем строкам файла, где своих значений нет, и человек обязан их
-видеть до загрузки, а не узнавать по результату.
+Действия справочника — ссылками на свои страницы (D081): заведение записи и,
+где есть, работа со справочником целиком (загрузка файлом, индексация ставок).
+Формы этих действий живут на своих адресах, а не раскрываются здесь: одна
+страница — одна функция, и список остаётся списком.
 {% endcomment %}
-{% if upload_url %}
-<form class="upload" method="post" action="{{ upload_url }}" enctype="multipart/form-data">
-  {% csrf_token %}
-  <p class="sub">{{ upload_about }}</p>
-  <label for="upload-file">{% translate "Файл бухгалтера (.xlsx)" %}</label>
-  <input type="file" id="upload-file" name="file" accept=".xlsx" required>
-  <label for="upload-pnl">{% translate "Строка P&L для статей, где её нет в файле" %}</label>
-  <select id="upload-pnl" name="pnl_item">
-    <option value="">{% translate "Не задана — такие строки будут пропущены" %}</option>
-    {% for line in upload_lines %}<option value="{{ line.id }}">{{ line.title }}</option>{% endfor %}
-  </select>
-  <label for="upload-language">{% translate "Язык названий в файле" %}</label>
-  <select id="upload-language" name="language">
-    {% for language in upload_languages %}<option value="{{ language.code }}"{% if language.selected %} selected{% endif %}>{{ language.title }}</option>{% endfor %}
-  </select>
-  <label for="upload-from">{% translate "Статьи действуют с" %}</label>
-  <input type="date" id="upload-from" name="valid_from" value="{{ upload_from }}">
-  <button type="submit">{{ upload_label }}</button>
-</form>
+{% if add_url or links %}
+<p class="actions">{% if add_url %}<a class="btn" href="{{ add_url }}">{{ add_label }}</a>{% endif %}{% for link in links %} <a class="btn" href="{{ link.url }}">{{ link.label }}</a>{% endfor %}</p>
 {% endif %}
 
 {% if rows %}
