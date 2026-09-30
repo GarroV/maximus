@@ -1,0 +1,32 @@
+{
+  "Люди и их роли": {"en": "People and their roles", "sr": "Ljudi i njihove uloge"},
+  "Показаны последние %(shown)s записей.": {
+    "en": "Showing the latest %(shown)s entries.",
+    "sr": "Prikazano je poslednjih %(shown)s zapisa."
+  },
+  "Права ролей": {"en": "Role rights", "sr": "Prava uloga"},
+  "Причина снятия роли «%(role)s»": {
+    "en": "Reason for removing the role “%(role)s”",
+    "sr": "Razlog za uklanjanje uloge „%(role)s“"
+  },
+  "Пусто — без срока.": {"en": "Empty means no end date.", "sr": "Prazno — bez roka."},
+  "Роли человека": {"en": "This person's roles", "sr": "Uloge ove osobe"},
+  "Снять роль «%(role)s»": {"en": "Remove the role “%(role)s”", "sr": "Ukloni ulogu „%(role)s“"},
+  "Страницы раздела «Роли и права»": {
+    "en": "Pages of the “Roles and rights” section",
+    "sr": "Stranice odeljka „Uloge i prava“"
+  },
+  "Такого человека у этого партнёра нет.": {
+    "en": "This partner has no such person.",
+    "sr": "Ovaj partner nema takvu osobu."
+  },
+  "Чтобы снять роль, напишите причину рядом с ней: она останется в истории\nрядом с вашим именем. Единственную роль снять нельзя — без неё человек войдёт\nи не увидит ничего.": {
+    "en": "To remove a role, write the reason next to it: it stays in the history next to your name. A person's only role cannot be removed — without it they would sign in and see nothing.",
+    "sr": "Da biste uklonili ulogu, upišite razlog pored nje: ostaje u istoriji pored vašeg imena. Jedinu ulogu osobe nije moguće ukloniti — bez nje bi se prijavila i ne bi videla ništa."
+  },
+  "← Все люди": {"en": "← All people", "sr": "← Svi ljudi"},
+  "← Люди пространства «%(title)s»": {
+    "en": "← People in the space “%(title)s”",
+    "sr": "← Ljudi u prostoru „%(title)s“"
+  }
+}

@@ -1,0 +1,12 @@
+{% load ui i18n %}{% comment %}
+Шапка страницы раздела ролей: заголовок, ряд ссылок на соседние страницы и
+сообщения (T225, D081).
+
+Ряд ссылок один на все страницы раздела и собирается в представлении
+(`roles_views.SECTIONS`): свой список в каждом шаблоне однажды разошёлся бы, и
+с одной из страниц исчезла бы дорога к другой.
+{% endcomment %}<h1>{{ title }}</h1>
+{% translate "Страницы раздела «Роли и права»" as sections_label %}
+{% include "web/components/cuts.html" with cuts=sections label=sections_label %}
+{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+{% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
