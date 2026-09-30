@@ -169,9 +169,9 @@ main:focus { outline: none; }
    подписей групп: она поясняет, а не называет раздел. Прокручивается вместе
    со списком, места в подвале не занимает. */
 .sidenav__legend {
-  display: flex; flex-direction: column; gap: var(--space-1);
-  margin: var(--space-4) 0 0; padding: var(--space-4) var(--space-5) 0;
-  border-top: 1px solid var(--line); list-style: none;
+  display: flex; flex-wrap: wrap; gap: 0 var(--space-5);
+  margin: var(--space-3) 0 0; padding: 0 var(--space-5);
+  list-style: none;
   font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-3);
 }
 .sidenav__legend li { display: flex; align-items: center; gap: var(--space-3); }
@@ -203,12 +203,12 @@ main:focus { outline: none; }
 /* Плотность списка. Требование сверки: у самых тяжёлых ролей
    (администратор, бухгалтер) все разделы влезают в экран 1440×900 без
    прокрутки панели. Ядро отдаёт группе 12 пикселей сверху — на пяти
-   группах это лишние три десятка пикселей; 8 по-прежнему отделяют группу
+   группах это лишние три десятка пикселей; 4 по-прежнему отделяют группу
    от предыдущего пункта. Промежутки в 2 пикселя между пунктами ядро
    ставит на случай соседних заливок; у пунктов по 34 пикселя и заливка
    только у текущего, так что их место отдано разделам: на двадцати
    строках это ещё сорок пикселей. */
-.sidenav__group { padding-top: var(--space-3); }
+.sidenav__group { padding-top: var(--space-2); }
 .sidenav__list, .sidenav__set { gap: 0; }
 .sidenav__brand { padding-top: var(--space-5); padding-bottom: var(--space-5); }
 .sidenav__list { padding-top: var(--space-4); padding-bottom: var(--space-4); }
@@ -259,7 +259,8 @@ main:focus { outline: none; }
    До issue #268 здесь были одни точки, различимые только цветом. Слово
    набрано цветом текста, а не регистра: мелкий цветной текст на панели
    читается хуже, а цвет уже несёт точка. */
-.sidenav__ledgers { display: flex; flex-wrap: wrap; gap: 0 var(--space-4); font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-2); }
+.sidenav__user { flex-wrap: wrap; }
+.sidenav__ledgers { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 0 var(--space-4); margin-top: calc(-1 * var(--space-2)); font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-2); }
 .sidenav__reg { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--ink-2); }
 .sidenav__reg::before { content: ""; flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .sidenav__reg.reg--official::before { background: var(--reg-official); }
@@ -323,14 +324,19 @@ main:focus { outline: none; }
     flex-direction: row; gap: 0; overflow-x: auto; overflow-y: hidden;
     padding: 0 0 env(safe-area-inset-bottom);
     background: var(--surface); border-top: 1px solid var(--line);
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
-    mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+    scroll-snap-type: x proximity;
   }
   .sidenav__list .sidenav__group { display: none; }
   .sidenav__set { flex-direction: row; gap: 0; }
   .sidenav__list .sidenav__item, .sidenav__list .sidenav__current {
     flex-direction: column; justify-content: center; gap: var(--space-1);
-    width: 88px; min-height: 60px; padding: var(--space-3) var(--space-3);
+    /* Ровно четыре пункта в окне и полоска пятого в гаснущем крае: пункт,
+       срезанный краем посередине слова, читался как обрезанная подпись
+       («Вед…», сверка T224), а полоска у края — как «дальше ещё». */
+    width: calc((100vw - 24px) / 4); min-height: 60px; padding: var(--space-3) var(--space-3);
+    scroll-snap-align: start;
     border-radius: 0; font-size: var(--fs-micro); line-height: 1.2; text-align: center;
   }
   .sidenav__list .sidenav__current { box-shadow: inset 0 2px 0 var(--accent); }
@@ -1682,6 +1688,12 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
   /* Плитки и полосы на 375: плитка одна в ряд, у полосы месяц и сумма
      сжимаются — иначе на саму полосу остаётся десяток пикселей и она перестаёт
      что-либо показывать. */
+  /* Первая колонка широкой таблицы — ключ строки (дата, имя, точка) — не
+     переносится: на 390 дата «12 июня 2026» ломалась в три строки, и строка
+     списка вырастала втрое (сверка T224). Таблица и так прокручивается
+     внутри себя, а ключ строки читается одним взглядом. */
+  .scroll td:first-child, .scroll th:first-child { white-space: nowrap; }
+
   .kpi { grid-template-columns: 1fr; }
   .chart__month { flex: 0 0 92px; }
   .chart__value { flex: 0 0 104px; }
@@ -1747,6 +1759,15 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
    reports, T222). Здесь он переносит пункты на следующую строку и не
    бывает шире родителя; ядро об этом — предложение в `GarroV/forma`. */
 .seg { flex-wrap: wrap; max-width: 100%; }
+/* Выбранная капсула в тёмной теме (сверка T224). Ядро красит её `--surface`,
+   а в тёмной теме он ТЕМНЕЕ дорожки `--seg-track`: выбранное отличалось от
+   соседей в основном жирностью. Здесь — рамкой и цветом акцента, как у
+   выбранного пункта панели. Правка общая для линейки — предложение в
+   `GarroV/forma`; до него перекрыто здесь. */
+:root[data-theme="dark"] .seg__current { color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .seg__current { color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+}
 
 /* ── Учётная запись (T222) ─────────────────────────────────────
    Кто вы и что вам видно — парами «название — значение», как карточка

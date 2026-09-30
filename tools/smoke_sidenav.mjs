@@ -7,9 +7,10 @@
  *
  *  - страница не едет вбок (поймано на 900: слой склада ставил body 1280);
  *  - открытый раздел помечен ровно один раз, раскрытий и списков в панели нет;
- *  - все разделы влезают без прокрутки панели на 1440×900 у самых тяжёлых
- *    ролей — администратора и бухгалтера — на всех трёх языках (сверка с
- *    эталоном по T222); на 768 результат записывается, но не валит прогон;
+ *  - все разделы влезают без прокрутки панели на 1440×900 у бухгалтера на
+ *    всех трёх языках (сверка с эталоном по T222); у администратора и на 768
+ *    результат записывается, но прокручиваемая панель обязана показывать
+ *    тень у края (T223, issue #268);
  *  - ни одна подпись не обрезана многоточием, и у каждой ссылки и кнопки
  *    панели есть имя для диктора;
  *  - на английской странице внизу панели нет роли по-русски (название
@@ -79,6 +80,9 @@ const probe = () => evalIn(`(() => {
     details: nav.querySelectorAll('details, select').length,
     navWidth: Math.round(nav.getBoundingClientRect().width),
     listOverflow: list.scrollHeight - list.clientHeight,
+    // Тень прокрутки — слой фона списка с \`scroll\` (см. app.css, «Тень у края
+    // списка»): без неё прокручиваемая панель выглядит законченной.
+    listShade: /scroll/.test(getComputedStyle(list).backgroundAttachment),
     groupsShown: [...nav.querySelectorAll('.sidenav__group')].filter(shown).length,
     whoShown: !!document.querySelector('.sidenav__who') && shown(document.querySelector('.sidenav__who')),
     cut, nameless,
@@ -184,8 +188,13 @@ for (const [k, v] of Object.entries(report)) {
   if (k.includes("tablet") && (!v.whoShown || !v.groupsShown)) bad.push(`${k}: на планшете не видно роли или групп`);
   if ((k.includes(" en ") || k.endsWith(" en")) && v.cyrillicWho) bad.push(`${k}: внизу панели русский на английской странице`);
   const heavy = HEAVY.some((r) => k.startsWith(r + " "));
-  if (heavy && k.includes("wide") && v.listOverflow > 0) bad.push(`${k}: разделы не влезают, панель прокручивается на ${v.listOverflow}px`);
-  if (heavy && k.includes("short")) notes.push(`${k}: ${v.listOverflow > 0 ? `прокрутка панели ${v.listOverflow}px` : "влезает"}`);
+  // Без прокрутки на 1440×900 обязан влезать бухгалтер — тот, кто работает
+  // в продукте каждый день. Администратору с T223 (issue #268) это больше не
+  // обещано: у него пятью разделами больше, панель прокручивается, и об этом
+  // говорит тень у края списка — её наличие и проверяется.
+  if (heavy && k.includes("wide") && v.listOverflow > 0 && !k.startsWith("admin ")) bad.push(`${k}: разделы не влезают, панель прокручивается на ${v.listOverflow}px`);
+  if (heavy && v.listOverflow > 0 && !v.listShade) bad.push(`${k}: панель прокручивается на ${v.listOverflow}px, а тени у края нет`);
+  if (heavy && (k.includes("short") || k.startsWith("admin "))) notes.push(`${k}: ${v.listOverflow > 0 ? `прокрутка панели ${v.listOverflow}px` : "влезает"}`);
 }
 for (const [name, s] of shots) if (s.skipVisible) bad.push(`${name}: на снимке видна «К содержанию»`);
 console.log(notes.join("\n"));
