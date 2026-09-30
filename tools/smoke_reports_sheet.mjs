@@ -9,7 +9,7 @@
  * Отдельно проверяется ширина: ведомость на 1440 не должна двигать страницу по
  * горизонтали (Definition of Done блока reports).
  *
- *     google-chrome --headless=new --remote-debugging-port=9339 \
+ *     chrome-for-testing --headless=new --remote-debugging-port=9339 \
  *         --user-data-dir=/tmp/chrome-smoke-rep &
  * Стенд смоук приводит к сиду сам — и в начале, и после себя (см. договор в
  * шапке `cdp.mjs`). Поэтому запускать его можно в любом порядке и в одиночку,

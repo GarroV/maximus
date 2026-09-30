@@ -1,0 +1,14 @@
+{
+  "У окладников в табеле не все часы месяца: %(people)s": {
+    "en": "Salaried people are missing hours in the timesheet: %(people)s",
+    "sr": "Zaposlenima na platu nedostaju sati u evidenciji: %(people)s"
+  },
+  "%(person)s — %(hours)s ч на %(money)s": {
+    "en": "%(person)s — %(hours)s h worth %(money)s",
+    "sr": "%(person)s — %(hours)s h u vrednosti %(money)s"
+  },
+  "Оклад платится полностью, только если в табеле стоят все часы месяца — отработанные, отпуск, больничный. Незаполненные часы молча уменьшают выплату против контракта. Проставьте тип часов или отложите находку с причиной.": {
+    "en": "A salary is paid in full only when every hour of the month is in the timesheet — worked, leave, sick. Missing hours quietly cut the payment below the contract. Fill in the hour type or postpone this finding with a reason.",
+    "sr": "Plata se isplaćuje u celosti samo ako su u evidenciji svi sati meseca — radni, odmor, bolovanje. Neupisani sati tiho smanjuju isplatu ispod ugovora. Upišite tip sati ili odložite nalaz uz razlog."
+  }
+}

@@ -74,7 +74,8 @@ def root_commits(call, cd: str) -> set[str]:
     Корневой коммит переименование не меняет.
     """
     out = call(f"{cd} git rev-list --max-parents=0 HEAD")
-    return {line.strip() for line in out.splitlines() if re.fullmatch(r"[0-9a-f]{7,40}", line.strip())}
+    lines = (line.strip() for line in out.splitlines())
+    return {line for line in lines if re.fullmatch(r"[0-9a-f]{7,40}", line)}
 
 
 def discover(call, is_remote: bool) -> tuple[str, str]:

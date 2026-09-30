@@ -31,6 +31,8 @@ STYLESHEETS = (
     # знать, иначе он объявил бы «голым HTML» всю печатную разметку сразу.
     ROOT / "src/web/static/web/print.css",
     ROOT / "src/timesheets/static/timesheets/grid.css",
+    # Аналитика по людям — свой лист: app.css в волне ведёт блок visual.
+    ROOT / "src/web/static/web/people.css",
 )
 
 # Классы без оформления по замыслу: крючки для htmx и для проверок. Каждый
