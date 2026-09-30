@@ -133,11 +133,11 @@ def test_the_current_section_is_not_a_link(client, web_env):
 
 
 def test_a_nested_screen_keeps_its_section_highlighted(client, web_env):
-    """Карточка платежа лежит под своим корнем адреса, а раздел — инбокс."""
+    """Карточка платежа лежит под своим корнем адреса, а раздел — счета."""
     login_as(client, "accountant")
     nav = sections_of(body(client.get("/payments/new/")))
 
-    assert 'class="sidenav__item" href="/inbox/"' not in nav, (
+    assert 'class="sidenav__item" href="/invoices/"' not in nav, (
         "на вложенном экране раздел снова стал ссылкой"
     )
     assert '<span class="sidenav__current" aria-current="page"' in nav
@@ -162,12 +162,15 @@ def test_the_section_of_another_root_is_not_highlighted(client, web_env):
     [
         ("/periods/", "/periods/", True),
         # Вложенные экраны остаются в своём разделе: след расчёта и табель
-        # открываются из ведомости, карточка платежа и инбокс — из счетов.
+        # открываются из ведомости, карточка платежа — из счетов. У инбокса и
+        # счетов с 30.09.2026 по пункту в панели (issue #268), и инбокс уже
+        # не выделяет счета.
         ("/periods/1234/", "/periods/", True),
         ("/payslips/1234/trace/", "/periods/", True),
         ("/timesheets/1234/", "/periods/", True),
         ("/payments/new/", "/invoices/", True),
-        ("/inbox/", "/invoices/", True),
+        ("/inbox/", "/invoices/", False),
+        ("/papers/1234/", "/inbox/", True),
         # Чужой раздел — не выделяется. `/expenses/` и `/invoices/` близкие по
         # смыслу, но это два разных экрана и два разных корня.
         ("/expenses/", "/invoices/", False),

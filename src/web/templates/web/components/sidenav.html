@@ -146,12 +146,13 @@
     <div class="sidenav__who">
       <span class="sidenav__whoami">{% if not principal.display_name|is_role_name:principal.role_title %}<b>{{ principal.display_name }}</b>{% endif %}{% if principal.role_title %}{% role_badge principal.role_title %}{% endif %}</span>
       <span class="sidenav__meta">{% if principal.tenant_title %}<span>{{ principal.tenant_title }}</span>{% endif %}{% if principal.units_title %}<span title="{% translate "Данные и итоги на всех страницах — только по этой точке" %}">{% blocktranslate with code=principal.units_title %}точка: {{ code }}{% endblocktranslate %}</span>{% endif %}</span>
-      {% if visible_ledgers %}<span class="sidenav__ledgers" role="list" aria-label="{% translate "Видимые регистры" %}">{% for name in visible_ledgers %}<span class="sidenav__reg reg--{{ name.code }}" role="listitem">{{ name }}</span>{% endfor %}</span>{% endif %}
     </div>
     <form class="sidenav__form sidenav__logout" method="post" action="{% url 'logout' %}">{% csrf_token %}
       {% translate "Выйти" as logout_label %}
       <button class="sidenav__item" type="submit" title="{{ logout_label }}" aria-label="{{ logout_label }}">{% icon "arrow" %}<span class="sidenav__label" aria-hidden="true">{{ logout_label }}</span></button>
     </form>
+    {% comment %}Регистры — последней строкой во всю ширину подвала, под именем и выходом: в колонке рядом с кнопкой выхода три слова вставали в три строки.{% endcomment %}
+    {% if visible_ledgers %}<span class="sidenav__ledgers" role="list" aria-label="{% translate "Видимые регистры" %}">{% for name in visible_ledgers %}<span class="sidenav__reg reg--{{ name.code }}" role="listitem">{{ name }}</span>{% endfor %}</span>{% endif %}
   </div>
   {% endif %}
 </nav>

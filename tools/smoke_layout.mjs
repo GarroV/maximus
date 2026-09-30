@@ -149,10 +149,10 @@ const probe = (phone) => evalIn(`(() => {
     const fills = new Set([...lastRow.cells].filter(shown).map((th) => { let bg = cs(th).backgroundColor; if (bg === 'rgba(0, 0, 0, 0)') bg = cs(lastRow).backgroundColor; if (bg === 'rgba(0, 0, 0, 0)') bg = cs(head).backgroundColor; return bg; }));
     if (fills.size > 1) r.thFill.push(name(t).slice(0, 40) + ' ' + [...fills].join(' / '));
   }
-  // Кнопка поля файла — шрифтом продукта, а не системным: так видно, что
-  // правило продукта до неё доехало (нативная берёт шрифт браузера).
-  const bodyFont = cs(document.body).fontFamily;
-  r.file = [...main.querySelectorAll('input[type=file]')].filter((i) => shown(i) && getComputedStyle(i, '::file-selector-button').fontFamily !== bodyFont).length;
+  // Кнопка поля файла оформлена продуктом: у нативной курсор обычный, у
+  // оформленной — рука, как у любой кнопки продукта.
+  r.file = [...main.querySelectorAll('input[type=file]')].filter((i) => shown(i) && getComputedStyle(i, '::file-selector-button').cursor !== 'pointer').length;
+  r.files = main.querySelectorAll('input[type=file]').length;
   if (${phone}) {
     r.headTop = Math.round(mr.top + window.scrollY);
     const bar = document.querySelector('.sidenav__list');
