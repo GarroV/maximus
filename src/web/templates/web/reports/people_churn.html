@@ -97,6 +97,7 @@
 </table>{% endscroll %}
 <p class="note">{% blocktranslate with tenure=avg_tenure %}Средний срок работы ушедших: {{ tenure }}{% endblocktranslate %}</p>
 {% else %}
-{% notice "empty" %}{% translate "За показанные месяцы никто не уволился." %}{% endnotice %}
+{% translate "Увольнений не было" as no_leavers %}
+{% notice "empty" title=no_leavers %}{% translate "За показанные месяцы никто не уволился." %}{% endnotice %}
 {% endif %}
 {% endblock %}
