@@ -4882,10 +4882,6 @@ msgstr "Printable payroll sheet"
 msgid "Основная навигация"
 msgstr "Main navigation"
 
-#: web/templates/web/components/header.html:148
-msgid "как это работает"
-msgstr "how this works"
-
 #: web/templates/web/components/header.html:164
 msgid "Как в системе"
 msgstr "Follow the system"
@@ -4904,10 +4900,6 @@ msgid ""
 msgstr ""
 "The login page has quick sign-in buttons for seed accounts (DEV_LOGIN=1)"
 
-#: web/templates/web/components/header.html:191
-msgid "dev-вход"
-msgstr "dev login"
-
 #: web/templates/web/components/header.html:204
 msgid "Данные и итоги на всех страницах — только по этой точке"
 msgstr "Data and totals on all pages — for this unit only"
@@ -4917,13 +4909,37 @@ msgstr "Data and totals on all pages — for this unit only"
 msgid "точка: %(code)s"
 msgstr "unit: %(code)s"
 
-#: web/templates/web/components/header.html:207
-msgid "пароль"
-msgstr "password"
+#: web/templates/web/components/sidenav.html:134
+msgid "Выйти"
+msgstr "Log out"
 
-#: web/templates/web/components/header.html:209
-msgid "выйти"
-msgstr "log out"
+#: web/templates/web/components/sidenav.html
+msgid "Учётная запись"
+msgstr "Account"
+
+#: web/templates/web/account.html
+msgid "Кто вы в продукте и что вам видно. Один и тот же экран показывает разным людям разные числа."
+msgstr "Who you are in the product and what you can see. The same screen shows different people different numbers."
+
+#: web/templates/web/account.html
+msgid "Видимые регистры"
+msgstr "Visible ledgers"
+
+#: web/templates/web/account.html
+msgid "Сменить пароль"
+msgstr "Change password"
+
+#: web/templates/web/components/sidenav.html:84
+msgid "Тема"
+msgstr "Theme"
+
+#: web/templates/web/components/sidenav.html:97
+msgid "Язык"
+msgstr "Language"
+
+#: web/templates/web/base.html:69
+msgid "К содержанию"
+msgstr "Skip to content"
 
 #: web/templates/web/components/header.html:212 web/templates/web/login.html:61
 msgid "войти"
@@ -5488,11 +5504,11 @@ msgid ""
 "Роль — это набор прав, и у каждого набора своя работа и свой первый\n"
 "  экран. Один и тот же экран показывает разным людям разные числа, поэтому "
 "в\n"
-"  шапке всегда написано, чьими глазами вы смотрите."
+"  левой панели всегда написано, чьими глазами вы смотрите."
 msgstr ""
 "A role is a set of rights, and each set has its own job and its own first\n"
 "  screen. The same screen shows different numbers to different people, so\n"
-"  the header always says whose eyes you are looking through."
+"  the left panel always says whose eyes you are looking through."
 
 #: web/templates/web/guide.html:171
 msgid ""
@@ -5576,23 +5592,23 @@ msgid ""
 "Права режет сама база, а не экран. Строку, которой роль не видит, она не\n"
 "  получит ни на странице, ни в выгрузке, ни через API — поэтому раздел, "
 "которого\n"
-"  у роли нет, в шапке не показывается вовсе, а не отвечает отказом по "
-"нажатию."
+"  у роли нет, в левой панели не показывается вовсе, а не отвечает отказом "
+"по нажатию."
 msgstr ""
 "Rights are cut by the database itself, not the screen. A row a role cannot\n"
 "  see will not reach it on the page, in an export, or through the API —\n"
-"  so a section the role does not have is not even shown in the header, "
+"  so a section the role does not have is not even shown in the left panel, "
 "rather\n"
 "  than refusing you after you click it."
 
 #: web/templates/web/guide.html:202
 msgid ""
 "Кому что выдано и что из этого следует — раздел «Роли и права». Он открыт\n"
-"  тому, у кого есть право вести роли; остальным его в шапке не видно."
+"  тому, у кого есть право вести роли; остальным его в левой панели не видно."
 msgstr ""
 "Who has been given what, and what follows from it, lives in the “Roles and "
-"rights” section. It is open to whoever has the right to manage roles; others "
-"do not see it in the header at all."
+"rights” section. It is open to whoever has the right to manage roles; "
+"others do not see it in the left panel at all."
 
 #: web/templates/web/guide.html:208
 msgid "Наличные, расходы и поставщики"
@@ -5614,14 +5630,15 @@ msgstr ""
 
 #: web/templates/web/guide.html:213
 msgid ""
-"В шапке это два раздела: «Наличные расходы» — то, что вышло из кассы точки,\n"
+"В левой панели это два раздела: «Наличные расходы» — то, что вышло из кассы "
+"точки,\n"
 "  и «Инбокс документов» — очередь того, что продукт не смог отнести сам.\n"
 "  Список счетов открывается из инбокса и живёт в том же разделе."
 msgstr ""
-"In the header these are two sections: “Cash expenses” — what left a unit's "
-"till — and “Document inbox” — the queue of what the product could not "
-"classify by itself. The list of invoices opens from the inbox and lives in "
-"the same section."
+"In the left panel these are two sections: “Cash expenses” — what left a "
+"unit's till — and “Document inbox” — the queue of what the product could "
+"not classify by itself. The list of invoices opens from the inbox and lives "
+"in the same section."
 
 #: web/templates/web/guide.html:219
 msgid "Расход из кассы."
@@ -5786,16 +5803,18 @@ msgstr ""
 #: web/templates/web/guide.html:287
 #, python-format
 msgid ""
-"Вам сейчас видно: %(names)s. Тот же список стоит в шапке на каждой странице."
+"Вам сейчас видно: %(names)s. Тот же список — цветными точками внизу левой "
+"панели и словами на странице «Учётная запись»."
 msgstr ""
-"You can currently see: %(names)s. The same list is shown in the header on\n"
-"every page."
+"You can currently see: %(names)s. The same list is shown as coloured dots at "
+"the bottom of the left panel and in words on the Account page."
 
 #: web/templates/web/guide.html:289
-msgid "Какие регистры видны именно вам, будет написано в шапке после входа."
+msgid ""
+"Какие регистры видны именно вам, будет написано в левой панели после входа."
 msgstr ""
-"Which ledgers are visible to you specifically will be shown in the header "
-"once you log in."
+"Which ledgers are visible to you specifically will be shown in the left "
+"panel once you log in."
 
 #: web/templates/web/guide.html:295
 msgid "С чего начать"
@@ -8509,12 +8528,21 @@ msgstr "Sorting in two hands: the director allocates, the accountant confirms"
 msgid ""
 "Часть разделов помечена. «Доработка» — экран работает, но до задуманного\n"
 "  не дотягивает, и рядом написано, чего именно не хватает. «Разработка в\n"
-"  процессе» — экрана ещё нет, а вместо него страница с описанием, что здесь\n"
-"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» и\n"
-"  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в шапке, и плашкой\n"
+"  процессе» — экрана ещё нет, а вместо него страница с описанием, что "
+"здесь\n"
+"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» "
+"и\n"
+"  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в левой панели, и "
+"плашкой\n"
 "  наверху самого экрана. Раздел без пометки готов."
 msgstr ""
-"Some sections are marked. “Refining” means the screen works but does not yet match what was designed, and the note beside it says what exactly is missing. “In development” means the screen does not exist yet — instead there is a page describing what will be here: that is how “Bank statement”, “Payouts”, “People analytics” and “Dodo IS integration” work. The mark appears both as a dot next to the item in the header and as a banner at the top of the screen itself. A section without a mark is ready."
+"Some sections are marked. “Refining” means the screen works but does not "
+"yet match what was designed, and the note beside it says what exactly is "
+"missing. “In development” means the screen does not exist yet — instead "
+"there is a page describing what will be here: that is how “Bank statement”, "
+"“Payouts”, “People analytics” and “Dodo IS integration” work. The mark "
+"appears both as a dot next to the item in the left panel and as a banner at "
+"the top of the screen itself. A section without a mark is ready."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
