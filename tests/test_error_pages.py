@@ -74,8 +74,8 @@ def test_a_missing_address_answers_with_a_page_of_the_product(client, web_env, d
 
     assert response.status_code == 404, response.status_code
     # Признак страницы продукта — марка в левой панели (до T222 — в шапке).
-    # Не `<header`: техническая страница Django тоже начинается с `<header id="summary">`, и проверка по
-    # тегу зеленела бы ровно на том, ради чего написана.
+    # Не `<header`: техническая страница Django тоже начинается
+    # с `<header id="summary">`, и проверка по тегу зеленела бы ровно на том, ради чего написана.
     assert 'class="sidenav__brand"' in html, "на странице нет панели продукта"
     assert 'href="/periods/"' in html, "с отказа некуда уйти: нет дороги в работу"
     for word in TECHNICAL:
