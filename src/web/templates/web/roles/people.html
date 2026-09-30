@@ -41,7 +41,7 @@
       <td data-label="{% translate "Человек" %}"><a href="{% url 'person-roles' person.user_id %}">{{ person.who }}</a>{% if person.mail %}<br><span class="note">{{ person.mail }}</span>{% endif %}</td>
       <td data-label="{% translate "Роли" %}">{% for held in person.roles %}<span class="chip">{{ held.title }}{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</span> {% endfor %}</td>
       <td data-label="{% translate "Точка" %}">{% if person.all_units %}{% translate "все точки" %}{% else %}{{ person.units|join:", " }}{% endif %}</td>
-      <td data-label="{% translate "Последний вход" %}">{% if person.seen %}{{ person.seen|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="note">{% translate "не входил" %}</span>{% endif %}</td>
+      <td data-label="{% translate "Последний вход" %}">{% if person.seen %}{{ person.seen|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">{% translate "не входил" %}</span>{% endif %}</td>
     </tr>
     {% endfor %}
   </tbody>

@@ -699,14 +699,23 @@ table.matrix tfoot button { padding: 0 var(--space-3); min-width: 0; }
    точки акцентный, как у включённой галочки: смысл тот же, «есть у роли». */
 .wall { font-family: var(--font-num); color: var(--ink-empty); cursor: default; }
 .granted-mark { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
-.matrix-legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
+p.note.matrix-legend {
+  display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6);
+  margin: var(--space-2) 0 var(--space-4);
+}
 .matrix-legend > span { display: inline-flex; align-items: center; gap: var(--space-2); }
-.matrix-legend input { margin: 0; accent-color: var(--accent); }
+/* Флажок легенды — тот же, что в сетке, а не серый выключенный: легенда
+   объясняет то, что человек видит в таблице. Нажать его нельзя. */
+.matrix-legend input { margin: 0; accent-color: var(--accent); pointer-events: none; }
+table.matrix thead small { display: block; font-size: 10px; line-height: 12px; color: var(--ink-3);
+  font-weight: var(--w-regular); text-transform: none; letter-spacing: 0; }
 
 /* Роль, которая у человека уже есть: карточка со сроком, причиной снятия и
-   кнопкой. Карточки идут столбиком с отбивкой, как строки списка; раскладку
-   внутри даёт `.card`. */
-.held-role { margin-bottom: var(--space-4); }
+   кнопкой. Карточки идут столбиком с отбивкой, как строки списка; ширина — как
+   у формы выдачи ниже, а не узкая карточка входа. */
+form.card.held-role { max-width: 860px; margin-bottom: var(--space-4); }
+.held-role .note { margin-top: 0; }
+.held-role button { margin-top: var(--space-4); }
 /* Что даст каждая роль — короткий список над формой выдачи: название роли
    жирным, дальше только то, чего у человека ещё нет. */
 .role-offers { margin: 0 0 var(--space-5); padding-left: var(--space-6); display: grid; gap: var(--space-2); font-size: var(--fs-body); }
@@ -733,6 +742,7 @@ table.matrix tfoot button { padding: 0 var(--space-3); min-width: 0; }
     position: relative; min-height: 0; height: auto;
     padding: var(--space-1) 0 var(--space-1) 40%; border: 0; text-align: left;
   }
+  table.stack td:not([data-label]) { padding-left: 0; }
   table.stack td[data-label]::before {
     content: attr(data-label); position: absolute; left: 0; top: var(--space-1); width: 38%;
     font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro);

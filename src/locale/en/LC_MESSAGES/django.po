@@ -9417,3 +9417,23 @@ msgid "Бумаги с точек: ждёт разбора %(counter)s"
 msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
 msgstr[0] "Papers from the units: %(counter)s waiting to be sorted out"
 msgstr[1] "Papers from the units: %(counter)s waiting to be sorted out"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не может:"
+msgstr "Cannot:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "бухгалтер"
+msgstr "accountant"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "директор"
+msgstr "director"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "партнёр"
+msgstr "partner"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "точка"
+msgstr "unit"

@@ -118,5 +118,25 @@
   "Выгрузить всю историю (CSV)": {
     "en": "Download the whole history (CSV)",
     "sr": "Preuzmi celu istoriju (CSV)"
+  },
+  "партнёр": {
+    "en": "partner",
+    "sr": "partner"
+  },
+  "директор": {
+    "en": "director",
+    "sr": "direktor"
+  },
+  "бухгалтер": {
+    "en": "accountant",
+    "sr": "knjigovođa"
+  },
+  "точка": {
+    "en": "unit",
+    "sr": "objekat"
+  },
+  "Не может:": {
+    "en": "Cannot:",
+    "sr": "Ne može:"
   }
 }

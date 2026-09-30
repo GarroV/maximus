@@ -335,7 +335,8 @@ def _person_page(request, who, person, *, error: str = "", status: int = 200):
         ],
     }
     return _show(request, "web/roles/person.html", "",
-                 {"person": shown, "now": effects["now"], "offers": effects["offers"],
+                 {"person": shown, "now": effects["now"], "cannot": effects["cannot"],
+                  "offers": effects["offers"],
                   **_choices(who)}, error=error, status=status)
 
 
