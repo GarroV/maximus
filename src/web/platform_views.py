@@ -33,6 +33,8 @@
 """
 from __future__ import annotations
 
+from uuid import UUID
+
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count
@@ -272,6 +274,40 @@ def _grant_form(request, found, *, error: str = "", status: int = 200):
     )
 
 
+def _as_uuid(raw: str):
+    """Идентификатор из формы или `None`, если вписано не то.
+
+    Не идентификатор — тот же ответ, что «такого нет», а не ошибка сервера.
+    """
+    try:
+        return UUID(str(raw).strip())
+    except ValueError:
+        return None
+
+
+def _revoke(request, tenant_id, user_id, role):
+    """Снять роль. Отказ — словами на странице людей пространства.
+
+    Человек ищется среди людей ЭТОГО пространства: снятие у чужого или
+    несуществующего не должно выглядеть как «роли и не было» — это разные
+    ответы на разные вопросы.
+    """
+    back = redirect("platform-space", tenant_id=tenant_id)
+    members = Membership.objects.filter(tenant_id=tenant_id, user_id=user_id) if user_id else None
+    if members is None or not members.exists():
+        request.session["platform_error"] = _("Такого человека в этом пространстве нет.")
+        return back
+    if role is None:
+        request.session["platform_error"] = _("Такой роли в этом пространстве нет.")
+        return back
+    removed, _ignored = members.filter(role=role).delete()
+    if not removed:
+        request.session["platform_error"] = _("Этой роли у человека и не было.")
+        return back
+    request.session["platform_notice"] = _("Роль снята.")
+    return back
+
+
 @login_required
 def member_role(request, tenant_id):
     """Выдать роль человеку в этом пространстве (форма и отправка) или снять её.
@@ -299,16 +335,7 @@ def member_role(request, tenant_id):
         role = None
 
     if action == "revoke":
-        if role is None:
-            request.session["platform_error"] = _("Такой роли в этом пространстве нет.")
-            return redirect("platform-space", tenant_id=tenant_id)
-        removed, _ignored = Membership.objects.filter(
-            tenant_id=tenant_id, user_id=user_id, role=role
-        ).delete()
-        request.session["platform_notice"] = (
-            _("Роль снята.") if removed else _("Этой роли у человека и не было.")
-        )
-        return redirect("platform-space", tenant_id=tenant_id)
+        return _revoke(request, tenant_id, _as_uuid(user_id), role)
 
     if role is None:
         # Роль чужого пространства сюда не приедет: фильтр по тенанту стоит в

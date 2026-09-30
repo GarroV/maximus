@@ -313,3 +313,32 @@ def test_a_garbled_person_id_is_refused_in_words(client, platform_admin):
     # подменяется общей страницей продукта (`web.errors`).
     assert response.status_code == 400
     assert "Такого человека нет" in body(response)
+
+
+@pytest.mark.parametrize("garbled", ["abc", ""])
+def test_revoking_for_a_garbled_person_is_refused_in_words(client, platform_admin, garbled):
+    """Снятие с не-идентификатором человека — отказ словами, а не ошибка сервера."""
+    from core.models import Role, Tenant
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    role = Role.objects.filter(tenant=tenant).first()
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "revoke", "user_id": garbled, "role_id": str(role.pk),
+    }, follow=True)
+    assert response.status_code == 200
+    assert "Такого человека в этом пространстве нет" in body(response)
+
+
+def test_revoking_for_someone_outside_the_space_is_refused(client, platform_admin, spaces_restored):
+    """Человек не из этого пространства — отказ, а не «роли и не было»."""
+    from core.models import Role, Tenant, User
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    role = Role.objects.filter(tenant=tenant).first()
+    outsider = User.objects.create_user(username="outsider-m1", password="secret-1")
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "revoke", "user_id": str(outsider.pk), "role_id": str(role.pk),
+    }, follow=True)
+    assert "Такого человека в этом пространстве нет" in body(response)

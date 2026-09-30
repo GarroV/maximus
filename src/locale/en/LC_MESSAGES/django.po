@@ -9151,3 +9151,7 @@ msgstr "← All people"
 #, python-format
 msgid "← Люди пространства «%(title)s»"
 msgstr "← People in the space “%(title)s”"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека в этом пространстве нет."
+msgstr "There is no such person in this space."
