@@ -180,6 +180,9 @@ def test_the_card_leads_to_the_positions_instead_of_holding_them(client, sql, it
     card = body(client.get(invoice))
     assert f'action="{invoice}positions/"' not in card, "форма позиции осталась на карточке"
     assert f'href="{invoice}positions/"' in card, "с карточки не попасть к позициям"
+    assert f'<a class="btn" href="{invoice}positions/">Разнести по статьям</a>' in card, (
+        "на карточке нет кнопки «Разнести по статьям» — ссылка в тексте не читается как действие"
+    )
     assert 'data-positions="2"' in card
 
     page = client.get(invoice + "positions/")

@@ -1194,7 +1194,6 @@ def inbox(request):
         **_papers_link(who),
         "notice": _inbox_notice(request),
         "failed": "",
-        "back_url": reverse("invoices"),
         **_batch_fields(who),
     })
 
@@ -1439,7 +1438,6 @@ def _inbox_refused(request, who, message: str, *, status: int = 400):
         **_papers_link(who),
         "notice": "",
         "failed": message,
-        "back_url": reverse("invoices"),
         **_batch_fields(who),
     }, status=status)
 

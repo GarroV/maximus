@@ -224,6 +224,9 @@ def test_a_handed_paper_is_named_in_the_inbox_and_listed_on_its_own_page(
     assert 'data-papers="1"' in inbox, inbox
     assert f'href="{PAPERS}"' in inbox, "из инбокса не попасть к бумагам"
     assert 'data-paper="' not in inbox, "бумаги по-прежнему списком в инбоксе"
+    # Навигация — левой панелью (D081): «назад к счетам» у страницы верхнего
+    # уровня дублирует её и ведёт «вверх» туда, где инбокс не лежит.
+    assert "← К счетам" not in inbox
     assert f"/papers/{document_id}/" not in inbox
     assert "18 600" not in inbox, "сумма бумаги стоит в инбоксе рядом с суммами P&L"
 

@@ -9307,3 +9307,7 @@ msgid "Бумаги с точек: ждёт разбора %(counter)s"
 msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
 msgstr[0] "Papers from the units: %(counter)s waiting to be sorted out"
 msgstr[1] "Papers from the units: %(counter)s waiting to be sorted out"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнести по статьям"
+msgstr "Split across expense items"
