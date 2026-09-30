@@ -6879,10 +6879,6 @@ msgstr ""
 "računovođa koji vodi ceo projekat postaje i administrator, a tamo gde su to "
 "različiti ljudi podela odgovornosti ostaje."
 
-#: web/templates/web/roles/index.html:31
-msgid "Права"
-msgstr "Prava"
-
 #: web/templates/web/roles/index.html:70
 msgid ""
 "В списке только те, кому уже выдана хотя бы одна роль: он и собирается из\n"
@@ -8146,21 +8142,9 @@ msgid "Логин или пароль не подходят"
 msgstr "Korisničko ime ili lozinka nisu ispravni"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Галочка — право, которое партнёр выдаёт и снимает сам. Прочерк — "
-"право,\nкоторого у этого набора не бывает: его не выдать ни отсюда, ни в "
-"обход экрана.\nНужны права старшего набора — человеку выдают старшую "
-"роль."
-msgstr "Kvačica je pravo koje partner sam dodeljuje i oduzima. Crtica je pravo koje ovaj skup nikada nema: ne može se dodeliti ni odavde ni mimo ovog ekrana.\nAko su nekome potrebna prava starijeg skupa, dobija stariju ulogu."
-
-#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid "Права роли не изменены: «%(right)s» у этой роли не бывает."
 msgstr "Prava uloge nisu promenjena: „%(right)s“ ova uloga nikada nema."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Этого права у роли не бывает: набор не расширяется в эту сторону"
-msgstr "Ova uloga nikada nema ovo pravo: skup se ne širi u tom pravcu"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -9103,3 +9087,70 @@ msgid ""
 "Набор точек этого сотрудника меняет роль, которой видны все точки "
 "партнёра. Обратитесь к оперативному директору или бухгалтеру."
 msgstr "Objekte ovog zaposlenog može da menja samo uloga koja vidi sve objekte partnera. Obratite se operativnom direktoru ili knjigovođi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "АДМ"
+msgstr "ADM"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "БУХ"
+msgstr "KNJ"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ДИР"
+msgstr "DIR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ и история"
+msgstr "Pristup i istorija"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата и деньги"
+msgstr "Plate i novac"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правила и справочники"
+msgstr "Pravila i šifarnici"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Право"
+msgstr "Pravo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сохранить права"
+msgstr "Sačuvaj prava"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сохранить права роли «%(role)s»"
+msgstr "Sačuvaj prava uloge „%(role)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срезы по регистрам учёта"
+msgstr "Preseci po registrima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Табель и операционка"
+msgstr "Evidencija i operativa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "УПР"
+msgstr "UPR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "право выдано — партнёр выдаёт и снимает его сам"
+msgstr "pravo dodeljeno — partner ga sam dodeljuje i uklanja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "регистр не виден"
+msgstr "registar nije vidljiv"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"у этой роли такого права не бывает: нужны права старшей роли — человеку "
+"выдают старшую роль"
+msgstr "ova uloga nikad nema takvo pravo: ako je osobi potrebno, dodelite joj stariju ulogu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "этого права у роли не бывает"
+msgstr "ova uloga nikad nema ovo pravo"

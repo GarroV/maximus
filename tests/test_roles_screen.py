@@ -24,22 +24,32 @@ def role_id(html: str, code: str) -> str:
     зависит от сортировки, врёт молча.
     """
     rows = re.findall(
-        r'<td>[^<]+<br><span class="note">([a-z]+)</span>.*?action="/roles/([0-9a-f-]+)/rights/"',
-        html,
-        flags=re.S,
+        r'<th scope="col"[^>]*data-role="([a-z_]+)" data-role-id="([0-9a-f-]+)"', html,
     )
     found = dict((c, i) for c, i in rows)
     assert code in found, f"роли {code} нет на экране: {sorted(found)}"
     return found[code]
 
 
+def role_cells(html: str, code: str) -> str:
+    """Клетки столбца роли в сетке прав — галочки и прочерки, склеенные подряд.
+
+    Сетка идёт строками прав, поэтому столбец роли на странице не лежит одним
+    куском: он собирается по `data-role` каждой клетки.
+    """
+    cells = re.findall(
+        r'<input type="checkbox"[^>]*data-role="' + code + r'"[^>]*>'
+        r'|<span class="wall" data-role="' + code + r'"[^>]*>'
+        r'–<span class="sr-only">[^<]*</span></span>',
+        html,
+    )
+    assert cells, f"на экране нет столбца прав роли {code}"
+    return "".join(cells)
+
+
 def granted_rights(html: str, code: str) -> set[str]:
     """Какие права отмечены у роли — глазами страницы, а не базы."""
-    block = re.search(
-        r'<span class="note">' + code + r'</span>.*?</form>', html, flags=re.S,
-    )
-    assert block, f"на экране нет формы прав роли {code}"
-    return set(re.findall(r'name="right:([a-z.]+)" checked', block.group(0).replace(">", "> ")))
+    return set(re.findall(r'name="right:([a-z.]+)"[^>]*\bchecked>', role_cells(html, code)))
 
 
 def test_the_administrator_opens_roles(client, web_env):

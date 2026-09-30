@@ -1,0 +1,66 @@
+{
+  "Табель и операционка": {
+    "en": "Timesheet and operations",
+    "sr": "Evidencija i operativa"
+  },
+  "Зарплата и деньги": {
+    "en": "Payroll and money",
+    "sr": "Plate i novac"
+  },
+  "Правила и справочники": {
+    "en": "Rules and directories",
+    "sr": "Pravila i šifarnici"
+  },
+  "Доступ и история": {
+    "en": "Access and history",
+    "sr": "Pristup i istorija"
+  },
+  "Срезы по регистрам учёта": {
+    "en": "Ledger views",
+    "sr": "Preseci po registrima"
+  },
+  "ДИР": {
+    "en": "DIR",
+    "sr": "DIR"
+  },
+  "БУХ": {
+    "en": "ACC",
+    "sr": "KNJ"
+  },
+  "УПР": {
+    "en": "MGR",
+    "sr": "UPR"
+  },
+  "АДМ": {
+    "en": "ADM",
+    "sr": "ADM"
+  },
+  "Право": {
+    "en": "Right",
+    "sr": "Pravo"
+  },
+  "регистр не виден": {
+    "en": "ledger not visible",
+    "sr": "registar nije vidljiv"
+  },
+  "этого права у роли не бывает": {
+    "en": "this role never has this right",
+    "sr": "ova uloga nikad nema ovo pravo"
+  },
+  "Сохранить права": {
+    "en": "Save rights",
+    "sr": "Sačuvaj prava"
+  },
+  "Сохранить права роли «%(role)s»": {
+    "en": "Save the rights of the role “%(role)s”",
+    "sr": "Sačuvaj prava uloge „%(role)s“"
+  },
+  "право выдано — партнёр выдаёт и снимает его сам": {
+    "en": "right granted — the partner grants and removes it",
+    "sr": "pravo dodeljeno — partner ga sam dodeljuje i uklanja"
+  },
+  "у этой роли такого права не бывает: нужны права старшей роли — человеку выдают старшую роль": {
+    "en": "this role never has such a right: if a person needs it, give them a senior role",
+    "sr": "ova uloga nikad nema takvo pravo: ako je osobi potrebno, dodelite joj stariju ulogu"
+  }
+}

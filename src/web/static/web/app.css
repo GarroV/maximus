@@ -660,6 +660,54 @@ form.upload.card { max-width: 640px; }   /* специфичнее общего 
 .right:has(input:checked) { color: var(--ink); font-weight: var(--w-medium); }
 .right:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* Матрица прав — сетка «право × роль» эталона «Роли и права» (T233). Столбцы
+   ролей узкие и одинаковые (три буквы сокращения), первый столбец забирает всё
+   остальное: так четыре роли помещаются и в 390 без прокрутки. Прокрутка вбок
+   остаётся запасом на случай, когда партнёр заведёт много своих ролей; тогда
+   названия прав прилипают к левому краю. Высота не ограничена — сетка короче
+   экрана, а внутренняя вертикальная прокрутка прятала бы нижние группы. */
+.matrix-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-block);
+}
+table.matrix { table-layout: fixed; min-width: calc(160px + var(--matrix-cols, 4) * 48px); }
+table.matrix th, table.matrix td {
+  height: var(--row); padding: var(--space-2) var(--space-3);
+  text-align: center; width: 56px;
+}
+table.matrix .matrix-right {
+  width: auto; text-align: left; padding-left: var(--space-5);
+  position: sticky; left: 0; background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  font-size: var(--fs-dense); text-transform: none; letter-spacing: 0;
+  font-weight: var(--w-regular); color: var(--ink);
+}
+table.matrix thead th { background: var(--surface-head); font-size: var(--fs-dense); color: var(--ink); }
+table.matrix thead .matrix-right { background: var(--surface-head); font-size: var(--fs-micro);
+  text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--ink-3); }
+table.matrix tr.matrix-group td {
+  text-align: left; padding: var(--space-2) var(--space-5); height: auto;
+  background: var(--surface-2); border-top: 1px solid var(--line-strong);
+  font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro);
+  color: var(--ink-3); font-weight: var(--w-semibold);
+}
+table.matrix input[type="checkbox"] { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+table.matrix tfoot button { padding: 0 var(--space-3); min-width: 0; }
+/* Прочерк — «у этой роли такого не бывает», точка — «регистр виден». Цвет у
+   точки акцентный, как у включённой галочки: смысл тот же, «есть у роли». */
+.wall { font-family: var(--font-num); color: var(--ink-empty); cursor: default; }
+.granted-mark { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+.matrix-legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
+.matrix-legend > span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.matrix-legend input { margin: 0; accent-color: var(--accent); }
+
+/* Роль, которая у человека уже есть: карточка со сроком, причиной снятия и
+   кнопкой. Карточки идут столбиком с отбивкой, как строки списка; раскладку
+   внутри даёт `.card`. */
+.held-role { margin-bottom: var(--space-4); }
+
 /* Роль человека в списке. Нейтральная: здесь перечисляют выданные наборы прав,
    и красить каждый в свой цвет значило бы спорить с плашкой в шапке, где цвет
    означает «чьими глазами вы смотрите сейчас». */
