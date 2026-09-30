@@ -75,6 +75,7 @@
 | `/inbox/` | `inbox` | `web.suppliers_views.inbox` |
 | `/inbox/<uuid:fact_id>/classify/` | `inbox-classify` | `web.suppliers_views.inbox_classify` |
 | `/inbox/classify/` | `inbox-batch` | `web.suppliers_views.inbox_batch` |
+| `/inbox/split/` | `inbox-split` | `web.inbox_split_views.inbox_split` |
 | `/invoices/` | `invoices` | `web.suppliers_views.invoices` |
 | `/invoices/<uuid:document_id>/` | `invoice` | `web.suppliers_views.invoice` |
 | `/invoices/<uuid:document_id>/not-ours/` | `invoice-not-ours` | `web.suppliers_views.invoice_not_ours` |

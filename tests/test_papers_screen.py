@@ -18,6 +18,7 @@
 """
 from __future__ import annotations
 
+import re
 import uuid
 from decimal import Decimal
 
@@ -223,6 +224,9 @@ def test_a_handed_paper_is_named_in_the_inbox_and_listed_on_its_own_page(
     assert 'data-papers="1"' in inbox, inbox
     assert f'href="{PAPERS}"' in inbox, "из инбокса не попасть к бумагам"
     assert 'data-paper="' not in inbox, "бумаги по-прежнему списком в инбоксе"
+    # Навигация — левой панелью (D081): «назад к счетам» у страницы верхнего
+    # уровня дублирует её и ведёт «вверх» туда, где инбокс не лежит.
+    assert "← К счетам" not in inbox
     assert f"/papers/{document_id}/" not in inbox
     assert "18 600" not in inbox, "сумма бумаги стоит в инбоксе рядом с суммами P&L"
 
@@ -273,6 +277,98 @@ def test_the_accountant_sorts_the_paper_out_and_the_money_appears(
     card = body(client.get(f"/papers/{document_id}/"))
     assert 'data-waiting="0"' in card, card
     assert f"/invoices/{document_id}/" in card
+
+
+def waiting_by_the_inbox(client) -> int:
+    """Сколько бумаг ждёт — по ссылке инбокса. Нет ссылки — ноль."""
+    found = re.search(r'data-papers="(\d+)"', body(client.get(INBOX)))
+    return int(found.group(1)) if found else 0
+
+
+def waiting_by_the_list(client) -> int:
+    """Сколько бумаг ждёт — по числу сверху списка бумаг, а не по строкам."""
+    found = re.search(r'<span data-waiting="(\d+)"', body(client.get(PAPERS)))
+    assert found, "у списка бумаг нет числа ждущих"
+    return int(found.group(1))
+
+
+def test_a_not_ours_paper_waits_nowhere(
+    client, units, counterparty, item, papers_removed, payruns_restored, sql,  # noqa: F811
+):
+    """Бумага «не наша» разобрана: строки сторнированы, но строки учёта есть.
+
+    Ждущей её не считают ни инбокс, ни список бумаг — иначе она вернулась бы в
+    очередь, из которой её только что убрали словами.
+    """
+    login_as(client, "manager")
+    card_of(hand_over(client, units))
+    document_id = document_id_of(sql)
+
+    login_as(client, "accountant")
+    review(client, counterparty=counterparty, item=item, units=units,
+           document_id=document_id)
+    answer = client.post(f"/invoices/{document_id}/not-ours/", {"why": "Соседний арендатор"})
+    assert answer.status_code == 302, body(answer)[:300]
+
+    assert waiting_by_the_inbox(client) == waiting_by_the_list(client) == 0
+
+
+def test_the_inbox_and_the_list_count_waiting_papers_alike(
+    client, units, counterparty, item, papers_removed, payruns_restored, sql,  # noqa: F811
+):
+    """Бумага, у которой не осталось ни одной действующей строки, ждёт — везде.
+
+    Раньше ссылка инбокса считала бумагу разобранной по ЛЮБОЙ строке, включая
+    заменённую, а список бумаг — только по действующей, и два экрана называли
+    разные числа об одной очереди (issue #287). Строка здесь снимается прямо в
+    базе: в продукте такого пути сейчас нет, но условие одно, и держит его тест.
+    """
+    login_as(client, "manager")
+    card_of(hand_over(client, units))
+    document_id = document_id_of(sql)
+
+    login_as(client, "accountant")
+    review(client, counterparty=counterparty, item=item, units=units,
+           document_id=document_id)
+    assert waiting_by_the_inbox(client) == waiting_by_the_list(client) == 0
+
+    sql.execute("update facts set superseded_at = now() where document_id = %s",
+                (document_id,))
+    assert sql.execute(
+        "select count(*) from facts where document_id = %s and superseded_at is null",
+        (document_id,),
+    ).fetchone()[0] == 0, "предохранитель: действующие строки остались"
+
+    assert waiting_by_the_list(client) == 1
+    assert waiting_by_the_inbox(client) == 1, "инбокс и список бумаг считают по-разному"
+
+
+def test_month_closing_counts_waiting_papers_like_the_list(
+    client, units, counterparty, item, papers_removed, payruns_restored, sql,  # noqa: F811
+):
+    """Готовность месяца к закрытию считает ждущие бумаги тем же условием.
+
+    Своё условие закрытия («у бумаги нет ни одного факта») считало бумагу без
+    единой действующей строки разобранной — и месяц закрывался с бумагой, денег
+    которой в отчёте нет, пока список бумаг называл её ждущей.
+    """
+    from payrun.readiness import check
+
+    login_as(client, "manager")
+    card_of(hand_over(client, units))
+    document_id = document_id_of(sql)
+    login_as(client, "accountant")
+    review(client, counterparty=counterparty, item=item, units=units,
+           document_id=document_id)
+    space, period = sql.execute(
+        "select tenant_id, period from facts where document_id = %s limit 1", (document_id,)
+    ).fetchone()
+    sql.execute("update facts set superseded_at = now() where document_id = %s",
+                (document_id,))
+
+    assert waiting_by_the_list(client) == 1, "предохранитель: список бумаг её не ждёт"
+    codes = [finding.code for finding in check(space, period).findings]
+    assert "papers" in codes, f"закрытие не видит ждущую бумагу: {codes}"
 
 
 def test_a_sorted_out_paper_leaves_the_inbox(
