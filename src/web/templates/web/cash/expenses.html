@@ -112,10 +112,7 @@
   {% endif %}
 </p>
 
-<form class="search row" method="get">
-  {% include "web/directory/fields.html" with fields=filters %}
-  <button type="submit">{% translate "Показать" %}</button>
-</form>
+{% include "web/components/filters.html" %}
 
 {% if rows %}
 {% scroll %}<table>
@@ -179,8 +176,8 @@
 {% if narrowed %}
 {% translate "Расходов нет." as empty %}
 {% notice "empty" title=empty %}<span data-total="{{ total_raw }}">{% blocktranslate %}Под выбранный отбор ничего не подошло. Снимите точку, статью, регистр или
-раздвиньте даты — и станет видно всё, что есть за месяц.{% endblocktranslate %}</span>
-  <a class="btn next" href="{% url 'expenses' %}">{% translate "Показать весь месяц" %}</a>
+выберите другой месяц — и станет видно всё, что есть.{% endblocktranslate %}</span>
+  <a class="btn next" href="{{ reset_url }}">{% translate "Показать весь месяц" %}</a>
 {% endnotice %}
 {% else %}
 {% translate "За этот месяц расходов ещё нет" as empty %}
