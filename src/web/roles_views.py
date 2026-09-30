@@ -66,12 +66,18 @@ from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, leads_one_unit
 
 from . import permissions
 from .principal import get_current_principal
+from .roles_display import role_choice, shown_role_title
 
 # Права, которые можно выдать с экрана, — ВСЕ права продукта, а не их список
 # рядом (T203). Список здесь был своей копией, и она успела разъехаться: право
 # `suppliers.classify` появилось с разбором первички, а на экране ролей его не
 # было вовсе — то есть выдать или снять его было нечем ни одним способом.
 GRANTABLE = ALL_PERMISSIONS
+
+
+def _title(role) -> str:
+    """Название роли на языке страницы (`web.roles_display`)."""
+    return shown_role_title(role.title, role.code)
 
 
 def _state_of(role, code: str) -> str:
@@ -107,6 +113,7 @@ def _people(tenant_id, user_id=None):
                    coalesce(u.email, '')                     as mail,
                    array_agg(r.id::text order by r.title)    as role_ids,
                    array_agg(r.title order by r.title)       as role_titles,
+                   array_agg(r.code order by r.title)        as role_codes,
                    array_agg(coalesce(to_char(m.expires_at, 'DD.MM.YYYY'), '')
                              order by r.title)               as role_until
               from memberships m
@@ -125,8 +132,9 @@ def _people(tenant_id, user_id=None):
                 "who": row[1],
                 "mail": row[2],
                 "roles": [
-                    {"id": rid, "title": title, "until": until}
-                    for rid, title, until in zip(row[3], row[4], row[5], strict=True)
+                    {"id": rid, "code": code, "title": shown_role_title(title, code),
+                     "until": until}
+                    for rid, title, code, until in zip(row[3], row[4], row[5], row[6], strict=True)
                 ],
             }
             for row in cur.fetchall()
@@ -167,7 +175,8 @@ def _history(tenant_id):
         return [
             {
                 "at": row[0], "actor": row[1], "subject": row[2],
-                "action": row[3], "role": row[4], "until": row[5], "reason": row[6],
+                "action": row[3], "role": shown_role_title(row[4]),
+                "until": row[5], "reason": row[6],
             }
             for row in cur.fetchall()
         ]
@@ -194,14 +203,14 @@ def membership_units(chosen: str, tenant_id, role):
         if chosen:
             return None, _(
                 "Роль «%(role)s» ведёт всего партнёра — точка для неё не выбирается."
-            ) % {"role": role.title}
+            ) % {"role": _title(role)}
         return None, ""
 
     if not chosen:
         return None, _(
             "Роль «%(role)s» ведёт одну точку — выберите её. "
             "Без точки человек получил бы все точки партнёра."
-        ) % {"role": role.title}
+        ) % {"role": _title(role)}
 
     try:
         unit = Unit.objects.filter(pk=chosen, tenant_id=tenant_id).first()
@@ -280,7 +289,10 @@ def _guard(request):
 def _choices(who) -> dict:
     """Роли и точки партнёра — то, из чего выбирают в формах выдачи."""
     return {
-        "roles": list(Role.objects.filter(tenant_id=who.tenant_id).order_by("title")),
+        "roles": [
+            role_choice(role)
+            for role in Role.objects.filter(tenant_id=who.tenant_id).order_by("title")
+        ],
         "units": list(Unit.objects.filter(tenant_id=who.tenant_id).order_by("code")),
         "today": date.today().isoformat(),
     }
@@ -290,7 +302,7 @@ def _rights_page(request, who, *, error: str = "", status: int = 200):
     roles = list(Role.objects.filter(tenant_id=who.tenant_id).order_by("title"))
     rows = [
         {
-            "role": role,
+            "role": role_choice(role),
             "rights": [
                 {
                     "code": code,
@@ -406,7 +418,7 @@ def role_rights(request, role_id):
             status=403,
         )
 
-    request.session["roles_notice"] = _("Права роли «%(role)s» сохранены.") % {"role": role.title}
+    request.session["roles_notice"] = _("Права роли «%(role)s» сохранены.") % {"role": _title(role)}
     return redirect(reverse("roles"))
 
 
@@ -591,7 +603,7 @@ def invite(request):
     request.session["roles_notice"] = _(
         "%(name)s заведён с ролью «%(role)s». Войти он пока не сможет: "
         "как человек получает первый вход, у продукта ещё не решено."
-    ) % {"name": full_name, "role": role.title}
+    ) % {"name": full_name, "role": _title(role)}
     # На страницу людей, а не обратно в пустую форму: человек пришёл завести
     # сотрудника и должен увидеть его в списке — с ролью и ссылкой на него.
     return redirect(reverse("roles-people"))
@@ -654,7 +666,7 @@ def person_roles(request, user_id):
             held.filter(role_id=role.pk).delete()
             _record(who, subject=user_id, action=REVOKED, role=role,
                     until=None, reason=reason)
-        request.session["roles_notice"] = _("Роль «%(role)s» снята.") % {"role": role.title}
+        request.session["roles_notice"] = _("Роль «%(role)s» снята.") % {"role": _title(role)}
         return redirect(here)
 
     until, refused_term = _term(request)
@@ -679,5 +691,5 @@ def person_roles(request, user_id):
         )
         _record(who, subject=user_id, action=GRANTED, role=role,
                 until=until, reason=reason)
-    request.session["roles_notice"] = _("Роль «%(role)s» выдана.") % {"role": role.title}
+    request.session["roles_notice"] = _("Роль «%(role)s» выдана.") % {"role": _title(role)}
     return redirect(here)
