@@ -8986,3 +8986,7 @@ msgstr "← Svi ljudi"
 #, python-format
 msgid "← Люди пространства «%(title)s»"
 msgstr "← Ljudi u prostoru „%(title)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека в этом пространстве нет."
+msgstr "U ovom prostoru nema takve osobe."
