@@ -1,0 +1,33 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Завести пространство партнёра и его первого человека (T225 — своей страницей).
+
+После отказа форма возвращается с тем, что уже набрано (`filled`), кроме
+пароля: пароль, вписанный сервером обратно в страницу, оседает в её коде.
+{% endcomment %}
+{% block title %}{% translate "Завести пространство" %}{% endblock %}
+{% block content %}
+<p class="note"><a href="{% url 'platform-index' %}">{% translate "← Все пространства" %}</a></p>
+<h1>{% translate "Завести пространство" %}</h1>
+<p class="sub">{% blocktranslate %}Вместе с пространством заводятся его роли и первый человек — иначе войти в него будет некому. Точки, юрлица и статьи расходов партнёр заводит сам.{% endblocktranslate %}</p>
+
+{% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
+
+<form class="card" method="post" action="{% url 'platform-space-create' %}">
+  {% csrf_token %}
+  {% translate "Название" as f_title %}{% translate "Код" as f_code %}
+  {% include "web/components/field.html" with id="id_title" name="title" label=f_title value=filled.title placeholder="Dodo Serbia" required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_code" name="code" label=f_code value=filled.code placeholder="rs-dodo" required=1 stacked=1 %}
+  {% translate "Страна" as f_country %}{% translate "Валюта учёта" as f_base %}{% translate "Валюта отчёта" as f_report %}
+  {% include "web/components/field.html" with id="id_country" name="country_code" label=f_country value=filled.country_code required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_base" name="base_currency" label=f_base value=filled.base_currency required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_report" name="report_currency" label=f_report value=filled.report_currency required=1 stacked=1 %}
+  {% translate "Логин первого человека" as f_login %}{% translate "Как его зовут" as f_name %}{% translate "Пароль" as f_pass %}
+  {% include "web/components/field.html" with id="id_login" name="admin_username" label=f_login value=filled.admin_username required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_name" name="admin_full_name" label=f_name value=filled.admin_full_name stacked=1 %}
+  {% include "web/components/field.html" with id="id_pass" name="admin_password" label=f_pass type="password" required=1 stacked=1 %}
+  {% translate "Его роль" as f_role %}
+  {% include "web/components/select.html" with id="id_role" name="role_code" label=f_role options=role_options stacked=1 %}
+  <button type="submit" class="primary">{% translate "Завести пространство" %}</button>
+</form>
+{% endblock %}

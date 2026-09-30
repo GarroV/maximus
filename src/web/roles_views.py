@@ -17,6 +17,25 @@
 бухгалтер часто ведёт весь проект и должен быть ещё и администратором, а там,
 где эти люди разные, разделение обязанностей остаётся.
 
+**Одна страница — одна функция** (T225, D081, D087). До 30.09.2026 всё это
+стояло одним экраном `/roles/`: матрица прав, у каждого человека в строке своя
+форма выдачи с двумя выпадающими списками, форма приглашения и история. На 390
+строка человека не помещалась вовсе, а вопрос «что позволяет роль» и вопрос «у
+кого какая роль» читались как один. Теперь раздел — четыре страницы и ряд
+ссылок между ними (`_sections`):
+
+| адрес | что на ней |
+|---|---|
+| `/roles/` | права ролей: что позволяет каждая |
+| `/roles/people/` | люди партнёра и их роли; человек — ссылка на свою страницу |
+| `/roles/people/<id>/` | роли одного человека: выдать, снять, срок, причина |
+| `/roles/invite/` | пригласить человека |
+| `/roles/history/` | история доступов |
+
+Отказ формы показывается на той же странице, где форма, и с тем, что человек
+уже набрал: прежде любая ошибка возвращала весь экран целиком, и причина
+отказа оказывалась над таблицей прав, далеко от поля, которое надо поправить.
+
 Чего здесь нет и почему.
 
 **Заведения ролей и учёток.** Роль — это набор прав, а не человек; новые роли
@@ -36,13 +55,14 @@ from uuid import uuid4
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 
 from core.models import AccessLogEntry, Membership, Role, Unit, User
-from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, ROLE_SHAPES
+from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, leads_one_unit
 
 from . import permissions
 from .principal import get_current_principal
@@ -64,8 +84,12 @@ def _state_of(role, code: str) -> str:
     return (role.permission_states or {}).get(code, OPTIONAL)
 
 
-def _people(tenant_id):
+def _people(tenant_id, user_id=None):
     """Люди партнёра с их ролями — одним запросом, а не по строке на человека.
+
+    `user_id` — один человек, для его страницы. Отдельной выборки для неё нет
+    намеренно: имя, почта и срок роли на двух страницах обязаны читаться
+    одинаково, а два запроса разошлись бы при первой же правке одного из них.
 
     Имена приходят из `users`, которую `0243` открыла тому, кто ведёт роли.
     Учётка без имени показывается логином: пусто в этом столбце означало бы,
@@ -89,10 +113,11 @@ def _people(tenant_id):
               join roles r on r.id = m.role_id
               left join users u on u.id = m.user_id
              where m.tenant_id = %s
+               and (%s::uuid is null or m.user_id = %s::uuid)
              group by m.user_id, who, mail
              order by who
             """,
-            [tenant_id],
+            [tenant_id, user_id, user_id],
         )
         return [
             {
@@ -149,36 +174,23 @@ def _history(tenant_id):
 
 
 
-def _unit_scoped(role) -> bool:
-    """Роль ведёт ОДНУ точку, а не всего партнёра.
-
-    Форма роли объявлена в `core/roles.py`: у управляющего точки там стоит
-    точка, у остальных — `None`. Сид её читает и заводит членство со списком,
-    а экран ролей — не читал вовсе (T188): членство создавалось без `unit_ids`.
-
-    Цена этой пропущенной строки велика. `unit_ids is null` в функциях
-    контекста (`0264`) означает ВСЕ точки тенанта, поэтому приглашённый
-    управляющий получал кассы, наличные, табели и надбавки всего партнёра
-    вместо своей точки — молча, вопреки D031, и тем отменяя смысл роли.
-    """
-    shape = ROLE_SHAPES.get(role.code)
-    return shape is not None and shape.unit is not None
-
-
-def _membership_units(request, who, role):
+def membership_units(chosen: str, tenant_id, role):
     """Точки членства и отказ словами, если выбор не сходится с ролью.
 
     Возвращает `(unit_ids, отказ)`. `unit_ids is None` — все точки партнёра, и
-    это законно ровно для тех ролей, которые его целиком и ведут.
+    это законно ровно для тех ролей, которые его целиком и ведут
+    (`core.roles.leads_one_unit`). Общая для страницы партнёра и платформы:
+    правило, написанное дважды, однажды разошлось бы, и платформа выдавала бы
+    управляющему все точки, как это и было до разбора прав T225.
 
     Молчаливого умолчания здесь нет намеренно: и «забыл выбрать точку», и
     «выбрал точку роли, которая ведёт всё» — это расхождение между тем, что
     человек имел в виду, и тем, что получит. Оба случая называются словами, а
     не разрешаются за него в ту или другую сторону.
     """
-    chosen = (request.POST.get("unit") or "").strip()
+    chosen = (chosen or "").strip()
 
-    if not _unit_scoped(role):
+    if not leads_one_unit(role.code):
         if chosen:
             return None, _(
                 "Роль «%(role)s» ведёт всего партнёра — точка для неё не выбирается."
@@ -192,7 +204,7 @@ def _membership_units(request, who, role):
         ) % {"role": role.title}
 
     try:
-        unit = Unit.objects.filter(pk=chosen, tenant_id=who.tenant_id).first()
+        unit = Unit.objects.filter(pk=chosen, tenant_id=tenant_id).first()
     except (DjangoValidationError, ValueError):
         unit = None
     if unit is None:
@@ -202,7 +214,79 @@ def _membership_units(request, who, role):
     return [unit.pk], ""
 
 
-def _page(request, who, *, notice: str = "", error: str = "", status: int = 200):
+def _membership_units(request, who, role):
+    return membership_units(request.POST.get("unit"), who.tenant_id, role)
+
+
+# Ряд ссылок раздела (D081): страницы раздела — шаги внутри одного пункта левой
+# панели, а не пункты панели сами по себе. Панель ведёт в «Роли и права», а здесь
+# человек выбирает, что именно делает. Ссылки, а не переключатель на странице:
+# у каждой функции свой адрес, который можно отправить коллеге.
+SECTIONS = (
+    ("roles", gettext_lazy("Права ролей")),
+    ("roles-people", gettext_lazy("Люди и их роли")),
+    ("roles-invite", gettext_lazy("Пригласить человека")),
+    ("roles-history", gettext_lazy("История доступов")),
+)
+
+
+def _sections(current: str) -> list:
+    # Страница одного человека — шаг внутри «Людей», а не пятая страница
+    # раздела: ряда у неё нет, есть дорога назад. Ряд, где ни один пункт не
+    # выделен, читался бы как второй набор навигации (сверка norma).
+    if not current:
+        return []
+    return [
+        {"title": title, "url": reverse(route), "selected": route == current}
+        for route, title in SECTIONS
+    ]
+
+
+def _show(request, template: str, current: str, context: dict, *,
+          error: str = "", status: int = 200):
+    """Страница раздела: ряд ссылок, сообщение об успехе, отказ словами.
+
+    Сообщение об успехе приходит через сессию: после записи — перенаправление
+    (обновление страницы не повторяет записи), и сказать «сохранено» надо уже на
+    той странице, куда человек попал.
+    """
+    return render(
+        request,
+        template,
+        {
+            **context,
+            "sections": _sections(current),
+            "notice": request.session.pop("roles_notice", ""),
+            "error": error,
+        },
+        status=status,
+    )
+
+
+def _guard(request):
+    """Кто смотрит и отказ словами, если вести роли ему не положено.
+
+    Одна развилка на все страницы раздела: пять страниц с пятью своими
+    проверками однажды разошлись бы, и одна из них открылась бы без права.
+    """
+    who = get_current_principal(request)
+    try:
+        permissions.check(who, permissions.ROLES_MANAGE)
+    except permissions.PermissionRefused as refusal:
+        return who, _refusal_page(request, refusal)
+    return who, None
+
+
+def _choices(who) -> dict:
+    """Роли и точки партнёра — то, из чего выбирают в формах выдачи."""
+    return {
+        "roles": list(Role.objects.filter(tenant_id=who.tenant_id).order_by("title")),
+        "units": list(Unit.objects.filter(tenant_id=who.tenant_id).order_by("code")),
+        "today": date.today().isoformat(),
+    }
+
+
+def _rights_page(request, who, *, error: str = "", status: int = 200):
     roles = list(Role.objects.filter(tenant_id=who.tenant_id).order_by("title"))
     rows = [
         {
@@ -222,58 +306,78 @@ def _page(request, who, *, notice: str = "", error: str = "", status: int = 200)
         }
         for role in roles
     ]
-    return render(
-        request,
-        "web/roles/index.html",
-        {
-            "rows": rows,
-            "roles": roles,
-            "people": _people(who.tenant_id),
-            "units": list(Unit.objects.filter(tenant_id=who.tenant_id).order_by("code")),
-            "history": _history(who.tenant_id),
-            "today": date.today().isoformat(),
-            "notice": notice,
-            "error": error,
-        },
-        status=status,
-    )
+    return _show(request, "web/roles/index.html", "roles", {"rows": rows},
+                 error=error, status=status)
+
+
+def _people_page(request, who, *, error: str = "", status: int = 200):
+    return _show(request, "web/roles/people.html", "roles-people",
+                 {"people": _people(who.tenant_id)}, error=error, status=status)
+
+
+def _person_page(request, who, person, *, error: str = "", status: int = 200):
+    return _show(request, "web/roles/person.html", "",
+                 {"person": person, **_choices(who)}, error=error, status=status)
+
+
+def _invite_page(request, who, *, error: str = "", status: int = 200):
+    # Что человек уже набрал, возвращается в форму: отказ из-за одного поля не
+    # должен стоить ему повторного ввода остальных пяти.
+    filled = {
+        key: (request.POST.get(key) or "").strip()
+        for key in ("full_name", "email", "role", "unit", "until", "reason")
+    } if request.method == "POST" else {}
+    return _show(request, "web/roles/invite.html", "roles-invite",
+                 {"filled": filled, **_choices(who)}, error=error, status=status)
 
 
 @login_required
 def index(request):
-    """Список ролей и людей. Кому не положено — отказ словами, а не пустой экран."""
-    who = get_current_principal(request)
-    try:
-        permissions.check(who, permissions.ROLES_MANAGE)
-    except permissions.PermissionRefused as refusal:
-        return render(
-            request,
-            "web/roles/denied.html",
-            {"message": refusal.message},
-            status=refusal.http_status,
-        )
-    return _page(request, who, notice=request.session.pop("roles_notice", ""))
+    """Права ролей. Кому не положено — отказ словами, а не пустой экран."""
+    who, refused = _guard(request)
+    if refused:
+        return refused
+    return _rights_page(request, who)
+
+
+@login_required
+def people(request):
+    """Люди партнёра и их роли; у каждого — ссылка на его страницу."""
+    who, refused = _guard(request)
+    if refused:
+        return refused
+    return _people_page(request, who)
+
+
+@login_required
+def history(request):
+    """Кто, кому, когда и зачем открывал и закрывал доступ."""
+    who, refused = _guard(request)
+    if refused:
+        return refused
+    return _show(request, "web/roles/history.html", "roles-history",
+                 {"history": _history(who.tenant_id), "shown": HISTORY_SHOWN})
 
 
 @login_required
 def role_rights(request, role_id):
-    """Сохранить права роли. Только POST: это запись, а не просмотр."""
-    who = get_current_principal(request)
-    try:
-        permissions.check(who, permissions.ROLES_MANAGE)
-    except permissions.PermissionRefused as refusal:
-        return render(
-            request,
-            "web/roles/denied.html",
-            {"message": refusal.message},
-            status=refusal.http_status,
-        )
+    """Сохранить права роли. Только POST: это запись, а не просмотр.
+
+    Прежде метод не проверялся, и обычный переход по этому адресу сохранял
+    роль с пустым списком прав — то есть ссылка, открытая администратором,
+    молча снимала с роли всё. Теперь чтение отсюда уводит на страницу прав.
+    """
+    who, refused = _guard(request)
+    if refused:
+        return refused
+    if request.method != "POST":
+        return redirect(reverse("roles"))
 
     role = Role.objects.filter(pk=role_id, tenant_id=who.tenant_id).first()
     if role is None:
         # Роль чужого партнёра или общая: политика её всё равно не отдаст на
         # запись, но человеку надо сказать словами, а не кодом ошибки.
-        return _page(
+        return _rights_page(
             request, who,
             error=_("Такой роли у этого партнёра нет."),
             status=404,
@@ -286,7 +390,7 @@ def role_rights(request, role_id):
     # держится и на владельце таблиц, и на экране, который забудет спросить.
     walled = [code for code in chosen if _state_of(role, code) == NEVER]
     if walled:
-        return _page(
+        return _rights_page(
             request, who,
             error=_("Права роли не изменены: «%(right)s» у этой роли не бывает.")
             % {"right": permissions.title(walled[0])},
@@ -296,7 +400,7 @@ def role_rights(request, role_id):
     if not changed:
         # Политика отказала молча — «изменено 0 строк». Такое молчание и есть
         # худший исход: человек уверен, что право выдано.
-        return _page(
+        return _rights_page(
             request, who,
             error=_("Права роли не изменены: база не приняла запись."),
             status=403,
@@ -401,6 +505,24 @@ def _insert_person(person_id, *, full_name: str, email: str) -> None:
         )
 
 
+def _mail_refused(request, who):
+    """Отказ по почте — один на «уже есть у вас» и «занята у другого партнёра».
+
+    Учётки чужих партнёров политики не показывают, поэтому проверка выше видит
+    только своих, а чужая почта всплывает на вставке. Отвечать по-разному значит
+    сообщать, что такая почта в системе есть — у кого-то. Поэтому текст и код
+    ответа одни, те же 400, что у прочих отказов ввода, и по ним нельзя понять
+    ни чья почта, ни есть ли она вовсе (решение блока, 30.09.2026; как D023).
+    Своего человека администратор найдёт в списке людей — туда текст и ведёт.
+    """
+    return _invite_page(
+        request, who,
+        error=_("Эту почту пригласить нельзя. Если человек уже работает у вас, "
+                "он есть в списке людей; если нет — проверьте адрес."),
+        status=400,
+    )
+
+
 @login_required
 def invite(request):
     """Завести человека партнёра и сразу дать ему роль (T188, issue #178).
@@ -413,11 +535,11 @@ def invite(request):
     эффектом этой формы нельзя. Учётка заводится непригодным для входа хэшем, а
     экран говорит об этом словами, а не оставляет человека гадать.
     """
-    who = get_current_principal(request)
-    try:
-        permissions.check(who, permissions.ROLES_MANAGE)
-    except permissions.PermissionRefused as refusal:
-        return _refusal_page(request, refusal)
+    who, refused = _guard(request)
+    if refused:
+        return refused
+    if request.method != "POST":
+        return _invite_page(request, who)
 
     full_name = (request.POST.get("full_name") or "").strip()
     email = (request.POST.get("email") or "").strip().lower()
@@ -426,37 +548,39 @@ def invite(request):
     role = Role.objects.filter(pk=role_id, tenant_id=who.tenant_id).first() if role_id else None
 
     if not full_name or not email:
-        return _page(
+        return _invite_page(
             request, who,
             error=_("Имя и почта обязательны: без них человека не отличить от другого."),
             status=400,
         )
     if role is None:
-        return _page(request, who, error=_("Такой роли у этого партнёра нет."), status=404)
+        return _invite_page(request, who, error=_("Такой роли у этого партнёра нет."), status=400)
     if not reason:
-        return _page(
+        return _invite_page(
             request, who,
             error=_("Причина обязательна: она остаётся в истории рядом с вашим именем."),
             status=400,
         )
     if User.objects.filter(email=email).exists() or User.objects.filter(username=email).exists():
-        return _page(
-            request, who,
-            error=_("Человек с такой почтой уже заведён."),
-            status=409,
-        )
+        return _mail_refused(request, who)
 
-    until, refused = _term(request)
-    if refused:
-        return _page(request, who, error=refused, status=400)
+    until, refused_term = _term(request)
+    if refused_term:
+        return _invite_page(request, who, error=refused_term, status=400)
 
     unit_ids, refused_unit = _membership_units(request, who, role)
     if refused_unit:
-        return _page(request, who, error=refused_unit, status=400)
+        return _invite_page(request, who, error=refused_unit, status=400)
 
     person_id = uuid4()
+    try:
+        with transaction.atomic():
+            _insert_person(person_id, full_name=full_name, email=email)
+    except IntegrityError:
+        # Почта занята учёткой, которую политики этому партнёру не показывают,
+        # — то есть чужой. Ответ тот же, что на свою (`_mail_refused`).
+        return _mail_refused(request, who)
     with transaction.atomic():
-        _insert_person(person_id, full_name=full_name, email=email)
         Membership.objects.create(
             tenant_id=who.tenant_id, user_id=person_id, role_id=role.pk, expires_at=until,
             unit_ids=unit_ids,
@@ -468,38 +592,61 @@ def invite(request):
         "%(name)s заведён с ролью «%(role)s». Войти он пока не сможет: "
         "как человек получает первый вход, у продукта ещё не решено."
     ) % {"name": full_name, "role": role.title}
-    return redirect(reverse("roles"))
+    # На страницу людей, а не обратно в пустую форму: человек пришёл завести
+    # сотрудника и должен увидеть его в списке — с ролью и ссылкой на него.
+    return redirect(reverse("roles-people"))
 
 
 @login_required
 def person_roles(request, user_id):
-    """Выдать человеку роль или снять её — со сроком, причиной и следом."""
-    who = get_current_principal(request)
-    try:
-        permissions.check(who, permissions.ROLES_MANAGE)
-    except permissions.PermissionRefused as refusal:
-        return _refusal_page(request, refusal)
+    """Роли одного человека: посмотреть, выдать, снять — со сроком, причиной и следом.
+
+    Человек ищется среди людей ЭТОГО партнёра до любой записи. Прежде адрес
+    принимал любой идентификатор, и роль можно было выдать учётке, у которой
+    здесь нет ни одной роли, — то есть привязать к своему пространству человека
+    чужого партнёра, о котором экран ничего не знает и показать его не может.
+    """
+    who, refused = _guard(request)
+    if refused:
+        return refused
+
+    person = next(iter(_people(who.tenant_id, user_id=user_id)), None)
+    if person is None:
+        # Теми же словами для «нет вовсе» и «есть, но у другого партнёра»: по
+        # ответу нельзя понять, чья это учётка (D023).
+        return _people_page(
+            request, who, error=_("Такого человека у этого партнёра нет."), status=404,
+        )
+    if request.method != "POST":
+        return _person_page(request, who, person)
 
     role_id = request.POST.get("role") or ""
     role = Role.objects.filter(pk=role_id, tenant_id=who.tenant_id).first() if role_id else None
     if role is None:
-        return _page(request, who, error=_("Такой роли у этого партнёра нет."), status=404)
+        return _person_page(request, who, person,
+                            error=_("Такой роли у этого партнёра нет."), status=400)
 
     reason = _reason(request)
     if not reason:
-        return _page(
-            request, who,
+        return _person_page(
+            request, who, person,
             error=_("Причина обязательна: она остаётся в истории рядом с вашим именем."),
             status=400,
         )
 
+    here = reverse("person-roles", args=[user_id])
     if request.POST.get("action") == "remove":
         held = Membership.objects.filter(tenant_id=who.tenant_id, user_id=user_id)
+        if not held.filter(role_id=role.pk).exists():
+            # Снимать нечего — и записывать в историю нечего: запись «снял
+            # роль», которой не было, врёт о том, что с доступом происходило.
+            return _person_page(request, who, person,
+                                error=_("Этой роли у человека нет."), status=409)
         if held.count() <= 1:
             # Человек без единой роли перестаёт существовать для продукта: он
             # входит и не видит ничего, включая объяснения почему.
-            return _page(
-                request, who,
+            return _person_page(
+                request, who, person,
                 error=_("Это единственная роль человека — снимать её некуда."),
                 status=409,
             )
@@ -508,21 +655,22 @@ def person_roles(request, user_id):
             _record(who, subject=user_id, action=REVOKED, role=role,
                     until=None, reason=reason)
         request.session["roles_notice"] = _("Роль «%(role)s» снята.") % {"role": role.title}
-        return redirect(reverse("roles"))
+        return redirect(here)
 
-    until, refused = _term(request)
-    if refused:
-        return _page(request, who, error=refused, status=400)
+    until, refused_term = _term(request)
+    if refused_term:
+        return _person_page(request, who, person, error=refused_term, status=400)
 
     already = Membership.objects.filter(
         tenant_id=who.tenant_id, user_id=user_id, role_id=role.pk,
     ).exists()
     if already:
-        return _page(request, who, error=_("Эта роль у человека уже есть."), status=409)
+        return _person_page(request, who, person,
+                            error=_("Эта роль у человека уже есть."), status=409)
 
     unit_ids, refused_unit = _membership_units(request, who, role)
     if refused_unit:
-        return _page(request, who, error=refused_unit, status=400)
+        return _person_page(request, who, person, error=refused_unit, status=400)
 
     with transaction.atomic():
         Membership.objects.create(
@@ -532,4 +680,4 @@ def person_roles(request, user_id):
         _record(who, subject=user_id, action=GRANTED, role=role,
                 until=until, reason=reason)
     request.session["roles_notice"] = _("Роль «%(role)s» выдана.") % {"role": role.title}
-    return redirect(reverse("roles"))
+    return redirect(here)

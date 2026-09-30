@@ -1,0 +1,66 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Роли одного человека: что у него есть, снять, выдать ещё одну (T225).
+
+Прежде это была строка общей таблицы людей с формой выдачи прямо в ней. Здесь
+человек один, и форма выдачи — обычная карточка с подписанными полями, а не
+ряд безымянных списков, различимых только по `aria-label`.
+
+Точка обязательна для ролей, которые ведут одну точку, и запрещена для тех,
+кто ведёт партнёра целиком. Какая роль какая — знает представление: держать эту
+развилку в разметке значило бы завести ей второе, расходящееся описание.
+{% endcomment %}
+{% block title %}{{ person.who }}{% endblock %}
+{% block content %}
+<p class="note"><a href="{% url 'roles-people' %}">{% translate "← Все люди" %}</a></p>
+{% include "web/roles/_head.html" with title=person.who %}
+{% if person.mail %}<p class="sub">{{ person.mail }}</p>{% endif %}
+
+<h2>{% translate "Роли человека" %}</h2>
+<p class="note under">{% blocktranslate %}Чтобы снять роль, напишите причину рядом с ней: она останется в истории
+рядом с вашим именем. Единственную роль снять нельзя — без неё человек войдёт
+и не увидит ничего.{% endblocktranslate %}</p>
+{% comment %}
+Каждая роль — своя маленькая форма снятия, карточкой, а не плашкой с полем
+внутри и не строкой таблицы. Плашка с полем причины и кнопкой в одну строку на
+1440 обрезала название роли; таблица на 390 уводила кнопку за край (две сверки
+norma, 30.09.2026). Карточка складывается в столбец сама. Форма у каждой роли
+своя: одна форма на всё означала бы, что причина одной роли уходит в историю
+другой.
+{% endcomment %}
+{% for held in person.roles %}
+<form method="post" action="{% url 'person-roles' person.user_id %}" class="card held-role">{% csrf_token %}
+  <input type="hidden" name="role" value="{{ held.id }}">
+  <input type="hidden" name="action" value="remove">
+  <p><span class="chip">{{ held.title }}</span>{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</p>
+  <label>{% blocktranslate with role=held.title %}Причина снятия роли «{{ role }}»{% endblocktranslate %}
+    <input type="text" name="reason" required maxlength="200">
+  </label>
+  <button type="submit">{% translate "Снять роль" %}</button>
+</form>
+{% endfor %}
+
+<h2>{% translate "Выдать роль" %}</h2>
+<form method="post" action="{% url 'person-roles' person.user_id %}" class="card wide">{% csrf_token %}
+  <label>{% translate "Роль" %}
+    <select name="role">
+      {% for role in roles %}<option value="{{ role.id }}">{{ role.title }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>{% translate "Точка" %}
+    <select name="unit">
+      <option value="">{% translate "не выбрана" %}</option>
+      {% for unit in units %}<option value="{{ unit.id }}">{{ unit.code }} — {{ unit.title }}</option>{% endfor %}
+    </select>
+    <span class="note">{% translate "Нужна ролям, которые ведут одну точку: без неё человек получил бы все точки партнёра." %}</span>
+  </label>
+  <label>{% translate "До какого числа" %}
+    <input type="date" name="until" min="{{ today }}">
+    <span class="note">{% translate "Пусто — без срока." %}</span>
+  </label>
+  <label>{% translate "Причина" %}
+    <input type="text" name="reason" required maxlength="200">
+  </label>
+  <button type="submit">{% translate "Выдать" %}</button>
+</form>
+{% endblock %}
