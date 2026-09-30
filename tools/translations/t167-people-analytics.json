@@ -1,0 +1,230 @@
+{
+  "Считать пока нечего": {
+    "en": "Nothing to count yet",
+    "sr": "Još nema šta da se broji"
+  },
+  "Что показать": {
+    "en": "What to show",
+    "sr": "Šta prikazati"
+  },
+  "Фонд оплаты труда по месяцам": {
+    "en": "Payroll cost by month",
+    "sr": "Fond zarada po mesecima"
+  },
+  "По точкам": {
+    "en": "By unit",
+    "sr": "Po objektu"
+  },
+  "ФОТ за период": {
+    "en": "Payroll cost for the period",
+    "sr": "Fond zarada za period"
+  },
+  "Часов": {
+    "en": "Hours",
+    "sr": "Sati"
+  },
+  "Стоимость часа": {
+    "en": "Cost per hour",
+    "sr": "Trošak po satu"
+  },
+  "Всего": {
+    "en": "Total",
+    "sr": "Ukupno"
+  },
+  "По группам": {
+    "en": "By group",
+    "sr": "Po grupi"
+  },
+  "Проценты здесь считаются от единиц людей": {
+    "en": "Percentages here are counted per whole person, not by share",
+    "sr": "Procenti se ovde računaju po celoj osobi, a ne po udelu"
+  },
+  "Приняли": {
+    "en": "Hires",
+    "sr": "Primljeni"
+  },
+  "Ушли": {
+    "en": "Leavers",
+    "sr": "Otišli"
+  },
+  "Текучесть": {
+    "en": "Turnover",
+    "sr": "Fluktuacija"
+  },
+  "База": {
+    "en": "Base",
+    "sr": "Osnovica"
+  },
+  "мало данных": {
+    "en": "not enough data",
+    "sr": "malo podataka"
+  },
+  "Сейчас": {
+    "en": "Now",
+    "sr": "Sada"
+  },
+  "Ушли за показанные месяцы": {
+    "en": "Left during the shown months",
+    "sr": "Otišli tokom prikazanih meseci"
+  },
+  "поимённо — пока их можно назвать по именам": {
+    "en": "by name — while there are few enough to list",
+    "sr": "poimenično — dok ih ima dovoljno malo da se mogu nabrojati"
+  },
+  "Отработал": {
+    "en": "Worked",
+    "sr": "Radio"
+  },
+  "Ушёл": {
+    "en": "Left",
+    "sr": "Otišao"
+  },
+  "За показанные месяцы никто не уволился.": {
+    "en": "No one left during the shown months.",
+    "sr": "Tokom prikazanih meseci niko nije otišao."
+  },
+  "Часов сверх нормы": {
+    "en": "Hours over standard",
+    "sr": "Sati preko norme"
+  },
+  "Доля в часах месяца": {
+    "en": "Share of the month's hours",
+    "sr": "Udeo u satima meseca"
+  },
+  "от всех отработанных часов": {
+    "en": "of all hours worked",
+    "sr": "od svih odrađenih sati"
+  },
+  "Кто вышел за норму": {
+    "en": "Who went over standard",
+    "sr": "Ko je prešao normu"
+  },
+  "Сверх нормы": {
+    "en": "Over standard",
+    "sr": "Preko norme"
+  },
+  "Начислено за месяц": {
+    "en": "Accrued for the month",
+    "sr": "Obračunato za mesec"
+  },
+  "В этом месяце никто не вышел за свою норму часов.": {
+    "en": "No one went over their hours standard this month.",
+    "sr": "Ovog meseca niko nije prešao svoju normu sati."
+  },
+  "Ни одного месяца с табелем или расчётом ещё нет. Аналитика появится, как только будет закрыт первый месяц.": {
+    "en": "There isn't a single month with a timesheet or a calculation yet. Analytics will appear as soon as the first month is closed.",
+    "sr": "Još nema nijednog meseca sa evidencijom sati ili obračunom. Analitika će se pojaviti čim se zatvori prvi mesec."
+  },
+  "Выручки в продукте пока нет — она приедет с коннектором Dodo IS. До тех пор доля ФОТ от выручки показана прочерком: ноль в этой строке читался бы как посчитанный ответ.": {
+    "en": "There is no revenue in the product yet — it will arrive with the Dodo IS connector. Until then, payroll cost's share of revenue is shown as a dash: a zero in this row would read as a calculated answer.",
+    "sr": "Prihoda u proizvodu još nema — stiže sa konektorom Dodo IS. Do tada je udeo fonda zarada u prihodu prikazan crticom: nula u ovom redu bi izgledala kao izračunat odgovor."
+  },
+  "Один лишний уход сдвигает показатель на несколько пунктов. Поэтому рядом с процентом всегда стоит база, а там, где база меньше %(base)s человек, процента нет вовсе — стоит «мало данных».": {
+    "en": "One extra departure shifts the figure by several points. That's why the base always sits next to the percentage, and where the base is under %(base)s people, there is no percentage at all — it says \"not enough data\".",
+    "sr": "Jedan dodatan odlazak pomeri pokazatelj za nekoliko poena. Zato pored procenta uvek stoji osnovica, a tamo gde je osnovica manja od %(base)s ljudi, procenta uopšte nema — piše „malo podataka“."
+  },
+  "Текучесть считается как ушедшие за показанные месяцы к средней численности за них же. Переводы между точками уходом не считаются: уход — это увольнение, а перевод меняет только условия найма.": {
+    "en": "Turnover is calculated as those who left during the shown months against the average headcount over the same months. Transfers between units don't count as leaving: leaving means dismissal, while a transfer only changes the employment terms.",
+    "sr": "Fluktuacija se računa kao broj onih koji su otišli tokom prikazanih meseci u odnosu na prosečan broj zaposlenih u istim mesecima. Prelasci između objekata se ne računaju kao odlazak: odlazak je otpuštanje, a prelazak menja samo uslove zapošljavanja."
+  },
+  "мало данных · база %(base)s": {
+    "en": "not enough data · base %(base)s",
+    "sr": "malo podataka · osnovica %(base)s"
+  },
+  "Средний срок работы ушедших: %(tenure)s": {
+    "en": "Average tenure of those who left: %(tenure)s",
+    "sr": "Prosečan radni staž onih koji su otišli: %(tenure)s"
+  },
+  "Сверх нормы — это отработанные часы минус норма самого человека: у работающего на полставки она своя. Во что обошлись именно эти часы, экран не считает — коэффициент переработки в правилах страны помечен как непроверенный, и число по нему выглядело бы как знание. Рядом стоит начисление человека за месяц — то самое, что в ведомости.": {
+    "en": "Over standard is hours worked minus the person's own standard: someone working part-time has their own. The screen doesn't calculate what exactly these hours cost — the overtime coefficient in the country rules is marked unverified, and a number based on it would look like knowledge. Next to it is the person's accrual for the month — the same figure that's in the payroll sheet.",
+    "sr": "Preko norme su odrađeni sati minus lična norma te osobe: ko radi sa pola radnog vremena, ima svoju. Koliko su tačno koštali ti sati, ekran ne računa — koeficijent prekovremenog rada u pravilima zemlje označen je kao neproveren, pa bi broj po njemu izgledao kao znanje. Pored toga stoji obračun osobe za mesec — isti onaj koji je u obračunskoj listi."
+  },
+  "Что с этим делать — решает не отчёт. Переработка бывает дешевле, чем нанять человека на полставки, но только пока это не выгорание. Экран показывает часы и деньги и не предлагает вывод.": {
+    "en": "What to do about it isn't for the report to decide. Overtime can be cheaper than hiring someone part-time, but only until it turns into burnout. The screen shows the hours and the money and offers no conclusion.",
+    "sr": "Šta sa tim dalje — ne odlučuje izveštaj. Prekovremeni rad ponekad je jeftiniji od zapošljavanja nekoga sa pola radnog vremena, ali samo dok ne postane sagorevanje. Ekran prikazuje sate i novac i ne nudi zaključak."
+  },
+  "%(count)s чел.": {
+    "en": "%(count)s people",
+    "sr": "%(count)s osoba"
+  },
+  "Без группы": {
+    "en": "No group",
+    "sr": "Bez grupe"
+  },
+  "%(since)s — %(until)s": {
+    "en": "%(since)s — %(until)s",
+    "sr": "%(since)s — %(until)s"
+  },
+  "ФОТ к выручке": {
+    "en": "Payroll cost to revenue",
+    "sr": "Fond zarada prema prihodu"
+  },
+  "за %(month)s": {
+    "en": "for %(month)s",
+    "sr": "za %(month)s"
+  },
+  "выручка приедет с коннектором Dodo IS": {
+    "en": "revenue will arrive with the Dodo IS connector",
+    "sr": "prihod stiže sa konektorom Dodo IS"
+  },
+  "ФОТ на человека": {
+    "en": "Payroll cost per person",
+    "sr": "Fond zarada po osobi"
+  },
+  "ушло %(left)s из %(base)s в среднем": {
+    "en": "%(left)s left out of %(base)s on average",
+    "sr": "otišlo %(left)s od %(base)s u proseku"
+  },
+  "%(count)s мес.": {
+    "en": "%(count)s mo.",
+    "sr": "%(count)s mes."
+  },
+  "Стоимость труда": {
+    "en": "Labour cost",
+    "sr": "Trošak rada"
+  },
+  "Кто уходит": {
+    "en": "Who is leaving",
+    "sr": "Ko odlazi"
+  },
+  "Часы и переработки": {
+    "en": "Hours and overtime",
+    "sr": "Sati i prekovremeni rad"
+  },
+  "Доля ФОТ от выручки: ждёт коннектора Dodo IS": {
+    "en": "Payroll cost's share of revenue: waiting for the Dodo IS connector",
+    "sr": "Udeo fonda zarada u prihodu: čeka konektor Dodo IS"
+  },
+  "прошлого месяца в отчёте нет — сравнить не с чем": {
+    "en": "no previous month in the report — nothing to compare with",
+    "sr": "u izveštaju nema prethodnog meseca — nema s čim da se uporedi"
+  },
+  "п.п.": {
+    "en": "pp",
+    "sr": "p.p."
+  },
+  "доля от выручки — выручки в продукте пока нет": {
+    "en": "share of revenue — no revenue in the product yet",
+    "sr": "udeo u prihodu — prihoda u proizvodu još nema"
+  },
+  "%(share)s от выручки %(revenue)s": {
+    "en": "%(share)s of revenue %(revenue)s",
+    "sr": "%(share)s od prihoda %(revenue)s"
+  },
+  "%(over)s из %(heads)s": {
+    "en": "%(over)s of %(heads)s",
+    "sr": "%(over)s od %(heads)s"
+  },
+  "Стоило переработок": {
+    "en": "Overtime cost",
+    "sr": "Trošak prekovremenog rada"
+  },
+  "коэффициент переработки в правилах страны не проверен": {
+    "en": "the overtime rate in the country rules is not verified",
+    "sr": "koeficijent prekovremenog rada u pravilima zemlje nije proveren"
+  },
+  "против %(value)s (%(month)s)": {
+    "en": "vs %(value)s (%(month)s)",
+    "sr": "u odnosu na %(value)s (%(month)s)"
+  }
+}
