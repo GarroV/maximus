@@ -22,7 +22,15 @@ import pytest
 
 from conftest import body, login_as, period_url, wipe_payruns
 
-SCREEN = "/analytics/people/"
+# Три режима модуля 12 — три страницы (T226, D081). Числа, которые сверяются с
+# ведомостью, живут на «Стоимости труда», поэтому она и есть главный экран теста.
+SCREEN = "/labor-cost/"
+PAGES = {"cost": "/labor-cost/", "churn": "/turnover/", "hours": "/work-hours/"}
+OLD_SCREEN = "/analytics/people/"
+CURRENT_ITEM = re.compile(
+    r'<span class="sidenav__current" aria-current="page"[^>]*>.*?'
+    r'<span class="sidenav__label">([^<]+)</span>', re.S,
+)
 
 # Итог ведомости стоит последней ячейкой подвала — той, что помечена `num--total`.
 SHEET_TOTAL = re.compile(r'class="[^"]*num--total[^"]*"[^>]*>([^<]+)</td>')
@@ -68,7 +76,7 @@ def screen(client, calculated):
 
 
 def test_экран_открывается_и_называет_себя(screen):
-    assert "Аналитика по людям" in screen
+    assert "<h1>Стоимость труда</h1>" in screen
 
 
 def test_фот_месяца_сходится_с_итогом_ведомости(client, calculated, screen):
@@ -135,25 +143,43 @@ def test_подобранная_чужая_точка_отвечает_как_в
 
 
 @pytest.mark.parametrize(
-    ("tab", "expected"),
+    ("page", "expected", "item"),
     [
-        ("cost", "Фонд оплаты труда по месяцам"),
-        ("churn", "Текучесть"),
-        ("hours", "Часы и переработки"),
+        ("cost", "Фонд оплаты труда по месяцам", "Стоимость труда"),
+        ("churn", "Текучесть", "Кто уходит"),
+        ("hours", "Кто вышел за норму", "Часы и переработки"),
     ],
 )
-def test_три_вкладки_эталона_открываются(client, calculated, tab, expected):
-    """Вкладки — обычные ссылки: состояние экрана живёт в адресе и переживает пересылку."""
+def test_три_режима_эталона_три_страницы(client, calculated, page, expected, item):
+    """Каждый режим — своя страница, и в левой панели выделен ровно её пункт.
+
+    Выделение считается по корню адреса (`in_section`): окажись у страниц общий
+    корень, панель выделила бы все три пункта сразу, и человек не видел бы, где он.
+    """
     login_as(client, "director")
-    html = body(client.get(f"{SCREEN}?tab={tab}"))
-    assert expected in html, f"вкладка {tab} не показала того, ради чего она есть"
+    html = body(client.get(PAGES[page]))
+    assert expected in html, f"страница {page} не показала того, ради чего она есть"
+    assert CURRENT_ITEM.findall(html) == [item], (
+        f"на странице {page} выделены пункты {CURRENT_ITEM.findall(html)}"
+    )
+    assert "<select" not in html, "выбор на странице — выпадающим списком (D081)"
 
 
-def test_выдуманная_вкладка_открывает_первую(client, calculated):
-    """Подобранный адрес не должен ни падать, ни показывать пустоту."""
+@pytest.mark.parametrize(
+    ("query", "target"),
+    [
+        ("?tab=churn&unit=NS1", "/turnover/?unit=NS1"),
+        ("?tab=hours", "/work-hours/"),
+        ("", "/labor-cost/"),
+        ("?tab=выдумка", "/labor-cost/"),
+    ],
+)
+def test_прежний_адрес_ведёт_на_свою_страницу(client, web_env, query, target):
+    """Разосланная ссылка на вкладку открывает ту страницу, которую имел в виду отправитель."""
     login_as(client, "director")
-    html = body(client.get(f"{SCREEN}?tab=выдумка"))
-    assert "Фонд оплаты труда по месяцам" in html
+    answer = client.get(OLD_SCREEN + query)
+    assert answer.status_code == 302
+    assert answer["Location"] == target
 
 
 def test_доля_фот_от_выручки_прочерк_а_не_ноль(screen):
@@ -182,7 +208,7 @@ def test_вкладка_часов_не_молчит_пустотой(client, ca
     них. Молчание — единственный исход, который здесь считается ошибкой.
     """
     login_as(client, "director")
-    html = body(client.get(f"{SCREEN}?tab=hours"))
+    html = body(client.get(PAGES["hours"]))
     assert ("Кто вышел за норму" in html) or (
         "никто не вышел за свою норму часов" in html
     ), "вкладка часов не сказала ни про переработки, ни про их отсутствие"

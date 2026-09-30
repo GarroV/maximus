@@ -8283,9 +8283,6 @@ msgstr "Bankovni izvod"
 msgid "Выплаты"
 msgstr "Isplate"
 
-#: web/navigation.py
-msgid "Аналитика по людям"
-msgstr "Analitika o ljudima"
 
 #: web/navigation.py
 msgid "Интеграция с Dodo IS"
@@ -8366,8 +8363,7 @@ msgid ""
 "  не дотягивает, и рядом написано, чего именно не хватает. «Разработка в\n"
 "  процессе» — экрана ещё нет, а вместо него страница с описанием, что "
 "здесь\n"
-"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» "
-"и\n"
+"  будет: так устроены «Банковская выписка», «Выплаты» и\n"
 "  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в левой панели, и "
 "плашкой\n"
 "  наверху самого экрана. Раздел без пометки готов."
@@ -8375,7 +8371,7 @@ msgstr ""
 "Neki odeljci su označeni. „Dorada“ znači da ekran radi, ali ne dostiže ono "
 "što je zamišljeno, a pored piše šta tačno nedostaje. „U izradi“ znači da "
 "ekrana još nema — umesto njega stoji stranica sa opisom šta će ovde biti: "
-"tako su rešeni „Bankovni izvod“, „Isplate“, „Analitika o ljudima“ i "
+"tako su rešeni „Bankovni izvod“, „Isplate“ i "
 "„Integracija sa Dodo IS“. Oznaka stoji i kao tačka pored stavke u levom "
 "panelu i kao traka na vrhu samog ekrana. Odeljak bez oznake je gotov."
 
@@ -8879,9 +8875,6 @@ msgstr "Sati preko norme"
 msgid "Часы и переработки"
 msgstr "Sati i prekovremeni rad"
 
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Что показать"
-msgstr "Šta prikazati"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""

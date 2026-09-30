@@ -88,7 +88,13 @@ def test_the_reference_menu_is_covered():
     # экран из одной шапки читаются как два разных места. «Доступы» названы
     # «Роли и права» по `navigation.OUR_OWN`.
     under_directories = {"Контрагенты", "Точки", "Юрлица", "Доступы"}
-    missing = sorted(wanted - ours - under_directories)
+    # «Аналитика по людям» разобрана на три пункта по вкладкам модуля 12 —
+    # «Стоимость труда», «Кто уходит», «Часы и переработки» (D081, T226).
+    # Исключение держится, только пока все три на месте.
+    split = {"Аналитика по людям"} if {
+        "Стоимость труда", "Кто уходит", "Часы и переработки",
+    } <= ours else set()
+    missing = sorted(wanted - ours - under_directories - split)
     assert not missing, f"пункты эталона, которых нет в шапке: {missing}"
 
 
