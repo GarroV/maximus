@@ -40,6 +40,9 @@ TAXES = "payroll_taxes"
 # Приставка ключа идемпотентности. По ней же строки находятся при пересчёте.
 PREFIX = "payrun:"
 
+# Точность денег в фактах — сотые, одна на все пути деления.
+CENT = Decimal("0.01")
+
 
 def post(payrun) -> int:
     """Перенести утверждённый расчёт в факты. Возвращает число строк.
@@ -255,11 +258,14 @@ def _shares(across: dict, employee_id, unit_id, amount: Decimal) -> list:
     `allocation_plan` и в ручном разнесении: иначе на трёх точках сумма долей
     не сойдётся с целым.
     """
+    # Все пути отдают сумму до сотых, как и путь с делением: иначе одна и та
+    # же сумма ложилась бы в P&L разными копейками в зависимости от того,
+    # сколько у человека точек.
     mine = across.get(employee_id) or []
     if not mine:
-        return [(unit_id, amount)]
+        return [(unit_id, amount.quantize(CENT))]
     if len(mine) == 1:
-        return [(mine[0][0], amount)]
+        return [(mine[0][0], amount.quantize(CENT))]
 
     weights = [(unit, share if share is not None else Decimal("1")) for unit, share in mine]
     total = sum(weight for _unit, weight in weights)
@@ -279,7 +285,7 @@ def _shares(across: dict, employee_id, unit_id, amount: Decimal) -> list:
     parts, done, carried = [], Decimal("0"), Decimal("0")
     for unit, weight in sorted(weights, key=lambda row: str(row[0])):
         carried += weight
-        upto = (amount * carried / total).quantize(Decimal("0.01"))
+        upto = (amount * carried / total).quantize(CENT)
         parts.append((unit, upto - done))
         done = upto
     return parts
