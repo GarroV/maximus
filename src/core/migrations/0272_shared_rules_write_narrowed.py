@@ -16,12 +16,13 @@
 ничего не меняется.
 """
 
-import core.models
+import uuid
+
 import django.contrib.postgres.constraints
 import django.db.models.functions.comparison
-import uuid
 from django.db import migrations, models
 
+import core.models
 
 POLICIES = """
 create policy shared_rows_read_only_update on allocation_rules

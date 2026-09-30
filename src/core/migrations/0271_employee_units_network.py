@@ -23,11 +23,11 @@
 точкам нет вовсе, а в правиле «свой человек» (`0269`) она не участвует.
 """
 
-import core.models
 import django.contrib.postgres.constraints
 import django.db.models.deletion
 from django.db import migrations, models
 
+import core.models
 
 POLICY = """
 drop policy if exists unit_visibility on employee_units;
