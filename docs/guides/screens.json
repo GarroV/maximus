@@ -1,5 +1,5 @@
 {
-  "_": "Экраны, которые показывает гайд. Один список на съёмку и на сборку: ключ — имя снимка, значение — адрес. Тест tests/test_guide_screens.py сверяет его с плейсхолдерами {{SHOT:…}} в самом гайде, поэтому забыть новый экран нельзя. В фигурных скобках — подстановки, которые скрипт съёмки находит на стенде сам: {period} — утверждённый месяц, {open_period} — только что заведённый, {employee} — карточка человека, {trace} — след расчёта одной суммы, {invoice} — карточка счёта.",
+  "_": "Экраны, которые показывает гайд. Один список на съёмку и на сборку: ключ — имя снимка, значение — адрес. Тест tests/test_guide_screens.py сверяет его с плейсхолдерами {{SHOT:…}} в самом гайде, поэтому забыть новый экран нельзя. В фигурных скобках — подстановки, которые скрипт съёмки находит на стенде сам: {period} — утверждённый месяц, {open_period} — только что заведённый, {employee} — карточка человека, {employee_terms} — его условия найма, {trace} — след расчёта одной суммы, {invoice} — карточка счёта.",
   "01-directory": "/directory/",
   "02-units": "/directory/units/",
   "03-rules": "/rules/",
@@ -7,7 +7,7 @@
   "05-positions": "/directory/positions/",
   "06-expense-items": "/directory/expense-items/upload/",
   "07-employees": "/directory/employees/",
-  "08-employee-card": "{employee}terms/",
+  "08-employee-card": "{employee_terms}",
   "09-calendar": "/directory/calendar/",
   "10-periods": "/periods/",
   "11-period-open": "{open_period}",

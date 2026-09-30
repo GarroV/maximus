@@ -9255,6 +9255,8 @@ msgstr "Employee pages"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Точки затрат"
 msgstr "Cost units"
+
+#: новые строки, добавлены tools/apply_translations.py
 msgid "АДМ"
 msgstr "ADM"
 

@@ -9091,6 +9091,8 @@ msgstr "Stranice zaposlenog"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Точки затрат"
 msgstr "Objekti troškova"
+
+#: новые строки, добавлены tools/apply_translations.py
 msgid "АДМ"
 msgstr "ADM"
 
