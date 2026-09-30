@@ -128,3 +128,54 @@ def test_the_people_list_shows_the_unit_and_the_last_visit(client, web_env):
     assert "не входил" not in person_row(html, "Администратор сети"), (
         "администратор только что вошёл, а список говорит, что он не входил"
     )
+
+
+def _history_entry(reason: str) -> None:
+    """Запись истории — прямо в таблицу: выдача через экран добавила бы роль,
+    и соседние тесты увидели бы у человека лишнее."""
+    from django.db import connection
+
+    from core.models import Role, Tenant, User
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    admin = User.objects.get(username="admin")
+    manager = User.objects.get(username="manager")
+    role = Role.objects.get(tenant=tenant, code="admin")
+    with connection.cursor() as cur:
+        cur.execute(
+            """insert into access_log (tenant_id, actor_user_id, subject_user_id, action,
+                                       role_id, role_title, until, reason)
+               values (%s, %s, %s, 'granted', %s, %s, null, %s)""",
+            [tenant.pk, admin.pk, manager.pk, role.pk, role.title, reason],
+        )
+
+
+def test_the_access_history_is_exported_as_csv(client, web_env):
+    """Выгрузка — все записи, а не последние сто, что на экране."""
+    import csv
+    import io
+
+    _history_entry("проверка выгрузки")
+    login_as(client, "admin")
+    answer = client.get("/roles/history/export/")
+    assert answer.status_code == 200
+    assert answer["Content-Type"].startswith("text/csv")
+    assert "attachment" in answer["Content-Disposition"]
+    rows = list(csv.reader(io.StringIO(answer.content.decode("utf-8-sig"))))
+    assert rows[0][0] == "Когда"
+    assert any("проверка выгрузки" in row for row in rows[1:])
+
+
+def test_a_formula_in_a_reason_does_not_run_in_the_spreadsheet(client, web_env):
+    """Причину пишет человек. Файл открывают в Excel, а ячейка, начатая с «=»,
+    там не текст, а формула — её отдают текстом."""
+    _history_entry("=HYPERLINK(\"http://example.test\")")
+    login_as(client, "admin")
+    text = client.get("/roles/history/export/").content.decode("utf-8-sig")
+    assert "'=HYPERLINK" in text
+    assert ",=HYPERLINK" not in text and '"=HYPERLINK' not in text
+
+
+def test_the_export_is_refused_to_whoever_does_not_lead_roles(client, web_env):
+    login_as(client, "manager")
+    assert client.get("/roles/history/export/").status_code == 403

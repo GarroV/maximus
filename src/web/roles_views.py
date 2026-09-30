@@ -68,6 +68,7 @@ from . import permissions
 from .principal import get_current_principal
 from .roles_display import rights_matrix, role_choice, shown_role_title
 from .roles_effects import role_effects
+from .roles_export import history_csv
 
 # Права, которые можно выдать с экрана, — ВСЕ права продукта, а не их список
 # рядом (T203). Список здесь был своей копией, и она успела разъехаться: право
@@ -375,6 +376,15 @@ def history(request):
         return refused
     return _show(request, "web/roles/history.html", "roles-history",
                  {"history": _history(who.tenant_id), "shown": HISTORY_SHOWN})
+
+
+@login_required
+def history_export(request):
+    """Вся история доступов файлом CSV — тем же правом, что и страница."""
+    who, refused = _guard(request)
+    if refused:
+        return refused
+    return history_csv(who.tenant_id)
 
 
 @login_required
