@@ -1,16 +1,12 @@
 {% extends "web/base.html" %}{% load ui i18n %}
 {% comment %}
-Одно правило: что действует сейчас, что было раньше и новая версия с даты.
+Одно правило: что действует сейчас, кто решает и что было раньше. Только
+чтение: новая версия и журнал попыток выйти за рамку — своими страницами
+(T227, D081/D087), сюда с них ссылка «← К правилу».
 
-История стоит между действующим значением и формой намеренно — тем же порядком
-и по той же причине, что в карточке сотрудника: человек, собравшийся менять
-правило, сначала видит, что было и с какого числа. Без этого «действует с»
-набирается наугад.
-
-Значение вводится тем видом поля, какого оно типа сейчас: список — там, где
-допустимое перечислено самими правилами страны (мера работы, схема расчёта),
-«да/нет» — у выключателя, обычное поле — у остального. Свободный ввод там, где
-набор ограничен, означает опечатку, которая меняет деньги молча.
+История версий здесь, а не на форме, и форма открывается отсюда — тем же
+порядком и по той же причине, что в карточке сотрудника: человек, собравшийся
+менять правило, сначала видит, что было и с какого числа.
 
 Кнопки «удалить версию» нет: правило не отменяют задним числом, его заводят
 заново с новой датой. Иначе исчезнувшая версия унесла бы с собой объяснение
@@ -18,14 +14,11 @@
 {% endcomment %}
 {% block title %}{{ heading }}{% endblock %}
 {% block content %}
-<p class="note"><a href="{{ back_url }}">{% translate "← К правилам" %}</a></p>
-<h1>{{ heading }}</h1>
-
-{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
-{% if error %}
-{% translate "Не сохранено." as not_saved %}
-{% notice "alert" title=not_saved %}{{ error }}{% endnotice %}
-{% endif %}
+<p class="back"><a href="{{ back_url }}">{% translate "← К правилам" %}</a></p>
+<div class="head">
+  <h1>{{ heading }}</h1>
+  {% if new_url %}<a class="btn primary" href="{{ new_url }}">{% translate "Завести версию" %}</a>{% endif %}
+</div>
 
 <p class="sub">{% blocktranslate with value=value origin=origin %}Сейчас действует: {{ value }} — {{ origin }}{% endblocktranslate %}{% if since %} ({% blocktranslate with day=since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
 
@@ -98,32 +91,7 @@
   </tbody>
 </table>{% endscroll %}
 {% endif %}
-
-{% if country_may_edit and not country_locked %}
-<form class="card" method="post">{% csrf_token %}
-  <input type="hidden" name="level" value="country">
-  <p class="note">{% blocktranslate %}Новая версия правил страны действует на всех партнёров этой страны. Прежняя закрывается днём начала новой и остаётся в истории: уже посчитанные месяцы собираются своей версией и не двигаются.{% endblocktranslate %}</p>
-  <p class="field">
-    {% translate "Действует с" as country_from_label %}
-    {% include "web/components/field.html" with id="country_valid_from" name="valid_from" label=country_from_label value=default_from required=True type="date" help=from_help %}
-  </p>
-  <p class="field">
-    {% translate "Значение в правилах страны" as country_value_label %}
-    {% if country_options %}
-      {% include "web/components/select.html" with id="country_value" name="value" label=country_value_label options=country_options required=True %}
-    {% elif country_kind == "bool" %}
-      {% include "web/components/select.html" with id="country_value" name="value" label=country_value_label options=country_bool required=True %}
-    {% elif country_kind == "number" %}
-      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_value required=True inputmode="decimal" %}
-    {% else %}
-      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_value required=True %}
-    {% endif %}
-  </p>
-  <button type="submit" class="primary">{% translate "Завести версию правил страны" %}</button>
-</form>
-{% elif country_locked %}
-<p class="note">{% translate "Название правила заведено на всех языках сразу и меняется вместе с пресетом страны, а не с этого экрана." %}</p>
-{% else %}
+{% if country_note %}
 <p class="note">{{ country_note }}</p>
 {% endif %}
 {% endif %}
@@ -166,117 +134,23 @@
 {% else %}
 {% translate "Это правило никто не переопределял." as never_changed %}
 {% comment %}
-У запертого правила пустота объясняется иначе, и это не придирка: формы ниже у
+У запертого правила пустота объясняется иначе, и это не придирка: формы у
 него нет, а прежний текст обещал «первую же версию ниже» — то есть звал к
 действию, которого на странице не существует.
 {% endcomment %}
 {% if frame_locked %}
 {% notice "empty" title=never_changed %}{% translate "Значение приходит из правил страны и остаётся её значением: это правило закрыто законом, и переопределить его нельзя ни партнёру, ни группе, ни человеку." %}{% endnotice %}
 {% else %}
-{% notice "empty" title=never_changed %}{% translate "Значение приходит из правил страны. Первая же версия ниже станет переопределением — на том уровне и с той даты, которые вы укажете." %}{% endnotice %}
+{% notice "empty" title=never_changed %}{% translate "Значение приходит из правил страны. Первая же новая версия станет переопределением — на том уровне и с той даты, которые вы укажете." %}{% endnotice %}
 {% endif %}
 {% endif %}
 
-{% if frame_locked %}
+{% if attempts_url %}
 {% comment %}
-Формы у запертого правила нет вовсе, а не «есть и отвергает». Форма, которая
-гарантированно откажет, — это работа, отнятая у человека до того, как он её
-сделал: он выберет уровень, наберёт дату и значение и только тогда прочитает,
-что так было нельзя с самого начала. Тот же приём, что у подписи правила страны.
+Журнал отвергнутых попыток — своей страницей, сюда только ссылка с числом.
+Пустой журнал не называется вовсе: «попыток не было» рассказывало бы о
+механизме тому, кто с ним не сталкивался.
 {% endcomment %}
-{% translate "Это правило не переопределяется." as no_override %}
-{% notice "empty" title=no_override %}{{ frame_note }}{% endnotice %}
-{% else %}
-<h2>{% translate "Новая версия правила" %}</h2>
-<p class="note">{% translate "Прежняя версия закрывается днём начала новой и остаётся в истории. Ничего не изменилось — версия не заводится." %}</p>
-{% comment %}
-Что случится с уже утверждённой зарплатой, названо до правки, а не только после
-неё. Найдено в браузере: подставленная дата верная, но человек, набравший свою,
-узнавал ответ только нажав «Завести версию» — продукт молчал ровно там, где знал
-его заранее. Тот же довод, что у `components/action.html`.
-
-Обещания отказа здесь больше нет (T121): дата внутри закрытого месяца
-принимается, закрытый месяц от неё не двигается, а разница едет вперёд
-помеченной строкой (D020). Слова приходят готовыми из `web/directory` — те же,
-что на форме справочника: два объяснения одного и того же разъехались бы.
-{% endcomment %}
-{% if closed_note %}
-<p class="note">{{ closed_note }}</p>
-{% endif %}
-<form class="card" method="post">{% csrf_token %}
-  {% comment %}
-  «Кому» стоит первым полем — до даты и до значения, и это не порядок вёрстки.
-  Уровень решает, кого правка заденет: партнёра целиком, одну группу или одного
-  человека. Спрошенный последним, он читался бы как уточнение к уже набранному
-  значению, тогда как это первое решение из трёх.
-
-  Уровни, на которых это правило не действует, в список не попадают, а причина
-  сказана словами рядом (`scope_note`) — до правки, а не отказом после неё.
-  {% endcomment %}
-  <p class="field">
-    {% translate "Кому" as target_label %}
-    {% translate "Уровни складываются: значение группы сильнее значения партнёра, значение человека сильнее обоих." as target_help %}
-    {% include "web/components/select.html" with id="target" name="target" label=target_label options=targets required=True help=target_help %}
-  </p>
-  {% if scope_note %}
-  <p class="note">{{ scope_note }}</p>
-  {% endif %}
-  <p class="field">
-    {% translate "Действует с" as from_label %}
-    {% comment %}
-    Подсказка приходит из `web/rules.monthly_help` — тем же местом, откуда
-    берутся слова после правки. Прежняя жила здесь строкой и говорила только про
-    месяцы ДО даты, умалчивая о главном: правила берутся на месяц целиком, и
-    дата внутри месяца на этот месяц не влияет вовсе (issue #99).
-    {% endcomment %}
-    {% include "web/components/field.html" with id="valid_from" name="valid_from" label=from_label value=default_from required=True type="date" help=from_help %}
-  </p>
-  <p class="field">
-    {% translate "Значение" as value_label %}
-    {% if options %}
-      {% include "web/components/select.html" with id="value" name="value" label=value_label options=options required=True %}
-    {% elif kind == "bool" %}
-      {% include "web/components/select.html" with id="value" name="value" label=value_label options=bool_options required=True %}
-    {% elif kind == "number" %}
-      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value required=True inputmode="decimal" help=frame_note %}
-    {% elif kind == "list" %}
-      {% translate "Через запятую." as list_help %}
-      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value help=list_help %}
-    {% else %}
-      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value required=True %}
-    {% endif %}
-  </p>
-  <button type="submit" class="primary">{% translate "Завести версию" %}</button>
-</form>
-{% endif %}
-
-{% comment %}
-Отвергнутые попытки. Эталон модуля 17 объясняет, зачем они на экране: «Отказ,
-который никуда не записан, повторят завтра» — это след для аудита, а не защита
-от дурака. Пустой список поэтому и не показывается: строка «попыток не было»
-рассказывала бы о механизме тому, кто с ним не столкнулся.
-{% endcomment %}
-{% if attempts %}
-<h2>{% translate "Попытки выйти за рамку" %}</h2>
-{% scroll %}<table>
-  <thead>
-    <tr>
-      <th>{% translate "Когда" %}</th>
-      <th>{% translate "Кто" %}</th>
-      <th>{% translate "Уровень" %}</th>
-      <th>{% translate "Ставили" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for attempt in attempts %}
-    <tr>
-      <td>{{ attempt.at }}</td>
-      <td>{{ attempt.who }}</td>
-      <td>{{ attempt.level }}</td>
-      <td class="{{ attempt.wanted|numclass }}">{{ attempt.wanted }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>{% endscroll %}
+<p class="sub"><a href="{{ attempts_url }}">{% translate "Попытки выйти за рамку" %}: {{ attempts_count }}</a></p>
 {% endif %}
 {% endblock %}

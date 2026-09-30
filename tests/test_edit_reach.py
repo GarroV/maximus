@@ -65,7 +65,7 @@ def test_the_rule_form_says_that_rules_are_taken_by_whole_months(client, web_env
     то, о чём человек не спрашивал, и молчала про месяц, в который он метит.
     """
     login_as(client, "admin")
-    html = body(client.get(f"/rules/{NET_FACTOR}/"))
+    html = body(client.get(f"/rules/{NET_FACTOR}/new/"))
     client.post("/logout/")
 
     assert "на месяц целиком" in html, "страница не говорит, что правила берутся помесячно"
@@ -81,7 +81,7 @@ def test_a_version_dated_inside_the_month_says_from_which_month_it_works(
     человек идёт заводить её второй раз.
     """
     login_as(client, "admin")
-    answer = client.post(f"/rules/{NET_FACTOR}/", {"value": "0.65", "valid_from": INSIDE_JUNE})
+    answer = client.post(f"/rules/{NET_FACTOR}/new/", {"value": "0.65", "valid_from": INSIDE_JUNE})
     assert answer.status_code == 302, body(answer)
     html = body(client.get(answer["Location"]))
     client.post("/logout/")
@@ -100,7 +100,9 @@ def test_a_version_dated_on_the_first_says_nothing_extra(
     не о чем.
     """
     login_as(client, "admin")
-    answer = client.post(f"/rules/{NET_FACTOR}/", {"value": "0.66", "valid_from": FIRST_OF_JULY})
+    answer = client.post(
+        f"/rules/{NET_FACTOR}/new/", {"value": "0.66", "valid_from": FIRST_OF_JULY}
+    )
     assert answer.status_code == 302, body(answer)
     html = body(client.get(answer["Location"]))
     client.post("/logout/")

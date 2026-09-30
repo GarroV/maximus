@@ -77,6 +77,12 @@ class DateRange(models.Func):
     output_field = DateRangeField()
 
 
+# Чем считается пустой `tenant_id` в ограничениях-исключениях: общая строка
+# продукта сравнивается сама с собой, как отдельный партнёр. Настоящего
+# партнёра с таким номером нет и не будет — идентификаторы заводит `uuid4`.
+SHARED_TENANT = uuid.UUID(int=0)
+
+
 def validity_range() -> DateRange:
     """Период действия. Конец не входит: «по 1 июля» и «с 1 июля» — не пересечение.
 
@@ -725,7 +731,14 @@ class AllocationRule(models.Model):
     """
 
     id = uuid_pk()
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, db_column="tenant_id")
+    # Пусто — правило поставляется продуктом и действует у каждого партнёра.
+    # Так же устроены общие строки P&L и системные роли (`SHARED_ROW_TABLES`,
+    # `0004_rls`): единый справочник — цель проекта, и «поровну» для сетевого
+    # ФОТ (D055) не может зависеть от того, завёл ли партнёр себе строку.
+    # Своя строка партнёра перебивает общую.
+    tenant = models.ForeignKey(
+        Tenant, on_delete=models.CASCADE, db_column="tenant_id", null=True, blank=True,
+    )
     counterparty = models.ForeignKey(
         Counterparty, on_delete=models.CASCADE, db_column="counterparty_id",
         null=True, blank=True,
@@ -794,14 +807,40 @@ class AllocationRule(models.Model):
                     (validity_range(), RangeOperators.OVERLAPS),
                 ],
             ),
-            # Ровно один ключ: правило без ключа не найдётся никогда, правило с
-            # двумя ключами нашлось бы дважды и разнесло бы факт по спорному.
+            # Не больше одного ключа: правило с двумя нашлось бы дважды и
+            # разнесло бы факт по спорному. Ключей при этом три, а не два:
+            # пустые контрагент и статья означают, что ключ — сама строка P&L
+            # (T221, D055). Так адресуется зарплата сетевого человека: у неё нет
+            # ни контрагента, ни статьи, и до этой задачи правило для неё не
+            # находилось никогда — ФОТ офиса висел неразнесённым.
             models.CheckConstraint(
                 condition=(
-                    models.Q(counterparty__isnull=True, expense_item__isnull=False)
-                    | models.Q(counterparty__isnull=False, expense_item__isnull=True)
+                    models.Q(counterparty__isnull=True)
+                    | models.Q(expense_item__isnull=True)
                 ),
                 name="allocation_rules_one_key",
+            ),
+            # Третий ключ — строка P&L. Регистр в него не входит намеренно:
+            # строка отчёта уже названа, а набор точек сети от регистра не
+            # зависит (в отличие от поставщика, которому платят и официально, и
+            # из кассы, — там регистр различает два разных правила).
+            # Пустой `tenant_id` — общее правило продукта, и сравнивается оно
+            # как отдельный «партнёр»: `null = null` в исключении не совпадает
+            # никогда, и два общих правила на одну строку ужились бы молча.
+            ExclusionConstraint(
+                name="allocation_rules_line_no_overlap",
+                expressions=[
+                    (
+                        Coalesce(
+                            "tenant", models.Value(SHARED_TENANT),
+                            output_field=models.UUIDField(),
+                        ),
+                        RangeOperators.EQUAL,
+                    ),
+                    ("pnl_item", RangeOperators.EQUAL),
+                    (validity_range(), RangeOperators.OVERLAPS),
+                ],
+                condition=models.Q(counterparty__isnull=True, expense_item__isnull=True),
             ),
         ]
 
@@ -1188,7 +1227,16 @@ class EmployeeUnit(models.Model):
         "Employee", on_delete=models.CASCADE, db_column="employee_id",
         related_name="units",
     )
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, db_column="unit_id")
+    # Пусто — «вся сеть» (D085): набор задан явно, и он офис. Это не то же
+    # самое, что привязок нет вовсе: тогда действует старое поведение, точка
+    # строки табеля (люди, заведённые до T221). Различить эти два случая без
+    # строки-маркера нельзя, а неразличимые они дают ровно исходную дыру #194 —
+    # офисный человек, отмеченный в табеле на случайной пиццерии, ложится на
+    # неё целиком. Строка без точки живёт одна: «вся сеть» и конкретные точки
+    # в одном периоде противоречат друг другу (`employee_units_network_alone`).
+    unit = models.ForeignKey(
+        Unit, on_delete=models.CASCADE, db_column="unit_id", null=True, blank=True,
+    )
     # Доля этой точки. Пусто — «поровну со всеми остальными»: умолчание названо
     # владельцем прямо, и хранить у каждой строки одинаковое число значило бы
     # заставлять партнёра пересчитывать доли при каждом добавлении точки.
@@ -1226,6 +1274,43 @@ class EmployeeUnit(models.Model):
                     | models.Q(valid_to__gt=models.F("valid_from"))
                 ),
                 name="employee_units_dates_in_order",
+            ),
+            # Доля — положительный вес или пусто («поровну»). Нуль и минус
+            # форма отвергает словами (`_wanted_units`), но запись мимо неё
+            # дала бы набор с суммой весов ноль: делить не на что, и расчёт
+            # отказал бы только в день утверждения месяца.
+            models.CheckConstraint(
+                condition=models.Q(share__isnull=True) | models.Q(share__gt=0),
+                name="employee_units_share_positive",
+            ),
+            # «Вся сеть» не соседствует ни с чем (D085): ни со второй такой же
+            # строкой, ни с конкретной точкой в том же периоде. Две строки без
+            # точки дали бы сети двойной вес, а сеть рядом с NS1 — вопрос «так
+            # офис он или пиццерия?», на который расчёт ответил бы молча и
+            # по-своему. Сравнивается признак «без точки»: `<>` находит пару,
+            # где ровно одна строка — сеть; условие ниже — пару сетей.
+            ExclusionConstraint(
+                name="employee_units_network_alone",
+                expressions=[
+                    ("employee", RangeOperators.EQUAL),
+                    (
+                        models.Case(
+                            models.When(unit__isnull=True, then=models.Value(1)),
+                            default=models.Value(0),
+                            output_field=models.IntegerField(),
+                        ),
+                        RangeOperators.NOT_EQUAL,
+                    ),
+                    (validity_range(), RangeOperators.OVERLAPS),
+                ],
+            ),
+            ExclusionConstraint(
+                name="employee_units_one_network",
+                expressions=[
+                    ("employee", RangeOperators.EQUAL),
+                    (validity_range(), RangeOperators.OVERLAPS),
+                ],
+                condition=models.Q(unit__isnull=True),
             ),
         ]
         indexes = [

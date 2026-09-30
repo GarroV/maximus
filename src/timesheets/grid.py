@@ -17,6 +17,7 @@ from decimal import Decimal
 from uuid import UUID
 
 from core.models import Timesheet, Unit
+from core.people_units import units_by_person, units_note
 from payroll import HOURS, insured_base, work_measure
 from payrun.calc import terms_in_force
 from payrun.rules import select_rules
@@ -63,11 +64,23 @@ class Row:
     # Кем заводить строку, когда её ещё нет: правка ячейки приходит с этим id
     # вместо id табеля.
     employee_id: UUID | None = None
+    # Точки, между которыми делятся деньги этого человека (D055). Пусто —
+    # привязок нет: одна точка строки, а если и её нет — сеть. Показывается
+    # только когда точек несколько: иначе колонка повторяла бы саму себя.
+    # Управляющему видны лишь его собственные точки (срез `0267`), поэтому у
+    # него набор схлопывается в одну и метка не появляется — чужую точку своего
+    # человека он знать не должен (D023).
+    cost_units: tuple[str, ...] = ()
     closed: bool = False
     # Чем меряется работа этого человека (D032, T075). Свойство строки, а не
     # сетки: на одном экране соседствуют почасовая кухня и сдельные курьеры —
     # в этом весь смысл поддержки обоих способов.
     measure: str = HOURS
+
+    @property
+    def units_note(self) -> str:
+        """Подпись к точке: делятся ли деньги человека и между какими точками."""
+        return units_note(self.cost_units, self.unit)
     measure_title: str = ""
     piece_value: Decimal = Decimal("0")
     # Подозрительные числа строки (T118). Считаются здесь, а не в шаблоне:
@@ -298,6 +311,9 @@ def build_grid(tenant_id: UUID, period: date, *, unit_ids=None) -> Grid:
     # условиями найма: группа человека нужна каждой строке.
     closed = set(open_closures(tenant_id, period))
     terms = terms_in_force(tenant_id, period)
+    # Точки, между которыми делятся деньги людей, — одним запросом на сетку, по
+    # тому же доводу, что и всё остальное выше.
+    across = units_by_person(tenant_id, period)
 
     # След правки читается двумя запросами на всю сетку, а не по запросу на
     # ячейку: ячеек 210, а разных ответов среди них два-три (T143).
@@ -352,6 +368,7 @@ def build_grid(tenant_id: UUID, period: date, *, unit_ids=None) -> Grid:
                     for code in codes
                     if (sheet.id, code) in authors
                 },
+                cost_units=across.get(sheet.employee_id, ()),
                 edited_by_name=row_editors.get(sheet.edited_by, ""),
                 edited_at=sheet.edited_at,
                 insured_by_name=row_editors.get(sheet.insured_by, ""),
@@ -367,7 +384,7 @@ def build_grid(tenant_id: UUID, period: date, *, unit_ids=None) -> Grid:
         _rows_without_a_sheet(
             tenant_id, period, terms=terms, codes=codes,
             seen={sheet.employee_id for sheet in sheets},
-            unit_ids=unit_ids, closed=closed, rules=rules,
+            unit_ids=unit_ids, closed=closed, rules=rules, across=across,
         )
     )
     # Порядок общий на всю сетку, а не «сначала заведённые, потом остальные»:
@@ -376,7 +393,8 @@ def build_grid(tenant_id: UUID, period: date, *, unit_ids=None) -> Grid:
     return Grid(columns=columns, rows=rows)
 
 
-def _rows_without_a_sheet(tenant_id, period, *, terms, codes, seen, unit_ids, closed, rules):
+def _rows_without_a_sheet(tenant_id, period, *, terms, codes, seen, unit_ids, closed, rules,
+                          across):
     """Пустые строки тех, кого ещё нет в табеле этого месяца."""
     from core.models import Employee
 
@@ -421,6 +439,7 @@ def _rows_without_a_sheet(tenant_id, period, *, terms, codes, seen, unit_ids, cl
                 measure_title=measure_title,
                 pays_by_hours=pays_by_hours(rules, term, measure),
                 contract_hours=_contract_of(term),
+                cost_units=across.get(person.id, ()),
             )
         )
     return empty
