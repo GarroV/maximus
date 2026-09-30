@@ -152,7 +152,9 @@ def test_the_accountant_becomes_an_administrator_too(client, web_env):
     # название роли, и регулярка попадала в неё, а форму хватала у первого
     # человека списка. Кто окажется первым, решает коллация базы — на macOS это
     # был нужный человек, на glibc администратор, и тест падал только в CI.
-    person = re.search(r'/roles/people/([0-9a-f-]+)/', person_row(html, "Бухгалтер"))
+    person = re.search(
+        r'/roles/people/([0-9a-f-]+)/', person_row(body(client.get("/roles/people/")), "Бухгалтер"),
+    )
     assert person, "бухгалтера нет в списке людей — некому выдавать роль"
     # Причина обязательна с T188: она уходит в историю доступов рядом с именем
     # того, кто выдал.
@@ -201,3 +203,110 @@ def test_the_refusal_stays_plain_for_everyone_else(client, web_env):
     refusal = body(client.get(period_url(client)))
     assert "Попросите того, у кого это право есть" in refusal
     assert "Роли и права" not in refusal
+
+
+# --- раздел страницами (T225, D081) ------------------------------------------
+
+
+ROLES_PAGES = ("/roles/", "/roles/people/", "/roles/invite/", "/roles/history/")
+
+
+def test_every_page_of_the_section_refuses_in_words(client, web_env):
+    """Раздел разобран на страницы — и отказ стоит на каждой, а не на первой.
+
+    Пять страниц с одной проверкой на входе — ровно то место, где новая
+    страница однажды открывается без права: её дописали, а развилку забыли.
+    """
+    login_as(client, "accountant")
+    admin = _seeded_user("admin")
+    for url in (*ROLES_PAGES, f"/roles/people/{admin}/"):
+        response = client.get(url)
+        assert response.status_code == 403, f"{url} открыт без права вести роли"
+        assert "не входит в права вашей роли" in body(response), url
+
+
+def test_every_page_links_to_its_neighbours(client, web_env):
+    """С любой страницы раздела видно остальные: панель ведёт только на первую."""
+    login_as(client, "admin")
+    for url in ROLES_PAGES:
+        html = body(client.get(url))
+        for other in ROLES_PAGES:
+            if other != url:
+                assert f'href="{other}"' in html, f"с {url} нет дороги на {other}"
+
+
+def test_opening_the_save_address_does_not_strip_the_role(client, web_env):
+    """Переход по адресу сохранения — не сохранение.
+
+    Прежде метод не проверялся, и обычный GET на `/roles/<id>/rights/`
+    сохранял роль с пустым списком прав: ссылка, открытая администратором,
+    молча снимала с роли всё.
+    """
+    from core.models import Role
+
+    login_as(client, "admin")
+    manager = role_id(body(client.get("/roles/")), "manager")
+    before = sorted(Role.objects.get(pk=manager).permissions or [])
+    assert before, "у управляющего в сиде есть права — иначе проверять нечего"
+
+    response = client.get(f"/roles/{manager}/rights/")
+    assert response.status_code == 302
+    assert sorted(Role.objects.get(pk=manager).permissions or []) == before
+
+
+def test_a_role_is_not_granted_to_someone_outside_the_partner(client, web_env):
+    """Роль выдаётся только человеку этого партнёра, а не любой учётке по адресу."""
+    from core.models import Membership, User
+
+    login_as(client, "admin")
+    stranger = User.objects.create_user(username="stranger-t225", password="x-secret-1")
+    try:
+        html = body(client.get("/roles/"))
+        response = client.post(f"/roles/people/{stranger.pk}/", {
+            "role": role_id(html, "accountant"), "reason": "проверка",
+        })
+        # Текст ответа не проверяется: при включённой отладке любой 404 со
+        # страницей подменяется общей страницей продукта (`web.errors`), а
+        # слова отказа одни и те же для «нет вовсе» и «у другого партнёра».
+        assert response.status_code == 404
+        assert not Membership.objects.filter(user_id=stranger.pk).exists()
+    finally:
+        Membership.objects.filter(user_id=stranger.pk).delete()
+        stranger.delete()
+
+
+def _seeded_user(username: str) -> str:
+    from core.models import User
+
+    return str(User.objects.get(username=username).pk)
+
+
+def test_removing_a_role_the_person_does_not_hold_is_refused(client, web_env):
+    """Снятие роли, которой нет, — отказ словами и ни строки в истории."""
+    from core.models import AccessLogEntry
+
+    login_as(client, "admin")
+    html = body(client.get("/roles/"))
+    person = re.search(
+        r'/roles/people/([0-9a-f-]+)/', person_row(body(client.get("/roles/people/")), "Бухгалтер"),
+    ).group(1)
+    # Вторая роль нужна, чтобы не упереться в «единственную роль»: тот отказ
+    # тоже ничего не пишет и прикрыл бы проверку.
+    from core.models import Membership, Role
+
+    extra = Membership.objects.create(
+        tenant_id=Role.objects.get(pk=role_id(html, "director")).tenant_id,
+        user_id=person, role_id=role_id(html, "director"),
+    )
+    try:
+        before = AccessLogEntry.objects.count()
+        response = client.post(f"/roles/people/{person}/", {
+            "role": role_id(html, "manager"), "action": "remove", "reason": "проверка",
+        })
+        assert response.status_code == 409
+        assert "Этой роли у человека нет" in body(response)
+        assert AccessLogEntry.objects.count() == before, (
+            "в историю записано снятие того, чего не было"
+        )
+    finally:
+        extra.delete()

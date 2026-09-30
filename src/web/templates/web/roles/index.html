@@ -1,11 +1,7 @@
 {% extends "web/base.html" %}{% load ui i18n %}
 {% comment %}
-Роли и права: что роль позволяет и у кого какая роль.
-
-Две таблицы, а не одна, потому что это два разных вопроса. «Что позволяет
-роль» меняют редко и всем сразу; «кто ею наделён» — по человеку. Смешанные в
-одну сетку, они дали бы экран, где галочка напротив имени означает то же, что
-галочка напротив роли, — а это разные вещи.
+Права ролей: что позволяет каждая роль (T225 — одна функция из прежнего общего
+экрана; люди, приглашение и история — соседние страницы раздела).
 
 Права показываются названиями действий, а не кодами: `payrun.calculate` —
 слова для разработчика. Названия берутся оттуда же, откуда их берёт отказ
@@ -15,15 +11,12 @@
 Форма на роль своя — сохранение построчное. Одна форма на всю таблицу означала
 бы, что правка одной роли переписывает заодно и остальные: незаметно и молча.
 {% endcomment %}
-{% block title %}{% translate "Роли и права" %}{% endblock %}
+{% block title %}{% translate "Права ролей" %}{% endblock %}
 {% block content %}
-<h1>{% translate "Роли и права" %}</h1>
+{% translate "Права ролей" as page_title %}
+{% include "web/roles/_head.html" with title=page_title %}
 <p class="sub">{% blocktranslate %}Роль — это набор прав, а человеку можно дать несколько ролей сразу. Так бухгалтер, который ведёт весь проект, становится ещё и администратором, а там, где это разные люди, разделение обязанностей остаётся.{% endblocktranslate %}</p>
 
-{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
-{% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
-
-<h2>{% translate "Что позволяет роль" %}</h2>
 <p class="note under">{% blocktranslate %}Галочка — право, которое партнёр выдаёт и снимает сам. Прочерк — право,
 которого у этого набора не бывает: его не выдать ни отсюда, ни в обход экрана.
 Нужны права старшего набора — человеку выдают старшую роль.{% endblocktranslate %}</p>
@@ -55,138 +48,6 @@
       </td>
       <td><button type="submit" form="rights-{{ row.role.id }}">{% translate "Сохранить" %}</button></td>
     </tr>
-    {% endfor %}
-  </tbody>
-</table>{% endscroll %}
-
-<h2>{% translate "У кого какая роль" %}</h2>
-{% comment %}
-Кого в этом списке нет и почему (T160). Пустого состояния у обеих таблиц здесь
-нет намеренно, и это не пропуск: экран открывается только по праву
-`roles.manage`, которое человек получает членством с ролью, — значит у смотрящего
-уже есть и роль, и членство, и таблицы при нём пусты быть не могут.
-
-А вот НЕполными они бывают, и это как раз тот случай, который пустое состояние
-обязано различать: список собирается из выданных ролей (`_people`, соединение с
-`roles` внутреннее), поэтому человек, у которого ролей нет, в нём не появляется
-вовсе. Молча это читается как «такого человека в системе нет» — то есть ровно
-как «не загрузилось», хотя данные на месте. Поэтому сказано словами.
-{% endcomment %}
-<p class="note under">{% blocktranslate %}В списке только те, кому уже выдана хотя бы одна роль: он и собирается из
-выданных ролей. Человек, у которого ролей нет, здесь не появится — и это не
-значит, что его нет в системе.{% endblocktranslate %}</p>
-{% scroll %}<table>
-  <thead>
-    <tr>
-      <th>{% translate "Человек" %}</th>
-      <th>{% translate "Роли" %}</th>
-      <th>{% translate "Выдать роль" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for person in people %}
-    <tr>
-      <td>{{ person.who }}{% if person.mail %}<br><span class="note">{{ person.mail }}</span>{% endif %}</td>
-      <td>
-        {% for held in person.roles %}
-        <form method="post" action="{% url 'person-roles' person.user_id %}" class="inline">{% csrf_token %}
-          <input type="hidden" name="role" value="{{ held.id }}">
-          <input type="hidden" name="action" value="remove">
-          <span class="chip">{{ held.title }}{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}
-            <input type="text" name="reason" required maxlength="200" size="14"
-                   placeholder="{% translate "Причина" %}" aria-label="{% translate "Причина снятия роли" %}">
-            <button type="submit" class="link" title="{% translate "Снять роль" %}">×</button>
-          </span>
-        </form>
-        {% endfor %}
-      </td>
-      <td>
-        <form method="post" action="{% url 'person-roles' person.user_id %}" class="inline">{% csrf_token %}
-          <select name="role" aria-label="{% translate "Роль" %}">
-            {% for role in roles %}<option value="{{ role.id }}">{{ role.title }}</option>{% endfor %}
-          </select>
-          {% comment %}
-          Точка обязательна для ролей, которые ведут одну точку, и запрещена
-          для тех, кто ведёт партнёра целиком. Какая роль какая — знает вид:
-          держать эту развилку в разметке значило бы завести ей второе,
-          расходящееся описание.
-          {% endcomment %}
-          <select name="unit" aria-label="{% translate "Точка" %}">
-            <option value="">{% translate "— точка —" %}</option>
-            {% for unit in units %}<option value="{{ unit.id }}">{{ unit.code }}</option>{% endfor %}
-          </select>
-          <input type="date" name="until" min="{{ today }}" aria-label="{% translate "До какого числа" %}">
-          <input type="text" name="reason" required maxlength="200"
-                 placeholder="{% translate "Причина" %}" aria-label="{% translate "Причина выдачи роли" %}">
-          <button type="submit">{% translate "Выдать" %}</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>{% endscroll %}
-
-<h2>{% translate "Пригласить человека" %}</h2>
-{% comment %}
-Пароля в форме нет намеренно. Как человек получает первый вход — открытый
-вопрос продукта (пароль против одноразового кода на почту), и решать его
-побочным эффектом этой формы нельзя. Учётка заводится непригодным для входа
-хэшем, и об этом сказано словами: молчаливая учётка, в которую нельзя войти,
-читалась бы как поломка.
-{% endcomment %}
-<form method="post" action="{% url 'roles-invite' %}" class="card wide">{% csrf_token %}
-  <label>{% translate "Имя и фамилия" %}
-    <input type="text" name="full_name" required maxlength="120">
-  </label>
-  <label>{% translate "Почта" %}
-    <input type="email" name="email" required maxlength="200">
-  </label>
-  <label>{% translate "Роль" %}
-    <select name="role">
-      {% for role in roles %}<option value="{{ role.id }}">{{ role.title }}</option>{% endfor %}
-    </select>
-  </label>
-  <label>{% translate "Точка" %}
-    <select name="unit">
-      <option value="">{% translate "не выбрана" %}</option>
-      {% for unit in units %}
-      <option value="{{ unit.id }}">{{ unit.code }} — {{ unit.title }}</option>
-      {% endfor %}
-    </select>
-    <span class="note">{% translate "Нужна ролям, которые ведут одну точку: без неё человек получил бы все точки партнёра." %}</span>
-  </label>
-  <label>{% translate "До какого числа" %}
-    <input type="date" name="until" min="{{ today }}">
-  </label>
-  <label>{% translate "Причина" %}
-    <input type="text" name="reason" required maxlength="200">
-  </label>
-  <button type="submit">{% translate "Пригласить" %}</button>
-</form>
-<p class="note under">{% blocktranslate %}Человек появится в списке сразу и с ролью. Войти он пока не сможет: как
-человек получает первый вход, у продукта ещё не решено — до этого доступ
-открывает администратор площадки.{% endblocktranslate %}</p>
-
-<h2>{% translate "История доступов" %}</h2>
-<p class="note under">{% blocktranslate %}Кто, кому, когда и зачем. Записи не правятся и не удаляются — этого не может
-ни один экран и ни один человек: у приложения нет таких прав на эту таблицу.{% endblocktranslate %}</p>
-{% scroll %}<table>
-  <thead>
-    <tr>
-      <th>{% translate "Когда" %}</th>
-      <th>{% translate "Что произошло" %}</th>
-      <th>{% translate "Зачем" %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for entry in history %}
-    <tr>
-      <td>{{ entry.at }}</td>
-      <td>{% if entry.action == "invited" %}{% blocktranslate with actor=entry.actor subject=entry.subject role=entry.role %}{{ actor }} пригласил {{ subject }} с ролью «{{ role }}»{% endblocktranslate %}{% elif entry.action == "revoked" %}{% blocktranslate with actor=entry.actor subject=entry.subject role=entry.role %}{{ actor }} снял с {{ subject }} роль «{{ role }}»{% endblocktranslate %}{% else %}{% blocktranslate with actor=entry.actor subject=entry.subject role=entry.role %}{{ actor }} выдал {{ subject }} роль «{{ role }}»{% endblocktranslate %}{% endif %}{% if entry.until %} <span class="note">{% blocktranslate with day=entry.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</td>
-      <td>{{ entry.reason }}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="3" class="note">{% translate "Доступы ещё не выдавали и не снимали." %}</td></tr>
     {% endfor %}
   </tbody>
 </table>{% endscroll %}

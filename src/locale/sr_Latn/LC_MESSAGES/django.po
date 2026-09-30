@@ -6388,10 +6388,6 @@ msgstr "Ukloni ulogu"
 msgid "(отключён)"
 msgstr "(isključen)"
 
-#: web/templates/web/platform/space.html:46
-msgid "Снять"
-msgstr "Ukloni"
-
 #: web/templates/web/platform/space.html:51
 msgid "В пространстве нет ни одного человека."
 msgstr "U ovom prostoru još nema nijedne osobe."
@@ -6883,17 +6879,9 @@ msgstr ""
 "računovođa koji vodi ceo projekat postaje i administrator, a tamo gde su to "
 "različiti ljudi podela odgovornosti ostaje."
 
-#: web/templates/web/roles/index.html:26
-msgid "Что позволяет роль"
-msgstr "Šta uloga dozvoljava"
-
 #: web/templates/web/roles/index.html:31
 msgid "Права"
 msgstr "Prava"
-
-#: web/templates/web/roles/index.html:57
-msgid "У кого какая роль"
-msgstr "Ko ima koju ulogu"
 
 #: web/templates/web/roles/index.html:70
 msgid ""
@@ -7162,26 +7150,10 @@ msgstr[0] "%(counter)s papir čeka razvrstavanje"
 msgstr[1] "%(counter)s papira čeka razvrstavanje"
 msgstr[2] "%(counter)s papira čeka razvrstavanje"
 
-#: web/templates/web/suppliers/inbox.html:141
-msgid "суммы со слов управляющих, в P&L их нет"
-msgstr "iznosi po izjavi menadžera, njih nema u P&L-u"
-
 #: web/templates/web/suppliers/inbox.html:151
 #: web/templates/web/suppliers/papers.html:42
 msgid "Сумма со слов"
 msgstr "Iznos po izjavi"
-
-#: web/templates/web/suppliers/inbox.html:164
-msgid "Открыть бумагу"
-msgstr "Otvori papir"
-
-#: web/templates/web/suppliers/inbox.html:170
-msgid "Бумаг на разбор нет."
-msgstr "Nema papira koji čekaju razvrstavanje."
-
-#: web/templates/web/suppliers/inbox.html:171
-msgid "Всё, что принесли с точек, разобрано."
-msgstr "Sve što je doneto sa objekata je razvrstano."
 
 #: web/templates/web/suppliers/invoice.html:32
 #, python-format
@@ -8241,17 +8213,9 @@ msgid "Пригласить человека"
 msgstr "Pozovi osobu"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Причина выдачи роли"
-msgstr "Razlog dodele uloge"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid ""
 "Причина обязательна: она остаётся в истории рядом с вашим именем."
 msgstr "Razlog je obavezan: ostaje u istoriji pored vašeg imena."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Причина снятия роли"
-msgstr "Razlog oduzimanja uloge"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Срок роли записан не датой."
@@ -8267,10 +8231,6 @@ msgid ""
 "как\nчеловек получает первый вход, у продукта ещё не решено — до этого "
 "доступ\nоткрывает администратор площадки."
 msgstr "Osoba se odmah pojavljuje na spisku, već sa ulogom. Još ne može da se prijavi: kako osoba dobija prvu prijavu, za proizvod još nije odlučeno — do tada pristup otvara administrator platforme."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Человек с такой почтой уже заведён."
-msgstr "Osoba sa ovom e-poštom već postoji."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Что произошло"
@@ -8305,7 +8265,6 @@ msgstr "Bankovni izvod"
 msgid "Выплаты"
 msgstr "Isplate"
 
-
 #: web/navigation.py
 msgid "Интеграция с Dodo IS"
 msgstr "Integracija sa Dodo IS"
@@ -8313,7 +8272,6 @@ msgstr "Integracija sa Dodo IS"
 #: web/templates/web/planned.html
 msgid "Очередь: %(when)s"
 msgstr "Planirano za: %(when)s"
-
 
 #: web/stages.py
 msgid "Карточки находок, готовность в процентах, подтверждение закрытия"
@@ -8323,17 +8281,13 @@ msgstr "Kartice nalaza, spremnost u procentima, potvrda zatvaranja"
 msgid "Консолидация сети в EUR по курсу на конец периода"
 msgstr "Konsolidacija mreže u EUR po kursu na kraju perioda"
 
-
 #: web/stages.py
 msgid "Приглашение человека, история доступов, настраиваемые наборы прав"
 msgstr "Pozivanje osobe, istorija pristupa, podesivi skupovi prava"
 
-
-
 #: web/stages.py
 msgid "Именованные надбавки и вилка ставки должности"
 msgstr "Imenovani dodaci i raspon stope radnog mesta"
-
 
 #: web/stages.py
 msgid "Шестая очередь продуктовой карты"
@@ -8423,10 +8377,6 @@ msgstr "Ovaj partner nema takvu lokaciju."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "не выбрана"
 msgstr "nije izabrana"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "— точка —"
-msgstr "— lokacija —"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -8951,7 +8901,6 @@ msgstr "Sati preko norme"
 msgid "Часы и переработки"
 msgstr "Sati i prekovremeni rad"
 
-
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
 "Что с этим делать — решает не отчёт. Переработка бывает дешевле, чем "
@@ -9026,6 +8975,94 @@ msgid "против %(value)s (%(month)s)"
 msgstr "u odnosu na %(value)s (%(month)s)"
 
 #: новые строки, добавлены tools/apply_translations.py
+msgid "Люди и их роли"
+msgstr "Ljudi i njihove uloge"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Показаны последние %(shown)s записей."
+msgstr "Prikazano je poslednjih %(shown)s zapisa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Права ролей"
+msgstr "Prava uloga"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Причина снятия роли «%(role)s»"
+msgstr "Razlog za uklanjanje uloge „%(role)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пусто — без срока."
+msgstr "Prazno — bez roka."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Роли человека"
+msgstr "Uloge ove osobe"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Снять роль «%(role)s»"
+msgstr "Ukloni ulogu „%(role)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы раздела «Роли и права»"
+msgstr "Stranice odeljka „Uloge i prava“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека у этого партнёра нет."
+msgstr "Ovaj partner nema takvu osobu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Чтобы снять роль, напишите причину рядом с ней: она останется в "
+"истории\nрядом с вашим именем. Единственную роль снять нельзя — без неё "
+"человек войдёт\nи не увидит ничего."
+msgstr "Da biste uklonili ulogu, upišite razlog pored nje: ostaje u istoriji pored vašeg imena. Jedinu ulogu osobe nije moguće ukloniti — bez nje bi se prijavila i ne bi videla ništa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "← Все люди"
+msgstr "← Svi ljudi"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "← Люди пространства «%(title)s»"
+msgstr "← Ljudi u prostoru „%(title)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека в этом пространстве нет."
+msgstr "U ovom prostoru nema takve osobe."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. "
+"Первым заведите того, кто ведёт партнёра целиком."
+msgstr "Uloga „%(role)s“ vodi jedan objekat, a novi prostor još nema objekata. Prvo dodajte osobu koja vodi celog partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в "
+"списке людей; если нет — проверьте адрес."
+msgstr "Ovu adresu nije moguće pozvati. Ako osoba već radi kod vas, nalazi se na spisku ljudi; ako ne — proverite adresu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Валюту отчёта укажите кодом из трёх латинских букв, например EUR."
+msgstr "Unesite valutu izveštaja kodom od tri latinična slova, na primer EUR."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюту учёта укажите кодом из трёх латинских букв, например RSD."
+msgstr "Unesite valutu knjiženja kodom od tri latinična slova, na primer RSD."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страну укажите кодом из двух латинских букв, например RS."
+msgstr "Unesite zemlju kodom od dva latinična slova, na primer RS."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Этой роли у человека нет."
+msgstr "Ova osoba nema tu ulogu."
+
 msgid ""
 "Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
 "«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
@@ -9050,3 +9087,61 @@ msgid ""
 "Набор точек этого сотрудника меняет роль, которой видны все точки "
 "партнёра. Обратитесь к оперативному директору или бухгалтеру."
 msgstr "Objekte ovog zaposlenog može da menja samo uloga koja vidi sve objekte partnera. Obratite se operativnom direktoru ili knjigovođi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на "
+"бумаге."
+msgstr "Jedan papir, više stavki P&L. Stavke moraju da se poklope sa iznosom na papiru."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Позиции счёта"
+msgstr "Stavke fakture"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Позиции счёта %(number)s"
+msgstr "Stavke fakture %(number)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Позиция добавлена и учтена в периоде %(month)s."
+msgstr "Stavka je dodata i uračunata u period %(month)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Позиция не добавлена."
+msgstr "Stavka nije dodata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "их в P&L ещё нет, разбираются на своей странице"
+msgstr "još nisu u P&L i razvrstavaju se na svojoj stranici"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не сходится с бумагой на %(left)s"
+msgstr "ne poklapa se sa papirom za %(left)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сумма позиций сходится с бумагой"
+msgstr "zbir stavki se poklapa sa papirom"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "← К карточке: %(card)s"
+msgstr "← Nazad na %(card)s"
+
+#: web/templates/web/suppliers/invoice.html
+#, python-format
+msgid "%(counter)s позиция"
+msgid_plural "%(counter)s позиций"
+msgstr[0] "%(counter)s stavka"
+msgstr[1] "%(counter)s stavke"
+msgstr[2] "%(counter)s stavki"
+
+#: web/templates/web/suppliers/inbox.html
+#, python-format
+msgid "Бумаги с точек: ждёт разбора %(counter)s"
+msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
+msgstr[0] "Papiri sa objekata: %(counter)s čeka razvrstavanje"
+msgstr[1] "Papiri sa objekata: %(counter)s čekaju razvrstavanje"
+msgstr[2] "Papiri sa objekata: %(counter)s čeka razvrstavanje"

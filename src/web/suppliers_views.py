@@ -35,7 +35,7 @@ from django.utils.translation import gettext_lazy
 
 from core.models import INVOICE, Counterparty, Unit
 
-from . import cash, filter_links, suppliers
+from . import cash, filter_links, papers, suppliers
 from .cash_views import _ledger, _till, _unit, _vat_rate
 from .counterparties_views import found as counterparties_found
 from .dbrefusal import BadInput
@@ -417,9 +417,7 @@ def invoice(request, document_id=None):
 
     return render(request, "web/suppliers/invoice.html", {
         "error": error,
-        "heading": (_("Счёт %(number)s") % {"number": document.doc_number}
-                    if document is not None and document.doc_number
-                    else (_("Счёт") if document is not None else _("Новый счёт"))),
+        "heading": (_card_heading(document) if document is not None else _("Новый счёт")),
         "entry_key": (suppliers.entry_key_of(fact) if fact is not None
                       else cash.new_entry_key()),
         "fields": invoice_fields(who, entered),
@@ -428,8 +426,9 @@ def invoice(request, document_id=None):
         "payments": _payments(document) if document is not None else [],
         "pay_url": reverse("invoice-pay", args=[document.id]) if document is not None else "",
         "summary": _summary(document, fact) if document is not None else None,
-        # Позиции документа и сходятся ли они с суммой на бумаге (T204).
-        **(_positions_block(who, document) if document is not None else {}),
+        # Сколько позиций и сходятся ли они с бумагой; сами позиции — на своей
+        # странице (T204, T232).
+        **(_positions_link(document) if document is not None else {}),
         **(_not_ours_block(document) if document is not None else {}),
     }, status=status)
 
@@ -468,15 +467,20 @@ def invoice_not_ours(request, document_id):
 
 @login_required
 def invoice_positions(request, document_id):
-    """Дописать в счёт ещё одну позицию: своя статья, своя точка (T204).
+    """Позиции счёта своей страницей: список, сверка с бумагой и добавление (T204, T232).
 
-    Только POST: это запись денег. Отдельным адресом, а не полем карточки,
-    потому что позиций может быть сколько угодно, а форма карточки правит
-    первую строку — смешивать эти два действия в одной форме значит однажды
-    переписать позицию вместо добавления.
+    **Своей страницей, а не блоком карточки** (D081: одна страница — одна
+    функция). Карточка правит сам счёт — первую строку, — а здесь бумагу
+    раскладывают на статьи. Две формы записи денег на одном экране однажды
+    перепутают: человек поправит позицию вместо добавления или наоборот.
+
+    Права те же, что у карточки, и на чтение, и на запись: без партнёра — отказ
+    словами, чужой или несуществующий счёт — 404. Отдельного права на позиции
+    нет, и заводить его здесь значило бы дать второй ответ на вопрос, который
+    уже решает видимость строки политиками базы (D014).
     """
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
+    if request.method not in ("GET", "POST"):
+        return HttpResponseNotAllowed(["GET", "POST"])
 
     who = get_current_principal(request)
     if who is None or who.tenant_id is None:
@@ -493,9 +497,12 @@ def invoice_positions(request, document_id):
     # по точке и регистру, а шапка документа видна шире. Без этой проверки
     # чужой счёт отвечал бы «Поле „Точка“ обязательно» вместо 404 — то есть по
     # ответу можно было бы понять, что счёт существует (D023). Та же проверка
-    # стоит в карточке счёта, и по той же причине.
+    # стоит в карточке счёта, и по той же причине — и на GET, и на POST.
     if document is None or suppliers.invoice_fact(document) is None:
         raise Http404("счёт не найден")
+
+    if request.method == "GET":
+        return _positions_page(request, who, document)
 
     try:
         amount = _number(request, "amount", _("Сумма"))
@@ -507,19 +514,52 @@ def invoice_positions(request, document_id):
             vat_rate=_vat_rate(request), note=(request.POST.get("note") or ""),
         )
     except (BadInput, cash.UnitRefused, cash.CashRefused) as refused:
-        return _refused_card(request, who, document, refused)
+        return _positions_page(request, who, document, refused=refused)
 
-    landed = reverse("invoice", args=[document.id]) + f"?added={recorded.landing.period:%Y-%m}"
+    landed = (reverse("invoice-positions", args=[document.id])
+              + f"?added={recorded.landing.period:%Y-%m}")
     return redirect(landed)
 
 
+def _positions_page(request, who, document, *, refused=None):
+    """Страница позиций: таблица, сверка с бумагой и форма новой позиции.
+
+    Отказ показывается здесь же, с тем, что человек набрал: набирать позицию
+    заново из-за одной пропущенной точки — верный способ её не добавить вовсе.
+    """
+    entered = request.POST if refused is not None else {}
+    added = _month_or_none(request.GET.get("added"))
+    return render(request, "web/suppliers/invoice_positions.html", {
+        "error": refused.message if refused is not None else "",
+        "notice": (_("Позиция добавлена и учтена в периоде %(month)s.")
+                   % {"month": month_title(added)} if added is not None else ""),
+        "heading": _positions_heading(document),
+        "card_url": reverse("invoice", args=[document.id]),
+        "card_title": _card_heading(document),
+        # Новый ключ на каждый показ формы: повторная отправка ТОЙ ЖЕ формы
+        # узнаётся по нему и не удваивает позицию, а следующая позиция — уже
+        # другая форма с другим ключом.
+        "entry_key": entered.get("entry_key") or cash.new_entry_key(),
+        **_positions_block(who, document, entered),
+    }, status=getattr(refused, "http_status", 400) if refused is not None else 200)
+
+
+def _card_heading(document) -> str:
+    return (_("Счёт %(number)s") % {"number": document.doc_number}
+            if document.doc_number else _("Счёт"))
+
+
+def _positions_heading(document) -> str:
+    return (_("Позиции счёта %(number)s") % {"number": document.doc_number}
+            if document.doc_number else _("Позиции счёта"))
+
+
 def _refused_card(request, who, document, refused):
-    """Отказ добавления позиции — на карточке счёта, с его же содержимым."""
+    """Отказ «не наша» — на карточке счёта, с её же содержимым."""
     fact = suppliers.invoice_fact(document)
     return render(request, "web/suppliers/invoice.html", {
         "error": refused.message,
-        "heading": (_("Счёт %(number)s") % {"number": document.doc_number}
-                    if document.doc_number else _("Счёт")),
+        "heading": _card_heading(document),
         "entry_key": suppliers.entry_key_of(fact) if fact is not None else cash.new_entry_key(),
         "fields": invoice_fields(who, _entered(document, fact)),
         "back_url": reverse("invoices"),
@@ -527,12 +567,29 @@ def _refused_card(request, who, document, refused):
         "payments": _payments(document),
         "pay_url": reverse("invoice-pay", args=[document.id]),
         "summary": _summary(document, fact),
-        **_positions_block(who, document),
+        **_positions_link(document),
         **_not_ours_block(document),
     }, status=getattr(refused, "http_status", 400))
 
 
-def _positions_block(who, document) -> dict:
+def _positions_link(document) -> dict:
+    """Что карточка говорит о позициях: сколько их и сходятся ли — и куда идти.
+
+    Сами позиции живут на своей странице, но расхождение с бумагой карточка
+    обязана назвать: иначе счёт с потерянной позицией выглядит на ней целым, и
+    заметят это на сборке P&L, когда сходиться уже поздно.
+    """
+    stated, got, difference = suppliers.positions_balance(document)
+    return {
+        "positions_counted": len(suppliers.invoice_lines(document)),
+        "positions_balanced": difference == 0,
+        "positions_difference_raw": f"{difference}",
+        "positions_difference_text": money(abs(difference)),
+        "positions_url": reverse("invoice-positions", args=[document.id]),
+    }
+
+
+def _positions_block(who, document, entered) -> dict:
     """Позиции документа и сверка с суммой на бумаге (модуль 3, «Разбор документа»).
 
     Сверка — половина смысла экрана. Разложить бумагу на статьи можно и без неё,
@@ -546,6 +603,10 @@ def _positions_block(who, document) -> dict:
             {
                 "line_no": row.line_no or "",
                 "title": row.title,
+                # Статья — суть страницы: одна бумага раскладывается на
+                # несколько статей, и без колонки не видно, куда легла каждая.
+                "item": (cash.item_title(row.expense_item.titles) if row.expense_item
+                         else _("Пока не разобрано")),
                 "unit": row.unit.code if row.unit else _("Вся сеть"),
                 "amount_text": money(row.amount),
                 "amount_raw": f"{row.amount}",
@@ -558,7 +619,7 @@ def _positions_block(who, document) -> dict:
         "difference_text": money(abs(difference)),
         "balanced": difference == 0,
         "positions_url": reverse("invoice-positions", args=[document.id]),
-        "position_fields": _position_fields(who, document),
+        "position_fields": _position_fields(who, document, entered),
     }
 
 
@@ -577,7 +638,7 @@ def _not_ours_block(document) -> dict:
     }
 
 
-def _position_fields(who, document) -> list[dict]:
+def _position_fields(who, document, entered) -> list[dict]:
     """Поля новой позиции: сумма, статья, точка. Регистр берётся у документа.
 
     Регистра здесь нет намеренно: одна бумага не ложится половиной в
@@ -587,14 +648,15 @@ def _position_fields(who, document) -> list[dict]:
     on = document.doc_date or date.today()
     return [
         {"kind": "number", "name": "amount", "label": _("Сумма"), "required": True,
-         "value": "", "help": _("Сколько из этой бумаги приходится на эту статью.")},
+         "value": entered.get("amount", ""),
+         "help": _("Сколько из этой бумаги приходится на эту статью.")},
         _select(
             "item", _("Статья расхода"),
             [(item.id, cash.item_title(item.titles))
              for item in cash.items_on(who.tenant_id, on, surface=INVOICE)],
-            "", required=False, empty_label=_("Пока не разобрано"),
+            entered.get("item", ""), required=False, empty_label=_("Пока не разобрано"),
         ),
-        _unit_field(who, {}),
+        _unit_field(who, entered),
     ]
 
 
@@ -1125,27 +1187,32 @@ def inbox(request):
 
     rows = inbox_rows(who)
     total = sum((row["amount"] for row in rows), Decimal("0"))
-    # Бумаги с точек — второй, отдельный список на том же экране (T174).
-    # Импорт здесь, а не в шапке модуля: `papers_views` берёт отсюда поля счёта
-    # и разбор ввода, и встречный импорт в шапке замкнул бы круг. Единственная
-    # причина именно такая — не «так короче».
-    from .papers_views import paper_rows
-
-    handed = paper_rows(who, only_waiting=True)
-    stated = sum((row["amount"] for row in handed), Decimal("0"))
     return render(request, "web/suppliers/inbox.html", {
         "rows": rows,
         "total_raw": f"{total}", "total_text": money(total),
         "counted": len(rows),
-        "papers": handed,
-        "papers_counted": len(handed),
-        "stated_raw": f"{stated}", "stated_text": money(stated),
-        "papers_url": reverse("papers"),
+        **_papers_link(who),
         "notice": _inbox_notice(request),
         "failed": "",
         "back_url": reverse("invoices"),
         **_batch_fields(who),
     })
+
+
+def _papers_link(who) -> dict:
+    """Сколько бумаг с точек ждёт разбора — числом для ссылки на `/papers/`.
+
+    Сами бумаги в инбоксе не показываются (T232, D081: одна страница — одна
+    функция). Разница не в оформлении, а в деньгах: строка без статьи **уже** в
+    P&L, только не в той статье, а у бумаги в P&L нет ни одной строки. Один экран
+    с двумя списками читается как одна очередь с одной суммой, которой нет ни в
+    одном отчёте. Но о том, что бумаги ждут, инбокс сказать обязан: разбирает их
+    тот же человек.
+    """
+    return {
+        "papers_waiting": len(papers.papers(who, only_waiting=True)),
+        "papers_url": reverse("papers"),
+    }
 
 
 def _inbox_items(who) -> list[tuple]:
@@ -1365,18 +1432,11 @@ def _inbox_refused(request, who, message: str, *, status: int = 400):
     """
     rows = inbox_rows(who)
     total = sum((row["amount"] for row in rows), Decimal("0"))
-    from .papers_views import paper_rows
-
-    handed = paper_rows(who, only_waiting=True)
-    stated = sum((row["amount"] for row in handed), Decimal("0"))
     return render(request, "web/suppliers/inbox.html", {
         "rows": rows,
         "total_raw": f"{total}", "total_text": money(total),
         "counted": len(rows),
-        "papers": handed,
-        "papers_counted": len(handed),
-        "stated_raw": f"{stated}", "stated_text": money(stated),
-        "papers_url": reverse("papers"),
+        **_papers_link(who),
         "notice": "",
         "failed": message,
         "back_url": reverse("invoices"),

@@ -1,0 +1,41 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Люди партнёра и их роли (T225). Здесь роли только видны: выдают и снимают их
+на странице человека. В строке прежде стояла своя форма выдачи — два
+выпадающих списка, дата и причина на каждого человека, — и на 390 строка не
+помещалась вовсе, а список людей читался как список форм.
+
+Кого в этом списке нет и почему (T160). Пустого состояния здесь нет намеренно,
+и это не пропуск: страница открывается только по праву `roles.manage`, которое
+человек получает членством с ролью, — значит в списке есть хотя бы смотрящий.
+
+А вот НЕполным он бывает, и это как раз тот случай, который надо назвать: список
+собирается из выданных ролей (`_people`, соединение с `roles` внутреннее),
+поэтому человек, у которого ролей нет, в нём не появляется вовсе. Молча это
+читается как «такого человека в системе нет» — то есть ровно как «не
+загрузилось», хотя данные на месте. Поэтому сказано словами.
+{% endcomment %}
+{% block title %}{% translate "Люди и их роли" %}{% endblock %}
+{% block content %}
+{% translate "Люди и их роли" as page_title %}
+{% include "web/roles/_head.html" with title=page_title %}
+<p class="note under">{% blocktranslate %}В списке только те, кому уже выдана хотя бы одна роль: он и собирается из
+выданных ролей. Человек, у которого ролей нет, здесь не появится — и это не
+значит, что его нет в системе.{% endblocktranslate %}</p>
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Человек" %}</th>
+      <th>{% translate "Роли" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for person in people %}
+    <tr>
+      <td><a href="{% url 'person-roles' person.user_id %}">{{ person.who }}</a>{% if person.mail %}<br><span class="note">{{ person.mail }}</span>{% endif %}</td>
+      <td>{% for held in person.roles %}<span class="chip">{{ held.title }}{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</span> {% endfor %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% endblock %}

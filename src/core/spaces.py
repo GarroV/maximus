@@ -23,6 +23,7 @@
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -31,7 +32,7 @@ from django.utils.translation import gettext as _
 
 from .models import Membership, PlatformAdmin, Role, Tenant, User
 from .role_delivery import product_shape
-from .roles import DEFAULT_TITLES, ROLE_ORDER, ROLE_SHAPES, permission_states
+from .roles import DEFAULT_TITLES, ROLE_ORDER, ROLE_SHAPES, leads_one_unit, permission_states
 
 __all__ = ["SpaceRefused", "NewSpace", "create_space", "is_platform_admin"]
 
@@ -49,6 +50,10 @@ def is_platform_admin(user_id: UUID | None) -> bool:
     который правила страны менять может, а пространства — нет.
     """
     return user_id is not None and PlatformAdmin.objects.filter(user_id=user_id).exists()
+
+
+_ISO_COUNTRY = re.compile(r"[A-Z]{2}")
+_ISO_CURRENCY = re.compile(r"[A-Z]{3}")
 
 
 class SpaceRefused(Exception):
@@ -103,10 +108,32 @@ def create_space(
         raise SpaceRefused(_("Первому человеку нужен логин — иначе в пространство некому войти."))
     if not admin_password:
         raise SpaceRefused(_("Первому человеку нужен пароль."))
+    country_code = (country_code or "").strip().upper()
+    base_currency = (base_currency or "").strip().upper()
+    report_currency = (report_currency or "").strip().upper()
+    # Форма кода по ISO: страна — две латинские буквы (3166-1 alpha-2), валюта —
+    # три (4217). По самому списку ISO не сверяется: библиотеки со списком в
+    # проекте нет, а пресет есть только у Сербии — ограничить страны пресетами
+    # значило бы запретить завести партнёра, чью страну ещё не описали.
+    if not _ISO_COUNTRY.fullmatch(country_code):
+        raise SpaceRefused(_("Страну укажите кодом из двух латинских букв, например RS."))
+    if not _ISO_CURRENCY.fullmatch(base_currency):
+        raise SpaceRefused(_("Валюту учёта укажите кодом из трёх латинских букв, например RSD."))
+    if not _ISO_CURRENCY.fullmatch(report_currency):
+        raise SpaceRefused(_("Валюту отчёта укажите кодом из трёх латинских букв, например EUR."))
     if role_code not in ROLE_SHAPES:
         raise SpaceRefused(
             _("Роли «%(role)s» в продукте нет. Выберите одну из: %(known)s")
             % {"role": role_code, "known": ", ".join(ROLE_ORDER)}
+        )
+    if leads_one_unit(role_code):
+        # Точек у нового пространства нет, а членство такой роли без точки
+        # функции контекста читают как ВСЕ точки. Первым заводится тот, кто
+        # ведёт партнёра целиком; управляющему роль выдаётся, когда точки есть.
+        raise SpaceRefused(
+            _("Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. "
+              "Первым заведите того, кто ведёт партнёра целиком.")
+            % {"role": DEFAULT_TITLES[role_code]}
         )
     if Tenant.objects.filter(code=code).exists():
         raise SpaceRefused(
@@ -125,9 +152,9 @@ def create_space(
         tenant = Tenant.objects.create(
             code=code,
             title=title,
-            country_code=country_code.upper(),
-            base_currency=base_currency.upper(),
-            report_currency=report_currency.upper(),
+            country_code=country_code,
+            base_currency=base_currency,
+            report_currency=report_currency,
         )
 
         roles = {

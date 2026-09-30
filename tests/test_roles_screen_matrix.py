@@ -78,9 +78,17 @@ def test_an_optional_permission_is_granted_as_usual(client, web_env):
     html = body(client.get("/roles/"))
     manager = role_id(html, "manager")
 
-    client.post(
-        f"/roles/{manager}/rights/",
-        {"right:timesheet.edit": "on", "right:unit.close": "on",
-         "right:payrun.calculate": "on"},
-    )
-    assert "payrun.calculate" in granted_rights(body(client.get("/roles/")), "manager")
+    before = granted_rights(html, "manager")
+    try:
+        client.post(
+            f"/roles/{manager}/rights/",
+            {"right:timesheet.edit": "on", "right:unit.close": "on",
+             "right:payrun.calculate": "on"},
+        )
+        assert "payrun.calculate" in granted_rights(body(client.get("/roles/")), "manager")
+    finally:
+        # База у веб-проверок одна на прогон. Оставленное право расчёта у
+        # управляющего краснило проверки доставки формы ролей
+        # (`test_roles_delivery.py`) — но только когда они шли после этой:
+        # по отдельности обе зелёные, и на master так же.
+        client.post(f"/roles/{manager}/rights/", {f"right:{code}": "on" for code in before})
