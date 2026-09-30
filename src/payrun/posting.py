@@ -118,8 +118,11 @@ def _refuse_partial_view(payrun) -> None:
 
     with connection.cursor() as cursor:
         cursor.execute(
-            "select app_unit_ids(%s) is null "
-            "and app_visible_ledgers(%s) @> enum_range(null::ledger)",
+            # Без пользователя (сид, команды управления) проводку ведёт
+            # владелец схемы мимо политик — среза нет, как и у
+            # `reallocate_period`.
+            "select app_user_id() is null or (app_unit_ids(%s) is null "
+            "and app_visible_ledgers(%s) @> enum_range(null::ledger))",
             [str(payrun.tenant_id), str(payrun.tenant_id)],
         )
         (whole,) = cursor.fetchone()
