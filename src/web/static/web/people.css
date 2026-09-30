@@ -56,12 +56,13 @@
 .people-page .scroll {
   background:
     linear-gradient(to left, var(--surface) 30%, transparent) right / 24px 100% no-repeat local,
-    linear-gradient(to left, var(--line-strong), transparent) right / 10px 100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in srgb, var(--ink) 28%, transparent), transparent) right / 18px 100% no-repeat scroll,
     var(--surface);
 }
 
-/* Ячейки тела прозрачны, иначе их белый фон закрывает эту тень. Первая колонка
+/* Таблица и ячейки тела прозрачны, иначе их белый фон закрывает эту тень. Первая колонка
    (закреплённая), шапка и строка итогов свой фон сохраняют: они липкие. */
+.people-page .scroll table,
 .people-page .scroll tbody td:not(:first-child) { background: transparent; }
 
 /* Численность под месяцем не рвётся посередине («35 / чел.»). */
