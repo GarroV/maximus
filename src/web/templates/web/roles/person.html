@@ -18,8 +18,12 @@
 {% if person.mail %}<p class="sub">{{ person.mail }}</p>{% endif %}
 
 <h2>{% translate "Роли человека" %}</h2>
-<p class="sub">{% if now %}{% translate "Сейчас человек может:" %} {{ now|join:", " }}.{% else %}{% translate "Сейчас у человека нет ни одного права — только просмотр того, что открывают его роли." %}{% endif %}</p>
-{% if cannot %}<p class="note under">{% translate "Не может:" %} {{ cannot|join:", " }}.</p>{% endif %}
+<dl class="abilities">
+  <dt>{% translate "Сейчас человек может:" %}</dt>
+  <dd>{% if now %}{{ now|join:", " }}{% else %}{% translate "ни одного права — только просмотр того, что открывают его роли" %}{% endif %}</dd>
+  {% if cannot %}<dt>{% translate "Не может:" %}</dt>
+  <dd>{{ cannot|join:", " }}</dd>{% endif %}
+</dl>
 <p class="note under">{% blocktranslate %}Чтобы снять роль, напишите причину рядом с ней: она останется в истории
 рядом с вашим именем. Единственную роль снять нельзя — без неё человек войдёт
 и не увидит ничего.{% endblocktranslate %}</p>

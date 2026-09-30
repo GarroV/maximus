@@ -185,6 +185,6 @@ def test_the_person_page_says_what_the_roles_do_not_give(client, web_env):
     """Как в эталоне — «чего не даёт»: у бухгалтера нет ведения ролей."""
     login_as(client, "admin")
     html = _person_page(client, "Бухгалтер")
-    cannot = re.search(r"Не может:([^<]*)</p>", html)
+    cannot = re.search(r"Не может:</dt>\s*<dd>([^<]*)</dd>", html)
     assert cannot and "Ведение ролей" in cannot.group(1)
     assert "Расчёт периода" not in cannot.group(1)

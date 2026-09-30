@@ -714,8 +714,21 @@ table.matrix thead small { display: block; font-size: 10px; line-height: 12px; c
    кнопкой. Карточки идут столбиком с отбивкой, как строки списка; ширина — как
    у формы выдачи ниже, а не узкая карточка входа. */
 form.card.held-role { max-width: 860px; margin-bottom: var(--space-4); }
+.held-role p { margin-bottom: var(--space-3); }
 .held-role .note { margin-top: 0; }
-.held-role button { margin-top: var(--space-4); }
+.held-role button { margin-top: var(--space-6); }
+/* Что человек может и чего не может — две строки «подпись — список», как
+   «Что даёт / Чего не даёт» в эталоне, а не два абзаца с полями между ними. */
+dl.abilities {
+  display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-5);
+  margin: var(--space-3) 0 var(--space-6); font-size: var(--fs-body);
+}
+dl.abilities dt { color: var(--ink-2); }
+dl.abilities dd { margin: 0; }
+@media (max-width: 719px) {
+  dl.abilities { grid-template-columns: 1fr; }
+  dl.abilities dd { margin-bottom: var(--space-3); }
+}
 /* Что даст каждая роль — короткий список над формой выдачи: название роли
    жирным, дальше только то, чего у человека ещё нет. */
 .role-offers { margin: 0 0 var(--space-5); padding-left: var(--space-6); display: grid; gap: var(--space-2); font-size: var(--fs-body); }

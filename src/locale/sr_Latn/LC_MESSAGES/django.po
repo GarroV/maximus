@@ -9149,12 +9149,6 @@ msgid "Если снять, человек потеряет:"
 msgstr "Ako se ukloni, osoba gubi:"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Сейчас у человека нет ни одного права — только просмотр того, что "
-"открывают его роли."
-msgstr "Trenutno osoba nema nijedno pravo — samo pregled onoga što otvaraju njene uloge."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Сейчас человек может:"
 msgstr "Trenutno osoba može:"
 
@@ -9275,3 +9269,7 @@ msgstr "partner"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "точка"
 msgstr "objekat"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ни одного права — только просмотр того, что открывают его роли"
+msgstr "nijedno pravo — samo pregled onoga što otvaraju njene uloge"
