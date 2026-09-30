@@ -38,6 +38,8 @@ ALL_PERMISSIONS = (
     "payslip.freeze",
     "retro.post",
     "suppliers.classify",
+    "staff.manage",
+    "terms.manage",
     "directory.manage",
     "rules.manage",
     "roles.manage",
@@ -71,6 +73,13 @@ MONTH_CYCLE = (
     # по-прежнему — там он не классифицирует чужое, а вносит свою трату (T109).
     "suppliers.classify",
 )
+
+
+# Ведение справочников целиком (D059): люди, их условия найма и сами
+# справочники — три права, а не одно, как три строки эталона «Роли и права»
+# (T236, миграция `0274`). У тех, кто вёл справочники, их по-прежнему три сразу:
+# разводить их по ролям — решение партнёра на месте (D060), а не продукта.
+DIRECTORIES = ("staff.manage", "terms.manage", "directory.manage")
 
 
 class RoleShape(NamedTuple):
@@ -120,7 +129,7 @@ ROLE_SHAPES: dict[str, RoleShape] = {
     # контрагенты заводит он же. Правила страны и роли при этом остаются за
     # администратором сети — это платформенный уровень, а не работа партнёра.
     "director": RoleShape(
-        ALL_LEDGERS, None, MONTH_CYCLE + ("directory.manage",), PARTNER_WALLS,
+        ALL_LEDGERS, None, MONTH_CYCLE + DIRECTORIES, PARTNER_WALLS,
     ),
     # Все три регистра и тот же набор прав, что у директора (D036, ответ
     # владельца на Q012). Раньше здесь стоял один официальный — догадка, что
@@ -140,7 +149,7 @@ ROLE_SHAPES: dict[str, RoleShape] = {
     # другому значило бы молча отменить прежнее решение, о котором нас не
     # спрашивали, — а у партнёра именно бухгалтер ведёт проект целиком.
     "accountant": RoleShape(
-        ALL_LEDGERS, None, MONTH_CYCLE + ("directory.manage",), PARTNER_WALLS,
+        ALL_LEDGERS, None, MONTH_CYCLE + DIRECTORIES, PARTNER_WALLS,
     ),
     # Два регистра, а не один (D031): управляющий отвечает за свою точку и
     # должен видеть надбавки своей смены.
@@ -166,7 +175,7 @@ ROLE_SHAPES: dict[str, RoleShape] = {
     # самим запрещённым, — не разграничение, а лишний шаг (D033).
     "admin": RoleShape(
         ALL_LEDGERS, None,
-        MONTH_CYCLE + ("directory.manage", "rules.manage", "roles.manage"),
+        MONTH_CYCLE + DIRECTORIES + ("rules.manage", "roles.manage"),
     ),
 }
 

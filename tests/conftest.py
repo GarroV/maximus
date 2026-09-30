@@ -301,7 +301,12 @@ P_ACCOUNTANT = (
     '["timesheet.edit", "payrun.calculate", "period.approve", "payslip.freeze"]'
 )
 P_MANAGER = '["timesheet.edit", "unit.close"]'
-P_ADMIN = '["directory.manage", "rules.manage", "roles.manage"]'
+# Люди и условия найма — свои права с T236 (`0274`): кто ведёт справочники,
+# ведёт и их, как у ролей продукта.
+P_ADMIN = (
+    '["staff.manage", "terms.manage", "directory.manage", "rules.manage",'
+    ' "roles.manage"]'
+)
 
 
 def _seed(conn) -> None:
