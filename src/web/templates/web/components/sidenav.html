@@ -57,7 +57,7 @@
 
 **Выход — форма, а не ссылка:** по ссылке его запустила бы картинка на чужой
 странице.
-{% endcomment %}{% translate "Как в системе" as theme_system %}{% translate "Светлая тема" as theme_light %}{% translate "Тёмная тема" as theme_dark %}
+{% endcomment %}
 <nav class="sidenav" aria-label="{% translate "Основная навигация" %}">
   {% comment %}
   Имя продукта ведёт на первый экран месяца: по имени продукта уходят «в
@@ -85,6 +85,12 @@
         {% endif %}
       </ul>
     {% endfor %}
+    {% comment %}
+    Легенда цветных точек состояния (issue #268): без неё точка у пункта
+    говорит только тому, кто навёл мышь. Рисуется, только когда точки в панели
+    есть, и только для тех цветов, что есть (`navigation._legend`).
+    {% endcomment %}
+    {% if nav_stages %}<ul class="sidenav__legend" aria-label="{% translate "Состояние" %}">{% for stage in nav_stages %}<li><span class="sidenav__stage sidenav__stage--{{ stage.kind }}" aria-hidden="true"></span>{{ stage.label }}</li>{% endfor %}</ul>{% endif %}
   </div>
 
   <div class="sidenav__foot">
@@ -116,33 +122,7 @@
     выбранная скриптом, она применялась бы после загрузки, и человек видел бы
     вспышку светлого перед тёмным (issue #164).
     {% endcomment %}
-    <div class="sidenav__prefs">
-    <form class="sidenav__theme" method="post" action="{% url 'set-theme' %}" role="group" aria-labelledby="nav-theme">{% csrf_token %}
-      <input type="hidden" name="next" value="{{ request.get_full_path }}">
-      <span class="sidenav__theme-label sr-only" id="nav-theme">{% translate "Тема" %}</span>
-      {% for option in themes %}
-        {% if option.code == "system" %}{% firstof theme_system as theme_name %}{% elif option.code == "light" %}{% firstof theme_light as theme_name %}{% else %}{% firstof theme_dark as theme_name %}{% endif %}
-        {% if option.current %}
-          <span class="sidenav__choice" aria-current="true" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</span>
-        {% else %}
-          <button type="submit" name="theme" value="{{ option.code }}" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</button>
-        {% endif %}
-      {% endfor %}
-    </form>
-    {% if languages %}
-    <form class="sidenav__theme" method="post" action="{% url 'set_language' %}" role="group" aria-labelledby="nav-lang">{% csrf_token %}
-      <input type="hidden" name="next" value="{{ request.get_full_path }}">
-      <span class="sidenav__theme-label sr-only" id="nav-lang">{% translate "Язык" %}</span>
-      {% for language in languages %}
-        {% if language.current %}
-          <span class="sidenav__choice" aria-current="true" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</span>
-        {% else %}
-          <button type="submit" name="language" value="{{ language.code }}" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</button>
-        {% endif %}
-      {% endfor %}
-    </form>
-    {% endif %}
-    </div>
+    <div class="sidenav__prefs">{% include "web/components/prefs.html" with prefs_id="nav" %}</div>
   </div>
 
   {% if principal %}
@@ -151,10 +131,11 @@
   имя совпадает с названием роли — на любом из языков продукта (фильтр
   `is_role_name`), — и тогда имени нет вовсе: иначе на английском рядом
   стояли бы жирное «Администратор сети» и плашка «Network Administrator».
-  Вторая строка: партнёр · регистры · точка. Регистры — цветными точками тех
-  же цветов, что метки в ведомости, с названием в `title` и у диктора; целиком
-  словами они на странице учётной записи. Точка — только когда человек ею
-  ограничен: объяснять надо срезанные данные, а не полные.
+  Вторая строка: партнёр · точка. Точка — только когда человек ею ограничен:
+  объяснять надо срезанные данные, а не полные. Третья — регистры словами, с
+  точкой того же цвета, что метки в ведомости. До issue #268 здесь были одни
+  цветные точки: различались только цветом, и перед ними висела «·» — для
+  того, кто цвета не различает, это был ряд одинаковых кружков.
 
   Выход — значком в той же строке, с названием в `aria-label` и `title`, и
   формой, а не ссылкой: по ссылке его запустила бы картинка на чужой странице.
@@ -164,7 +145,8 @@
     <span class="avatar sidenav__avatar" aria-hidden="true">{{ principal.role_title|first|upper }}</span>
     <div class="sidenav__who">
       <span class="sidenav__whoami">{% if not principal.display_name|is_role_name:principal.role_title %}<b>{{ principal.display_name }}</b>{% endif %}{% if principal.role_title %}{% role_badge principal.role_title %}{% endif %}</span>
-      <span class="sidenav__meta">{% if principal.tenant_title %}<span>{{ principal.tenant_title }}</span>{% endif %}{% if visible_ledgers %}<span class="sidenav__ledgers">{% for name in visible_ledgers %}<span class="sidenav__reg reg--{{ name.code }}" title="{{ name }}"><span class="sr-only">{{ name }}</span></span>{% endfor %}</span>{% endif %}{% if principal.units_title %}<span title="{% translate "Данные и итоги на всех страницах — только по этой точке" %}">{% blocktranslate with code=principal.units_title %}точка: {{ code }}{% endblocktranslate %}</span>{% endif %}</span>
+      <span class="sidenav__meta">{% if principal.tenant_title %}<span>{{ principal.tenant_title }}</span>{% endif %}{% if principal.units_title %}<span title="{% translate "Данные и итоги на всех страницах — только по этой точке" %}">{% blocktranslate with code=principal.units_title %}точка: {{ code }}{% endblocktranslate %}</span>{% endif %}</span>
+      {% if visible_ledgers %}<span class="sidenav__ledgers" role="list" aria-label="{% translate "Видимые регистры" %}">{% for name in visible_ledgers %}<span class="sidenav__reg reg--{{ name.code }}" role="listitem">{{ name }}</span>{% endfor %}</span>{% endif %}
     </div>
     <form class="sidenav__form sidenav__logout" method="post" action="{% url 'logout' %}">{% csrf_token %}
       {% translate "Выйти" as logout_label %}

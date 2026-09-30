@@ -281,5 +281,23 @@ def sections(request) -> dict:
                 "needs": offers[0]["needs"], "route": offers[0]["route"],
             },
         })
-    return {"nav_areas": areas}
+    return {"nav_areas": areas, "nav_stages": _legend(areas)}
+
+
+def _legend(areas: list[dict]) -> list[dict]:
+    """Какие состояния экранов стоят в панели этого человека — для легенды.
+
+    Цветная точка у пункта без слов ничего не говорит глазу (issue #268):
+    наведение называет состояние, но на планшете и с клавиатуры наведения нет.
+    Поэтому под списком разделов — подпись к каждому цвету, который в панели
+    есть. Только к тем, что есть: легенда к цвету, которого человек не видит,
+    — ещё одна строка шума в панели, где на счету каждые двадцать пикселей.
+    """
+    seen: dict[str, dict] = {}
+    for area in areas:
+        for item in area["items"]:
+            stage = item["stage"]
+            if item["allowed"] and stage is not None and stage.kind not in seen:
+                seen[stage.kind] = {"kind": stage.kind, "label": stage.label}
+    return list(seen.values())
 
