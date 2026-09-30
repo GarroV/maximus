@@ -68,10 +68,17 @@ def test_partner_roles_get_a_refusal_in_words(client, who):
     поломка продукта, и человек ищет, что сломалось, вместо того чтобы понять,
     что дверь не его.
     """
+    from core.models import Tenant
+
     login_as(client, who)
-    response = client.get("/platform/")
-    assert response.status_code == 403
-    assert "администратор платформы" in body(response).lower()
+    # Каждая страница админки, а не только первая (T225): форма заведения и
+    # выдача роли стали отдельными адресами, и у каждого своя развилка входа.
+    tenant = Tenant.objects.get(code="rs-dev").pk
+    for url in ("/platform/", "/platform/new/", f"/platform/{tenant}/",
+                f"/platform/{tenant}/roles/"):
+        response = client.get(url)
+        assert response.status_code == 403, f"{url} открыт роли {who}"
+        assert "администратор платформы" in body(response).lower(), url
 
 
 def test_platform_admin_sees_the_list_of_spaces(client, platform_admin):
@@ -119,13 +126,17 @@ def test_a_duplicate_code_is_refused_in_words(client, platform_admin, spaces_res
         "base_currency": "RSD", "report_currency": "EUR",
         "admin_username": "dup-one", "admin_password": "secret-1",
     })
-    client.post("/platform/new/", {
+    response = client.post("/platform/new/", {
         "title": "Второй", "code": "dup-code", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
         "admin_username": "dup-two", "admin_password": "secret-2",
     })
-    html = body(client.get("/platform/"))
+    # Отказ — на странице самой формы, с набранным, а не на экране списка (T225).
+    assert response.status_code == 400
+    html = body(response)
     assert "уже есть" in html, "повтор кода должен объясняться словами"
+    assert 'value="Второй"' in html, "набранное потерялось — вводить заново"
+    assert "secret-2" not in html, "пароль вписан обратно в страницу"
 
 
 def test_a_space_without_a_first_person_is_refused(client, platform_admin, spaces_restored):
@@ -133,7 +144,7 @@ def test_a_space_without_a_first_person_is_refused(client, platform_admin, space
     from core.models import Tenant
 
     login_as(client, "admin")
-    client.post("/platform/new/", {
+    response = client.post("/platform/new/", {
         "title": "Ничей", "code": "nobody", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
         "admin_username": "", "admin_password": "",
@@ -141,7 +152,7 @@ def test_a_space_without_a_first_person_is_refused(client, platform_admin, space
     assert not Tenant.objects.filter(code="nobody").exists(), (
         "пространство завелось без первого человека — войти в него некому"
     )
-    assert "логин" in body(client.get("/platform/")).lower()
+    assert "логин" in body(response).lower()
 
 
 # --- люди и роли внутри пространства -----------------------------------------
@@ -160,15 +171,18 @@ def test_inside_a_space_people_and_their_roles_are_visible(client, platform_admi
 
 def test_a_role_can_be_granted_and_revoked(client, platform_admin, spaces_restored):
     """Выдача и снятие роли — то, ради чего экран и заводился."""
-    from core.models import Membership, Role, Tenant, User
+    from core.models import Membership, Role, Tenant, Unit, User
 
     tenant = Tenant.objects.get(code="rs-dev")
     person = User.objects.create_user(username="new-hand", password="secret-1")
     role = Role.objects.filter(tenant=tenant, code="manager").first()
+    # Управляющий ведёт одну точку — без неё выдача отказывает (разбор прав T225).
+    unit = Unit.objects.filter(tenant=tenant).order_by("code").first()
 
     login_as(client, "admin")
     client.post(f"/platform/{tenant.pk}/roles/", {
         "action": "grant", "user_id": str(person.pk), "role_id": str(role.pk),
+        "unit": str(unit.pk),
     })
     assert Membership.objects.filter(tenant=tenant, user_id=person.pk, role=role).exists()
 
@@ -257,3 +271,163 @@ def test_the_counters_are_honest(client, platform_admin, spaces_restored):
     assert row.people == 1, "у нового партнёра ровно один человек — тот, кого мы завели"
     assert row.active == 1, "он действующий: отключать его никто не просил"
     assert row.last_seen is None, "он ещё не входил"
+
+
+# --- одна страница — одна функция (T225, D081) ------------------------------
+
+
+def test_the_list_leads_to_the_form_and_the_form_is_its_own_page(client, platform_admin):
+    """Список пространств формы не держит; форма — по кнопке, своей страницей."""
+    login_as(client, "admin")
+    listing = body(client.get("/platform/"))
+    assert 'href="/platform/new/"' in listing, "со списка нет дороги к заведению"
+    assert 'name="admin_password"' not in listing, "форма заведения осталась на списке"
+    form = client.get("/platform/new/")
+    assert form.status_code == 200
+    assert 'name="admin_password"' in body(form)
+
+
+def test_granting_a_role_is_its_own_page(client, platform_admin):
+    """Люди пространства — одна страница, выдача роли — другая."""
+    from core.models import Tenant
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    login_as(client, "admin")
+    people = body(client.get(f"/platform/{tenant.pk}/"))
+    assert f'href="/platform/{tenant.pk}/roles/"' in people, "нет дороги к выдаче роли"
+    assert 'value="grant"' not in people, "форма выдачи осталась на странице людей"
+    grant = client.get(f"/platform/{tenant.pk}/roles/")
+    assert grant.status_code == 200
+    assert 'value="grant"' in body(grant)
+
+
+def test_a_garbled_person_id_is_refused_in_words(client, platform_admin):
+    """Не идентификатор в поле человека — ответ словами, а не ошибка сервера."""
+    from core.models import Role, Tenant
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    role = Role.objects.filter(tenant=tenant).first()
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": "не-идентификатор", "role_id": str(role.pk),
+    })
+    # 400, а не 404: страница формы есть, неверно то, что в неё вписали. И
+    # только так отказ остаётся рядом с формой — 404 со страницей при отладке
+    # подменяется общей страницей продукта (`web.errors`).
+    assert response.status_code == 400
+    assert "Такого человека нет" in body(response)
+
+
+@pytest.mark.parametrize("garbled", ["abc", ""])
+def test_revoking_for_a_garbled_person_is_refused_in_words(client, platform_admin, garbled):
+    """Снятие с не-идентификатором человека — отказ словами, а не ошибка сервера."""
+    from core.models import Role, Tenant
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    role = Role.objects.filter(tenant=tenant).first()
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "revoke", "user_id": garbled, "role_id": str(role.pk),
+    }, follow=True)
+    assert response.status_code == 200
+    assert "Такого человека в этом пространстве нет" in body(response)
+
+
+def test_revoking_for_someone_outside_the_space_is_refused(client, platform_admin, spaces_restored):
+    """Человек не из этого пространства — отказ, а не «роли и не было»."""
+    from core.models import Role, Tenant, User
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    role = Role.objects.filter(tenant=tenant).first()
+    outsider = User.objects.create_user(username="outsider-m1", password="secret-1")
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "revoke", "user_id": str(outsider.pk), "role_id": str(role.pk),
+    }, follow=True)
+    assert "Такого человека в этом пространстве нет" in body(response)
+
+
+# --- точка у роли, которая ведёт одну точку (как на странице партнёра) --------
+
+
+def test_platform_grants_a_unit_role_only_with_a_unit(client, platform_admin, spaces_restored):
+    """Управляющий точки без точки получил бы все точки партнёра — отказ.
+
+    С точкой — в членстве ровно она. Правило то же, что у приглашения на
+    странице партнёра: одна развилка на обе поверхности.
+    """
+    from core.models import Membership, Role, Tenant, Unit, User
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    manager = Role.objects.get(tenant=tenant, code="manager")
+    unit = Unit.objects.filter(tenant=tenant).order_by("code").first()
+    person = User.objects.create_user(username="m2-hand", password="secret-1")
+    login_as(client, "admin")
+
+    refused = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": str(person.pk), "role_id": str(manager.pk),
+    })
+    assert refused.status_code == 400
+    assert "выберите её" in body(refused)
+    assert not Membership.objects.filter(user_id=person.pk).exists()
+
+    client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": str(person.pk), "role_id": str(manager.pk),
+        "unit": str(unit.pk),
+    })
+    held = Membership.objects.get(user_id=person.pk)
+    assert [str(u) for u in held.unit_ids] == [str(unit.pk)]
+    held.delete()
+
+
+def test_platform_gives_no_unit_to_a_whole_partner_role(client, platform_admin, spaces_restored):
+    from core.models import Membership, Role, Tenant, Unit, User
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    accountant = Role.objects.get(tenant=tenant, code="accountant")
+    unit = Unit.objects.filter(tenant=tenant).first()
+    person = User.objects.create_user(username="m2-acc", password="secret-1")
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": str(person.pk), "role_id": str(accountant.pk),
+        "unit": str(unit.pk),
+    })
+    assert response.status_code == 400
+    assert "точка для неё не выбирается" in body(response)
+    assert not Membership.objects.filter(user_id=person.pk).exists()
+
+
+def test_a_new_space_does_not_start_with_a_unit_manager(client, platform_admin, spaces_restored):
+    """У нового пространства точек нет — управляющий точки первым получил бы все."""
+    from core.models import Tenant
+
+    login_as(client, "admin")
+    response = client.post("/platform/new/", {
+        "title": "Точечный", "code": "unit-first", "country_code": "RS",
+        "base_currency": "RSD", "report_currency": "EUR",
+        "admin_username": "unit-first-boss", "admin_password": "secret-1",
+        "role_code": "manager",
+    })
+    assert response.status_code == 400
+    assert not Tenant.objects.filter(code="unit-first").exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("country_code", ""), ("country_code", "Serbia"), ("country_code", "Р1"),
+    ("base_currency", ""), ("base_currency", "dinar"),
+    ("report_currency", ""), ("report_currency", "E1R"),
+])
+def test_country_and_currencies_are_checked(client, platform_admin, spaces_restored, field, value):
+    """Страна — двумя латинскими буквами, валюты — тремя (ISO); иначе отказ словами."""
+    from core.models import Tenant
+
+    payload = {
+        "title": "Проверка", "code": "l1-check", "country_code": "RS",
+        "base_currency": "RSD", "report_currency": "EUR",
+        "admin_username": "l1-boss", "admin_password": "secret-1",
+    }
+    payload[field] = value
+    login_as(client, "admin")
+    response = client.post("/platform/new/", payload)
+    assert response.status_code == 400, f"{field}={value!r} принят"
+    assert not Tenant.objects.filter(code="l1-check").exists()

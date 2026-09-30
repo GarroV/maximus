@@ -718,7 +718,7 @@ def invoice_fact(document) -> Fact | None:
 def invoice_lines(document) -> list[Fact]:
     """Все действующие строки счёта: исходная и исправления рядом с ней."""
     return list(
-        Fact.objects.select_related("unit")
+        Fact.objects.select_related("unit", "expense_item")
         .filter(document_id=document.id, dedup_key__startswith=INVOICE_PREFIX,
                 superseded_at__isnull=True)
         .exclude(allocation="allocated")
@@ -827,13 +827,64 @@ def classify(who, fact, *, item, unit_id) -> Recorded:
     неразобранного — это правка задним числом, и переписать ею закрытый месяц
     нельзя: июнь сегодня и июнь через полгода обязаны давать одно число.
     """
-    remember(who, fact.counterparty_id, item)
-    if not cash.month_is_closed(who.tenant_id, fact.period):
-        return _reclassified(who, fact, item=item, unit_id=unit_id,
-                             dedup_key=fact.dedup_key)
-    storno_line(who, fact)
-    return _reclassified(who, fact, item=item, unit_id=unit_id,
-                         dedup_key=fact.dedup_key + cash.FIX_SUFFIX)
+    # Разнесённая строка остаётся разнесённой (D089, issue #288): разбор меняет
+    # статью, а не точки. Точка, пришедшая в форме, у неё не применяется — иначе
+    # разбор складывал доли, поставленные человеком, в одну строку молча.
+    #
+    # Одной транзакцией: отказ повторного разнесения обязан откатить и замену
+    # строки, иначе в базе осталась бы разобранная строка на всю сеть без долей.
+    shares = shares_of(fact)
+    if shares:
+        unit_id = None
+    with transaction.atomic():
+        # Память «поставщик → статья» — внутри той же транзакции: отказанный
+        # разбор не должен оставлять подсказку, строка ведь не разобрана.
+        remember(who, fact.counterparty_id, item)
+        if not cash.month_is_closed(who.tenant_id, fact.period):
+            recorded = _reclassified(who, fact, item=item, unit_id=unit_id,
+                                     dedup_key=fact.dedup_key)
+        else:
+            storno_id = storno_line(who, fact)
+            if shares:
+                _split_again(storno_id, shares, who)
+            recorded = _reclassified(who, fact, item=item, unit_id=unit_id,
+                                     dedup_key=fact.dedup_key + cash.FIX_SUFFIX)
+        if shares:
+            _split_again(recorded.fact_id, shares, who)
+    return recorded
+
+
+def shares_of(fact) -> dict:
+    """Доли разнесённой строки: точка → сумма. Не разнесена — пусто.
+
+    Суммы, а не проценты: их база и примет весами, и разнесёт той же функцией —
+    копейка в копейку так же, как было, потому что вес каждой точки и есть её
+    сумма.
+    """
+    if fact.allocation != "split":
+        return {}
+    # Веса — по модулю: у кредит-ноты доли отрицательные, а база принимает
+    # только положительные веса. Знак долям даёт сумма самой строки.
+    return {
+        row.unit_id: abs(row.amount)
+        for row in Fact.objects.filter(parent_fact_id=fact.id, superseded_at__isnull=True,
+                                       allocation="allocated")
+    }
+
+
+def _split_again(fact_id, shares: dict, who) -> None:
+    """Разнести новую версию строки теми же долями. Отказ — не молча.
+
+    Отказ здесь значит, что разнесение ставил один человек, а разбирает другой,
+    кому часть точек не видна. Проглотить его значило бы оставить строку на всю
+    сеть — то самое свёртывание долей, от которого правило D089.
+    """
+    written = cash.split_by_hand(fact_id, shares, getattr(who, "user_id", None))
+    if not written:
+        raise cash.CashRefused(_(
+            "Строка разнесена по точкам, часть которых вам не видна, — разобрать её "
+            "может тот, кто ведёт все точки партнёра."
+        ))
 
 
 def _reclassified(who, fact, *, item, unit_id, dedup_key: str) -> Recorded:

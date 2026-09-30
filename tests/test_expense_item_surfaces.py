@@ -146,10 +146,11 @@ def test_the_register_filter_still_offers_every_item(client, items):
     """Отбор в реестре расходов перечисляет все статьи.
 
     Реестр — экран бухгалтера, и ему нужен полный список: расход по статье,
-    снятой с наличных, иначе стало бы нечем найти.
+    снятой с наличных, иначе стало бы нечем найти. С T224 статья выбирается
+    не выпадающим списком реестра, а на своей странице выбора (D081).
     """
     login_as(client, "admin")
-    page = body(client.get("/expenses/"))
+    page = body(client.get("/expenses/filter/item/"))
     assert "Вода на точку" in page
     assert "Канцелярия по накладной" in page
 

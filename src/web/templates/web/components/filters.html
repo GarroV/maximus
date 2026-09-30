@@ -1,0 +1,41 @@
+{% load i18n %}{% comment %}
+Отбор списка ссылками (T224, D081 — «никаких выпадающих списков»).
+
+Каждый ряд — подпись и значения. Выбранное значение — `span[aria-current]`, не
+ссылка: ссылка на текущее состояние обманывает и мышь, и клавиатуру. Кнопки
+«Показать» нет: нажатая ссылка и есть применённый отбор, а весь остальной отбор
+она несёт в адресе (`filter_links.url`).
+
+Три вида ряда, собираются в `filter_links.py`:
+- `choices` без `label` — период: соседние месяцы по бокам от выбранного;
+- `choices` с `label` — ряд вариантов (точки, регистры, оплата);
+- `pick_url` — вариантов много: тот же ряд капсул, но в нём только «все»
+  (снимает отбор), выбранное и «выбрать…» — на страницу выбора. Вид — как у
+  остальных рядов, чтобы ряд читался переключателем, а не подписью со ссылкой.
+
+Варианты приезжают готовыми и только из видимого роли (D023): компонент
+справочников не знает.
+
+Параметры: `filters`.
+{% endcomment %}
+<div class="filters">
+  {% for f in filters %}
+  <div class="filters__row" data-filter="{{ f.name }}">
+    <span class="filters__label">{% if f.label %}{{ f.label }}{% else %}{% translate "Месяц" %}{% endif %}</span>
+    {% if f.choices %}
+    <nav class="seg" aria-label="{% if f.label %}{{ f.label }}{% else %}{% translate "Месяц" %}{% endif %}">
+      {% for item in f.choices %}
+      {% if item.selected %}<span class="seg__current" aria-current="true">{{ item.title }}</span>
+      {% else %}<a class="seg__item" href="{{ item.url }}"{% if item.rel %} rel="{{ item.rel }}"{% endif %}>{{ item.title }}</a>{% endif %}
+      {% endfor %}
+    </nav>
+    {% else %}
+    <nav class="seg" aria-label="{{ f.label }}">
+      {% if f.is_set %}<a class="seg__item" href="{{ f.reset_url }}">{{ f.everything }}</a>{% endif %}
+      <span class="seg__current" aria-current="true">{{ f.current }}</span>
+      <a class="seg__item seg__item--pick" href="{{ f.pick_url }}">{% translate "выбрать…" %}</a>
+    </nav>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>

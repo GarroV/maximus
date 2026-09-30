@@ -68,6 +68,7 @@
 | `/expenses/<uuid:fact_id>/delete/` | `expense-delete` | `web.expenses_views.expense_delete` |
 | `/expenses/<uuid:fact_id>/receipt/` | `expense-receipt` | `web.expenses_views.expense_receipt` |
 | `/expenses/<uuid:fact_id>/split/` | `expense-split-form` | `web.expenses_views.split_form` |
+| `/expenses/filter/item/` | `expense-item-pick` | `web.expenses_views.expense_item_pick` |
 | `/expenses/new/` | `expense-new` | `web.cash_views.cash_expense` |
 | `/expenses/split/` | `expense-split` | `web.expenses_views.split` |
 | `/expenses/unallocated/` | `expenses-unallocated` | `web.expenses_views.unallocated` |
@@ -76,11 +77,13 @@
 | `/inbox/` | `inbox` | `web.suppliers_views.inbox` |
 | `/inbox/<uuid:fact_id>/classify/` | `inbox-classify` | `web.suppliers_views.inbox_classify` |
 | `/inbox/classify/` | `inbox-batch` | `web.suppliers_views.inbox_batch` |
+| `/inbox/split/` | `inbox-split` | `web.inbox_split_views.inbox_split` |
 | `/invoices/` | `invoices` | `web.suppliers_views.invoices` |
 | `/invoices/<uuid:document_id>/` | `invoice` | `web.suppliers_views.invoice` |
 | `/invoices/<uuid:document_id>/not-ours/` | `invoice-not-ours` | `web.suppliers_views.invoice_not_ours` |
 | `/invoices/<uuid:document_id>/pay/` | `invoice-pay` | `web.suppliers_views.invoice_pay` |
 | `/invoices/<uuid:document_id>/positions/` | `invoice-positions` | `web.suppliers_views.invoice_positions` |
+| `/invoices/filter/counterparty/` | `invoice-counterparty-pick` | `web.suppliers_views.counterparty_pick` |
 | `/invoices/new/` | `invoice-new` | `web.suppliers_views.invoice` |
 | `/labor-cost/` | `people-cost` | `web.people_views.cost_page` |
 | `/login/` | `login` | `web.views.login_page` |
@@ -121,7 +124,10 @@
 | `/reports/reconcile/` | `reports-reconcile` | `web.planned_views.reconcile` |
 | `/roles/` | `roles` | `web.roles_views.index` |
 | `/roles/<uuid:role_id>/rights/` | `role-rights` | `web.roles_views.role_rights` |
+| `/roles/history/` | `roles-history` | `web.roles_views.history` |
+| `/roles/history/export/` | `roles-history-export` | `web.roles_views.history_export` |
 | `/roles/invite/` | `roles-invite` | `web.roles_views.invite` |
+| `/roles/people/` | `roles-people` | `web.roles_views.people` |
 | `/roles/people/<uuid:user_id>/` | `person-roles` | `web.roles_views.person_roles` |
 | `/rules/` | `rules` | `web.rules_views.index` |
 | `/rules/<str:path>/` | `rule` | `web.rules_views.rule` |

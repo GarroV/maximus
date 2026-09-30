@@ -1,0 +1,62 @@
+{
+  "Разнести по статьям": {
+    "en": "Split across expense items",
+    "sr": "Rasporedi po stavkama troškova"
+  },
+  "Вернуться в инбокс": {
+    "en": "Back to the inbox",
+    "sr": "Nazad u prijemno sanduče"
+  },
+  "Итого к разнесению": {
+    "en": "Total to split",
+    "sr": "Ukupno za raspodelu"
+  },
+  "Не разнесено.": {
+    "en": "Not split.",
+    "sr": "Nije raspoređeno."
+  },
+  "Отметьте строки, которые разносятся по точкам: без отметки разносить нечего.": {
+    "en": "Check the rows to split across units: with nothing checked there is nothing to split.",
+    "sr": "Označite redove koji se raspoređuju po objektima: bez oznake nema šta da se rasporedi."
+  },
+  "Отмеченные строки инбокса делятся одними долями. Статья у них остаётся прежней — её назначают в инбоксе, и разнесение при этом сохранится.": {
+    "en": "The checked inbox rows are split with one set of shares. Their expense item stays as it is — it is assigned in the inbox, and the split will be kept.",
+    "sr": "Označeni redovi iz prijemnog sandučeta dele se istim udelima. Stavka troška ostaje ista — dodeljuje se u prijemnom sandučetu, a raspodela će se sačuvati."
+  },
+  "Отмеченные строки относятся к разным юрлицам, а делятся накладные только на точки своего юрлица: общих точек у них нет. Разнесите их по одной или отметьте строки одного юрлица.": {
+    "en": "The checked rows belong to different legal entities, and a delivery note is split only across the units of its own legal entity: they have no units in common. Split them one by one or check rows of one legal entity.",
+    "sr": "Označeni redovi pripadaju različitim pravnim licima, a otpremnica se deli samo na objekte svog pravnog lica: zajedničkih objekata nemaju. Rasporedite ih pojedinačno ili označite redove jednog pravnog lica."
+  },
+  "Разнесено по точкам строк: %(count)d.": {
+    "en": "Rows split across units: %(count)d.",
+    "sr": "Redova raspoređenih po objektima: %(count)d."
+  },
+  "Разнести по точкам": {
+    "en": "Split across units",
+    "sr": "Rasporedi po objektima"
+  },
+  "Среди отмеченных есть строки, у которых точка уже есть или которые уже разнесены: %(what)s. Снимите с них отметку — разносить их нечего.": {
+    "en": "Some checked rows already have a unit or are already split: %(what)s. Uncheck them — there is nothing to split.",
+    "sr": "Među označenima ima redova koji već imaju objekat ili su već raspoređeni: %(what)s. Uklonite im oznaku — nema šta da se rasporedi."
+  },
+  "Строка разнесена по точкам, часть которых вам не видна, — разобрать её может тот, кто ведёт все точки партнёра.": {
+    "en": "The row is split across units some of which you cannot see — it can be sorted out by someone who manages all of the partner's units.",
+    "sr": "Red je raspoređen po objektima od kojih neke ne vidite — može ga razvrstati onaj ko vodi sve objekte partnera."
+  },
+  "У юрлица этих строк нет ни одной точки, которую вы ведёте.": {
+    "en": "The legal entity of these rows has no unit that you manage.",
+    "sr": "Pravno lice ovih redova nema nijedan objekat koji vodite."
+  },
+  "разнесена по точкам — доли сохранятся": {
+    "en": "split across units — the shares will be kept",
+    "sr": "raspoređeno po objektima — udeli će se sačuvati"
+  },
+  "Среди долей есть точка, на которую эту накладную разнести нельзя: делится она только на точки своего юрлица, которые вы ведёте.": {
+    "en": "One of the shares is on a unit this delivery note cannot be split to: it is split only across the units of its own legal entity that you manage.",
+    "sr": "Među udelima je objekat na koji se ova otpremnica ne može rasporediti: deli se samo na objekte svog pravnog lica koje vodite."
+  },
+  "Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из пачки не записано — откройте инбокс заново.": {
+    "en": "The row “%(what)s” was not split: it has already been split or sorted out. Nothing from the batch was saved — open the inbox again.",
+    "sr": "Red „%(what)s“ nije raspoređen: već je raspoređen ili razvrstan. Ništa iz grupe nije sačuvano — ponovo otvorite prijemno sanduče."
+  }
+}

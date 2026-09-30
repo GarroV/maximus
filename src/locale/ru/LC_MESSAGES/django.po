@@ -93,3 +93,19 @@ msgid_plural "Итого по %(counter)s счетам"
 msgstr[0] "Итого по %(counter)s счёту"
 msgstr[1] "Итого по %(counter)s счетам"
 msgstr[2] "Итого по %(counter)s счетам"
+
+#: web/templates/web/suppliers/invoice.html
+#, python-format
+msgid "%(counter)s позиция"
+msgid_plural "%(counter)s позиций"
+msgstr[0] "%(counter)s позиция"
+msgstr[1] "%(counter)s позиции"
+msgstr[2] "%(counter)s позиций"
+
+#: web/templates/web/suppliers/inbox.html
+#, python-format
+msgid "Бумаги с точек: ждёт разбора %(counter)s"
+msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
+msgstr[0] "Бумаги с точек: ждёт разбора %(counter)s"
+msgstr[1] "Бумаги с точек: ждут разбора %(counter)s"
+msgstr[2] "Бумаги с точек: ждут разбора %(counter)s"

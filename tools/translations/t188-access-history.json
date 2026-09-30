@@ -55,17 +55,9 @@
     "en": "Invite a person",
     "sr": "Pozovi osobu"
   },
-  "Причина выдачи роли": {
-    "en": "Reason for granting the role",
-    "sr": "Razlog dodele uloge"
-  },
   "Причина обязательна: она остаётся в истории рядом с вашим именем.": {
     "en": "A reason is required: it stays in the history next to your name.",
     "sr": "Razlog je obavezan: ostaje u istoriji pored vašeg imena."
-  },
-  "Причина снятия роли": {
-    "en": "Reason for revoking the role",
-    "sr": "Razlog oduzimanja uloge"
   },
   "Срок роли записан не датой.": {
     "en": "The end of the role is not written as a date.",
@@ -78,10 +70,6 @@
   "Человек появится в списке сразу и с ролью. Войти он пока не сможет: как\nчеловек получает первый вход, у продукта ещё не решено — до этого доступ\nоткрывает администратор площадки.": {
     "en": "The person appears in the list at once, already with a role. They cannot sign in yet: how a person gets their first sign-in has not been decided for the product — until then access is opened by the platform administrator.",
     "sr": "Osoba se odmah pojavljuje na spisku, već sa ulogom. Još ne može da se prijavi: kako osoba dobija prvu prijavu, za proizvod još nije odlučeno — do tada pristup otvara administrator platforme."
-  },
-  "Человек с такой почтой уже заведён.": {
-    "en": "A person with this email already exists.",
-    "sr": "Osoba sa ovom e-poštom već postoji."
   },
   "Что произошло": {
     "en": "What happened",

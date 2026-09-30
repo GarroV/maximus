@@ -27,6 +27,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404, HttpResponseNotAllowed
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -35,7 +36,7 @@ from django.utils.translation import gettext_lazy
 
 from core.models import INVOICE, Counterparty, Unit
 
-from . import cash, suppliers
+from . import cash, filter_links, papers, suppliers
 from .cash_views import _ledger, _till, _unit, _vat_rate
 from .counterparties_views import found as counterparties_found
 from .dbrefusal import BadInput
@@ -185,6 +186,9 @@ def invoices(request):
         "left_raw": f"{left}", "left_text": money(left),
         "counted": len(rows),
         "filters": _filter_fields(who, chosen),
+        "reset_url": filter_links.reset(
+            reverse("invoices"), filter_links.query_of(chosen, filters_default())
+        ),
         # Сужен ли отбор — от этого зависит, что говорит пустой список (T160).
         "narrowed": narrowed(chosen),
         "add_url": reverse("invoice-new"),
@@ -277,30 +281,75 @@ def _state_title(state: str) -> str:
 
 
 def _filter_fields(who, chosen: dict) -> list[dict]:
-    """Поля отбора. Списки — только из того, что видно роли (D023)."""
-    return [
-        {"kind": "date", "name": "from", "label": LABELS["from"],
-         "value": chosen["from"].isoformat()},
-        {"kind": "date", "name": "to", "label": LABELS["to"],
-         "value": chosen["to"].isoformat()},
-        _select(
+    """Отбор ссылками (T224, D081). Варианты — только из того, что видно роли (D023).
+
+    Регистры и состояние оплаты — рядом ссылок: вариантов единицы. Контрагентов
+    десятки — у них выбранное словами и страница выбора с поиском
+    (`counterparty_pick`). Ряд регистров из одного варианта не показывается.
+    """
+    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default())
+    ledgers = [(code, ledger_title(code)) for code in LEDGER_CODES
+               if code in who.visible_ledgers]
+    fields = [
+        filter_links.months(chosen, base=base, query=query),
+        filter_links.picked(
             "counterparty", LABELS["counterparty"],
-            counterparties_found().values_list("id", "title"),
-            chosen["counterparty"], required=False, empty_label=_("Все контрагенты"),
-        ),
-        _select(
-            "ledger", LABELS["ledger"],
-            [(code, ledger_title(code)) for code in LEDGER_CODES
-             if code in who.visible_ledgers],
-            chosen["ledger"], required=False, empty_label=_("Все регистры"),
-        ),
-        _select(
-            "state", LABELS["state"],
-            [("unpaid", _("Только неоплаченные")), ("paid", _("Только оплаченные"))],
-            "" if chosen["state"] == "all" else chosen["state"],
-            required=False, empty_label=_("Все счета"),
+            _counterparty_title(chosen["counterparty"]), chosen["counterparty"],
+            base=base, query=query, pick_url=reverse("invoice-counterparty-pick"),
+            everything=_("Все контрагенты"),
         ),
     ]
+    if len(ledgers) > 1 or chosen["ledger"]:
+        fields.append(filter_links.row(
+            "ledger", LABELS["ledger"], ledgers, chosen["ledger"],
+            base=base, query=query, everything=_("Все регистры"),
+        ))
+    # «Все счета» — умолчание `all`; в адрес оно не пишется, поэтому у варианта
+    # пустое значение, а не `all`: иначе ссылка «все» несла бы лишний параметр.
+    fields.append(filter_links.row(
+        "state", LABELS["state"],
+        [("unpaid", _("Только неоплаченные")), ("paid", _("Только оплаченные"))],
+        "" if chosen["state"] == "all" else chosen["state"],
+        base=base, query=query, everything=_("Все счета"),
+    ))
+    return fields
+
+
+def _counterparty_title(counterparty_id: str) -> str:
+    """Подпись выбранного контрагента; чужой и выдуманный — одинаково (D023)."""
+    if not counterparty_id:
+        return ""
+    found = counterparties_found().filter(pk=counterparty_id).values_list("title", flat=True)
+    return next(iter(found), "") or _("не найдено")
+
+
+@login_required
+def counterparty_pick(request):
+    """Страница выбора контрагента для отбора счетов (T224).
+
+    Отдельная страница, а не выпадающий список (D081). Поиск — тот же, что в
+    справочнике контрагентов (`counterparties_views.found`): по названию,
+    налоговому номеру и написаниям из выписки. Список — из видимых роли: срез
+    делает база (D014).
+    """
+    who = get_current_principal(request)
+    if who is None or who.tenant_id is None:
+        return _no_membership(request, _(
+            "Вас ещё не завели ни к одному партнёру, поэтому счетов у вас нет. "
+            "Попросите администратора сети добавить вас."
+        ))
+    try:
+        chosen = filters_from(request)
+    except BadInput:
+        return redirect(reverse("invoices") + "?" + request.GET.urlencode())
+    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default())
+    q = (request.GET.get("q") or "").strip()
+    options = [(str(pk), title) for pk, title in counterparties_found(q).values_list("id", "title")]
+    return render(request, "web/filters/pick.html", filter_links.pick_page(
+        options, chosen["counterparty"], name="counterparty", q=q, base=base,
+        query=query, title=LABELS["counterparty"], everything=_("Все контрагенты"),
+        searched=True,
+    ))
 
 
 def _notice(request) -> str:
@@ -369,9 +418,7 @@ def invoice(request, document_id=None):
 
     return render(request, "web/suppliers/invoice.html", {
         "error": error,
-        "heading": (_("Счёт %(number)s") % {"number": document.doc_number}
-                    if document is not None and document.doc_number
-                    else (_("Счёт") if document is not None else _("Новый счёт"))),
+        "heading": (_card_heading(document) if document is not None else _("Новый счёт")),
         "entry_key": (suppliers.entry_key_of(fact) if fact is not None
                       else cash.new_entry_key()),
         "fields": invoice_fields(who, entered),
@@ -380,8 +427,9 @@ def invoice(request, document_id=None):
         "payments": _payments(document) if document is not None else [],
         "pay_url": reverse("invoice-pay", args=[document.id]) if document is not None else "",
         "summary": _summary(document, fact) if document is not None else None,
-        # Позиции документа и сходятся ли они с суммой на бумаге (T204).
-        **(_positions_block(who, document) if document is not None else {}),
+        # Сколько позиций и сходятся ли они с бумагой; сами позиции — на своей
+        # странице (T204, T232).
+        **(_positions_link(document) if document is not None else {}),
         **(_not_ours_block(document) if document is not None else {}),
     }, status=status)
 
@@ -420,15 +468,20 @@ def invoice_not_ours(request, document_id):
 
 @login_required
 def invoice_positions(request, document_id):
-    """Дописать в счёт ещё одну позицию: своя статья, своя точка (T204).
+    """Позиции счёта своей страницей: список, сверка с бумагой и добавление (T204, T232).
 
-    Только POST: это запись денег. Отдельным адресом, а не полем карточки,
-    потому что позиций может быть сколько угодно, а форма карточки правит
-    первую строку — смешивать эти два действия в одной форме значит однажды
-    переписать позицию вместо добавления.
+    **Своей страницей, а не блоком карточки** (D081: одна страница — одна
+    функция). Карточка правит сам счёт — первую строку, — а здесь бумагу
+    раскладывают на статьи. Две формы записи денег на одном экране однажды
+    перепутают: человек поправит позицию вместо добавления или наоборот.
+
+    Права те же, что у карточки, и на чтение, и на запись: без партнёра — отказ
+    словами, чужой или несуществующий счёт — 404. Отдельного права на позиции
+    нет, и заводить его здесь значило бы дать второй ответ на вопрос, который
+    уже решает видимость строки политиками базы (D014).
     """
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
+    if request.method not in ("GET", "POST"):
+        return HttpResponseNotAllowed(["GET", "POST"])
 
     who = get_current_principal(request)
     if who is None or who.tenant_id is None:
@@ -445,9 +498,12 @@ def invoice_positions(request, document_id):
     # по точке и регистру, а шапка документа видна шире. Без этой проверки
     # чужой счёт отвечал бы «Поле „Точка“ обязательно» вместо 404 — то есть по
     # ответу можно было бы понять, что счёт существует (D023). Та же проверка
-    # стоит в карточке счёта, и по той же причине.
+    # стоит в карточке счёта, и по той же причине — и на GET, и на POST.
     if document is None or suppliers.invoice_fact(document) is None:
         raise Http404("счёт не найден")
+
+    if request.method == "GET":
+        return _positions_page(request, who, document)
 
     try:
         amount = _number(request, "amount", _("Сумма"))
@@ -459,19 +515,52 @@ def invoice_positions(request, document_id):
             vat_rate=_vat_rate(request), note=(request.POST.get("note") or ""),
         )
     except (BadInput, cash.UnitRefused, cash.CashRefused) as refused:
-        return _refused_card(request, who, document, refused)
+        return _positions_page(request, who, document, refused=refused)
 
-    landed = reverse("invoice", args=[document.id]) + f"?added={recorded.landing.period:%Y-%m}"
+    landed = (reverse("invoice-positions", args=[document.id])
+              + f"?added={recorded.landing.period:%Y-%m}")
     return redirect(landed)
 
 
+def _positions_page(request, who, document, *, refused=None):
+    """Страница позиций: таблица, сверка с бумагой и форма новой позиции.
+
+    Отказ показывается здесь же, с тем, что человек набрал: набирать позицию
+    заново из-за одной пропущенной точки — верный способ её не добавить вовсе.
+    """
+    entered = request.POST if refused is not None else {}
+    added = _month_or_none(request.GET.get("added"))
+    return render(request, "web/suppliers/invoice_positions.html", {
+        "error": refused.message if refused is not None else "",
+        "notice": (_("Позиция добавлена и учтена в периоде %(month)s.")
+                   % {"month": month_title(added)} if added is not None else ""),
+        "heading": _positions_heading(document),
+        "card_url": reverse("invoice", args=[document.id]),
+        "card_title": _card_heading(document),
+        # Новый ключ на каждый показ формы: повторная отправка ТОЙ ЖЕ формы
+        # узнаётся по нему и не удваивает позицию, а следующая позиция — уже
+        # другая форма с другим ключом.
+        "entry_key": entered.get("entry_key") or cash.new_entry_key(),
+        **_positions_block(who, document, entered),
+    }, status=getattr(refused, "http_status", 400) if refused is not None else 200)
+
+
+def _card_heading(document) -> str:
+    return (_("Счёт %(number)s") % {"number": document.doc_number}
+            if document.doc_number else _("Счёт"))
+
+
+def _positions_heading(document) -> str:
+    return (_("Позиции счёта %(number)s") % {"number": document.doc_number}
+            if document.doc_number else _("Позиции счёта"))
+
+
 def _refused_card(request, who, document, refused):
-    """Отказ добавления позиции — на карточке счёта, с его же содержимым."""
+    """Отказ «не наша» — на карточке счёта, с её же содержимым."""
     fact = suppliers.invoice_fact(document)
     return render(request, "web/suppliers/invoice.html", {
         "error": refused.message,
-        "heading": (_("Счёт %(number)s") % {"number": document.doc_number}
-                    if document.doc_number else _("Счёт")),
+        "heading": _card_heading(document),
         "entry_key": suppliers.entry_key_of(fact) if fact is not None else cash.new_entry_key(),
         "fields": invoice_fields(who, _entered(document, fact)),
         "back_url": reverse("invoices"),
@@ -479,12 +568,29 @@ def _refused_card(request, who, document, refused):
         "payments": _payments(document),
         "pay_url": reverse("invoice-pay", args=[document.id]),
         "summary": _summary(document, fact),
-        **_positions_block(who, document),
+        **_positions_link(document),
         **_not_ours_block(document),
     }, status=getattr(refused, "http_status", 400))
 
 
-def _positions_block(who, document) -> dict:
+def _positions_link(document) -> dict:
+    """Что карточка говорит о позициях: сколько их и сходятся ли — и куда идти.
+
+    Сами позиции живут на своей странице, но расхождение с бумагой карточка
+    обязана назвать: иначе счёт с потерянной позицией выглядит на ней целым, и
+    заметят это на сборке P&L, когда сходиться уже поздно.
+    """
+    stated, got, difference = suppliers.positions_balance(document)
+    return {
+        "positions_counted": len(suppliers.invoice_lines(document)),
+        "positions_balanced": difference == 0,
+        "positions_difference_raw": f"{difference}",
+        "positions_difference_text": money(abs(difference)),
+        "positions_url": reverse("invoice-positions", args=[document.id]),
+    }
+
+
+def _positions_block(who, document, entered) -> dict:
     """Позиции документа и сверка с суммой на бумаге (модуль 3, «Разбор документа»).
 
     Сверка — половина смысла экрана. Разложить бумагу на статьи можно и без неё,
@@ -498,6 +604,10 @@ def _positions_block(who, document) -> dict:
             {
                 "line_no": row.line_no or "",
                 "title": row.title,
+                # Статья — суть страницы: одна бумага раскладывается на
+                # несколько статей, и без колонки не видно, куда легла каждая.
+                "item": (cash.item_title(row.expense_item.titles) if row.expense_item
+                         else _("Пока не разобрано")),
                 "unit": row.unit.code if row.unit else _("Вся сеть"),
                 "amount_text": money(row.amount),
                 "amount_raw": f"{row.amount}",
@@ -510,7 +620,7 @@ def _positions_block(who, document) -> dict:
         "difference_text": money(abs(difference)),
         "balanced": difference == 0,
         "positions_url": reverse("invoice-positions", args=[document.id]),
-        "position_fields": _position_fields(who, document),
+        "position_fields": _position_fields(who, document, entered),
     }
 
 
@@ -529,7 +639,7 @@ def _not_ours_block(document) -> dict:
     }
 
 
-def _position_fields(who, document) -> list[dict]:
+def _position_fields(who, document, entered) -> list[dict]:
     """Поля новой позиции: сумма, статья, точка. Регистр берётся у документа.
 
     Регистра здесь нет намеренно: одна бумага не ложится половиной в
@@ -539,14 +649,15 @@ def _position_fields(who, document) -> list[dict]:
     on = document.doc_date or date.today()
     return [
         {"kind": "number", "name": "amount", "label": _("Сумма"), "required": True,
-         "value": "", "help": _("Сколько из этой бумаги приходится на эту статью.")},
+         "value": entered.get("amount", ""),
+         "help": _("Сколько из этой бумаги приходится на эту статью.")},
         _select(
             "item", _("Статья расхода"),
             [(item.id, cash.item_title(item.titles))
              for item in cash.items_on(who.tenant_id, on, surface=INVOICE)],
-            "", required=False, empty_label=_("Пока не разобрано"),
+            entered.get("item", ""), required=False, empty_label=_("Пока не разобрано"),
         ),
-        _unit_field(who, {}),
+        _unit_field(who, entered),
     ]
 
 
@@ -1077,27 +1188,31 @@ def inbox(request):
 
     rows = inbox_rows(who)
     total = sum((row["amount"] for row in rows), Decimal("0"))
-    # Бумаги с точек — второй, отдельный список на том же экране (T174).
-    # Импорт здесь, а не в шапке модуля: `papers_views` берёт отсюда поля счёта
-    # и разбор ввода, и встречный импорт в шапке замкнул бы круг. Единственная
-    # причина именно такая — не «так короче».
-    from .papers_views import paper_rows
-
-    handed = paper_rows(who, only_waiting=True)
-    stated = sum((row["amount"] for row in handed), Decimal("0"))
     return render(request, "web/suppliers/inbox.html", {
         "rows": rows,
         "total_raw": f"{total}", "total_text": money(total),
         "counted": len(rows),
-        "papers": handed,
-        "papers_counted": len(handed),
-        "stated_raw": f"{stated}", "stated_text": money(stated),
-        "papers_url": reverse("papers"),
+        **_papers_link(who),
         "notice": _inbox_notice(request),
         "failed": "",
-        "back_url": reverse("invoices"),
         **_batch_fields(who),
     })
+
+
+def _papers_link(who) -> dict:
+    """Сколько бумаг с точек ждёт разбора — числом для ссылки на `/papers/`.
+
+    Сами бумаги в инбоксе не показываются (T232, D081: одна страница — одна
+    функция). Разница не в оформлении, а в деньгах: строка без статьи **уже** в
+    P&L, только не в той статье, а у бумаги в P&L нет ни одной строки. Один экран
+    с двумя списками читается как одна очередь с одной суммой, которой нет ни в
+    одном отчёте. Но о том, что бумаги ждут, инбокс сказать обязан: разбирает их
+    тот же человек.
+    """
+    return {
+        "papers_waiting": papers.waiting_count(who),
+        "papers_url": reverse("papers"),
+    }
 
 
 def _inbox_items(who) -> list[tuple]:
@@ -1176,12 +1291,19 @@ def inbox_rows(who) -> list[dict]:
                  "selected": guess is not None and code == guess.id}
                 for code, title in items
             ],
-            "units": [
+            # Разнесённой строке точку не предлагают: разбор её доли сохраняет
+            # (D089), и список, который ничего не делает, врал бы.
+            "split": row.allocation == "split",
+            "units": [] if row.allocation == "split" else [
                 {"code": str(code), "title": title,
                  "selected": str(code) == (str(row.unit_id) if row.unit_id
                                            else cash.NETWORK_UNIT)}
                 for code, title in unit_options
             ],
+            # Строку на всю сеть можно разнести по точкам её экраном «Чья
+            # накладная» (модуль 15) — прямо отсюда (T234).
+            "split_url": (reverse("expense-split-form", args=[row.id])
+                          if row.allocation == "pending" and not row.unit_id else ""),
         })
     return rows
 
@@ -1210,8 +1332,10 @@ def inbox_classify(request, fact_id):
             raise BadInput(
                 _("Поле «%(label)s» обязательно.") % {"label": _("Статья расхода")}
             )
+        # У разнесённой строки точку не спрашивают и не применяют (D089).
+        was_split = fact.allocation == "split"
         recorded = suppliers.classify(
-            who, fact, item=item, unit_id=_unit(request, who),
+            who, fact, item=item, unit_id=None if was_split else _unit(request, who),
         )
     except (BadInput, cash.UnitRefused, cash.CashRefused):
         # Отказ уезжает в адрес признаком, а не готовой фразой: фразу в адресе не
@@ -1222,9 +1346,10 @@ def inbox_classify(request, fact_id):
     landed = reverse("inbox") + f"?done={recorded.landing.period:%Y-%m}"
     if recorded.landing.moved_from is not None:
         landed += f"&moved={recorded.landing.moved_from:%Y-%m}"
-    if _unit(request, who) is None:
+    if not was_split and _unit(request, who) is None:
         # Строка на всю сеть разносится сразу, как расход и как счёт: узнать
         # через месяц, что сумма висела нераспределённой, — худший из ответов.
+        # Разнесённую разносить заново правилом нельзя: доли поставил человек.
         cash.spread_now(recorded.fact_id)
     return redirect(landed)
 
@@ -1283,10 +1408,14 @@ def inbox_batch(request):
                 _("Поле «%(label)s» обязательно.") % {"label": _("Статья расхода")}
             )
         unit_id = _unit(request, who)
-        landed = [
-            suppliers.classify(who, fact, item=item, unit_id=unit_id)
-            for fact in facts
-        ]
+        # Своя транзакция, а не только ATOMIC_REQUESTS: отказ здесь ловится и
+        # превращается в обычный ответ, и запрос, завершившийся ответом,
+        # фиксирует всё, что успело записаться. Пачка либо целиком, либо никак.
+        with transaction.atomic():
+            landed = [
+                suppliers.classify(who, fact, item=item, unit_id=unit_id)
+                for fact in facts
+            ]
     except (BadInput, cash.UnitRefused, cash.CashRefused) as refused:
         return _inbox_refused(
             request, who, refused.message,
@@ -1296,9 +1425,11 @@ def inbox_batch(request):
     if unit_id is None:
         # Строки на всю сеть разносятся сразу — тем же доводом, что и
         # поодиночке: узнать через месяц, что суммы висели нераспределёнными,
-        # хуже, чем разнести их в момент разбора.
-        for recorded in landed:
-            cash.spread_now(recorded.fact_id)
+        # хуже, чем разнести их в момент разбора. Разнесённые уже разнесены
+        # своими долями (D089) — правилом их не трогаем.
+        for recorded, fact in zip(landed, facts, strict=True):
+            if fact.allocation != "split":
+                cash.spread_now(recorded.fact_id)
 
     address = reverse("inbox") + f"?sorted={len(landed)}"
     moved = [r.landing.moved_from for r in landed if r.landing.moved_from is not None]
@@ -1317,21 +1448,13 @@ def _inbox_refused(request, who, message: str, *, status: int = 400):
     """
     rows = inbox_rows(who)
     total = sum((row["amount"] for row in rows), Decimal("0"))
-    from .papers_views import paper_rows
-
-    handed = paper_rows(who, only_waiting=True)
-    stated = sum((row["amount"] for row in handed), Decimal("0"))
     return render(request, "web/suppliers/inbox.html", {
         "rows": rows,
         "total_raw": f"{total}", "total_text": money(total),
         "counted": len(rows),
-        "papers": handed,
-        "papers_counted": len(handed),
-        "stated_raw": f"{stated}", "stated_text": money(stated),
-        "papers_url": reverse("papers"),
+        **_papers_link(who),
         "notice": "",
         "failed": message,
-        "back_url": reverse("invoices"),
         **_batch_fields(who),
     }, status=status)
 
@@ -1350,6 +1473,9 @@ def _inbox_notice(request) -> str:
         # «…: 40», и обходится одной формой вместо трёх на каждый язык. Формы
         # заводятся там, где без них фраза ломается, — здесь не тот случай.
         said.append(_("Разобрано строк: %(count)d.") % {"count": int(sorted_out)})
+    spread = request.GET.get("spread")
+    if spread and spread.isdigit():
+        said.append(_("Разнесено по точкам строк: %(count)d.") % {"count": int(spread)})
     done = _month_or_none(request.GET.get("done"))
     if done is not None:
         said.append(_("Строка разобрана и учтена в периоде %(month)s.")
