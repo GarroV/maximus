@@ -62,5 +62,33 @@
   "у этой роли такого права не бывает: нужны права старшей роли — человеку выдают старшую роль": {
     "en": "this role never has such a right: if a person needs it, give them a senior role",
     "sr": "ova uloga nikad nema takvo pravo: ako je osobi potrebno, dodelite joj stariju ulogu"
+  },
+  "регистр «%(ledger)s»": {
+    "en": "the “%(ledger)s” ledger",
+    "sr": "registar „%(ledger)s“"
+  },
+  "Если снять, человек потеряет:": {
+    "en": "If removed, the person loses:",
+    "sr": "Ako se ukloni, osoba gubi:"
+  },
+  "Если снять, человек ничего не потеряет: всё это есть в других его ролях.": {
+    "en": "If removed, the person loses nothing: their other roles give all of this.",
+    "sr": "Ako se ukloni, osoba ništa ne gubi: sve to daju njene druge uloge."
+  },
+  "человек получит:": {
+    "en": "the person gets:",
+    "sr": "osoba dobija:"
+  },
+  "ничего нового: всё это у человека уже есть": {
+    "en": "nothing new: the person already has all of this",
+    "sr": "ništa novo: osoba sve to već ima"
+  },
+  "Сейчас человек может:": {
+    "en": "Right now the person can:",
+    "sr": "Trenutno osoba može:"
+  },
+  "Сейчас у человека нет ни одного права — только просмотр того, что открывают его роли.": {
+    "en": "Right now the person has no rights — only viewing what their roles open.",
+    "sr": "Trenutno osoba nema nijedno pravo — samo pregled onoga što otvaraju njene uloge."
   }
 }
