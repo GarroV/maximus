@@ -294,3 +294,55 @@ def test_the_card_of_such_a_person_opens_and_hides_the_foreign_unit(client, web_
     shown = body(answer)
     assert ALIEN not in shown, "в карточке видна точка, о которой управляющий знать не должен"
     assert MINE in shown, "в карточке не видно точки самого управляющего"
+
+
+# --- 5. «Вся сеть» не открывает человека каждому (D085, `0271`) ---------------
+
+
+def put_on_network(sql, employee_id) -> None:
+    """Явный набор «вся сеть» — строка привязки без точки, как пишет экран."""
+    sql.execute(
+        """insert into employee_units (tenant_id, employee_id, unit_id, valid_from)
+           select tenant_id, id, null, '2020-01-01' from employees where id = %s""",
+        (employee_id,),
+    )
+
+
+def test_a_network_binding_does_not_open_the_person_to_every_manager(rls, sql):
+    """Офис с условиями найма на чужой точке не становится своим каждому.
+
+    Строка без точки по `app_unit_is_visible` «ничья, видна всем». Пусти её
+    правило «свой человек» — и каждый управляющий видел бы каждого офисного,
+    вместе с условиями найма, хотя сетевые затраты урезанной роли не
+    показываются (T130). Сужать или расширять доступ этой задачей не просили.
+    """
+    person, _key = somebody_of(sql, ALIEN)
+    put_on_network(sql, person)
+    assert not visible_to(rls, boss_of(sql, MINE), person), (
+        "набор «вся сеть» открыл офисного человека управляющему чужой точки"
+    )
+
+
+def test_a_restricted_role_does_not_read_the_network_binding(rls, sql):
+    """Свой человек на «вся сеть» — управляющий видит его, но не строку сети.
+
+    Директору та же строка видна: без этой половины проверка зеленела бы и
+    тогда, когда строки нет вовсе.
+    """
+    person, _key = somebody_of(sql, MINE)
+    put_on_network(sql, person)
+
+    def network_rows(user_id: str) -> int:
+        with as_app_user(rls, user_id):
+            return rls.execute(
+                "select count(*) from employee_units "
+                "where employee_id = %s and unit_id is null", (person,),
+            ).fetchone()[0]
+
+    director = str(sql.execute(
+        "select id from users where username = 'director'"
+    ).fetchone()[0])
+    assert network_rows(director) == 1, "директор не видит набор «вся сеть»"
+    assert network_rows(boss_of(sql, MINE)) == 0, (
+        "урезанная роль видит строку «вся сеть» — сетевые затраты ей не показываются"
+    )

@@ -1,0 +1,38 @@
+{
+  "«Вся сеть» задаёт тот, кому видны все точки партнёра.": {
+    "en": "\"Entire network\" can only be set by someone who sees all of the partner's units.",
+    "sr": "„Cela mreža“ može da postavi samo onaj ko vidi sve objekte partnera."
+  },
+  "Отмечены и «Вся сеть», и отдельные точки. Выберите что-то одно: человек либо работает на всю сеть, либо на отмеченные точки.": {
+    "en": "Both \"Entire network\" and individual units are checked. Choose one: the person works either for the whole network or for the checked units.",
+    "sr": "Označeni su i „Cela mreža“ i pojedinačni objekti. Izaberite jedno: osoba radi ili za celu mrežu, ili za označene objekte."
+  },
+  "Не отмечено ни одной точки. Отметьте точки, между которыми делятся затраты на человека, или «Вся сеть», если он работает на всех.": {
+    "en": "No unit is checked. Check the units the person's costs are split between, or \"Entire network\" if they work for all of them.",
+    "sr": "Nijedan objekat nije označen. Označite objekte između kojih se dele troškovi osobe, ili „Cela mreža“ ako radi za sve."
+  },
+  "делится между всеми точками партнёра поровну": {
+    "en": "split evenly across all of the partner's units",
+    "sr": "deli se podjednako na sve objekte partnera"
+  },
+  "Вся сеть — затраты делятся между всеми точками поровну": {
+    "en": "Entire network — costs are split evenly across all units",
+    "sr": "Cela mreža — troškovi se dele podjednako na sve objekte"
+  },
+  "Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у всех отмеченных точек сразу: пустая доля считается единицей, и рядом с 0,7 это дало бы не те проценты, которые вы имели в виду.": {
+    "en": "Shares can be left unset entirely — then the split is even. If you do set them, set them for all checked units at once: an empty share counts as one, and next to 0.7 that would give percentages you did not mean.",
+    "sr": "Udele ne morate zadavati uopšte — tada se deli podjednako. Ako ih zadajete, zadajte ih za sve označene objekte odjednom: prazan udeo se računa kao jedan, i pored 0,7 to bi dalo procente koje niste želeli."
+  },
+  "С этой даты человек работает на всю сеть: его затраты делятся между всеми точками поровну, где бы ни стояла его строка табеля.": {
+    "en": "From this date the person works for the whole network: their costs are split evenly across all units, wherever their timesheet row is.",
+    "sr": "Od ovog datuma osoba radi za celu mrežu: njeni troškovi se dele podjednako na sve objekte, bez obzira na to gde stoji njen red u evidenciji sati."
+  },
+  "Точки нет и в условиях найма — затраты идут на ту точку, где стоит его строка табеля. Если человек работает на всех, отметьте ниже «Вся сеть»: тогда затраты разделятся между всеми точками.": {
+    "en": "There is no unit in the employment terms either — costs go to the unit where their timesheet row is. If the person works for all units, check \"Entire network\" below: then costs will be split across all of them.",
+    "sr": "Objekat ne postoji ni u uslovima zapošljavanja — troškovi idu na objekat na kome stoji red u evidenciji sati. Ako osoba radi za sve, označite ispod „Cela mreža“: tada će se troškovi podeliti na sve objekte."
+  },
+  "целиком на %(code)s": {
+    "en": "all to %(code)s",
+    "sr": "sve na %(code)s"
+  }
+}

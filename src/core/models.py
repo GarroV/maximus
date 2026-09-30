@@ -1212,7 +1212,16 @@ class EmployeeUnit(models.Model):
         "Employee", on_delete=models.CASCADE, db_column="employee_id",
         related_name="units",
     )
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, db_column="unit_id")
+    # Пусто — «вся сеть» (D085): набор задан явно, и он офис. Это не то же
+    # самое, что привязок нет вовсе: тогда действует старое поведение, точка
+    # строки табеля (люди, заведённые до T221). Различить эти два случая без
+    # строки-маркера нельзя, а неразличимые они дают ровно исходную дыру #194 —
+    # офисный человек, отмеченный в табеле на случайной пиццерии, ложится на
+    # неё целиком. Строка без точки живёт одна: «вся сеть» и конкретные точки
+    # в одном периоде противоречат друг другу (`employee_units_network_alone`).
+    unit = models.ForeignKey(
+        Unit, on_delete=models.CASCADE, db_column="unit_id", null=True, blank=True,
+    )
     # Доля этой точки. Пусто — «поровну со всеми остальными»: умолчание названо
     # владельцем прямо, и хранить у каждой строки одинаковое число значило бы
     # заставлять партнёра пересчитывать доли при каждом добавлении точки.
@@ -1250,6 +1259,35 @@ class EmployeeUnit(models.Model):
                     | models.Q(valid_to__gt=models.F("valid_from"))
                 ),
                 name="employee_units_dates_in_order",
+            ),
+            # «Вся сеть» не соседствует ни с чем (D085): ни со второй такой же
+            # строкой, ни с конкретной точкой в том же периоде. Две строки без
+            # точки дали бы сети двойной вес, а сеть рядом с NS1 — вопрос «так
+            # офис он или пиццерия?», на который расчёт ответил бы молча и
+            # по-своему. Сравнивается признак «без точки»: `<>` находит пару,
+            # где ровно одна строка — сеть; условие ниже — пару сетей.
+            ExclusionConstraint(
+                name="employee_units_network_alone",
+                expressions=[
+                    ("employee", RangeOperators.EQUAL),
+                    (
+                        models.Case(
+                            models.When(unit__isnull=True, then=models.Value(1)),
+                            default=models.Value(0),
+                            output_field=models.IntegerField(),
+                        ),
+                        RangeOperators.NOT_EQUAL,
+                    ),
+                    (validity_range(), RangeOperators.OVERLAPS),
+                ],
+            ),
+            ExclusionConstraint(
+                name="employee_units_one_network",
+                expressions=[
+                    ("employee", RangeOperators.EQUAL),
+                    (validity_range(), RangeOperators.OVERLAPS),
+                ],
+                condition=models.Q(unit__isnull=True),
             ),
         ]
         indexes = [

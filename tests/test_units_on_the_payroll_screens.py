@@ -166,3 +166,46 @@ def test_the_manager_is_not_told_about_the_foreign_unit_of_his_person(client, sq
     line = row_of(body(client.get(f"/timesheets/{period_id(sql)}/")), name)
 
     assert "BG1" not in line, f"управляющему видна чужая точка его человека: {line[:400]}"
+
+
+# --- набор решает, а не точка строки (D085) -----------------------------------
+
+
+def test_the_network_set_is_named_even_on_a_pizzeria_row(client, sql):
+    """Строка табеля стоит на пиццерии, набор — «вся сеть»: так и написано.
+
+    Без подписи колонка назвала бы пиццерию, а деньги делятся на всех.
+    """
+    person, name = somebody_with_hours(sql)
+    sql.execute(
+        """insert into employee_units (tenant_id, employee_id, unit_id, valid_from)
+           select tenant_id, id, null, '2020-01-01' from employees where id = %s""",
+        (person,),
+    )
+    login_as(client, "director")
+    line = row_of(body(client.get(f"/timesheets/{period_id(sql)}/")), name)
+
+    assert "вся сеть" in line.lower() or "entire network" in line.lower(), (
+        f"набор «вся сеть» не назван у строки на пиццерии: {line[:400]}"
+    )
+
+
+def test_one_other_unit_in_the_set_is_named(client, sql):
+    """В наборе одна точка, но не та, что у строки, — «целиком на …»."""
+    # Человек, у чьей строки точка есть: соседняя проверка снимает её у первого.
+    person, name, row_unit = sql.execute(
+        """select e.id, e.last_name, u.code from employees e
+             join timesheets t on t.employee_id = e.id and t.period = %s
+             join units u on u.id = t.unit_id
+            order by e.external_id limit 1""",
+        (JUNE,),
+    ).fetchone()
+    other = "NS1" if row_unit != "NS1" else "BG1"
+    bind(sql, person, other)
+
+    login_as(client, "director")
+    line = row_of(body(client.get(f"/timesheets/{period_id(sql)}/")), name)
+
+    assert ("целиком на " + other) in line or ("all to " + other) in line, (
+        f"деньги идут на {other}, а строка на {row_unit} об этом молчит: {line[:400]}"
+    )
