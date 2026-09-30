@@ -1210,7 +1210,7 @@ def _papers_link(who) -> dict:
     тот же человек.
     """
     return {
-        "papers_waiting": len(papers.papers(who, only_waiting=True)),
+        "papers_waiting": papers.waiting_count(who),
         "papers_url": reverse("papers"),
     }
 

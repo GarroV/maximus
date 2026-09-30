@@ -146,19 +146,10 @@ def _handled(found) -> dict[str, list]:
     По одному запросу на строку список из двадцати бумаг делал бы двадцать
     обращений к базе; здесь это не про скорость, а про то, что такой список
     начинают «оптимизировать» отказом от проверки — и он перестаёт показывать,
-    что разобрано.
+    что разобрано. Что считать строкой учёта, решает `papers.accounting_lines`
+    — одно условие и для списка, и для ссылки инбокса (T235).
     """
-    from core.models import Fact
-
-    ids = [document.id for document in found]
-    grouped: dict[str, list] = {}
-    for row in (
-        Fact.objects.filter(document_id__in=ids, superseded_at__isnull=True)
-        .exclude(allocation="allocated")
-        .order_by("created_at")
-    ):
-        grouped.setdefault(str(row.document_id), []).append(row)
-    return grouped
+    return papers.lines_of_many(found)
 
 
 # --- приём бумаги -------------------------------------------------------------
