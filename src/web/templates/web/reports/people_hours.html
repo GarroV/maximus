@@ -54,7 +54,8 @@
   </tbody>
 </table>{% endscroll %}
 {% else %}
-{% notice "empty" %}{% translate "В этом месяце никто не вышел за свою норму часов." %}{% endnotice %}
+{% translate "Переработок нет" as no_overtime %}
+{% notice "empty" title=no_overtime %}{% translate "В этом месяце никто не вышел за свою норму часов." %}{% endnotice %}
 {% endif %}
 
 {% comment %}

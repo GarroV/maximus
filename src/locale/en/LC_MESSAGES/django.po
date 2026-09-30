@@ -8882,6 +8882,10 @@ msgstr "Base"
 msgid "Без группы"
 msgstr "No group"
 
+#: src/web/templates/web/reports/people_hours.html
+msgid "Переработок нет"
+msgstr "No overtime"
+
 #: новые строки, добавлены tools/apply_translations.py
 msgid "В этом месяце никто не вышел за свою норму часов."
 msgstr "No one went over their hours standard this month."
@@ -8904,6 +8908,10 @@ msgstr "Payroll cost's share of revenue: waiting for the Dodo IS connector"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Доля в часах месяца"
 msgstr "Share of the month's hours"
+
+#: src/web/templates/web/reports/people_churn.html
+msgid "Увольнений не было"
+msgstr "No leavers"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "За показанные месяцы никто не уволился."

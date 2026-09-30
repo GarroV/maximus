@@ -8717,6 +8717,10 @@ msgstr "Osnovica"
 msgid "Без группы"
 msgstr "Bez grupe"
 
+#: src/web/templates/web/reports/people_hours.html
+msgid "Переработок нет"
+msgstr "Nema prekovremenog rada"
+
 #: новые строки, добавлены tools/apply_translations.py
 msgid "В этом месяце никто не вышел за свою норму часов."
 msgstr "Ovog meseca niko nije prešao svoju normu sati."
@@ -8739,6 +8743,10 @@ msgstr "Udeo fonda zarada u prihodu: čeka konektor Dodo IS"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Доля в часах месяца"
 msgstr "Udeo u satima meseca"
+
+#: src/web/templates/web/reports/people_churn.html
+msgid "Увольнений не было"
+msgstr "Nije bilo odlazaka"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "За показанные месяцы никто не уволился."
