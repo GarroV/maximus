@@ -9313,12 +9313,6 @@ msgid "Если снять, человек потеряет:"
 msgstr "If removed, the person loses:"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Сейчас у человека нет ни одного права — только просмотр того, что "
-"открывают его роли."
-msgstr "Right now the person has no rights — only viewing what their roles open."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Сейчас человек может:"
 msgstr "Right now the person can:"
 
@@ -9437,3 +9431,7 @@ msgstr "partner"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "точка"
 msgstr "unit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ни одного права — только просмотр того, что открывают его роли"
+msgstr "no rights at all — only viewing what their roles open"

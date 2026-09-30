@@ -87,10 +87,6 @@
     "en": "Right now the person can:",
     "sr": "Trenutno osoba može:"
   },
-  "Сейчас у человека нет ни одного права — только просмотр того, что открывают его роли.": {
-    "en": "Right now the person has no rights — only viewing what their roles open.",
-    "sr": "Trenutno osoba nema nijedno pravo — samo pregled onoga što otvaraju njene uloge."
-  },
   "все точки": {
     "en": "all units",
     "sr": "svi objekti"
@@ -138,5 +134,9 @@
   "Не может:": {
     "en": "Cannot:",
     "sr": "Ne može:"
+  },
+  "ни одного права — только просмотр того, что открывают его роли": {
+    "en": "no rights at all — only viewing what their roles open",
+    "sr": "nijedno pravo — samo pregled onoga što otvaraju njene uloge"
   }
 }
