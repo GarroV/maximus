@@ -8431,14 +8431,6 @@ msgid ""
 msgstr "Udeli se zadaju ili za sve izabrane objekte, ili ni za jedan. Trenutno %(named)s ima udeo, a %(silent)s ga nema: prazan udeo se računa kao jedan, i pored zadatog udela to bi dalo procente koje niste želeli. Ostavite sve udele praznim — podeliće se podjednako."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у "
-"всех отмеченных точек сразу: пустая доля считается единицей, и рядом с "
-"0,7 это дало бы не те проценты, которые вы имели в виду. Не отмечено ни "
-"одной точки — человек работает на всю сеть."
-msgstr "Udele ne morate zadavati uopšte — tada se deli podjednako. Ako ih zadajete, zadajte ih za sve označene objekte odjednom: prazan udeo se računa kao jedan, i pored 0,7 to bi dalo procente koje niste želeli. Nijedan objekat nije označen — osoba radi za celu mrežu."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Доля"
 msgstr "Udeo"
 
@@ -8500,26 +8492,12 @@ msgid "Сохранить точки"
 msgstr "Sačuvaj objekte"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Точек у человека не осталось — с этой даты он работает на всю сеть. Его "
-"затраты пойдут на разнесение общим правилом, как расход юрлица, а не на "
-"одну пиццерию."
-msgstr "Osoba više nema nijednog objekta — od ovog datuma radi za celu mrežu. Njeni troškovi idu na raspodelu opštim pravilom, kao trošak pravnog lica, a ne na jednu piceriju."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Точки действуют с"
 msgstr "Objekti važe od"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Точки не заданы."
 msgstr "Objekti nisu zadati."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Точки нет и в условиях найма — значит человек работает на всю сеть. Его "
-"затраты уходят на разнесение общим правилом, как расход юрлица, а не на "
-"одну пиццерию."
-msgstr "Objekat ne postoji ni u uslovima zapošljavanja — znači da osoba radi za celu mrežu. Njeni troškovi idu na raspodelu opštim pravilom, kao trošak pravnog lica, a ne na jednu piceriju."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
@@ -8690,6 +8668,58 @@ msgstr "Ova vrednost se ne može uporediti sa okvirom zemlje (%(source)s): druge
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
+msgid "делится: %(codes)s"
+msgstr "deli se: %(codes)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "«Вся сеть» задаёт тот, кому видны все точки партнёра."
+msgstr "„Cela mreža“ može da postavi samo onaj ko vidi sve objekte partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вся сеть — затраты делятся между всеми точками поровну"
+msgstr "Cela mreža — troškovi se dele podjednako na sve objekte"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Доли можно не задавать вовсе — тогда поровну. Если задаёте, задавайте у "
+"всех отмеченных точек сразу: пустая доля считается единицей, и рядом с "
+"0,7 это дало бы не те проценты, которые вы имели в виду."
+msgstr "Udele ne morate zadavati uopšte — tada se deli podjednako. Ako ih zadajete, zadajte ih za sve označene objekte odjednom: prazan udeo se računa kao jedan, i pored 0,7 to bi dalo procente koje niste želeli."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Не отмечено ни одной точки. Отметьте точки, между которыми делятся "
+"затраты на человека, или «Вся сеть», если он работает на всех."
+msgstr "Nijedan objekat nije označen. Označite objekte između kojih se dele troškovi osobe, ili „Cela mreža“ ako radi za sve."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмечены и «Вся сеть», и отдельные точки. Выберите что-то одно: человек "
+"либо работает на всю сеть, либо на отмеченные точки."
+msgstr "Označeni su i „Cela mreža“ i pojedinačni objekti. Izaberite jedno: osoba radi ili za celu mrežu, ili za označene objekte."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"С этой даты человек работает на всю сеть: его затраты делятся между "
+"всеми точками поровну, где бы ни стояла его строка табеля."
+msgstr "Od ovog datuma osoba radi za celu mrežu: njeni troškovi se dele podjednako na sve objekte, bez obzira na to gde stoji njen red u evidenciji sati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Точки нет и в условиях найма — затраты идут на ту точку, где стоит его "
+"строка табеля. Если человек работает на всех, отметьте ниже «Вся сеть»: "
+"тогда затраты разделятся между всеми точками."
+msgstr "Objekat ne postoji ni u uslovima zapošljavanja — troškovi idu na objekat na kome stoji red u evidenciji sati. Ako osoba radi za sve, označite ispod „Cela mreža“: tada će se troškovi podeliti na sve objekte."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "делится между всеми точками партнёра поровну"
+msgstr "deli se podjednako na sve objekte partnera"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "целиком на %(code)s"
+msgstr "sve na %(code)s"
+
 msgid "%(person)s — %(hours)s ч на %(money)s"
 msgstr "%(person)s — %(hours)s h u vrednosti %(money)s"
 
@@ -8972,3 +9002,29 @@ msgstr "u izveštaju nema prethodnog meseca — nema s čim da se uporedi"
 #, python-format
 msgid "против %(value)s (%(month)s)"
 msgstr "u odnosu na %(value)s (%(month)s)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
+"«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
+"утверждён — сообщите администратору продукта."
+msgstr "Plate zaposlenih na nivou mreže nisu raspoređene po objektima: za stavke „Plata“ i „Porezi na platu“ ne postoji pravilo raspodele. Mesec nije odobren — obavestite administratora proizvoda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Утвердить месяц может только тот, кому видны все точки и все регистры "
+"партнёра: зарплата переносится в P&L целиком, и по части сети она легла "
+"бы не на те точки."
+msgstr "Mesec može da odobri samo onaj ko vidi sve objekte i sve registre partnera: zarade se prenose u P&L u celini, a iz dela mreže bi pale na pogrešne objekte."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У сотрудника доли всех точек нулевые — зарплату не на что разделить. "
+"Задайте доли на карточке сотрудника."
+msgstr "Svi udeli objekata ovog zaposlenog su nula, pa zaradu nije moguće podeliti. Unesite udele na kartici zaposlenog."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Набор точек этого сотрудника меняет роль, которой видны все точки "
+"партнёра. Обратитесь к оперативному директору или бухгалтеру."
+msgstr "Objekte ovog zaposlenog može da menja samo uloga koja vidi sve objekte partnera. Obratite se operativnom direktoru ili knjigovođi."

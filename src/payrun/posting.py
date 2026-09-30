@@ -40,6 +40,9 @@ TAXES = "payroll_taxes"
 # Приставка ключа идемпотентности. По ней же строки находятся при пересчёте.
 PREFIX = "payrun:"
 
+# Точность денег в фактах — сотые, одна на все пути деления.
+CENT = Decimal("0.01")
+
 
 def post(payrun) -> int:
     """Перенести утверждённый расчёт в факты. Возвращает число строк.
@@ -52,6 +55,7 @@ def post(payrun) -> int:
 
     from web import cash
 
+    _refuse_partial_view(payrun)
     rows = _lines_of(payrun)
     titles = {code: _line_title(code) for code in (LABOUR, TAXES)}
     written = 0
@@ -97,7 +101,72 @@ def post(payrun) -> int:
                 "and superseded_at is null",
                 [f"{PREFIX}{payrun.period:%Y-%m}:%"],
             )
+        _refuse_if_left_pending(payrun)
     return written
+
+
+def _refuse_partial_view(payrun) -> None:
+    """Проводить месяц может только тот, кому видна вся сеть и все регистры.
+
+    Проводка читает ведомости и привязки к точкам под политиками того, кто
+    утверждает. Роль с частью точек увидела бы часть людей и часть их точек:
+    человек на двух точках ушёл бы целиком на одну, сетевой — на точку табеля,
+    а ведомости соседних точек не попали бы в P&L вовсе. Ошибки бы никто не
+    увидел — поэтому отказ, а не проводка по срезу.
+    """
+    from django.db import connection
+    from django.utils.translation import gettext as _
+
+    from web.dbcontext import APP_ROLE
+
+    from .errors import PayrunRefused
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            # Мимо политик ходит только владелец схемы (сид, команды
+            # управления) — у него среза нет, как и у `reallocate_period`.
+            # Признак — роль, а не отсутствие человека: `app_user` без
+            # человека не видит ничего, и проводка по пустоте утвердила бы
+            # месяц без зарплаты.
+            "select current_user <> %s or (app_unit_ids(%s) is null "
+            "and app_visible_ledgers(%s) @> enum_range(null::ledger))",
+            [APP_ROLE, str(payrun.tenant_id), str(payrun.tenant_id)],
+        )
+        (whole,) = cursor.fetchone()
+    if not whole:
+        raise PayrunRefused(
+            _("Утвердить месяц может только тот, кому видны все точки и все "
+              "регистры партнёра: зарплата переносится в P&L целиком, и по части "
+              "сети она легла бы не на те точки.")
+        )
+
+
+def _refuse_if_left_pending(payrun) -> None:
+    """ФОТ, оставшийся неразнесённым, останавливает утверждение, а не молчит.
+
+    Сетевую зарплату разносит общее правило «поровну» (`0270`). Если его нет —
+    строка P&L появилась путём, который правила не завёл, — сумма повисла бы
+    `pending` и в затраты точек не вошла; узналось бы это через месяц по дыре в
+    P&L. Отказ откатывает и проводку, и утверждение: они в одной транзакции.
+    """
+    from django.db import connection
+    from django.utils.translation import gettext as _
+
+    from .errors import PayrunRefused
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "select count(*) from facts where dedup_key like %s "
+            "and allocation = 'pending' and superseded_at is null",
+            [f"{PREFIX}{payrun.period:%Y-%m}:%"],
+        )
+        (left,) = cursor.fetchone()
+    if left:
+        raise PayrunRefused(
+            _("Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
+              "«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
+              "утверждён — сообщите администратору продукта.")
+        )
 
 
 def _lines_of(payrun) -> dict:
@@ -177,29 +246,46 @@ def _shares(across: dict, employee_id, unit_id, amount: Decimal) -> list:
 
     * точек несколько — делим между ними (умолчание «поровну», доля у строки
       переопределяет);
-    * точка одна (или привязок нет, но ведомость знает точку) — всё туда;
-    * точек нет вовсе — это офис: сумма уходит без точки и разносится общим
-      правилом, «потому что офис на всех работает, вне зависимости».
+    * точка одна — всё туда, где бы ни стояла строка табеля;
+    * набор — «вся сеть» (строка привязки без точки, D085) — это офис: сумма
+      уходит без точки, и её разносит общее правило «поровну» (`0270`),
+      «потому что офис на всех работает, вне зависимости». Точка строки
+      табеля при этом не решает ничего: иначе офисный, отмеченный на
+      пиццерии, ложился бы на неё целиком (исходная дыра #194);
+    * набор не задан вовсе (люди до T221) — старое поведение: точка строки.
 
     Копейки раскладываются накопленной суммой — тем же приёмом, что в
     `allocation_plan` и в ручном разнесении: иначе на трёх точках сумма долей
     не сойдётся с целым.
     """
+    # Все пути отдают сумму до сотых, как и путь с делением: иначе одна и та
+    # же сумма ложилась бы в P&L разными копейками в зависимости от того,
+    # сколько у человека точек.
     mine = across.get(employee_id) or []
     if not mine:
-        return [(unit_id, amount)]
+        return [(unit_id, amount.quantize(CENT))]
     if len(mine) == 1:
-        return [(mine[0][0], amount)]
+        return [(mine[0][0], amount.quantize(CENT))]
 
     weights = [(unit, share if share is not None else Decimal("1")) for unit, share in mine]
     total = sum(weight for _unit, weight in weights)
     if total <= 0:
-        return [(unit_id, amount)]
+        # Делить не на что. Тихий возврат к точке строки табеля положил бы
+        # деньги туда, куда человека никто не ставил. База такие доли не
+        # принимает (`0273`), так что сюда доходит только дефект — громко.
+        from django.utils.translation import gettext as _
+
+        from .errors import PayrunRefused
+
+        raise PayrunRefused(
+            _("У сотрудника доли всех точек нулевые — зарплату не на что "
+              "разделить. Задайте доли на карточке сотрудника.")
+        )
 
     parts, done, carried = [], Decimal("0"), Decimal("0")
     for unit, weight in sorted(weights, key=lambda row: str(row[0])):
         carried += weight
-        upto = (amount * carried / total).quantize(Decimal("0.01"))
+        upto = (amount * carried / total).quantize(CENT)
         parts.append((unit, upto - done))
         done = upto
     return parts

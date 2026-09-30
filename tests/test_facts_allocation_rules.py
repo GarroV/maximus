@@ -217,8 +217,14 @@ def test_a_role_with_every_unit_allocates(db):
 
 # --- инварианты правила -------------------------------------------------------
 
-def test_a_rule_has_exactly_one_key(db):
-    """Правило знает либо контрагента, либо статью — но не оба и не ничего."""
+def test_a_rule_has_at_most_one_key(db):
+    """Контрагент, статья или сама строка P&L — но не два ключа сразу.
+
+    До T221 правило без контрагента и статьи отвергалось. Теперь это третий
+    ключ — строка P&L (`0270`): так адресуется зарплата сетевого человека, у
+    которой нет ни того, ни другого, и без него ФОТ офиса висел неразнесённым.
+    Двух ответов на одну строку за один срок при этом быть не должно.
+    """
     item_id = expense_item(db)
     with pytest.raises(psycopg.errors.CheckViolation):
         db.execute(
@@ -230,10 +236,15 @@ def test_a_rule_has_exactly_one_key(db):
         )
     db.rollback()
 
-    with pytest.raises(psycopg.errors.CheckViolation):
+    db.execute(
+        """insert into allocation_rules (tenant_id, pnl_item_id, method, valid_from)
+           values (%s, %s, 'even', '2026-01-01')""",
+        (T1, I_FOOD),
+    )
+    with pytest.raises(psycopg.errors.ExclusionViolation):
         db.execute(
             """insert into allocation_rules (tenant_id, pnl_item_id, method, valid_from)
-               values (%s, %s, 'even', '2026-01-01')""",
+               values (%s, %s, 'even', '2026-03-01')""",
             (T1, I_FOOD),
         )
 
