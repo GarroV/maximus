@@ -1,0 +1,42 @@
+{% load ui i18n %}{% comment %}
+Тема и язык — две группы кнопок (вынесено из левой панели, issue #268).
+
+Живёт в двух местах: в подвале панели и на странице учётной записи. На
+телефоне шапка до содержимого не должна быть выше ~120 px, а шесть кнопок по
+44 (физика пальца) — это целая строка шапки; поэтому на телефоне тема и язык
+уезжают на страницу учётной записи, куда из шапки ведёт пункт словом. Копия
+разметки в двух шаблонах разъехалась бы молча, отсюда один компонент.
+
+`prefs_id` — приставка к `id` подписей групп: на странице учётной записи
+компонент стоит дважды (панель и сама страница), и одинаковые `id` сломали
+бы имя группы у диктора.
+
+Смена темы и языка — формами с кнопками, а не ссылками: смена меняет
+состояние (cookie), ссылку пройдёт любой предзагрузчик. Выбранное —
+`span[aria-current]`, а не кнопка.
+{% endcomment %}{% translate "Как в системе" as theme_system %}{% translate "Светлая тема" as theme_light %}{% translate "Тёмная тема" as theme_dark %}
+    <form class="sidenav__theme" method="post" action="{% url 'set-theme' %}" role="group" aria-labelledby="{{ prefs_id }}-theme">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <span class="sidenav__theme-label sr-only" id="{{ prefs_id }}-theme">{% translate "Тема" %}</span>
+      {% for option in themes %}
+        {% if option.code == "system" %}{% firstof theme_system as theme_name %}{% elif option.code == "light" %}{% firstof theme_light as theme_name %}{% else %}{% firstof theme_dark as theme_name %}{% endif %}
+        {% if option.current %}
+          <span class="sidenav__choice" aria-current="true" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</span>
+        {% else %}
+          <button type="submit" name="theme" value="{{ option.code }}" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</button>
+        {% endif %}
+      {% endfor %}
+    </form>
+    {% if languages %}
+    <form class="sidenav__theme" method="post" action="{% url 'set_language' %}" role="group" aria-labelledby="{{ prefs_id }}-lang">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <span class="sidenav__theme-label sr-only" id="{{ prefs_id }}-lang">{% translate "Язык" %}</span>
+      {% for language in languages %}
+        {% if language.current %}
+          <span class="sidenav__choice" aria-current="true" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</span>
+        {% else %}
+          <button type="submit" name="language" value="{{ language.code }}" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</button>
+        {% endif %}
+      {% endfor %}
+    </form>
+    {% endif %}

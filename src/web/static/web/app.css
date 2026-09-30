@@ -165,6 +165,16 @@ main:focus { outline: none; }
 .sidenav__stage { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; }
 .sidenav__stage--refining { background: var(--warn-mark); }
 .sidenav__stage--planned { background: var(--accent); }
+/* Легенда точек (issue #268) — под последней группой, мелко и тише
+   подписей групп: она поясняет, а не называет раздел. Прокручивается вместе
+   со списком, места в подвале не занимает. */
+.sidenav__legend {
+  display: flex; flex-direction: column; gap: var(--space-1);
+  margin: var(--space-4) 0 0; padding: var(--space-4) var(--space-5) 0;
+  border-top: 1px solid var(--line); list-style: none;
+  font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-3);
+}
+.sidenav__legend li { display: flex; align-items: center; gap: var(--space-3); }
 
 /* Раздел, который ведёт другая роль, в демо (T163). Выглядит пунктом
    панели, но тише и с пунктиром: это не раздел человека, а предложение
@@ -203,6 +213,21 @@ main:focus { outline: none; }
 .sidenav__brand { padding-top: var(--space-5); padding-bottom: var(--space-5); }
 .sidenav__list { padding-top: var(--space-4); padding-bottom: var(--space-4); }
 
+/* Тень у края списка, когда за краем ещё есть разделы (issue #268). На
+   1440×768 у администратора список прокручивается на сотню пикселей, и без
+   подсказки последняя область выглядела концом панели. Приём «тени
+   прокрутки» без скрипта: две заливки цветом панели едут вместе со
+   списком (`local`) и закрывают две тени, стоящие у краёв окна списка
+   (`scroll`). Пока край списка у края окна — тень закрыта, отъехал — видна.
+   Список, который влез целиком, тени не показывает вовсе. */
+.sidenav__list {
+  background:
+    linear-gradient(var(--surface-2) 30%, transparent) center top / 100% 32px no-repeat local,
+    linear-gradient(transparent, var(--surface-2) 70%) center bottom / 100% 32px no-repeat local,
+    radial-gradient(farthest-side at 50% 0, color-mix(in srgb, var(--ink) 16%, transparent), transparent) center top / 100% 12px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, color-mix(in srgb, var(--ink) 16%, transparent), transparent) center bottom / 100% 12px no-repeat scroll;
+}
+
 /* Тема и язык одной строкой, подписи групп — только диктору. */
 .sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) var(--space-2) 0; }
 .sidenav__prefs .sidenav__theme { margin: 0; padding: 0; }
@@ -225,12 +250,21 @@ main:focus { outline: none; }
 .sidenav__who { flex: 1; gap: var(--space-1); }
 .sidenav__whoami { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); min-width: 0; }
 .sidenav__whoami b { white-space: normal; }
-.sidenav__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-3); font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
-.sidenav__meta > * + *::before { content: "·"; margin-right: var(--space-3); color: var(--ink-3); }
-/* Регистры — точками тех же цветов, что метки регистров в ведомости:
-   цвет связывает панель с таблицей. Название — в `title` и у диктора. */
-.sidenav__ledgers { display: inline-flex; align-items: center; gap: var(--space-2); }
-.sidenav__reg { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+/* Партнёр и точка — строками, а не через «·»: название партнёра длинное,
+   перенос ставил разделитель в начало следующей строки, и у управляющего
+   она читалась как «· точка: NS1» (issue #268). */
+.sidenav__meta { display: flex; flex-direction: column; font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
+/* Регистры — словами, каждый с точкой того же цвета, что метки регистров
+   в ведомости: цвет связывает панель с таблицей, а слово говорит, что это.
+   До issue #268 здесь были одни точки, различимые только цветом. Слово
+   набрано цветом текста, а не регистра: мелкий цветной текст на панели
+   читается хуже, а цвет уже несёт точка. */
+.sidenav__ledgers { display: flex; flex-wrap: wrap; gap: 0 var(--space-4); font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-2); }
+.sidenav__reg { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--ink-2); }
+.sidenav__reg::before { content: ""; flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.sidenav__reg.reg--official::before { background: var(--reg-official); }
+.sidenav__reg.reg--supplementary::before { background: var(--reg-supp); }
+.sidenav__reg.reg--internal::before { background: var(--reg-internal); }
 .sidenav__logout .sidenav__item { justify-content: center; width: 34px; padding: 0; }
 .sidenav__logout .sidenav__label {
   position: absolute; width: 1px; height: 1px; margin: -1px;
@@ -271,11 +305,16 @@ main:focus { outline: none; }
 @media (max-width: 719px) {
   .shell { display: block; }
   .shell > .sidenav { position: static; height: auto; }
+  /* Шапка до содержимого — две строки по 44 (issue #268: было около 200).
+     Первая — знак продукта, «Учётная запись» и выход, вторая — кто смотрит.
+     Тема и язык уехали на страницу учётной записи, регистры словами — туда
+     же: здесь их некуда поставить, не добавив строку. */
   .sidenav {
     width: auto; flex-direction: row; flex-wrap: wrap; align-items: center;
-    gap: var(--space-3) var(--space-5); padding: var(--space-4) var(--space-6);
+    gap: var(--space-2) var(--space-5); padding: var(--space-3) var(--space-6);
     border-right: 0; border-bottom: 1px solid var(--line);
   }
+  .sidenav > .sidenav__foot .sidenav__prefs, .sidenav__ledgers, .sidenav__legend { display: none; }
   .sidenav__brand { min-height: var(--tap-min); padding: 0; border-bottom: 0; justify-content: flex-start; }
   .sidenav__name { display: flex; }
 
@@ -319,7 +358,9 @@ main:focus { outline: none; }
   .sidenav__foot .sidenav__label { display: inline; }
   .sidenav__logout .sidenav__label { display: inline; position: static; width: auto; height: auto; margin: 0; clip: auto; }
   .sidenav__user { width: 100%; justify-content: flex-start; padding: 0; border-top: 0; }
-  .sidenav__who { display: flex; }
+  /* Кто смотрит — одной строкой с переносом: плашка роли, партнёр, точка. */
+  .sidenav__who { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0 var(--space-4); }
+  .sidenav__meta { flex-direction: row; flex-wrap: wrap; gap: 0 var(--space-4); }
   .sidenav__avatar { display: none; }
 }
 
@@ -986,6 +1027,29 @@ form.search.row input, form.search.row select {
   background: var(--surface); color: var(--ink);
 }
 
+/* Поле выбора файла (issue #268). Браузер рисует его своей серой кнопкой и
+   системным шрифтом — на экране продукта это чужой элемент, и человек не
+   узнаёт в нём кнопку. Само поле остаётся нативным и видимым: подпись с
+   именем взятого файла нужна (человек должен видеть, что взял), а подмена
+   поля своей разметкой отняла бы клавиатуру и диктора. Меняется только
+   кнопка внутри — видом вторичной кнопки `.btn` ядра. */
+input[type="file"] {
+  max-width: 100%;
+  font: var(--w-regular) var(--fs-meta) / var(--lh-meta) var(--font-ui);
+  color: var(--ink-2);
+}
+form.card input[type="file"] { height: auto; padding: 0; border: 0; background: none; }
+input[type="file"]::file-selector-button {
+  height: var(--control-h); margin-right: var(--space-5); padding: 0 var(--space-7);
+  border: 1px solid var(--line-control); border-radius: var(--r-control);
+  background: var(--surface); color: var(--ink);
+  font: var(--w-medium) var(--fs-body) / 1 var(--font-ui);
+  box-shadow: var(--sh-xs); cursor: pointer;
+}
+input[type="file"]:hover::file-selector-button { background: var(--surface-3); }
+input[type="file"]:focus-visible { outline: none; }
+input[type="file"]:focus-visible::file-selector-button { outline: var(--focus-outline); outline-offset: 1px; }
+
 /* ── Таблицы ─────────────────────────────────────────────────── */
 
 table { border-collapse: collapse; width: 100%; background: var(--surface); }
@@ -1280,8 +1344,11 @@ ol.steps {
   border: 1px solid var(--line-control); border-radius: var(--r-control);
   overflow: hidden;
 }
+/* Основа шага — 160, а не 220: три шага по 220 не вставали рядом с левой
+   панелью на планшете (на 900 содержимому остаётся 650), и полоса ломалась
+   на два ряда (issue #268). Короткие названия шагов в 160 помещаются. */
 ol.steps li {
-  flex: 1 1 220px; padding: var(--space-4) var(--space-7);
+  flex: 1 1 160px; padding: var(--space-4) var(--space-7);
   border-right: 1px solid var(--line-2);
   color: var(--ink-2); font-size: var(--fs-meta);
 }
@@ -1671,3 +1738,10 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 .account dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .account__links { display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
 .account__links a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
+/* Тема и язык на странице учётной записи — только на телефоне: там их нет в
+   шапке (issue #268, см. правила телефона в «Левой панели»). */
+.account__prefs { display: none; }
+@media (max-width: 719px) {
+  .account__prefs { display: flex; justify-content: flex-start; gap: var(--space-8); margin: 0 0 var(--space-8); padding: 0; }
+  .account__prefs .sidenav__theme { display: flex; flex-direction: row; gap: var(--space-2); margin: 0; }
+}
