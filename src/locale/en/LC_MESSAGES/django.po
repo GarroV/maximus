@@ -6500,10 +6500,6 @@ msgstr "Remove the role"
 msgid "(отключён)"
 msgstr "(disabled)"
 
-#: web/templates/web/platform/space.html:46
-msgid "Снять"
-msgstr "Revoke"
-
 #: web/templates/web/platform/space.html:51
 msgid "В пространстве нет ни одного человека."
 msgstr "There is nobody in this space yet."
@@ -7009,17 +7005,9 @@ msgstr ""
 "administrator, while separation of duties stays intact wherever those are "
 "different people."
 
-#: web/templates/web/roles/index.html:26
-msgid "Что позволяет роль"
-msgstr "What a role allows"
-
 #: web/templates/web/roles/index.html:31
 msgid "Права"
 msgstr "Rights"
-
-#: web/templates/web/roles/index.html:57
-msgid "У кого какая роль"
-msgstr "Who holds which role"
 
 #: web/templates/web/roles/index.html:70
 msgid ""
@@ -8383,17 +8371,9 @@ msgid "Пригласить человека"
 msgstr "Invite a person"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Причина выдачи роли"
-msgstr "Reason for granting the role"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid ""
 "Причина обязательна: она остаётся в истории рядом с вашим именем."
 msgstr "A reason is required: it stays in the history next to your name."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Причина снятия роли"
-msgstr "Reason for revoking the role"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Срок роли записан не датой."
@@ -8570,10 +8550,6 @@ msgstr "This partner has no such unit."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "не выбрана"
 msgstr "not chosen"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "— точка —"
-msgstr "— unit —"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -9120,3 +9096,58 @@ msgstr "no previous month in the report — nothing to compare with"
 #, python-format
 msgid "против %(value)s (%(month)s)"
 msgstr "vs %(value)s (%(month)s)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Люди и их роли"
+msgstr "People and their roles"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Показаны последние %(shown)s записей."
+msgstr "Showing the latest %(shown)s entries."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Права ролей"
+msgstr "Role rights"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Причина снятия роли «%(role)s»"
+msgstr "Reason for removing the role “%(role)s”"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пусто — без срока."
+msgstr "Empty means no end date."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Роли человека"
+msgstr "This person's roles"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Снять роль «%(role)s»"
+msgstr "Remove the role “%(role)s”"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы раздела «Роли и права»"
+msgstr "Pages of the “Roles and rights” section"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека у этого партнёра нет."
+msgstr "This partner has no such person."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Чтобы снять роль, напишите причину рядом с ней: она останется в "
+"истории\nрядом с вашим именем. Единственную роль снять нельзя — без неё "
+"человек войдёт\nи не увидит ничего."
+msgstr "To remove a role, write the reason next to it: it stays in the history next to your name. A person's only role cannot be removed — without it they would sign in and see nothing."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "← Все люди"
+msgstr "← All people"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "← Люди пространства «%(title)s»"
+msgstr "← People in the space “%(title)s”"

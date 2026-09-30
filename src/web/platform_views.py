@@ -17,6 +17,14 @@
 (`0248`), и спрашивается одной функцией `core.spaces.is_platform_admin`. Роль
 партнёра, даже самая полная, платформенной не делает никогда.
 
+**Одна страница — одна функция** (T225, D081, D087): список пространств —
+`/platform/`, заведение нового — `/platform/new/`, люди пространства —
+`/platform/<id>/`, выдача роли — `/platform/<id>/roles/`. Прежде форма
+заведения стояла под списком, а выдача роли — под людьми, и отказ формы
+возвращался через сессию на экран списка, далеко от поля, которое надо
+поправить. Теперь отказ показывается на странице самой формы, с тем, что уже
+набрано (кроме пароля).
+
 **Финансов партнёров здесь нет и не будет.** Миграция `0261` открыла ровно четыре
 таблицы — пространства, люди, членства, справочник ролей. Зарплаты, табели и
 факты остаются невидимы, и это проверяется тестом на настоящих данных
@@ -26,6 +34,7 @@
 from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
@@ -101,9 +110,18 @@ def _spaces():
     return spaces
 
 
+def _role_options(selected: str = "admin") -> list:
+    """Роли продукта, а не роли какого-то пространства: пространства ещё нет.
+    Названия — те же, что лягут в базу при заведении."""
+    return [
+        {"code": code, "title": DEFAULT_TITLES[code], "selected": code == selected}
+        for code in ROLE_ORDER
+    ]
+
+
 @login_required
 def index(request):
-    """Список пространств и форма заведения нового."""
+    """Список пространств. Заведение нового — своей страницей (`space_create`)."""
     who = get_current_principal(request)
     if not is_platform_admin(who.user_id if who else None):
         return _refuse(request)
@@ -113,26 +131,46 @@ def index(request):
         "web/platform/index.html",
         {
             "spaces": _spaces(),
-            # Роли продукта, а не роли какого-то пространства: пространства ещё
-            # нет. Названия — те же, что лягут в базу при заведении.
-            "role_options": [
-                {"code": code, "title": DEFAULT_TITLES[code], "selected": code == "admin"}
-                for code in ROLE_ORDER
-            ],
             "notice": request.session.pop("platform_notice", ""),
             "error": request.session.pop("platform_error", ""),
         },
     )
 
 
+# Поля формы заведения, которые возвращаются в неё после отказа. Пароля среди
+# них нет намеренно: пароль, вписанный сервером обратно в страницу, оседает в
+# её коде и в истории браузера.
+_SPACE_FIELDS = (
+    "title", "code", "country_code", "base_currency", "report_currency",
+    "admin_username", "admin_full_name",
+)
+_SPACE_DEFAULTS = {"country_code": "RS", "base_currency": "RSD", "report_currency": "EUR"}
+
+
+def _space_form(request, *, error: str = "", status: int = 200):
+    filled = dict(_SPACE_DEFAULTS)
+    if request.method == "POST":
+        filled.update({key: (request.POST.get(key) or "").strip() for key in _SPACE_FIELDS})
+    return render(
+        request,
+        "web/platform/new.html",
+        {
+            "filled": filled,
+            "role_options": _role_options(request.POST.get("role_code") or "admin"),
+            "error": error,
+        },
+        status=status,
+    )
+
+
 @login_required
 def space_create(request):
-    """Завести пространство и первого его человека. Только POST: это запись."""
+    """Завести пространство и первого его человека: форма и её отправка."""
     who = get_current_principal(request)
     if not is_platform_admin(who.user_id if who else None):
         return _refuse(request)
     if request.method != "POST":
-        return redirect("platform-index")
+        return _space_form(request)
 
     try:
         space = create_space(
@@ -147,10 +185,9 @@ def space_create(request):
             role_code=request.POST.get("role_code", "admin"),
         )
     except SpaceRefused as refusal:
-        # Отказ кладётся в сессию и показывается на том же экране: форма длинная,
-        # и человек должен увидеть причину рядом с ней, а не на пустой странице.
-        request.session["platform_error"] = refusal.message
-        return redirect("platform-index")
+        # Отказ — на странице формы и с тем, что человек уже набрал: форма
+        # длинная, и причина должна стоять рядом с ней, а не на другом экране.
+        return _space_form(request, error=refusal.message, status=400)
 
     request.session["platform_notice"] = _(
         "Пространство «%(title)s» заведено. Первый человек может входить."
@@ -184,18 +221,26 @@ def _people(tenant_id):
     return sorted(found.values(), key=lambda row: row["name"])
 
 
+def _space_or_none(tenant_id):
+    return Tenant.objects.filter(pk=tenant_id).first()
+
+
+def _no_space(request):
+    return render(request, "web/platform/denied.html", {
+        "message": _("Такого пространства нет.")
+    }, status=404)
+
+
 @login_required
 def space(request, tenant_id):
-    """Внутрь пространства: его люди и их роли."""
+    """Внутрь пространства: его люди и их роли. Выдача роли — своей страницей."""
     who = get_current_principal(request)
     if not is_platform_admin(who.user_id if who else None):
         return _refuse(request)
 
-    found = Tenant.objects.filter(pk=tenant_id).first()
+    found = _space_or_none(tenant_id)
     if found is None:
-        return render(request, "web/platform/denied.html", {
-            "message": _("Такого пространства нет.")
-        }, status=404)
+        return _no_space(request)
 
     return render(
         request,
@@ -203,38 +248,60 @@ def space(request, tenant_id):
         {
             "space": found,
             "people": _people(tenant_id),
-            "role_options": [
-                {"code": str(role.pk), "title": role.title, "selected": False}
-                for role in Role.objects.filter(tenant_id=tenant_id).order_by("title")
-            ],
             "notice": request.session.pop("platform_notice", ""),
             "error": request.session.pop("platform_error", ""),
         },
     )
 
 
+def _grant_form(request, found, *, error: str = "", status: int = 200):
+    chosen = request.POST.get("role_id") or ""
+    return render(
+        request,
+        "web/platform/grant.html",
+        {
+            "space": found,
+            "user_id": (request.POST.get("user_id") or "").strip(),
+            "role_options": [
+                {"code": str(role.pk), "title": role.title, "selected": str(role.pk) == chosen}
+                for role in Role.objects.filter(tenant_id=found.pk).order_by("title")
+            ],
+            "error": error,
+        },
+        status=status,
+    )
+
+
 @login_required
 def member_role(request, tenant_id):
-    """Выдать или снять роль человеку в этом пространстве. Только POST."""
+    """Выдать роль человеку в этом пространстве (форма и отправка) или снять её.
+
+    Снимают роль со страницы людей пространства — кнопкой у самой роли; отказ
+    снятия возвращается туда же. Выдача — отдельная страница: у неё своя форма,
+    и её отказ стоит рядом с ней.
+    """
     who = get_current_principal(request)
     if not is_platform_admin(who.user_id if who else None):
         return _refuse(request)
+    found = _space_or_none(tenant_id)
+    if found is None:
+        return _no_space(request)
     if request.method != "POST":
-        return redirect("platform-space", tenant_id=tenant_id)
+        return _grant_form(request, found)
 
     user_id = request.POST.get("user_id") or ""
     role_id = request.POST.get("role_id") or ""
     action = request.POST.get("action") or "grant"
 
-    role = Role.objects.filter(pk=role_id, tenant_id=tenant_id).first()
-    if role is None:
-        # Роль чужого пространства сюда не приедет: фильтр по тенанту стоит в
-        # запросе, а не проверяется после. Подмена идентификатора в форме даёт
-        # отказ, а не выдачу роли соседа.
-        request.session["platform_error"] = _("Такой роли в этом пространстве нет.")
-        return redirect("platform-space", tenant_id=tenant_id)
+    try:
+        role = Role.objects.filter(pk=role_id, tenant_id=tenant_id).first() if role_id else None
+    except DjangoValidationError:
+        role = None
 
     if action == "revoke":
+        if role is None:
+            request.session["platform_error"] = _("Такой роли в этом пространстве нет.")
+            return redirect("platform-space", tenant_id=tenant_id)
         removed, _ignored = Membership.objects.filter(
             tenant_id=tenant_id, user_id=user_id, role=role
         ).delete()
@@ -243,9 +310,21 @@ def member_role(request, tenant_id):
         )
         return redirect("platform-space", tenant_id=tenant_id)
 
-    if not User.objects.filter(pk=user_id).exists():
-        request.session["platform_error"] = _("Такого человека нет.")
-        return redirect("platform-space", tenant_id=tenant_id)
+    if role is None:
+        # Роль чужого пространства сюда не приедет: фильтр по тенанту стоит в
+        # запросе, а не проверяется после. Подмена идентификатора в форме даёт
+        # отказ, а не выдачу роли соседа.
+        return _grant_form(request, found,
+                           error=_("Такой роли в этом пространстве нет."), status=400)
+
+    try:
+        known = User.objects.filter(pk=user_id).exists()
+    except DjangoValidationError:
+        # Вписано не то, что похоже на идентификатор: это тот же ответ, что и
+        # «такого нет», а не ошибка сервера на весь экран.
+        known = False
+    if not known:
+        return _grant_form(request, found, error=_("Такого человека нет."), status=400)
 
     _created = Membership.objects.get_or_create(
         tenant_id=tenant_id, user_id=user_id, role=role

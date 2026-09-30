@@ -118,7 +118,9 @@
 | `/reports/reconcile/` | `reports-reconcile` | `web.planned_views.reconcile` |
 | `/roles/` | `roles` | `web.roles_views.index` |
 | `/roles/<uuid:role_id>/rights/` | `role-rights` | `web.roles_views.role_rights` |
+| `/roles/history/` | `roles-history` | `web.roles_views.history` |
 | `/roles/invite/` | `roles-invite` | `web.roles_views.invite` |
+| `/roles/people/` | `roles-people` | `web.roles_views.people` |
 | `/roles/people/<uuid:user_id>/` | `person-roles` | `web.roles_views.person_roles` |
 | `/rules/` | `rules` | `web.rules_views.index` |
 | `/rules/<str:path>/` | `rule` | `web.rules_views.rule` |

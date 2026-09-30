@@ -17,6 +17,20 @@ from datetime import date, timedelta
 from conftest import body, login_as, person_row
 
 
+def roles_pages(client) -> str:
+    """Страницы раздела ролей, где идут эти сценарии: приглашение, люди, история.
+
+    До T225 всё это было одним экраном `/roles/`, и проверки читали его целиком.
+    Раздел разобран на страницы (D081), а сценарии остались прежними — пригласить,
+    выдать, снять, найти запись в истории, — поэтому читаются те же три страницы
+    подряд. Выпадающие списки ролей и точек берутся со страницы приглашения,
+    строка человека — со страницы людей, причина — из истории.
+    """
+    return "\n".join(
+        body(client.get(url)) for url in ("/roles/invite/", "/roles/people/", "/roles/history/")
+    )
+
+
 def role_option(html: str, title: str) -> str:
     """Идентификатор роли из выпадающего списка выдачи — по названию, не по месту."""
     found = re.findall(r'<option value="([0-9a-f-]+)">([^<]+)</option>', html)
@@ -48,7 +62,7 @@ def held_roles(html: str, name: str) -> str:
 def test_the_administrator_invites_a_person(client, web_env):
     """Человек заводится из интерфейса, сразу с ролью, и попадает в историю."""
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     manager = role_option(html, "Управляющий точки")
 
     response = client.post("/roles/invite/", {
@@ -60,7 +74,7 @@ def test_the_administrator_invites_a_person(client, web_env):
     })
     assert response.status_code == 302
 
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     assert "Jovana Kostić" in html
     assert "Новый управляющий вместо уволенного" in html, "в истории нет причины"
 
@@ -69,7 +83,7 @@ def test_an_invitation_without_a_reason_is_refused_in_words(client, web_env):
     """Причина обязательна везде, как у отката периода: пустое «зачем» —
     это история, которая ни на что не отвечает."""
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     manager = role_option(html, "Управляющий точки")
 
     response = client.post("/roles/invite/", {
@@ -78,13 +92,13 @@ def test_an_invitation_without_a_reason_is_refused_in_words(client, web_env):
     })
     assert response.status_code == 400
     assert "Причина" in body(response)
-    assert "Без причины" not in body(client.get("/roles/"))
+    assert "Без причины" not in roles_pages(client)
 
 
 def test_a_person_is_not_invited_twice_by_the_same_mail(client, web_env):
     """Второй человек с той же почтой — это не второй человек."""
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     payload = {
         "full_name": "Дубль", "email": "dubl@example.test",
         "role": role_option(html, "Управляющий точки"),
@@ -121,7 +135,7 @@ def test_a_role_is_granted_until_a_date_and_the_screen_says_so(client, web_env):
     только в полном прогоне, а поодиночке был зелёным.
     """
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     accountant = role_option(html, "Бухгалтер")
     admin_role = role_option(html, "Администратор сети")
     until = (date.today() + timedelta(days=30)).isoformat()
@@ -130,7 +144,7 @@ def test_a_role_is_granted_until_a_date_and_the_screen_says_so(client, web_env):
         "full_name": "Jelena Nikolić", "email": "jelena@example.test",
         "role": accountant, "reason": "ведёт учёт партнёра",
     })
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     user_id = re.search(
         r"/roles/people/([0-9a-f-]+)/", person_row(html, "Jelena Nikolić")
     ).group(1)
@@ -140,7 +154,7 @@ def test_a_role_is_granted_until_a_date_and_the_screen_says_so(client, web_env):
     })
     assert response.status_code == 302
 
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     assert "до " in person_row(html, "Jelena Nikolić"), "срок роли не показан рядом с ролью"
     assert "Отпуск партнёра" in html, "в истории нет причины выдачи"
 
@@ -148,7 +162,7 @@ def test_a_role_is_granted_until_a_date_and_the_screen_says_so(client, web_env):
 def test_a_role_cannot_be_granted_until_a_day_that_has_passed(client, web_env):
     """Роль «до вчера» — это доступ, которого не было ни секунды."""
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     admin_role = role_option(html, "Администратор сети")
     user_id = re.search(r"/roles/people/([0-9a-f-]+)/", person_row(html, "Бухгалтер")).group(1)
 
@@ -169,7 +183,7 @@ def test_revoking_a_role_records_who_and_why(client, web_env):
     того дня, когда соседнюю переименуют.
     """
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     manager = role_option(html, "Управляющий точки")
     director = role_option(html, "Оперативный директор")
 
@@ -177,7 +191,7 @@ def test_revoking_a_role_records_who_and_why(client, web_env):
         "full_name": "Petar Petrović", "email": "petar@example.test",
         "role": manager, "unit": unit_option(html, "NS1"), "reason": "принял точку",
     })
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     user_id = re.search(
         r"/roles/people/([0-9a-f-]+)/", person_row(html, "Petar Petrović")
     ).group(1)
@@ -190,7 +204,7 @@ def test_revoking_a_role_records_who_and_why(client, web_env):
     })
     assert revoked.status_code == 302
 
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     assert "вернулся партнёр" in html
     assert "нужен второй администратор" in html, "старая запись истории исчезла"
     assert "Оперативный директор" not in held_roles(html, "Petar Petrović"), (
@@ -201,7 +215,7 @@ def test_revoking_a_role_records_who_and_why(client, web_env):
 def test_a_role_is_not_revoked_without_a_reason(client, web_env):
     """Снятие без «зачем» оставляет в истории строку, которая ни о чём не говорит."""
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     manager = role_option(html, "Управляющий точки")
     director = role_option(html, "Оперативный директор")
 
@@ -209,7 +223,7 @@ def test_a_role_is_not_revoked_without_a_reason(client, web_env):
         "full_name": "Miloš Stojanović", "email": "milos@example.test",
         "role": manager, "unit": unit_option(html, "NS1"), "reason": "принял точку",
     })
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     user_id = re.search(
         r"/roles/people/([0-9a-f-]+)/", person_row(html, "Miloš Stojanović")
     ).group(1)
@@ -221,7 +235,7 @@ def test_a_role_is_not_revoked_without_a_reason(client, web_env):
     assert response.status_code == 400
     assert "Причина" in body(response)
     assert "Оперативный директор" in held_roles(
-        body(client.get("/roles/")), "Miloš Stojanović"
+        roles_pages(client), "Miloš Stojanović"
     ), "роль снялась, хотя причину не назвали"
 
 
@@ -285,7 +299,7 @@ def test_an_invited_manager_gets_only_the_chosen_unit(client, web_env):
     from core.models import Unit
 
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     ns1 = Unit.objects.get(code="NS1")
 
     response = client.post("/roles/invite/", {
@@ -308,7 +322,7 @@ def test_a_role_of_one_unit_is_not_granted_without_a_unit(client, web_env):
     from core.models import User
 
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
 
     response = client.post("/roles/invite/", {
         "full_name": "Bez tačke", "email": "bez-tacke@example.test",
@@ -331,7 +345,7 @@ def test_a_role_of_the_whole_partner_takes_no_unit(client, web_env):
     from core.models import User
 
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
 
     response = client.post("/roles/invite/", {
         "full_name": "Lišnja tačka", "email": "lisnja@example.test",
@@ -352,7 +366,7 @@ def test_granting_a_unit_role_to_a_person_also_names_the_unit(client, web_env):
     from core.models import Membership, Unit, User
 
     login_as(client, "admin")
-    html = body(client.get("/roles/"))
+    html = roles_pages(client)
     bg1 = Unit.objects.get(code="BG1")
 
     client.post("/roles/invite/", {
@@ -362,8 +376,8 @@ def test_granting_a_unit_role_to_a_person_also_names_the_unit(client, web_env):
     person = User.objects.get(full_name="Nikola Ilić")
 
     response = client.post(f"/roles/people/{person.pk}/", {
-        "role": role_option(body(client.get("/roles/")), "Управляющий точки"),
-        "unit": unit_option(body(client.get("/roles/")), "BG1"),
+        "role": role_option(roles_pages(client), "Управляющий точки"),
+        "unit": unit_option(roles_pages(client), "BG1"),
         "reason": "подменяет управляющего",
     })
     assert response.status_code == 302

@@ -6365,10 +6365,6 @@ msgstr "Ukloni ulogu"
 msgid "(отключён)"
 msgstr "(isključen)"
 
-#: web/templates/web/platform/space.html:46
-msgid "Снять"
-msgstr "Ukloni"
-
 #: web/templates/web/platform/space.html:51
 msgid "В пространстве нет ни одного человека."
 msgstr "U ovom prostoru još nema nijedne osobe."
@@ -6860,17 +6856,9 @@ msgstr ""
 "računovođa koji vodi ceo projekat postaje i administrator, a tamo gde su to "
 "različiti ljudi podela odgovornosti ostaje."
 
-#: web/templates/web/roles/index.html:26
-msgid "Что позволяет роль"
-msgstr "Šta uloga dozvoljava"
-
 #: web/templates/web/roles/index.html:31
 msgid "Права"
 msgstr "Prava"
-
-#: web/templates/web/roles/index.html:57
-msgid "У кого какая роль"
-msgstr "Ko ima koju ulogu"
 
 #: web/templates/web/roles/index.html:70
 msgid ""
@@ -8219,17 +8207,9 @@ msgid "Пригласить человека"
 msgstr "Pozovi osobu"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Причина выдачи роли"
-msgstr "Razlog dodele uloge"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid ""
 "Причина обязательна: она остаётся в истории рядом с вашим именем."
 msgstr "Razlog je obavezan: ostaje u istoriji pored vašeg imena."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Причина снятия роли"
-msgstr "Razlog oduzimanja uloge"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Срок роли записан не датой."
@@ -8405,10 +8385,6 @@ msgstr "Ovaj partner nema takvu lokaciju."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "не выбрана"
 msgstr "nije izabrana"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "— точка —"
-msgstr "— lokacija —"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -8955,3 +8931,58 @@ msgstr "u izveštaju nema prethodnog meseca — nema s čim da se uporedi"
 #, python-format
 msgid "против %(value)s (%(month)s)"
 msgstr "u odnosu na %(value)s (%(month)s)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Люди и их роли"
+msgstr "Ljudi i njihove uloge"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Показаны последние %(shown)s записей."
+msgstr "Prikazano je poslednjih %(shown)s zapisa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Права ролей"
+msgstr "Prava uloga"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Причина снятия роли «%(role)s»"
+msgstr "Razlog za uklanjanje uloge „%(role)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пусто — без срока."
+msgstr "Prazno — bez roka."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Роли человека"
+msgstr "Uloge ove osobe"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Снять роль «%(role)s»"
+msgstr "Ukloni ulogu „%(role)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы раздела «Роли и права»"
+msgstr "Stranice odeljka „Uloge i prava“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека у этого партнёра нет."
+msgstr "Ovaj partner nema takvu osobu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Чтобы снять роль, напишите причину рядом с ней: она останется в "
+"истории\nрядом с вашим именем. Единственную роль снять нельзя — без неё "
+"человек войдёт\nи не увидит ничего."
+msgstr "Da biste uklonili ulogu, upišite razlog pored nje: ostaje u istoriji pored vašeg imena. Jedinu ulogu osobe nije moguće ukloniti — bez nje bi se prijavila i ne bi videla ništa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "← Все люди"
+msgstr "← Svi ljudi"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "← Люди пространства «%(title)s»"
+msgstr "← Ljudi u prostoru „%(title)s“"

@@ -68,10 +68,17 @@ def test_partner_roles_get_a_refusal_in_words(client, who):
     поломка продукта, и человек ищет, что сломалось, вместо того чтобы понять,
     что дверь не его.
     """
+    from core.models import Tenant
+
     login_as(client, who)
-    response = client.get("/platform/")
-    assert response.status_code == 403
-    assert "администратор платформы" in body(response).lower()
+    # Каждая страница админки, а не только первая (T225): форма заведения и
+    # выдача роли стали отдельными адресами, и у каждого своя развилка входа.
+    tenant = Tenant.objects.get(code="rs-dev").pk
+    for url in ("/platform/", "/platform/new/", f"/platform/{tenant}/",
+                f"/platform/{tenant}/roles/"):
+        response = client.get(url)
+        assert response.status_code == 403, f"{url} открыт роли {who}"
+        assert "администратор платформы" in body(response).lower(), url
 
 
 def test_platform_admin_sees_the_list_of_spaces(client, platform_admin):
@@ -119,13 +126,17 @@ def test_a_duplicate_code_is_refused_in_words(client, platform_admin, spaces_res
         "base_currency": "RSD", "report_currency": "EUR",
         "admin_username": "dup-one", "admin_password": "secret-1",
     })
-    client.post("/platform/new/", {
+    response = client.post("/platform/new/", {
         "title": "Второй", "code": "dup-code", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
         "admin_username": "dup-two", "admin_password": "secret-2",
     })
-    html = body(client.get("/platform/"))
+    # Отказ — на странице самой формы, с набранным, а не на экране списка (T225).
+    assert response.status_code == 400
+    html = body(response)
     assert "уже есть" in html, "повтор кода должен объясняться словами"
+    assert 'value="Второй"' in html, "набранное потерялось — вводить заново"
+    assert "secret-2" not in html, "пароль вписан обратно в страницу"
 
 
 def test_a_space_without_a_first_person_is_refused(client, platform_admin, spaces_restored):
@@ -133,7 +144,7 @@ def test_a_space_without_a_first_person_is_refused(client, platform_admin, space
     from core.models import Tenant
 
     login_as(client, "admin")
-    client.post("/platform/new/", {
+    response = client.post("/platform/new/", {
         "title": "Ничей", "code": "nobody", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
         "admin_username": "", "admin_password": "",
@@ -141,7 +152,7 @@ def test_a_space_without_a_first_person_is_refused(client, platform_admin, space
     assert not Tenant.objects.filter(code="nobody").exists(), (
         "пространство завелось без первого человека — войти в него некому"
     )
-    assert "логин" in body(client.get("/platform/")).lower()
+    assert "логин" in body(response).lower()
 
 
 # --- люди и роли внутри пространства -----------------------------------------
@@ -257,3 +268,48 @@ def test_the_counters_are_honest(client, platform_admin, spaces_restored):
     assert row.people == 1, "у нового партнёра ровно один человек — тот, кого мы завели"
     assert row.active == 1, "он действующий: отключать его никто не просил"
     assert row.last_seen is None, "он ещё не входил"
+
+
+# --- одна страница — одна функция (T225, D081) ------------------------------
+
+
+def test_the_list_leads_to_the_form_and_the_form_is_its_own_page(client, platform_admin):
+    """Список пространств формы не держит; форма — по кнопке, своей страницей."""
+    login_as(client, "admin")
+    listing = body(client.get("/platform/"))
+    assert 'href="/platform/new/"' in listing, "со списка нет дороги к заведению"
+    assert 'name="admin_password"' not in listing, "форма заведения осталась на списке"
+    form = client.get("/platform/new/")
+    assert form.status_code == 200
+    assert 'name="admin_password"' in body(form)
+
+
+def test_granting_a_role_is_its_own_page(client, platform_admin):
+    """Люди пространства — одна страница, выдача роли — другая."""
+    from core.models import Tenant
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    login_as(client, "admin")
+    people = body(client.get(f"/platform/{tenant.pk}/"))
+    assert f'href="/platform/{tenant.pk}/roles/"' in people, "нет дороги к выдаче роли"
+    assert 'value="grant"' not in people, "форма выдачи осталась на странице людей"
+    grant = client.get(f"/platform/{tenant.pk}/roles/")
+    assert grant.status_code == 200
+    assert 'value="grant"' in body(grant)
+
+
+def test_a_garbled_person_id_is_refused_in_words(client, platform_admin):
+    """Не идентификатор в поле человека — ответ словами, а не ошибка сервера."""
+    from core.models import Role, Tenant
+
+    tenant = Tenant.objects.get(code="rs-dev")
+    role = Role.objects.filter(tenant=tenant).first()
+    login_as(client, "admin")
+    response = client.post(f"/platform/{tenant.pk}/roles/", {
+        "action": "grant", "user_id": "не-идентификатор", "role_id": str(role.pk),
+    })
+    # 400, а не 404: страница формы есть, неверно то, что в неё вписали. И
+    # только так отказ остаётся рядом с формой — 404 со страницей при отладке
+    # подменяется общей страницей продукта (`web.errors`).
+    assert response.status_code == 400
+    assert "Такого человека нет" in body(response)

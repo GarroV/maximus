@@ -55,17 +55,9 @@
     "en": "Invite a person",
     "sr": "Pozovi osobu"
   },
-  "Причина выдачи роли": {
-    "en": "Reason for granting the role",
-    "sr": "Razlog dodele uloge"
-  },
   "Причина обязательна: она остаётся в истории рядом с вашим именем.": {
     "en": "A reason is required: it stays in the history next to your name.",
     "sr": "Razlog je obavezan: ostaje u istoriji pored vašeg imena."
-  },
-  "Причина снятия роли": {
-    "en": "Reason for revoking the role",
-    "sr": "Razlog oduzimanja uloge"
   },
   "Срок роли записан не датой.": {
     "en": "The end of the role is not written as a date.",

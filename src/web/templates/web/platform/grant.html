@@ -1,0 +1,22 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Выдать роль человеку в пространстве (T225 — своей страницей, под людьми
+пространства она стояла второй функцией экрана).
+{% endcomment %}
+{% block title %}{% translate "Выдать роль" %} · {{ space.title }}{% endblock %}
+{% block content %}
+<p class="note"><a href="{% url 'platform-space' tenant_id=space.id %}">{% blocktranslate with title=space.title %}← Люди пространства «{{ title }}»{% endblocktranslate %}</a></p>
+<h1>{% translate "Выдать роль" %}</h1>
+<p class="sub">{% blocktranslate %}Логин человека должен уже существовать: одной учёткой можно работать у нескольких партнёров. Нового человека партнёр заводит сам на своём экране ролей.{% endblocktranslate %}</p>
+
+{% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
+
+<form class="card" method="post" action="{% url 'platform-member-role' tenant_id=space.id %}">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="grant">
+  {% translate "Идентификатор человека" as f_person %}{% translate "Роль" as f_role %}
+  {% include "web/components/field.html" with id="id_person" name="user_id" label=f_person value=user_id required=1 stacked=1 %}
+  {% include "web/components/select.html" with id="id_grant_role" name="role_id" label=f_role options=role_options stacked=1 %}
+  <button type="submit" class="primary">{% translate "Выдать" %}</button>
+</form>
+{% endblock %}
