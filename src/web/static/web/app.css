@@ -490,6 +490,9 @@ a.mark--ok:hover { background: var(--ok-line); }
 .alert { color: var(--warn-ink); background: var(--warn-soft); border: 1px solid var(--warn-line); }
 .alert .details { color: var(--ink); font-size: var(--fs-meta); margin-top: var(--space-3); }
 .ok { color: var(--ok); background: var(--ok-soft); border: 1px solid var(--ok-line); }
+/* Заголовок плашки — своей строкой над текстом, как `.note__title` эталона
+   (issue #268: в строку с текстом он сливался с ним). */
+.notice__title { display: block; margin-bottom: var(--space-1); font-size: var(--fs-dense); font-weight: var(--w-semibold); }
 /* Ещё два вида из эталона, которых в продукте не было: «к сведению» и «ошибка».
    Без них любое сообщение приходилось красить как предупреждение — и обычная
    подсказка выглядела тревожно, а настоящая ошибка ничем от неё не отличалась. */
