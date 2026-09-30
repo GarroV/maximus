@@ -58,5 +58,17 @@
   "Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в списке людей; если нет — проверьте адрес.": {
     "en": "This e-mail cannot be invited. If the person already works with you, they are in the list of people; if not, check the address.",
     "sr": "Ovu adresu nije moguće pozvati. Ako osoba već radi kod vas, nalazi se na spisku ljudi; ako ne — proverite adresu."
+  },
+  "Страну укажите кодом из двух латинских букв, например RS.": {
+    "en": "Enter the country as a two-letter Latin code, for example RS.",
+    "sr": "Unesite zemlju kodom od dva latinična slova, na primer RS."
+  },
+  "Валюту учёта укажите кодом из трёх латинских букв, например RSD.": {
+    "en": "Enter the accounting currency as a three-letter Latin code, for example RSD.",
+    "sr": "Unesite valutu knjiženja kodom od tri latinična slova, na primer RSD."
+  },
+  "Валюту отчёта укажите кодом из трёх латинских букв, например EUR.": {
+    "en": "Enter the reporting currency as a three-letter Latin code, for example EUR.",
+    "sr": "Unesite valutu izveštaja kodom od tri latinična slova, na primer EUR."
   }
 }

@@ -410,3 +410,24 @@ def test_a_new_space_does_not_start_with_a_unit_manager(client, platform_admin, 
     })
     assert response.status_code == 400
     assert not Tenant.objects.filter(code="unit-first").exists()
+
+
+@pytest.mark.parametrize("field,value", [
+    ("country_code", ""), ("country_code", "Serbia"), ("country_code", "Р1"),
+    ("base_currency", ""), ("base_currency", "dinar"),
+    ("report_currency", ""), ("report_currency", "E1R"),
+])
+def test_country_and_currencies_are_checked(client, platform_admin, spaces_restored, field, value):
+    """Страна — двумя латинскими буквами, валюты — тремя (ISO); иначе отказ словами."""
+    from core.models import Tenant
+
+    payload = {
+        "title": "Проверка", "code": "l1-check", "country_code": "RS",
+        "base_currency": "RSD", "report_currency": "EUR",
+        "admin_username": "l1-boss", "admin_password": "secret-1",
+    }
+    payload[field] = value
+    login_as(client, "admin")
+    response = client.post("/platform/new/", payload)
+    assert response.status_code == 400, f"{field}={value!r} принят"
+    assert not Tenant.objects.filter(code="l1-check").exists()

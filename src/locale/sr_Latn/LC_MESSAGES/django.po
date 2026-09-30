@@ -8999,3 +8999,16 @@ msgid ""
 "Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в "
 "списке людей; если нет — проверьте адрес."
 msgstr "Ovu adresu nije moguće pozvati. Ako osoba već radi kod vas, nalazi se na spisku ljudi; ako ne — proverite adresu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Валюту отчёта укажите кодом из трёх латинских букв, например EUR."
+msgstr "Unesite valutu izveštaja kodom od tri latinična slova, na primer EUR."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюту учёта укажите кодом из трёх латинских букв, например RSD."
+msgstr "Unesite valutu knjiženja kodom od tri latinična slova, na primer RSD."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страну укажите кодом из двух латинских букв, например RS."
+msgstr "Unesite zemlju kodom od dva latinična slova, na primer RS."

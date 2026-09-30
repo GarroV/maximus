@@ -9164,3 +9164,16 @@ msgid ""
 "Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в "
 "списке людей; если нет — проверьте адрес."
 msgstr "This e-mail cannot be invited. If the person already works with you, they are in the list of people; if not, check the address."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Валюту отчёта укажите кодом из трёх латинских букв, например EUR."
+msgstr "Enter the reporting currency as a three-letter Latin code, for example EUR."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюту учёта укажите кодом из трёх латинских букв, например RSD."
+msgstr "Enter the accounting currency as a three-letter Latin code, for example RSD."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страну укажите кодом из двух латинских букв, например RS."
+msgstr "Enter the country as a two-letter Latin code, for example RS."
