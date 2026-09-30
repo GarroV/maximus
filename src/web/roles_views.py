@@ -66,7 +66,7 @@ from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, leads_one_unit
 
 from . import permissions
 from .principal import get_current_principal
-from .roles_display import role_choice, shown_role_title
+from .roles_display import rights_matrix, role_choice, shown_role_title
 
 # Права, которые можно выдать с экрана, — ВСЕ права продукта, а не их список
 # рядом (T203). Список здесь был своей копией, и она успела разъехаться: право
@@ -300,25 +300,7 @@ def _choices(who) -> dict:
 
 def _rights_page(request, who, *, error: str = "", status: int = 200):
     roles = list(Role.objects.filter(tenant_id=who.tenant_id).order_by("title"))
-    rows = [
-        {
-            "role": role_choice(role),
-            "rights": [
-                {
-                    "code": code,
-                    "title": permissions.title(code),
-                    "granted": code in (role.permissions or []),
-                    # Стена рисуется прочерком, а не пустой галочкой: иначе она
-                    # выглядит как «просто не выдано», человек её жмёт и
-                    # получает отказ на то, что экран сам ему и предложил.
-                    "walled": _state_of(role, code) == NEVER,
-                }
-                for code in GRANTABLE
-            ],
-        }
-        for role in roles
-    ]
-    return _show(request, "web/roles/index.html", "roles", {"rows": rows},
+    return _show(request, "web/roles/index.html", "roles", rights_matrix(roles),
                  error=error, status=status)
 
 
