@@ -279,3 +279,21 @@ def _seeded_user(username: str) -> str:
     from core.models import User
 
     return str(User.objects.get(username=username).pk)
+
+
+def test_removing_a_role_the_person_does_not_hold_is_refused(client, web_env):
+    """Снятие роли, которой нет, — отказ словами и ни строки в истории."""
+    from core.models import AccessLogEntry
+
+    login_as(client, "admin")
+    html = body(client.get("/roles/"))
+    person = re.search(
+        r'/roles/people/([0-9a-f-]+)/', person_row(body(client.get("/roles/people/")), "Бухгалтер"),
+    ).group(1)
+    before = AccessLogEntry.objects.count()
+    response = client.post(f"/roles/people/{person}/", {
+        "role": role_id(html, "manager"), "action": "remove", "reason": "проверка",
+    })
+    assert response.status_code == 409
+    assert "Этой роли у человека нет" in body(response)
+    assert AccessLogEntry.objects.count() == before, "в историю записано снятие того, чего не было"

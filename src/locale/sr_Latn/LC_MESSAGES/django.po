@@ -9012,3 +9012,7 @@ msgstr "Unesite valutu knjiženja kodom od tri latinična slova, na primer RSD."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Страну укажите кодом из двух латинских букв, например RS."
 msgstr "Unesite zemlju kodom od dva latinična slova, na primer RS."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Этой роли у человека нет."
+msgstr "Ova osoba nema tu ulogu."
