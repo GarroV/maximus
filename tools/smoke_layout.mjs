@@ -61,12 +61,13 @@ const pages = () => evalIn(`(async () => {
   const out = new Set(nav.map((h) => new URL(h).pathname));
   // Страница месяца, табель и ведомость — со страницы периодов.
   const r = await fetch('/periods/'); const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
-  const period = [...doc.querySelectorAll('main a[href^="/periods/"]')].map((a) => a.getAttribute('href'))
-    .find((h) => /^\\/periods\\/[0-9a-f-]{36}\\/$/.test(h));
-  if (period) {
+  // Первые три месяца: свежий обычно ещё не посчитан, и ведомости с её
+  // двумя ярусами шапки на нём нет — проба шапки прошла бы мимо.
+  const periods = [...new Set([...doc.querySelectorAll('main a[href^="/periods/"]')].map((a) => a.getAttribute('href'))
+    .filter((h) => /^\\/periods\\/[0-9a-f-]{36}\\/$/.test(h)))].slice(0, 3);
+  for (const period of periods) {
     out.add(period);
-    const id = period.split('/')[2];
-    out.add('/timesheets/' + id + '/');
+    out.add('/timesheets/' + period.split('/')[2] + '/');
   }
   out.add('/payroll/sheet/');
   return [...out];
@@ -139,10 +140,25 @@ const probe = (phone) => evalIn(`(() => {
     // прилипает под предыдущим, а не поверх него (у ведомости два яруса —
     // группы колонок и сами колонки, и оба стояли на top: 0).
     const box = scroller(t);
-    if (box && head.rows.length > 1 && box.scrollHeight > box.clientHeight + 40) {
+    if (box && box.scrollHeight > box.clientHeight + 40) {
       box.scrollTop = 200;
-      const rows = [...head.rows].filter(shown).map((row) => row.getBoundingClientRect());
-      for (let i = 1; i < rows.length; i++) if (rows[i].top < rows[i - 1].bottom - 1) r.stickyOverlap.push(name(t).slice(0, 40) + ' ярус ' + (i + 1) + ' поверх яруса ' + i + ' на ' + Math.round(rows[i - 1].bottom - rows[i].top) + 'px');
+      // Шапка осталась у верхнего края окна таблицы, а не уехала с ней.
+      const headTop = Math.min(...[...head.querySelectorAll('th')].filter(shown).map((c) => c.getBoundingClientRect().top));
+      const boxTop = box.getBoundingClientRect().top + box.clientTop;
+      if (Math.abs(headTop - boxTop) > 2) r.stickyOverlap.push(name(t).slice(0, 40) + ' шапка не держится при прокрутке: уехала на ' + Math.round(boxTop - headTop) + 'px');
+      // Меряются ячейки, а не строки: прилипают th, а прямоугольник tr
+      // уезжает вместе с таблицей — по строкам ярусы не пересекаются никогда
+      // (так эта проба и была зелёной на сломанной ведомости). Ячейки,
+      // растянутые на оба яруса, в расчёт нижней границы не идут.
+      const rows = [...head.rows].filter(shown);
+      for (let i = 1; i < rows.length; i++) {
+        const above = [...rows[i - 1].cells].filter((c) => shown(c) && c.rowSpan === 1);
+        const here = [...rows[i].cells].filter(shown);
+        if (!above.length || !here.length) continue;
+        const bottom = Math.max(...above.map((c) => c.getBoundingClientRect().bottom));
+        const top = Math.min(...here.map((c) => c.getBoundingClientRect().top));
+        if (top < bottom - 1) r.stickyOverlap.push(name(t).slice(0, 40) + ' ярус ' + (i + 1) + ' поверх яруса ' + i + ' на ' + Math.round(bottom - top) + 'px');
+      }
       box.scrollTop = 0;
     }
     const lastRow = [...head.rows].pop();
