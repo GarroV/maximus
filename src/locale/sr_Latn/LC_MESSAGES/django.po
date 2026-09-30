@@ -7146,26 +7146,10 @@ msgstr[0] "%(counter)s papir čeka razvrstavanje"
 msgstr[1] "%(counter)s papira čeka razvrstavanje"
 msgstr[2] "%(counter)s papira čeka razvrstavanje"
 
-#: web/templates/web/suppliers/inbox.html:141
-msgid "суммы со слов управляющих, в P&L их нет"
-msgstr "iznosi po izjavi menadžera, njih nema u P&L-u"
-
 #: web/templates/web/suppliers/inbox.html:151
 #: web/templates/web/suppliers/papers.html:42
 msgid "Сумма со слов"
 msgstr "Iznos po izjavi"
-
-#: web/templates/web/suppliers/inbox.html:164
-msgid "Открыть бумагу"
-msgstr "Otvori papir"
-
-#: web/templates/web/suppliers/inbox.html:170
-msgid "Бумаг на разбор нет."
-msgstr "Nema papira koji čekaju razvrstavanje."
-
-#: web/templates/web/suppliers/inbox.html:171
-msgid "Всё, что принесли с точек, разобрано."
-msgstr "Sve što je doneto sa objekata je razvrstano."
 
 #: web/templates/web/suppliers/invoice.html:32
 #, python-format
@@ -9214,3 +9198,60 @@ msgstr "poziv"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "снятие роли"
 msgstr "uklanjanje uloge"
+
+msgid ""
+"Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на "
+"бумаге."
+msgstr "Jedan papir, više stavki P&L. Stavke moraju da se poklope sa iznosom na papiru."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Позиции счёта"
+msgstr "Stavke fakture"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Позиции счёта %(number)s"
+msgstr "Stavke fakture %(number)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Позиция добавлена и учтена в периоде %(month)s."
+msgstr "Stavka je dodata i uračunata u period %(month)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Позиция не добавлена."
+msgstr "Stavka nije dodata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "их в P&L ещё нет, разбираются на своей странице"
+msgstr "još nisu u P&L i razvrstavaju se na svojoj stranici"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не сходится с бумагой на %(left)s"
+msgstr "ne poklapa se sa papirom za %(left)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сумма позиций сходится с бумагой"
+msgstr "zbir stavki se poklapa sa papirom"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "← К карточке: %(card)s"
+msgstr "← Nazad na %(card)s"
+
+#: web/templates/web/suppliers/invoice.html
+#, python-format
+msgid "%(counter)s позиция"
+msgid_plural "%(counter)s позиций"
+msgstr[0] "%(counter)s stavka"
+msgstr[1] "%(counter)s stavke"
+msgstr[2] "%(counter)s stavki"
+
+#: web/templates/web/suppliers/inbox.html
+#, python-format
+msgid "Бумаги с точек: ждёт разбора %(counter)s"
+msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
+msgstr[0] "Papiri sa objekata: %(counter)s čeka razvrstavanje"
+msgstr[1] "Papiri sa objekata: %(counter)s čekaju razvrstavanje"
+msgstr[2] "Papiri sa objekata: %(counter)s čeka razvrstavanje"
