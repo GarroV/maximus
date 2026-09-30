@@ -161,6 +161,8 @@ def pick_page(options, current: str, *, name: str, q: str, base: str, query: dic
         "back_url": url(base, query),
         "q": q,
         "keep": sorted(keep.items()),
+        # «Сбросить поиск» — эта же страница без `q`, с тем же остальным отбором.
+        "keep_query": urlencode(sorted(keep.items())),
         "everything": {"title": everything, "selected": not current,
                        "url": url(base, query, **{name: ""})},
         "options": [

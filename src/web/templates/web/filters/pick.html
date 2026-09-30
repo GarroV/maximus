@@ -19,7 +19,7 @@
 </div>
 
 {% translate "Найти по названию" as search_label %}
-<form class="search" method="get" role="search">
+<form class="search row" method="get" role="search">
   {% for name, value in keep %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
   {% include "web/components/field.html" with id="q" name="q" label=search_label value=q %}
   <button type="submit">{% translate "Найти" %}</button>
@@ -31,5 +31,5 @@
   <li>{% if option.selected %}<span class="pick__current" aria-current="true">{{ option.title }}</span>{% else %}<a href="{{ option.url }}">{{ option.title }}</a>{% endif %}</li>
   {% endfor %}
 </ul>
-{% if not options %}<p class="sub">{% translate "Ничего не нашлось. Попробуйте часть названия." %}</p>{% endif %}
+{% if not options %}<p class="sub">{% translate "Ничего не нашлось. Попробуйте часть названия." %}{% if q %} <a href="{{ request.path }}{% if keep_query %}?{{ keep_query }}{% endif %}">{% translate "Сбросить поиск" %}</a>{% endif %}</p>{% endif %}
 {% endblock %}

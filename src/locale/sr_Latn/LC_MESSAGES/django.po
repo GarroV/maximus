@@ -4645,6 +4645,9 @@ msgstr "Pronađi po nazivu"
 msgid "Ничего не нашлось. Попробуйте часть названия."
 msgstr "Ništa nije pronađeno. Pokušajte deo naziva."
 
+msgid "Сбросить поиск"
+msgstr "Poništi pretragu"
+
 #: web/templates/web/cash/expenses.html:185
 #: web/templates/web/suppliers/invoices.html:96
 msgid "Показать весь месяц"

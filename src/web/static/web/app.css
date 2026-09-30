@@ -1675,13 +1675,14 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 /* ── Отбор списка ссылками (T224, D081) ────────────────────────
    Подпись слева, значения рядом: подписи стоят столбиком одной ширины, и ряды
    читаются как карточка. Выпадающих списков нет — каждое значение видно сразу.
-   Выбранное — `.seg__current` ядра; у отбора «выбрать…» — словами. */
+   Выбранное — `.seg__current` ядра, и у отбора со страницей выбора тоже: иначе
+   ряд «Статья» читался подписью со ссылкой, а не переключателем (сверка T224). */
 .filters { display: flex; flex-direction: column; gap: var(--space-4); margin: 0 0 var(--space-8); }
 .filters__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-6); }
 /* 14ch — самая длинная подпись («Статья расхода», «Регистр учёта») в одну строку. */
 .filters__label { flex: 0 0 14ch; font-size: var(--fs-meta); color: var(--ink-2); }
-.filters__pick { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-6); }
-.filters__value { font-weight: var(--w-semibold); color: var(--ink); }
+/* «выбрать…» уводит на другую страницу, а не переключает на месте — цветом ссылки. */
+.filters .seg__item--pick { color: var(--accent); }
 
 /* Страница выбора значения: столбик ссылок, выбранное — не ссылка. */
 .pick { list-style: none; margin: var(--space-6) 0 0; padding: 0; max-width: 640px; }
@@ -1693,5 +1694,8 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
   .filters__row { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
   .filters__label { flex-basis: auto; }
   .filters .seg__item, .filters .seg__current { height: var(--tap-min); }
-  .filters__pick a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
+  /* На телефоне длинный ряд («Внутренний», «Только оплаченные») переносится
+     на вторую строку, и капсула-пилюля становилась овалом в две строки.
+     Перенесённый ряд — прямоугольник со скруглением поля ввода. */
+  .filters .seg { border-radius: var(--r-control); }
 }
