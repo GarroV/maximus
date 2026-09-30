@@ -123,6 +123,8 @@
 | `/roles/people/<uuid:user_id>/` | `person-roles` | `web.roles_views.person_roles` |
 | `/rules/` | `rules` | `web.rules_views.index` |
 | `/rules/<str:path>/` | `rule` | `web.rules_views.rule` |
+| `/rules/<str:path>/attempts/` | `rule-attempts` | `web.rules_views.rule_attempts` |
+| `/rules/<str:path>/new/` | `rule-new` | `web.rules_views.rule_new` |
 | `/settings/dodo-is/` | `planned-dodo-is` | `web.planned_views.planned` |
 | `/statement/` | `planned-statement` | `web.planned_views.planned` |
 | `/theme/` | `set-theme` | `web.theme.set_theme` |

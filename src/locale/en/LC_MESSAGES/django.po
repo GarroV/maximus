@@ -4119,12 +4119,12 @@ msgstr ""
 msgid ""
 "Правила страны — общая база для всех партнёров этой страны, поэтому их ведёт "
 "не партнёр, а администратор платформы. Для себя любое из них можно "
-"переопределить формой ниже: правило страны от этого не меняется."
+"переопределить своей новой версией: правило страны от этого не меняется."
 msgstr ""
 "Country rules are the shared base for every partner in that country, so "
 "they're managed by the platform administrator, not the partner. You can "
-"override any of them for yourself using the form below — the country rule "
-"itself doesn't change."
+"override any of them for yourself with a new version of your own — the "
+"country rule itself doesn't change."
 
 #: web/rules_country.py:123
 msgid ""
@@ -7184,10 +7184,10 @@ msgstr "No one has overridden this rule."
 
 #: web/templates/web/rules/rule.html:143
 msgid ""
-"Значение приходит из правил страны. Первая же версия ниже станет "
+"Значение приходит из правил страны. Первая же новая версия станет "
 "переопределением — на том уровне и с той даты, которые вы укажете."
 msgstr ""
-"The value comes from the country rules. The first version below becomes an "
+"The value comes from the country rules. The first new version becomes an "
 "override — at the level and from the date you specify."
 
 #: web/templates/web/rules/rule.html:146
@@ -8742,6 +8742,22 @@ msgstr "Who changes it"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Попытки выйти за рамку"
 msgstr "Attempts to go beyond the frame"
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "← К правилу"
+msgstr "← To the rule"
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Значения, которые рамка страны не пропустила. Свежие сверху."
+msgstr "Values the country frame did not let through. Newest first."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Попыток не было."
+msgstr "No attempts."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Никто не пробовал поставить этому правилу значение за рамкой страны."
+msgstr "Nobody has tried to set this rule to a value outside the country frame."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Поставить можно столько же или больше."

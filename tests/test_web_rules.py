@@ -142,7 +142,7 @@ def june_rule(web_env, path: str):
 
 
 def post_rule(client, path: str, *, value: str, valid_from: str):
-    return client.post(f"/rules/{path}/", {"value": value, "valid_from": valid_from})
+    return client.post(f"/rules/{path}/new/", {"value": value, "valid_from": valid_from})
 
 
 # --- право --------------------------------------------------------------------
@@ -169,8 +169,9 @@ def test_the_rules_screen_refuses_the_other_roles_in_words(client, role):
     answer = client.get("/rules/")
     assert answer.status_code == 403, answer.status_code
     assert "Ведение правил расчёта" in body(answer), "отказ не назвал действия"
-    denied = client.get(f"/rules/{NIGHT_PERCENT}/")
-    assert denied.status_code == 403, denied.status_code
+    for tail in ("", "new/", "attempts/"):
+        denied = client.get(f"/rules/{NIGHT_PERCENT}/{tail}")
+        assert denied.status_code == 403, (tail, denied.status_code)
     client.post("/logout/")
 
 
@@ -184,6 +185,31 @@ def test_a_role_without_the_right_cannot_write_a_rule_through_the_screen(
     assert sql.execute(
         "select count(*) from rule_overrides where path = %s", (NIGHT_PERCENT,)
     ).fetchone()[0] == 0, "отказ отказал, но правило всё-таки записал"
+    client.post("/logout/")
+
+
+def test_the_rule_card_only_reads_and_the_form_is_its_own_page(
+    client, sql, overrides_restored,
+):
+    """Карточка правила — только чтение, форма новой версии — своим адресом (T227).
+
+    Одна страница — одна функция (D081, D087): карточку открывают, чтобы
+    узнать, что действует, а не чтобы набрать значение. Поэтому формы записи на
+    ней нет, запись по её адресу не принимается, а к форме ведёт ссылка.
+    """
+    login_as(client, "admin")
+    card = body(client.get(f"/rules/{NIGHT_PERCENT}/"))
+    assert 'name="valid_from"' not in card, "на карточке правила осталась форма записи"
+    assert f'href="/rules/{NIGHT_PERCENT}/new/?on=' in card, "с карточки не попасть к форме"
+    form = body(client.get(f"/rules/{NIGHT_PERCENT}/new/"))
+    assert 'name="valid_from"' in form and 'name="target"' in form, "формы новой версии нет"
+    written = client.post(
+        f"/rules/{NIGHT_PERCENT}/", {"value": "1.5", "valid_from": "2026-09-01"},
+    )
+    assert written.status_code == 405, written.status_code
+    assert sql.execute(
+        "select count(*) from rule_overrides where path = %s", (NIGHT_PERCENT,)
+    ).fetchone()[0] == 0, "карточка правила приняла запись"
     client.post("/logout/")
 
 
@@ -216,6 +242,7 @@ def test_the_preset_identity_is_not_offered_for_editing(client):
     login_as(client, "admin")
     assert client.get("/rules/country/").status_code == 404
     assert client.get("/rules/valid_from/").status_code == 404
+    assert client.get("/rules/valid_from/new/").status_code == 404
     assert client.get("/rules/hour_types.night.nonesuch/").status_code == 404
     client.post("/logout/")
 
@@ -357,7 +384,7 @@ def test_the_form_offers_a_date_that_does_not_touch_the_closed_month(
     login_as(client, "admin")
     import re
 
-    html = body(client.get(f"/rules/{NIGHT_PERCENT}/"))
+    html = body(client.get(f"/rules/{NIGHT_PERCENT}/new/"))
     offered = re.search(r'id="valid_from"[^>]*?value="(\d{4}-\d{2}-\d{2})"', html)
     assert offered, f"в форме нет подставленной даты:\n{html[-1500:]}"
     assert date.fromisoformat(offered.group(1)) > date(2026, 6, 30), (
@@ -393,8 +420,12 @@ def test_the_rules_never_name_a_ledger_the_role_cannot_see(client, sql):
         assert "groups.kitchen" in html, "дополнительный регистр управляющему открыт (D031)"
         assert "couriers" not in html, "внутренний регистр назван в правилах"
         assert "internal" not in html, "внутренний регистр назван в правилах"
-        # И по прямому адресу правило чужого регистра не открывается.
-        assert client.get(f"/rules/{COURIERS_MEASURE}/").status_code == 404
+        # И по прямому адресу правило чужого регистра не открывается — ни
+        # карточкой, ни формой, ни журналом попыток (T227): три адреса одного
+        # правила обязаны отвечать одинаково, иначе срез держится на одном.
+        for tail in ("", "new/", "attempts/"):
+            answer = client.get(f"/rules/{COURIERS_MEASURE}/{tail}")
+            assert answer.status_code == 404, (tail, answer.status_code)
         client.post("/logout/")
     finally:
         sql.execute(REVOKE_RULES_FROM_MANAGER)
@@ -495,7 +526,7 @@ def test_the_timesheet_shows_the_piece_column_once_the_measure_is_switched(
     client.post("/logout/")
 
 
-def test_the_rule_page_names_the_closed_month_before_the_edit(
+def test_the_new_version_page_names_the_closed_month_before_the_edit(
     client, web_env, payruns_restored,
 ):
     """Граница утверждённой зарплаты названа до правки, а не только после неё.
@@ -507,7 +538,7 @@ def test_the_rule_page_names_the_closed_month_before_the_edit(
     """
     approve_june(client, web_env)
     login_as(client, "admin")
-    html = body(client.get(f"/rules/{NIGHT_PERCENT}/"))
+    html = body(client.get(f"/rules/{NIGHT_PERCENT}/new/"))
     assert "2026-06-30" in html, "страница не называет границу закрытого месяца"
     client.post("/logout/")
 
@@ -568,7 +599,7 @@ def scoped_rule(web_env, path: str, when: date, *, group=None, employee=None):
 
 def post_scoped(client, path: str, *, value: str, valid_from: str, target: str):
     return client.post(
-        f"/rules/{path}/", {"value": value, "valid_from": valid_from, "target": target}
+        f"/rules/{path}/new/", {"value": value, "valid_from": valid_from, "target": target}
     )
 
 
@@ -773,7 +804,7 @@ def test_the_levels_never_name_a_group_the_role_cannot_see(client, sql, override
     sql.execute(GRANT_RULES_TO_MANAGER)
     try:
         login_as(client, "manager")
-        html = body(client.get(f"/rules/{NIGHT_PERCENT}/"))
+        html = body(client.get(f"/rules/{NIGHT_PERCENT}/new/"))
         assert "Кому" in html, "выбора уровня на форме нет вовсе"
         assert "couriers" not in html and "Курьеры" not in html, html[:900]
         answer = post_scoped(
