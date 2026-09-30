@@ -4704,10 +4704,33 @@ msgstr "No expenses."
 #: web/templates/web/cash/expenses.html:183
 msgid ""
 "Под выбранный отбор ничего не подошло. Снимите точку, статью, регистр или\n"
-"раздвиньте даты — и станет видно всё, что есть за месяц."
+"выберите другой месяц — и станет видно всё, что есть."
 msgstr ""
 "Nothing matched the selected filters. Clear the unit, item, or ledger, or\n"
-"widen the dates — and you will see everything there is for the month."
+"pick another month — and you will see everything there is."
+
+#: web/templates/web/components/filters.html web/templates/web/filters/pick.html
+msgid "выбрать…"
+msgstr "choose…"
+
+#: web/templates/web/components/filters.html web/templates/web/filters/pick.html
+msgid "не найдено"
+msgstr "not found"
+
+#: web/templates/web/components/filters.html web/templates/web/filters/pick.html
+msgid "Назад к списку"
+msgstr "Back to the list"
+
+#: web/templates/web/components/filters.html web/templates/web/filters/pick.html
+msgid "Найти по названию"
+msgstr "Find by name"
+
+#: web/templates/web/components/filters.html web/templates/web/filters/pick.html
+msgid "Ничего не нашлось. Попробуйте часть названия."
+msgstr "Nothing found. Try part of the name."
+
+msgid "Сбросить поиск"
+msgstr "Clear search"
 
 #: web/templates/web/cash/expenses.html:185
 #: web/templates/web/suppliers/invoices.html:96
@@ -7455,12 +7478,10 @@ msgstr "No invoices."
 #: web/templates/web/suppliers/invoices.html:94
 msgid ""
 "Под выбранный отбор ничего не подошло. Снимите контрагента, регистр или\n"
-"состояние оплаты, либо раздвиньте даты — и станет видно всё, что есть за "
-"месяц."
+"состояние оплаты, либо выберите другой месяц — и станет видно всё, что есть."
 msgstr ""
 "Nothing matched the selected filters. Clear the counterparty, ledger, or\n"
-"payment status, or widen the dates — and you will see everything there is\n"
-"for the month."
+"payment status, or pick another month — and you will see everything there is."
 
 #: web/templates/web/suppliers/invoices.html:99
 msgid "За этот месяц счетов ещё нет"

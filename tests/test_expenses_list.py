@@ -271,30 +271,33 @@ def test_a_foreign_unit_in_the_filter_is_indistinguishable_from_nothing(
     login_as(client, "manager")
     try:
         alien = body(client.get(LIST, {**WIDE, "unit": units["BG1"]}))
-        nobody = body(client.get(LIST, {**WIDE, "unit": str(uuid.uuid4())}))
+        invented = str(uuid.uuid4())
+        nobody = body(client.get(LIST, {**WIDE, "unit": invented}))
 
         assert shown(alien) == [], "чужая строка пришла через фильтр"
         assert total_of(alien) == Decimal("0")
         assert "BG1" not in alien and "Beograd" not in alien
-        assert _without_the_filter(alien) == _without_the_filter(nobody), (
-            "по ответу видно, что чужая точка существует"
-        )
+        assert _without_the_filter(alien, units["BG1"]) == _without_the_filter(
+            nobody, invented
+        ), "по ответу видно, что чужая точка существует"
     finally:
         client.post("/logout/")
 
 
-def _without_the_filter(page: str) -> str:
+def _without_the_filter(page: str, sent: str) -> str:
     """Страница без того, что заведомо различается у двух запросов.
 
     Убираются три вещи, и ни одна из них не про чужие данные: ключ формы
-    (он новый на каждый ответ), адрес возврата у переключателя языка (в нём
-    лежит тот самый номер из адреса, который прислал сам клиент) и значения
-    полей-uuid. Всё остальное обязано совпасть слово в слово — иначе по ответу
-    видно, что чужая точка существует.
+    (он новый на каждый ответ), адрес возврата у переключателя языка и сам
+    номер, который прислал клиент (`sent`). Отбор теперь ссылками (D081), и
+    каждая ссылка несёт весь остальной отбор — то есть повторяет номер из
+    адреса запроса. Заменяется только он, а не всякий uuid: номер чужой точки,
+    пришедший из базы, обязан остаться в сравнении. Всё остальное обязано
+    совпасть слово в слово — иначе по ответу видно, что чужая точка существует.
     """
     page = re.sub(r'name="csrfmiddlewaretoken" value="[^"]+"', "", page)
     page = re.sub(r'name="next" value="[^"]*"', "", page)
-    return re.sub(r'value="[0-9a-f-]{36}"', 'value="…"', page)
+    return page.replace(sent, "…")
 
 
 def test_a_foreign_tenant_item_in_the_filter_reveals_nothing(

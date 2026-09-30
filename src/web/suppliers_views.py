@@ -35,7 +35,7 @@ from django.utils.translation import gettext_lazy
 
 from core.models import INVOICE, Counterparty, Unit
 
-from . import cash, suppliers
+from . import cash, filter_links, suppliers
 from .cash_views import _ledger, _till, _unit, _vat_rate
 from .counterparties_views import found as counterparties_found
 from .dbrefusal import BadInput
@@ -185,6 +185,9 @@ def invoices(request):
         "left_raw": f"{left}", "left_text": money(left),
         "counted": len(rows),
         "filters": _filter_fields(who, chosen),
+        "reset_url": filter_links.reset(
+            reverse("invoices"), filter_links.query_of(chosen, filters_default())
+        ),
         # Сужен ли отбор — от этого зависит, что говорит пустой список (T160).
         "narrowed": narrowed(chosen),
         "add_url": reverse("invoice-new"),
@@ -277,30 +280,75 @@ def _state_title(state: str) -> str:
 
 
 def _filter_fields(who, chosen: dict) -> list[dict]:
-    """Поля отбора. Списки — только из того, что видно роли (D023)."""
-    return [
-        {"kind": "date", "name": "from", "label": LABELS["from"],
-         "value": chosen["from"].isoformat()},
-        {"kind": "date", "name": "to", "label": LABELS["to"],
-         "value": chosen["to"].isoformat()},
-        _select(
+    """Отбор ссылками (T224, D081). Варианты — только из того, что видно роли (D023).
+
+    Регистры и состояние оплаты — рядом ссылок: вариантов единицы. Контрагентов
+    десятки — у них выбранное словами и страница выбора с поиском
+    (`counterparty_pick`). Ряд регистров из одного варианта не показывается.
+    """
+    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default())
+    ledgers = [(code, ledger_title(code)) for code in LEDGER_CODES
+               if code in who.visible_ledgers]
+    fields = [
+        filter_links.months(chosen, base=base, query=query),
+        filter_links.picked(
             "counterparty", LABELS["counterparty"],
-            counterparties_found().values_list("id", "title"),
-            chosen["counterparty"], required=False, empty_label=_("Все контрагенты"),
-        ),
-        _select(
-            "ledger", LABELS["ledger"],
-            [(code, ledger_title(code)) for code in LEDGER_CODES
-             if code in who.visible_ledgers],
-            chosen["ledger"], required=False, empty_label=_("Все регистры"),
-        ),
-        _select(
-            "state", LABELS["state"],
-            [("unpaid", _("Только неоплаченные")), ("paid", _("Только оплаченные"))],
-            "" if chosen["state"] == "all" else chosen["state"],
-            required=False, empty_label=_("Все счета"),
+            _counterparty_title(chosen["counterparty"]), chosen["counterparty"],
+            base=base, query=query, pick_url=reverse("invoice-counterparty-pick"),
+            everything=_("Все контрагенты"),
         ),
     ]
+    if len(ledgers) > 1 or chosen["ledger"]:
+        fields.append(filter_links.row(
+            "ledger", LABELS["ledger"], ledgers, chosen["ledger"],
+            base=base, query=query, everything=_("Все регистры"),
+        ))
+    # «Все счета» — умолчание `all`; в адрес оно не пишется, поэтому у варианта
+    # пустое значение, а не `all`: иначе ссылка «все» несла бы лишний параметр.
+    fields.append(filter_links.row(
+        "state", LABELS["state"],
+        [("unpaid", _("Только неоплаченные")), ("paid", _("Только оплаченные"))],
+        "" if chosen["state"] == "all" else chosen["state"],
+        base=base, query=query, everything=_("Все счета"),
+    ))
+    return fields
+
+
+def _counterparty_title(counterparty_id: str) -> str:
+    """Подпись выбранного контрагента; чужой и выдуманный — одинаково (D023)."""
+    if not counterparty_id:
+        return ""
+    found = counterparties_found().filter(pk=counterparty_id).values_list("title", flat=True)
+    return next(iter(found), "") or _("не найдено")
+
+
+@login_required
+def counterparty_pick(request):
+    """Страница выбора контрагента для отбора счетов (T224).
+
+    Отдельная страница, а не выпадающий список (D081). Поиск — тот же, что в
+    справочнике контрагентов (`counterparties_views.found`): по названию,
+    налоговому номеру и написаниям из выписки. Список — из видимых роли: срез
+    делает база (D014).
+    """
+    who = get_current_principal(request)
+    if who is None or who.tenant_id is None:
+        return _no_membership(request, _(
+            "Вас ещё не завели ни к одному партнёру, поэтому счетов у вас нет. "
+            "Попросите администратора сети добавить вас."
+        ))
+    try:
+        chosen = filters_from(request)
+    except BadInput:
+        return redirect(reverse("invoices") + "?" + request.GET.urlencode())
+    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default())
+    q = (request.GET.get("q") or "").strip()
+    options = [(str(pk), title) for pk, title in counterparties_found(q).values_list("id", "title")]
+    return render(request, "web/filters/pick.html", filter_links.pick_page(
+        options, chosen["counterparty"], name="counterparty", q=q, base=base,
+        query=query, title=LABELS["counterparty"], everything=_("Все контрагенты"),
+        searched=True,
+    ))
 
 
 def _notice(request) -> str:

@@ -1,0 +1,35 @@
+{% extends "web/base.html" %}{% load i18n %}
+{% comment %}
+Страница выбора одного значения для отбора списка (T224, D081).
+
+Вместо выпадающего списка — страница: значений десятки, и выбор среди них —
+отдельное действие со своим поиском. Каждое значение — ссылка обратно на список
+с тем же остальным отбором; выбранное — не ссылка. «Все» стоит первым: снять
+отбор так же легко, как поставить.
+
+Поиск — обычная форма GET: скрытые поля несут остальной отбор, чтобы, пока
+человек ищет, месяц и регистр не терялись. Это поиск, а не отбор списка:
+кнопка у него «Найти», и нажимают её, чтобы сузить варианты на этой же странице.
+{% endcomment %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="head">
+  <h1>{{ title }}</h1>
+  <a class="btn" href="{{ back_url }}">{% translate "Назад к списку" %}</a>
+</div>
+
+{% translate "Найти по названию" as search_label %}
+<form class="search row" method="get" role="search">
+  {% for name, value in keep %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+  {% include "web/components/field.html" with id="q" name="q" label=search_label value=q %}
+  <button type="submit">{% translate "Найти" %}</button>
+</form>
+
+<ul class="pick">
+  <li>{% if everything.selected %}<span class="pick__current" aria-current="true">{{ everything.title }}</span>{% else %}<a href="{{ everything.url }}">{{ everything.title }}</a>{% endif %}</li>
+  {% for option in options %}
+  <li>{% if option.selected %}<span class="pick__current" aria-current="true">{{ option.title }}</span>{% else %}<a href="{{ option.url }}">{{ option.title }}</a>{% endif %}</li>
+  {% endfor %}
+</ul>
+{% if not options %}<p class="sub">{% translate "Ничего не нашлось. Попробуйте часть названия." %}{% if q %} <a href="{{ request.path }}{% if keep_query %}?{{ keep_query }}{% endif %}">{% translate "Сбросить поиск" %}</a>{% endif %}</p>{% endif %}
+{% endblock %}

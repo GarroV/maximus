@@ -282,6 +282,8 @@ urlpatterns = [
     # раньше адреса по номеру записи, иначе `new` разбирался бы как номер.
     path("expenses/", expenses_views.expenses, name="expenses"),
     path("expenses/new/", cash_views.cash_expense, name="expense-new"),
+    # Выбор статьи для отбора списка (T224): страница вместо выпадающего списка.
+    path("expenses/filter/item/", expenses_views.expense_item_pick, name="expense-item-pick"),
     # Нераспределённое (T111): суммы без точки и пересчёт разнесения. Постоянный
     # адрес, поэтому стоит раньше адреса по номеру записи.
     path(
@@ -321,6 +323,12 @@ urlpatterns = [
     # раньше адреса по номеру записи, иначе `new` разбирался бы как номер.
     path("invoices/", suppliers_views.invoices, name="invoices"),
     path("invoices/new/", suppliers_views.invoice, name="invoice-new"),
+    # Выбор контрагента для отбора списка (T224): страница вместо выпадающего списка.
+    path(
+        "invoices/filter/counterparty/",
+        suppliers_views.counterparty_pick,
+        name="invoice-counterparty-pick",
+    ),
     path("invoices/<uuid:document_id>/", suppliers_views.invoice, name="invoice"),
     # Оплата — свой адрес, а не поле в форме счёта: платёж это отдельное
     # событие со своей датой, и привязать его дату к правке счёта значило бы
