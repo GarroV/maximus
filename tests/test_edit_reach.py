@@ -100,7 +100,9 @@ def test_a_version_dated_on_the_first_says_nothing_extra(
     не о чем.
     """
     login_as(client, "admin")
-    answer = client.post(f"/rules/{NET_FACTOR}/new/", {"value": "0.66", "valid_from": FIRST_OF_JULY})
+    answer = client.post(
+        f"/rules/{NET_FACTOR}/new/", {"value": "0.66", "valid_from": FIRST_OF_JULY}
+    )
     assert answer.status_code == 302, body(answer)
     html = body(client.get(answer["Location"]))
     client.post("/logout/")
