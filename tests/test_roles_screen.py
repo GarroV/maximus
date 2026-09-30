@@ -290,10 +290,21 @@ def test_removing_a_role_the_person_does_not_hold_is_refused(client, web_env):
     person = re.search(
         r'/roles/people/([0-9a-f-]+)/', person_row(body(client.get("/roles/people/")), "Бухгалтер"),
     ).group(1)
-    before = AccessLogEntry.objects.count()
-    response = client.post(f"/roles/people/{person}/", {
-        "role": role_id(html, "manager"), "action": "remove", "reason": "проверка",
-    })
-    assert response.status_code == 409
-    assert "Этой роли у человека нет" in body(response)
-    assert AccessLogEntry.objects.count() == before, "в историю записано снятие того, чего не было"
+    # Вторая роль нужна, чтобы не упереться в «единственную роль»: тот отказ
+    # тоже ничего не пишет и прикрыл бы проверку.
+    from core.models import Membership, Role
+
+    extra = Membership.objects.create(
+        tenant_id=Role.objects.get(pk=role_id(html, "director")).tenant_id,
+        user_id=person, role_id=role_id(html, "director"),
+    )
+    try:
+        before = AccessLogEntry.objects.count()
+        response = client.post(f"/roles/people/{person}/", {
+            "role": role_id(html, "manager"), "action": "remove", "reason": "проверка",
+        })
+        assert response.status_code == 409
+        assert "Этой роли у человека нет" in body(response)
+        assert AccessLogEntry.objects.count() == before, "в историю записано снятие того, чего не было"
+    finally:
+        extra.delete()
