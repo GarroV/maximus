@@ -191,14 +191,38 @@ def _refusal(request, refusal, *, status=None):
     )
 
 
-def _guard(request):
-    """Пропустить того, у кого есть право вести справочники; иначе — отказ страницей."""
+def _guard(request, *rights: str):
+    """Пропустить того, у кого есть все названные права; иначе — отказ страницей.
+
+    Без аргументов — право вести справочники. Люди и условия найма спрашивают
+    свои (`staff.manage`, `terms.manage`, T236): заведение сотрудника пишет и
+    человека, и первую версию условий, поэтому ему нужны оба.
+    """
     who = _who(request)
     try:
-        permissions.check(who, permissions.DIRECTORY_MANAGE)
+        for right in rights or (permissions.DIRECTORY_MANAGE,):
+            permissions.check(who, right)
     except permissions.PermissionRefused as refusal:
         return who, _refusal(request, refusal)
     return who, None
+
+
+def _may_edit_employee(who) -> bool:
+    """Показывать ли формы карточки сотрудника: хватает любого из двух прав.
+
+    Какая форма чьим правом пишется, решает `POST` (`_employee_right`): отказ
+    там словами, а база закрывает запись своей политикой (`0274`).
+    """
+    return permissions.has(who, permissions.STAFF_MANAGE) or permissions.has(
+        who, permissions.TERMS_MANAGE,
+    )
+
+
+def _employee_right(what: str | None) -> str:
+    """Право формы карточки: человек и его точки — люди, остальное — условия."""
+    if what in ("person", "units"):
+        return permissions.STAFF_MANAGE
+    return permissions.TERMS_MANAGE
 
 
 def _reader(request):
@@ -553,7 +577,7 @@ def employees(request):
     who, denied = _reader(request)
     if denied is not None:
         return denied
-    may_manage = permissions.has(who, permissions.DIRECTORY_MANAGE)
+    may_manage = permissions.has(who, permissions.STAFF_MANAGE)
 
     query = (request.GET.get("q") or "").strip()
     rows = _employee_rows(who, query, with_key=may_manage)
@@ -758,7 +782,7 @@ def employee(request, employee_id):
     # на своего человека 200, а на чужого — 403, то есть узнавал бы о его
     # существовании ровно по коду ответа (D023).
     person = _employee_or_404(who, employee_id)
-    may_manage = permissions.has(who, permissions.DIRECTORY_MANAGE)
+    may_manage = _may_edit_employee(who)
 
     notice = error = ""
     # Код ответа формы: 200, пока ничего не отклонено. Отказ по состоянию данных
@@ -772,7 +796,7 @@ def employee(request, employee_id):
         # а «сохранено» и «отказано» не должны быть неразличимы для того, кто
         # смотрит на код ответа.
         try:
-            permissions.check(who, permissions.DIRECTORY_MANAGE)
+            permissions.check(who, _employee_right(request.POST.get("what")))
         except permissions.PermissionRefused as refusal:
             return _refusal(request, refusal)
         try:
@@ -846,7 +870,7 @@ def employee_new(request):
     (`0130_directory_permissions`), то есть запись мимо интерфейса тоже не
     пройдёт.
     """
-    who, denied = _guard(request)
+    who, denied = _guard(request, permissions.STAFF_MANAGE, permissions.TERMS_MANAGE)
     if denied is not None:
         return denied
 
@@ -1413,7 +1437,7 @@ def _employee_context(
         # те же самые, которыми ответит сам отказ на `POST`.
         return {
             **shown,
-            "denied": permissions.explain(who, permissions.DIRECTORY_MANAGE),
+            "denied": permissions.explain(who, permissions.STAFF_MANAGE),
             # Сквозного ключа среди фактов нет намеренно — там JMBG, и на этом
             # экране он нужен тому, кто сводит загрузку табеля, а не точке.
             "facts": [

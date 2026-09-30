@@ -48,7 +48,8 @@ RIGHT_GROUPS = (
      ("timesheet.edit", "unit.close", "suppliers.classify")),
     (gettext_noop("Зарплата и деньги"),
      ("payrun.calculate", "period.approve", "period.reopen", "payslip.freeze", "retro.post")),
-    (gettext_noop("Правила и справочники"), ("rules.manage", "directory.manage")),
+    (gettext_noop("Правила и справочники"),
+     ("rules.manage", "terms.manage", "staff.manage", "directory.manage")),
     (gettext_noop("Доступ и история"), ("roles.manage",)),
 )
 LEDGER_GROUP = gettext_noop("Срезы по регистрам учёта")

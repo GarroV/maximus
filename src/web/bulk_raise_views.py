@@ -27,7 +27,7 @@ from django.views.decorators.http import require_POST
 
 from core.models import EmployeeGroup, EmploymentTerm
 
-from . import directory
+from . import directory, permissions
 from .dbrefusal import BadInput, ConstraintRefused, saving
 from .directory_views import _date, _guard, _number
 from .format import day, exact
@@ -49,7 +49,7 @@ def _new_rate(current: Decimal, percent: Decimal | None, amount: Decimal | None)
 @login_required
 @require_POST
 def raise_rates(request):
-    who, denied = _guard(request)
+    who, denied = _guard(request, permissions.TERMS_MANAGE)
     if denied is not None:
         return denied
 
