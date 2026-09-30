@@ -9164,3 +9164,9 @@ msgid ""
 "партнёра: зарплата переносится в P&L целиком, и по части сети она легла "
 "бы не на те точки."
 msgstr "Only someone who sees all of the partner's units and ledgers can approve the month: payroll is carried into the P&L as a whole, and from part of the network it would land on the wrong units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У сотрудника доли всех точек нулевые — зарплату не на что разделить. "
+"Задайте доли на карточке сотрудника."
+msgstr "All unit shares of this employee are zero, so the salary cannot be split. Set the shares on the employee card."

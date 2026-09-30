@@ -659,3 +659,27 @@ def test_the_database_refuses_two_overlapping_rows_of_one_unit(sql):
             "insert into employee_units (tenant_id, employee_id, unit_id, valid_from) "
             "values (%s, %s, %s, '2026-06-01')", (tenant, person, bg1),
         )
+
+
+def test_the_base_refuses_a_zero_or_negative_share(sql):
+    """Доля не бывает нулевой или отрицательной — это держит база, а не форма.
+
+    Форма такие доли отвергает словами, но запись мимо формы (импорт, SQL,
+    следующий экран) дала бы расчёту набор с суммой весов ноль, и делить было
+    бы не на что. Пустая доля («поровну») остаётся законной.
+    """
+    import psycopg
+
+    person, _ext = sql.execute(
+        "select id, external_id from employees order by external_id limit 1"
+    ).fetchone()
+    for bad in ("0", "-0.5"):
+        with pytest.raises(psycopg.errors.CheckViolation):
+            sql.execute(
+                """insert into employee_units
+                       (tenant_id, employee_id, unit_id, share, valid_from)
+                   select e.tenant_id, e.id, %s, %s, '2031-01-01'
+                     from employees e where e.id = %s""",
+                (unit(sql, "NS1"), bad, person),
+            )
+    assert not bindings(sql, person), "нулевая доля записалась"

@@ -8999,3 +8999,9 @@ msgid ""
 "партнёра: зарплата переносится в P&L целиком, и по части сети она легла "
 "бы не на те точки."
 msgstr "Mesec može da odobri samo onaj ko vidi sve objekte i sve registre partnera: zarade se prenose u P&L u celini, a iz dela mreže bi pale na pogrešne objekte."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У сотрудника доли всех точек нулевые — зарплату не на что разделить. "
+"Задайте доли на карточке сотрудника."
+msgstr "Svi udeli objekata ovog zaposlenog su nula, pa zaradu nije moguće podeliti. Unesite udele na kartici zaposlenog."
