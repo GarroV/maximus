@@ -8956,3 +8956,17 @@ msgstr "u izveštaju nema prethodnog meseca — nema s čim da se uporedi"
 #, python-format
 msgid "против %(value)s (%(month)s)"
 msgstr "u odnosu na %(value)s (%(month)s)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
+"«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
+"утверждён — сообщите администратору продукта."
+msgstr "Plate zaposlenih na nivou mreže nisu raspoređene po objektima: za stavke „Plata“ i „Porezi na platu“ ne postoji pravilo raspodele. Mesec nije odobren — obavestite administratora proizvoda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Утвердить месяц может только тот, кому видны все точки и все регистры "
+"партнёра: зарплата переносится в P&L целиком, и по части сети она легла "
+"бы не на те точки."
+msgstr "Mesec može da odobri samo onaj ko vidi sve objekte i sve registre partnera: zarade se prenose u P&L u celini, a iz dela mreže bi pale na pogrešne objekte."
