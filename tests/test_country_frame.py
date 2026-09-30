@@ -92,7 +92,7 @@ def post_rule(client, path: str, *, value: str, valid_from: str = SEPTEMBER, tar
     fields = {"value": value, "valid_from": valid_from}
     if target:
         fields["target"] = target
-    return client.post(f"/rules/{path}/", fields)
+    return client.post(f"/rules/{path}/new/", fields)
 
 
 def overrides_of(sql, path: str) -> int:
@@ -407,7 +407,10 @@ def test_the_refused_attempt_is_written_down_and_shown(
     """
     login_as(client, "admin")
     post_rule(client, NIGHT, value="1.10")
-    html = content(client.get(f"/rules/{NIGHT}/"))
+    html = content(client.get(f"/rules/{NIGHT}/attempts/"))
+    # Журнал своей страницей (T227), а карточка ведёт к нему ссылкой с числом.
+    card = content(client.get(f"/rules/{NIGHT}/"))
+    assert f"/rules/{NIGHT}/attempts/" in card and "Попытки выйти за рамку: 1" in card, card[-900:]
     client.post("/logout/")
 
     written = attempts_of(sql, NIGHT)

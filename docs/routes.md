@@ -82,6 +82,7 @@
 | `/invoices/<uuid:document_id>/positions/` | `invoice-positions` | `web.suppliers_views.invoice_positions` |
 | `/invoices/filter/counterparty/` | `invoice-counterparty-pick` | `web.suppliers_views.counterparty_pick` |
 | `/invoices/new/` | `invoice-new` | `web.suppliers_views.invoice` |
+| `/labor-cost/` | `people-cost` | `web.people_views.cost_page` |
 | `/login/` | `login` | `web.views.login_page` |
 | `/logout/` | `logout` | `web.views.logout_page` |
 | `/papers/` | `papers` | `web.papers_views.paper_list` |
@@ -124,6 +125,8 @@
 | `/roles/people/<uuid:user_id>/` | `person-roles` | `web.roles_views.person_roles` |
 | `/rules/` | `rules` | `web.rules_views.index` |
 | `/rules/<str:path>/` | `rule` | `web.rules_views.rule` |
+| `/rules/<str:path>/attempts/` | `rule-attempts` | `web.rules_views.rule_attempts` |
+| `/rules/<str:path>/new/` | `rule-new` | `web.rules_views.rule_new` |
 | `/settings/dodo-is/` | `planned-dodo-is` | `web.planned_views.planned` |
 | `/statement/` | `planned-statement` | `web.planned_views.planned` |
 | `/theme/` | `set-theme` | `web.theme.set_theme` |
@@ -134,3 +137,5 @@
 | `/timesheets/<uuid:period_id>/insured/` | `timesheet-insured` | `timesheets.views.insured` |
 | `/timesheets/<uuid:period_id>/piece/` | `timesheet-piece` | `timesheets.views.piece` |
 | `/timesheets/<uuid:period_id>/reopen/` | `timesheet-reopen` | `timesheets.views.reopen` |
+| `/turnover/` | `people-churn` | `web.people_views.churn_page` |
+| `/work-hours/` | `people-hours` | `web.people_views.hours_page` |

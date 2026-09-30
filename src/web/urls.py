@@ -451,6 +451,11 @@ urlpatterns = [
     # на страницу правила, а не искать её глазами.
     path("rules/", rules_views.index, name="rules"),
     path("rules/<str:path>/", rules_views.rule, name="rule"),
+    # Шаги внутри правила, а не разделы (T227, D081): новая версия и журнал
+    # отвергнутых рамкой попыток — своими страницами, с карточки правила
+    # ссылками. В левой панели их нет: панель ведёт к разделу, а не к шагу.
+    path("rules/<str:path>/new/", rules_views.rule_new, name="rule-new"),
+    path("rules/<str:path>/attempts/", rules_views.rule_attempts, name="rule-attempts"),
     # Месяц календаря адресуется самим месяцем, а не uuid: строка одна на
     # страну и месяц, и `2026-06` в адресе читается человеком, в отличие от
     # случайного ключа.
@@ -480,6 +485,12 @@ urlpatterns = [
     # Аналитика по кадрам (T167, модуль 12 эталона). Единственный отчёт, который
     # НЕ живёт внутри периода: он отвечает на вопрос не про месяц, а про полгода,
     # и выбор месяца на входе означал бы, что за него уже ответили.
+    # Аналитика по людям — три страницы, у каждой свой корень адреса (T226,
+    # D081): пункт левой панели выделяется по корню, и общий корень выделил
+    # бы все три пункта разом. Прежний адрес с `?tab=` ведёт на нужную из них.
+    path("labor-cost/", people_views.cost_page, name="people-cost"),
+    path("turnover/", people_views.churn_page, name="people-churn"),
+    path("work-hours/", people_views.hours_page, name="people-hours"),
     path("analytics/people/", people_views.analytics, name="people-analytics"),
     # Экраны, которых ещё нет: маршруты собираются из того же списка, что и сами
     # страницы (`web/stages.py`), — иначе экран заводился бы в двух местах и
