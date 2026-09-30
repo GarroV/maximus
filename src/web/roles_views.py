@@ -240,6 +240,11 @@ SECTIONS = (
 
 
 def _sections(current: str) -> list:
+    # Страница одного человека — шаг внутри «Людей», а не пятая страница
+    # раздела: ряда у неё нет, есть дорога назад. Ряд, где ни один пункт не
+    # выделен, читался бы как второй набор навигации (сверка norma).
+    if not current:
+        return []
     return [
         {"title": title, "url": reverse(route), "selected": route == current}
         for route, title in SECTIONS
