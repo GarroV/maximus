@@ -70,5 +70,9 @@
   "Валюту отчёта укажите кодом из трёх латинских букв, например EUR.": {
     "en": "Enter the reporting currency as a three-letter Latin code, for example EUR.",
     "sr": "Unesite valutu izveštaja kodom od tri latinična slova, na primer EUR."
+  },
+  "Этой роли у человека нет.": {
+    "en": "This person does not hold this role.",
+    "sr": "Ova osoba nema tu ulogu."
   }
 }

@@ -9177,3 +9177,7 @@ msgstr "Enter the accounting currency as a three-letter Latin code, for example 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Страну укажите кодом из двух латинских букв, например RS."
 msgstr "Enter the country as a two-letter Latin code, for example RS."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Этой роли у человека нет."
+msgstr "This person does not hold this role."

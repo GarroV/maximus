@@ -637,6 +637,11 @@ def person_roles(request, user_id):
     here = reverse("person-roles", args=[user_id])
     if request.POST.get("action") == "remove":
         held = Membership.objects.filter(tenant_id=who.tenant_id, user_id=user_id)
+        if not held.filter(role_id=role.pk).exists():
+            # Снимать нечего — и записывать в историю нечего: запись «снял
+            # роль», которой не было, врёт о том, что с доступом происходило.
+            return _person_page(request, who, person,
+                                error=_("Этой роли у человека нет."), status=409)
         if held.count() <= 1:
             # Человек без единой роли перестаёт существовать для продукта: он
             # входит и не видит ничего, включая объяснения почему.
