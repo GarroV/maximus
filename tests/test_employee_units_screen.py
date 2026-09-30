@@ -683,3 +683,49 @@ def test_the_base_refuses_a_zero_or_negative_share(sql):
                 (unit(sql, "NS1"), bad, person),
             )
     assert not bindings(sql, person), "нулевая доля записалась"
+
+
+def test_a_hidden_network_row_gives_the_manager_a_neutral_refusal(client, web_env, sql):
+    """Скрытая от управляющего строка «вся сеть» не выдаёт себя отказом базы.
+
+    Строку «вся сеть» видит только роль без ограничения по точкам (`0271`).
+    Управляющий, привязывая своего человека к своей точке, упирается в неё
+    ограничением `employee_units_network_alone` — и сырой отказ базы сказал бы
+    ему, что у человека есть невидимая ему привязка, да ещё какая. Ответ —
+    словами, без упоминания сети, и ничего не записано.
+    """
+    person, _ext = sql.execute(
+        """select e.id, e.external_id from employees e
+             join employment_terms t on t.employee_id = e.id
+             join units u on u.id = t.unit_id
+            where u.code = 'NS1' order by e.external_id limit 1"""
+    ).fetchone()
+    sql.execute(
+        """insert into employee_units (tenant_id, employee_id, unit_id, valid_from)
+           select tenant_id, id, null, '2026-01-01' from employees where id = %s""",
+        (person,),
+    )
+    granted = sql.execute(
+        """update roles set permissions = permissions || '["directory.manage"]'::jsonb
+            where code = 'manager' and not permissions ? 'directory.manage'
+        returning id"""
+    ).fetchall()
+    try:
+        login_as(client, "manager")
+        answer = client.post(f"{LIST}{person}/", {
+            "what": "units", "units_from": "2026-06-01", "units": [unit(sql, "NS1")],
+        })
+    finally:
+        for (role_id,) in granted:
+            sql.execute(
+                "update roles set permissions = permissions - 'directory.manage' where id = %s",
+                (role_id,),
+            )
+        client.post("/logout/")
+
+    assert answer.status_code == 409, (answer.status_code, str(answer.context["error"]))
+    error = str(answer.context["error"])
+    assert "оперативному директору" in error, error
+    for leak in ("сет", "network", "период уже занят"):
+        assert leak not in error.lower(), f"отказ выдаёт скрытую строку: {error}"
+    assert [row[0] for row in bindings(sql, person)] == [None], "запись всё-таки прошла"
