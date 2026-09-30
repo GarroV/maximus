@@ -660,6 +660,109 @@ form.upload.card { max-width: 640px; }   /* специфичнее общего 
 .right:has(input:checked) { color: var(--ink); font-weight: var(--w-medium); }
 .right:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* Матрица прав — сетка «право × роль» эталона «Роли и права» (T233). Столбцы
+   ролей узкие и одинаковые (три буквы сокращения), первый столбец забирает всё
+   остальное: так четыре роли помещаются и в 390 без прокрутки. Прокрутка вбок
+   остаётся запасом на случай, когда партнёр заведёт много своих ролей; тогда
+   названия прав прилипают к левому краю. Высота не ограничена — сетка короче
+   экрана, а внутренняя вертикальная прокрутка прятала бы нижние группы. */
+.matrix-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-block);
+}
+table.matrix { table-layout: fixed; min-width: calc(160px + var(--matrix-cols, 4) * 48px); }
+table.matrix th, table.matrix td {
+  height: var(--row); padding: var(--space-2) var(--space-3);
+  text-align: center; width: 56px;
+}
+table.matrix .matrix-right {
+  width: auto; text-align: left; padding-left: var(--space-5);
+  position: sticky; left: 0; background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  font-size: var(--fs-dense); text-transform: none; letter-spacing: 0;
+  font-weight: var(--w-regular); color: var(--ink);
+}
+table.matrix thead th { background: var(--surface-head); font-size: var(--fs-dense); color: var(--ink); }
+table.matrix thead .matrix-right { background: var(--surface-head); font-size: var(--fs-micro);
+  text-transform: uppercase; letter-spacing: var(--tracking-micro); color: var(--ink-3); }
+table.matrix tr.matrix-group td {
+  text-align: left; padding: var(--space-2) var(--space-5); height: auto;
+  background: var(--surface-2); border-top: 1px solid var(--line-strong);
+  font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro);
+  color: var(--ink-3); font-weight: var(--w-semibold);
+}
+table.matrix input[type="checkbox"] { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+table.matrix tfoot button { padding: 0 var(--space-3); min-width: 0; }
+/* Прочерк — «у этой роли такого не бывает», точка — «регистр виден». Цвет у
+   точки акцентный, как у включённой галочки: смысл тот же, «есть у роли». */
+.wall { font-family: var(--font-num); color: var(--ink-empty); cursor: default; }
+.granted-mark { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+p.note.matrix-legend {
+  display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6);
+  margin: var(--space-2) 0 var(--space-4);
+}
+.matrix-legend > span { display: inline-flex; align-items: center; gap: var(--space-2); }
+/* Флажок легенды — тот же, что в сетке, а не серый выключенный: легенда
+   объясняет то, что человек видит в таблице. Нажать его нельзя. */
+.matrix-legend input { margin: 0; accent-color: var(--accent); pointer-events: none; }
+table.matrix thead small { display: block; font-size: 10px; line-height: 12px; color: var(--ink-3);
+  font-weight: var(--w-regular); text-transform: none; letter-spacing: 0; }
+
+/* Роль, которая у человека уже есть: карточка со сроком, причиной снятия и
+   кнопкой. Карточки идут столбиком с отбивкой, как строки списка; ширина — как
+   у формы выдачи ниже, а не узкая карточка входа. */
+form.card.held-role { max-width: 860px; margin-bottom: var(--space-4); }
+.held-role p { margin-bottom: var(--space-3); }
+.held-role .note { margin-top: 0; }
+.held-role button { margin-top: var(--space-6); }
+/* Что человек может и чего не может — две строки «подпись — список», как
+   «Что даёт / Чего не даёт» в эталоне, а не два абзаца с полями между ними. */
+dl.abilities {
+  display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-5);
+  margin: var(--space-3) 0 var(--space-6); font-size: var(--fs-body);
+}
+dl.abilities dt { color: var(--ink-2); }
+dl.abilities dd { margin: 0; }
+@media (max-width: 719px) {
+  dl.abilities { grid-template-columns: 1fr; }
+  dl.abilities dd { margin-bottom: var(--space-3); }
+}
+/* Что даст каждая роль — короткий список над формой выдачи: название роли
+   жирным, дальше только то, чего у человека ещё нет. */
+.role-offers { margin: 0 0 var(--space-5); padding-left: var(--space-6); display: grid; gap: var(--space-2); font-size: var(--fs-body); }
+
+/* Список, который на узком экране складывается карточками (T233): строка —
+   блок, ячейка — «подпись: значение», подпись берётся из `data-label`. Так на
+   390 не остаётся внутренней прокрутки вбок, в которой пропадали правые
+   столбцы (кто когда входил, сколько людей), а читать строку можно целиком.
+   Контейнер `.scroll` вокруг такой таблицы на узком экране отпускается: его
+   высота ограничена ради липкой шапки, а у карточек шапки нет — осталась бы
+   только вторая, вертикальная прокрутка внутри страницы. */
+@media (max-width: 719px) {
+  .scroll:has(> table.stack) { overflow: visible; max-height: none; }
+  table.stack thead {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; width: auto; }
+  table.stack tr { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--line); }
+  /* Подпись — абсолютом слева, значение течёт как обычный текст: у ячейки
+     бывает несколько детей (имя и почта, ряд плашек), и flex разложил бы их
+     в строку столбиками. */
+  table.stack td {
+    position: relative; min-height: 0; height: auto;
+    padding: var(--space-1) 0 var(--space-1) 40%; border: 0; text-align: left;
+  }
+  table.stack td:not([data-label]) { padding-left: 0; }
+  table.stack td[data-label]::before {
+    content: attr(data-label); position: absolute; left: 0; top: var(--space-1); width: 38%;
+    font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro);
+    color: var(--ink-3);
+  }
+}
+
 /* Роль человека в списке. Нейтральная: здесь перечисляют выданные наборы прав,
    и красить каждый в свой цвет значило бы спорить с плашкой в шапке, где цвет
    означает «чьими глазами вы смотрите сейчас». */
