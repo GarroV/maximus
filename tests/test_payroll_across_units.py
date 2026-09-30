@@ -400,3 +400,26 @@ def test_a_missing_network_rule_stops_the_approval_loudly(client, sql, calculate
     assert saved, "общих правил не было и до теста — проверять нечего"
     assert payrun_facts(sql) == 0, "месяц утверждён с ФОТ, висящим без разнесения"
     assert "правил" in page, f"отказ без объяснения: {page[:600]}"
+
+
+def test_posting_under_the_app_role_without_a_person_is_refused(sql, calculated):  # noqa: F811
+    """Ролью приложения без человека в контексте месяц не проводится.
+
+    Проводку мимо политик ведёт только владелец схемы (сид, команды
+    управления): у него среза нет. Роль `app_user` без человека видит пустоту —
+    ни ведомостей, ни привязок, — и проводка по пустоте записала бы ноль строк
+    и утвердила месяц без зарплаты. «Нет человека» не значит «видно всё».
+    """
+    from core.models import Payrun
+    from payrun import posting
+    from payrun.errors import PayrunRefused
+    from web.dbcontext import db_context
+
+    payrun = Payrun.objects.filter(status="calculated").order_by("-period").first()
+    assert payrun is not None, "посчитанного месяца нет — проверять нечего"
+
+    with pytest.raises(PayrunRefused):
+        with db_context(None):
+            posting.post(payrun)
+
+    assert payrun_facts(sql) == 0, "проводка без человека записала строки"
