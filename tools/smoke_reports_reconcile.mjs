@@ -14,7 +14,7 @@
  * расчёта вовсе (T071), и сверка обязана сказать это прямо, а не отрапортовать
  * совпадение по деньгам, которых она не видела.
  *
- *     google-chrome --headless=new --remote-debugging-port=9341 \
+ *     chrome-for-testing --headless=new --remote-debugging-port=9341 \
  *         --user-data-dir=/tmp/chrome-smoke-rep3 &
  *     APP=http://127.0.0.1:8058 DOWNLOADS=/tmp/rep3-downloads \
  * Стенд смоук приводит к сиду сам — и в начале, и после себя (см. договор в

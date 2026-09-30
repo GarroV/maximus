@@ -14,7 +14,7 @@
  *
  * Как запустить (нужен поднятый продукт с сидом и headless-браузер):
  *
- *     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+ *     chrome-for-testing \
  *         --headless=new --disable-gpu --no-first-run --window-size=1440,900 \
  *         --remote-debugging-port=9339 --user-data-dir=/tmp/chrome-smoke &
  * Стенд смоук приводит к сиду сам — но только на базовой ступени: ступени

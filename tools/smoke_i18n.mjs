@@ -24,7 +24,7 @@
  * из базы стенда. Список исключений, лежащий рядом с проверкой, — это место,
  * куда однажды тихо доедет непереведённая строка продукта.
  *
- *     google-chrome --headless=new --remote-debugging-port=9351 \
+ *     chrome-for-testing --headless=new --remote-debugging-port=9351 \
  *         --user-data-dir=/tmp/chrome-i18n &
  *     PARTNER_DATA="$(docker exec <база стенда> psql -U app -d maximus -Atc "
  *         select title from tenants

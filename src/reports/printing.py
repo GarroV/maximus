@@ -240,18 +240,6 @@ def document_number(kind: str, period: date) -> str:
     return f"{kind}-{period:%Y-%m}"
 
 
-def _hours_of(row) -> Decimal:
-    """Часы строки табеля — все виды вместе.
-
-    То же правило, что у истории человека (`payrun.person._hours_of`): документ
-    отвечает на «сколько времени человек отдал работе», а не на «что вошло в
-    базу для взносов». Правило продублировано осознанно — модуль чужого блока
-    отсюда не правится, — и закреплено тестом, чтобы разъезд был красным, а не
-    молчаливым.
-    """
-    return sum((Decimal(str(value)) for value in (row.hours or {}).values()), Decimal(0))
-
-
 def month_hours(tenant_id: UUID, period: date) -> dict[UUID, tuple[Decimal, Decimal]]:
     """Часы и норма месяца по сотрудникам: {employee_id: (отработано, норма)}.
 
@@ -260,11 +248,12 @@ def month_hours(tenant_id: UUID, period: date) -> dict[UUID, tuple[Decimal, Deci
     норма календаря, одна на месяц, а не свойство точки.
     """
     from core.models import Timesheet
+    from timesheets.totals import hours_of
 
     found: dict[UUID, tuple[Decimal, Decimal]] = {}
     for row in Timesheet.objects.filter(tenant_id=tenant_id, period=period):
         worked, norm = found.get(row.employee_id, (Decimal(0), Decimal(0)))
-        found[row.employee_id] = (worked + _hours_of(row), max(norm, row.norm_hours))
+        found[row.employee_id] = (worked + hours_of(row), max(norm, row.norm_hours))
     return found
 
 

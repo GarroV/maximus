@@ -12,7 +12,7 @@
  * Как запустить (нужен поднятый продукт с сидом и headless-браузер):
  *
  *     docker compose up -d && docker compose exec app python manage.py seed_dev
- *     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+ *     chrome-for-testing \
  *         --headless=new --disable-gpu --no-first-run \
  *         --remote-debugging-port=9339 --user-data-dir=/tmp/chrome-smoke &
  *

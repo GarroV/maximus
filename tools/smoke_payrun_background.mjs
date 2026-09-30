@@ -18,7 +18,7 @@
  *     COMPOSE_PROJECT_NAME=<стенд> node tools/smoke_payrun_background.mjs
  *
  * Перед запуском:
- *     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+ *     chrome-for-testing --headless=new \
  *         --remote-debugging-port=9339 --user-data-dir=/tmp/chrome-smoke &
  */
 import { writeFileSync } from "node:fs";

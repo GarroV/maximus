@@ -146,12 +146,14 @@ docker compose down -v    # то же и стереть базу целиком
 
 ```bash
 docker compose up -d && docker compose run --rm migrate python manage.py seed_dev
-"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+chrome-for-testing \
     --headless=new --disable-gpu --no-first-run \
     --remote-debugging-port=9339 --user-data-dir=/tmp/chrome-smoke &
 APP=http://127.0.0.1:8000 CDP_PORT=9339 COMPOSE_PROJECT_NAME=<имя стенда> \
     node tools/smoke_timesheets.mjs
 ```
+
+Браузер — **Chrome for Testing** (`chrome-for-testing` из dotfiles, сам ставится при первом запуске), а не личный Google Chrome: для macOS фоновый headless-Chrome — тот же `com.google.Chrome`, и ссылки из других приложений уходят в него невидимо (25.09.2026 так пропал звонок из рекордера Swarm). Браузер после прогона гасить: `pkill -f chrome-smoke`.
 
 `APP` — адрес продукта, `CDP_PORT` — порт отладки Chrome (по умолчанию 9339).
 **`COMPOSE_PROJECT_NAME` обязателен** — без него смоук откажется стартовать.

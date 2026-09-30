@@ -143,18 +143,6 @@ class History:
         return bool(self.months)
 
 
-def _hours_of(row) -> Decimal:
-    """Сколько часов в строке табеля — все виды вместе.
-
-    Складываются значения как есть, без выбора «зачётных»: экран отвечает на
-    «сколько времени человек отдал работе», а не на «что вошло в базу для
-    взносов» (для этого у табеля есть своя колонка `insured_hours`).
-    """
-    return sum(
-        (Decimal(str(value)) for value in (row.hours or {}).values()), Decimal(0)
-    )
-
-
 def _timesheet_hours(tenant_id: UUID, employee_id: UUID) -> dict[date, tuple[Decimal, Decimal]]:
     """Часы и норма по месяцам. Складываются строки, потому что их бывает две.
 
@@ -167,11 +155,12 @@ def _timesheet_hours(tenant_id: UUID, employee_id: UUID) -> dict[date, tuple[Dec
     одна и та же, а у неполной строки бывает меньше.
     """
     from core.models import Timesheet
+    from timesheets.totals import hours_of
 
     found: dict[date, tuple[Decimal, Decimal]] = {}
     for row in Timesheet.objects.filter(tenant_id=tenant_id, employee_id=employee_id):
         worked, norm = found.get(row.period, (Decimal(0), Decimal(0)))
-        found[row.period] = (worked + _hours_of(row), max(norm, row.norm_hours))
+        found[row.period] = (worked + hours_of(row), max(norm, row.norm_hours))
     return found
 
 

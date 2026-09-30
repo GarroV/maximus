@@ -8300,10 +8300,6 @@ msgid "Шестая очередь продуктовой карты"
 msgstr "Šesta faza mape proizvoda"
 
 #: web/stages.py
-msgid "Десятая очередь продуктовой карты"
-msgstr "Deseta faza mape proizvoda"
-
-#: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Nakon što se obračun zarada završi u celini"
 
@@ -8318,10 +8314,6 @@ msgstr "Učitavanje bankovnog izvoda i uparivanje plaćanja sa fakturama dobavlj
 #: web/stages.py
 msgid "Что и когда ушло людям: ведомость к выплате, отметки о переводе, остаток задолженности по каждому человеку."
 msgstr "Šta je i kada isplaćeno ljudima: spisak za isplatu, oznake o prenosu, preostali dug za svakog čoveka."
-
-#: web/stages.py
-msgid "Стоимость труда и текучесть в динамике: как меняется ФОТ на точку, кто уходит и сколько стоит замена."
-msgstr "Trošak rada i fluktuacija kroz vreme: kako se menja fond zarada po objektu, ko odlazi i koliko košta zamena."
 
 #: web/stages.py
 msgid "Отработанные часы приезжают из Dodo IS вместо ручного ввода. Механизм подключения уже есть: каждый поток включается отдельно и по умолчанию выключен. Не хватает экрана и самого доступа к API."
@@ -8686,3 +8678,281 @@ msgstr "deli se podjednako na sve objekte partnera"
 #, python-format
 msgid "целиком на %(code)s"
 msgstr "sve na %(code)s"
+
+msgid "%(person)s — %(hours)s ч на %(money)s"
+msgstr "%(person)s — %(hours)s h u vrednosti %(money)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Оклад платится полностью, только если в табеле стоят все часы месяца — "
+"отработанные, отпуск, больничный. Незаполненные часы молча уменьшают "
+"выплату против контракта. Проставьте тип часов или отложите находку с "
+"причиной."
+msgstr "Plata se isplaćuje u celosti samo ako su u evidenciji svi sati meseca — radni, odmor, bolovanje. Neupisani sati tiho smanjuju isplatu ispod ugovora. Upišite tip sati ili odložite nalaz uz razlog."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "У окладников в табеле не все часы месяца: %(people)s"
+msgstr "Zaposlenima na platu nedostaju sati u evidenciji: %(people)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ручная корректировка"
+msgstr "Ručna korekcija"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s мес."
+msgstr "%(count)s mes."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s чел."
+msgstr "%(count)s osoba"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(since)s — %(until)s"
+msgstr "%(since)s — %(until)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "База"
+msgstr "Osnovica"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без группы"
+msgstr "Bez grupe"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В этом месяце никто не вышел за свою норму часов."
+msgstr "Ovog meseca niko nije prešao svoju normu sati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Всего"
+msgstr "Ukupno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выручки в продукте пока нет — она приедет с коннектором Dodo IS. До тех "
+"пор доля ФОТ от выручки показана прочерком: ноль в этой строке читался "
+"бы как посчитанный ответ."
+msgstr "Prihoda u proizvodu još nema — stiže sa konektorom Dodo IS. Do tada je udeo fonda zarada u prihodu prikazan crticom: nula u ovom redu bi izgledala kao izračunat odgovor."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля ФОТ от выручки: ждёт коннектора Dodo IS"
+msgstr "Udeo fonda zarada u prihodu: čeka konektor Dodo IS"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля в часах месяца"
+msgstr "Udeo u satima meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "За показанные месяцы никто не уволился."
+msgstr "Tokom prikazanih meseci niko nije otišao."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кто вышел за норму"
+msgstr "Ko je prešao normu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кто уходит"
+msgstr "Ko odlazi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Начислено за месяц"
+msgstr "Obračunato za mesec"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ни одного месяца с табелем или расчётом ещё нет. Аналитика появится, как "
+"только будет закрыт первый месяц."
+msgstr "Još nema nijednog meseca sa evidencijom sati ili obračunom. Analitika će se pojaviti čim se zatvori prvi mesec."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Один лишний уход сдвигает показатель на несколько пунктов. Поэтому рядом "
+"с процентом всегда стоит база, а там, где база меньше %(base)s человек, "
+"процента нет вовсе — стоит «мало данных»."
+msgstr "Jedan dodatan odlazak pomeri pokazatelj za nekoliko poena. Zato pored procenta uvek stoji osnovica, a tamo gde je osnovica manja od %(base)s ljudi, procenta uopšte nema — piše „malo podataka“."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отработал"
+msgstr "Radio"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "По группам"
+msgstr "Po grupi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "По точкам"
+msgstr "Po objektu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Приняли"
+msgstr "Primljeni"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Проценты здесь считаются от единиц людей"
+msgstr "Procenti se ovde računaju po celoj osobi, a ne po udelu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверх нормы"
+msgstr "Preko norme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сверх нормы — это отработанные часы минус норма самого человека: у "
+"работающего на полставки она своя. Во что обошлись именно эти часы, "
+"экран не считает — коэффициент переработки в правилах страны помечен как "
+"непроверенный, и число по нему выглядело бы как знание. Рядом стоит "
+"начисление человека за месяц — то самое, что в ведомости."
+msgstr "Preko norme su odrađeni sati minus lična norma te osobe: ko radi sa pola radnog vremena, ima svoju. Koliko su tačno koštali ti sati, ekran ne računa — koeficijent prekovremenog rada u pravilima zemlje označen je kao neproveren, pa bi broj po njemu izgledao kao znanje. Pored toga stoji obračun osobe za mesec — isti onaj koji je u obračunskoj listi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сейчас"
+msgstr "Sada"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Средний срок работы ушедших: %(tenure)s"
+msgstr "Prosečan radni staž onih koji su otišli: %(tenure)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоимость труда"
+msgstr "Trošak rada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоимость часа"
+msgstr "Trošak po satu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Считать пока нечего"
+msgstr "Još nema šta da se broji"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Текучесть"
+msgstr "Fluktuacija"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Текучесть считается как ушедшие за показанные месяцы к средней "
+"численности за них же. Переводы между точками уходом не считаются: уход "
+"— это увольнение, а перевод меняет только условия найма."
+msgstr "Fluktuacija se računa kao broj onih koji su otišli tokom prikazanih meseci u odnosu na prosečan broj zaposlenih u istim mesecima. Prelasci između objekata se ne računaju kao odlazak: odlazak je otpuštanje, a prelazak menja samo uslove zapošljavanja."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ушли"
+msgstr "Otišli"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ушли за показанные месяцы"
+msgstr "Otišli tokom prikazanih meseci"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ушёл"
+msgstr "Otišao"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ФОТ за период"
+msgstr "Fond zarada za period"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ФОТ к выручке"
+msgstr "Fond zarada prema prihodu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ФОТ на человека"
+msgstr "Fond zarada po osobi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Фонд оплаты труда по месяцам"
+msgstr "Fond zarada po mesecima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часов"
+msgstr "Sati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часов сверх нормы"
+msgstr "Sati preko norme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часы и переработки"
+msgstr "Sati i prekovremeni rad"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что показать"
+msgstr "Šta prikazati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Что с этим делать — решает не отчёт. Переработка бывает дешевле, чем "
+"нанять человека на полставки, но только пока это не выгорание. Экран "
+"показывает часы и деньги и не предлагает вывод."
+msgstr "Šta sa tim dalje — ne odlučuje izveštaj. Prekovremeni rad ponekad je jeftiniji od zapošljavanja nekoga sa pola radnog vremena, ali samo dok ne postane sagorevanje. Ekran prikazuje sate i novac i ne nudi zaključak."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выручка приедет с коннектором Dodo IS"
+msgstr "prihod stiže sa konektorom Dodo IS"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "за %(month)s"
+msgstr "za %(month)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "мало данных"
+msgstr "malo podataka"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "мало данных · база %(base)s"
+msgstr "malo podataka · osnovica %(base)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "от всех отработанных часов"
+msgstr "od svih odrađenih sati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "поимённо — пока их можно назвать по именам"
+msgstr "poimenično — dok ih ima dovoljno malo da se mogu nabrojati"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "ушло %(left)s из %(base)s в среднем"
+msgstr "otišlo %(left)s od %(base)s u proseku"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(over)s из %(heads)s"
+msgstr "%(over)s od %(heads)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(share)s от выручки %(revenue)s"
+msgstr "%(share)s od prihoda %(revenue)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Стоило переработок"
+msgstr "Trošak prekovremenog rada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "доля от выручки — выручки в продукте пока нет"
+msgstr "udeo u prihodu — prihoda u proizvodu još nema"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "коэффициент переработки в правилах страны не проверен"
+msgstr "koeficijent prekovremenog rada u pravilima zemlje nije proveren"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "п.п."
+msgstr "p.p."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "прошлого месяца в отчёте нет — сравнить не с чем"
+msgstr "u izveštaju nema prethodnog meseca — nema s čim da se uporedi"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "против %(value)s (%(month)s)"
+msgstr "u odnosu na %(value)s (%(month)s)"

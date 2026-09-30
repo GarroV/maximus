@@ -18,7 +18,7 @@
  *    по-настоящему, и число страниц в PDF сверяется с числом, написанным на
  *    самой бумаге («Лист N из M»).
  *
- *     google-chrome --headless=new --remote-debugging-port=9351 \
+ *     chrome-for-testing --headless=new --remote-debugging-port=9351 \
  *         --user-data-dir=/tmp/chrome-smoke-print &
  *     COMPOSE_PROJECT_NAME=maximus-reports APP=http://127.0.0.1:8070 \
  *         CDP_PORT=9351 node tools/smoke_print_forms.mjs

@@ -41,6 +41,7 @@ FILES = [
     # Значения дизайн-системы (T176) и правила на них (T177).
     ("web/tokens.css", b"--canvas", "web/base.html"),
     ("web/app.css", b"var(--ink)", "web/base.html"),
+    ("web/people.css", b"people-switch", "web/reports/people.html"),
     # Шрифты локально: внешние загрузки в проде запрещены, а без файла продукт
     # молча уезжает на системный шрифт — метрики другие, вёрстка «почти та же».
     ("web/fonts/golos-text-cyrillic.woff2", b"wOF2", "web/tokens.css"),

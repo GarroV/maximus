@@ -11,7 +11,7 @@
  * Что меряет: высоту строк таблиц, высоту кнопок, размер и вес заголовка,
  * базовый размер и шрифт страницы, наличие инлайновых цветов в разметке.
  *
- *     google-chrome --headless=new --remote-debugging-port=9390 \
+ *     chrome-for-testing --headless=new --remote-debugging-port=9390 \
  *         --user-data-dir=/tmp/chrome-visual &
  *     APP=http://127.0.0.1:8001 node tools/smoke_visual.mjs
  *
