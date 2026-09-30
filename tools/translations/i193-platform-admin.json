@@ -26,7 +26,6 @@
   "Роли «%(role)s» в продукте нет. Выберите одну из: %(known)s": {"en": "There is no “%(role)s” role in the product. Choose one of: %(known)s", "sr": "Uloga „%(role)s“ ne postoji u proizvodu. Izaberite jednu od: %(known)s"},
   "Роль выдана.": {"en": "Role granted.", "sr": "Uloga je dodeljena."},
   "Роль снята.": {"en": "Role revoked.", "sr": "Uloga je uklonjena."},
-  "Снять": {"en": "Revoke", "sr": "Ukloni"},
   "Такого пространства нет.": {"en": "There is no such space.", "sr": "Takav prostor ne postoji."},
   "Такого человека нет.": {"en": "There is no such person.", "sr": "Takva osoba ne postoji."},
   "Такой роли в этом пространстве нет.": {"en": "There is no such role in this space.", "sr": "Takva uloga ne postoji u ovom prostoru."},

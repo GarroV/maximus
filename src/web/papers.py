@@ -54,6 +54,7 @@ from datetime import date
 
 from django.db import Error as DatabaseError
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -240,6 +241,21 @@ def _write_paper(payload: dict) -> str:
 # --- чтение -------------------------------------------------------------------
 
 
+def accounting_lines():
+    """Строки учёта, которыми бумага разобрана, — единственное определение (T235).
+
+    Действующие (не заменённые правкой) и не дочерние строки разнесения: дочь
+    повторяет родителя по точкам, и считать её значило бы видеть разбор там,
+    где его сделало правило. Сторно — тоже строка учёта: бумага «не наша»
+    разобрана, а не ждёт.
+
+    Отсюда и «ждёт ли бумага», и «чем её разобрали». Два условия в двух местах
+    уже расходились: ссылка инбокса считала бумагу разобранной по любой строке,
+    включая заменённую, а список бумаг — только по действующей.
+    """
+    return Fact.objects.filter(superseded_at__isnull=True).exclude(allocation="allocated")
+
+
 def papers(who, *, only_waiting: bool = False) -> list[SourceDocument]:
     """Бумаги, принесённые с точек. Срез делает база, здесь только порядок.
 
@@ -253,12 +269,36 @@ def papers(who, *, only_waiting: bool = False) -> list[SourceDocument]:
         .order_by("-handed_over_at")
     )
     if only_waiting:
-        # Разобрана — значит у документа появились строки. Отдельного признака
+        # Разобрана — значит у документа есть строка учёта. Отдельного признака
         # «разобрано» нет намеренно: он был бы вторым ответом на вопрос, на
-        # который отвечает наличие факта, и разошёлся бы с ним на первом же
+        # который отвечает наличие строки, и разошёлся бы с ним на первом же
         # сторно.
-        rows = rows.filter(fact__isnull=True)
+        rows = rows.exclude(Exists(accounting_lines().filter(document_id=OuterRef("pk"))))
     return list(rows)
+
+
+def waiting_count(who, *, tenant_id=None) -> int:
+    """Сколько бумаг ждёт разбора — одно число для инбокса, списка бумаг и
+    готовности месяца к закрытию (`payrun.readiness`).
+
+    `tenant_id` — для того, кто считает не от вошедшего человека, а от
+    пространства партнёра (проверка закрытия месяца). Условие «ждёт» то же.
+    """
+    found = papers(who, only_waiting=True)
+    if tenant_id is not None:
+        found = [document for document in found if document.tenant_id == tenant_id]
+    return len(found)
+
+
+def lines_of_many(found) -> dict[str, list]:
+    """Строки учёта бумаг списка — одним запросом, сгруппированные по бумаге."""
+    grouped: dict[str, list] = {}
+    for row in (
+        accounting_lines().filter(document_id__in=[document.id for document in found])
+        .order_by("created_at")
+    ):
+        grouped.setdefault(str(row.document_id), []).append(row)
+    return grouped
 
 
 def paper_or_none(document_id) -> SourceDocument | None:
@@ -298,9 +338,8 @@ def files_of(documents) -> dict[str, dict]:
 def lines_of(document) -> list[Fact]:
     """Строки, которыми бумагу разобрали. Пусто — бумага ждёт разбора."""
     return list(
-        Fact.objects.select_related("expense_item", "pnl_item", "unit")
-        .filter(document_id=document.id, superseded_at__isnull=True)
-        .exclude(allocation="allocated")
+        accounting_lines().select_related("expense_item", "pnl_item", "unit")
+        .filter(document_id=document.id)
         .order_by("created_at")
     )
 

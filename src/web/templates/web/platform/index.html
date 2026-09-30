@@ -7,8 +7,13 @@
 забыли». Это же место, куда встанет остальная статистика, когда она понадобится
 (заходы, активность): колонка добавляется, а экран не переделывается.
 
-Форма заведения — на этом же экране, а не отдельной страницей. Заводят партнёра
-редко, но всегда глядя на список: не появился ли он уже.
+Форма заведения — своей страницей `/platform/new/` (T225, D081: одна страница —
+одна функция). Кнопка к ней стоит над списком: заводят партнёра редко, но
+всегда глядя на список — не появился ли он уже.
+
+На узком экране строки складываются карточками (`table.stack`, T233): семь
+столбцов на 390 уходили во внутреннюю прокрутку вбок, и справа пропадало
+самое нужное — кто и когда входил.
 {% endcomment %}
 {% block title %}{% translate "Пространства" %}{% endblock %}
 {% block content %}
@@ -18,7 +23,9 @@
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 {% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
 
-{% scroll %}<table>
+<p><a class="btn primary" href="{% url 'platform-space-create' %}">{% translate "Завести пространство" %}</a></p>
+
+{% scroll %}<table class="stack">
   <thead>
     <tr>
       <th>{% translate "Пространство" %}</th>
@@ -33,17 +40,17 @@
   <tbody>
     {% for space in spaces %}
     <tr>
-      <td><a href="{% url 'platform-space' tenant_id=space.id %}">{{ space.title }}</a></td>
-      <td>{{ space.code }}</td>
-      <td>{{ space.country_code }}</td>
-      <td>{{ space.base_currency }}</td>
-      <td class="num">{{ space.people }}</td>
-      <td class="num">{{ space.active }}</td>
+      <td data-label="{% translate "Пространство" %}"><a href="{% url 'platform-space' tenant_id=space.id %}">{{ space.title }}</a></td>
+      <td data-label="{% translate "Код" %}">{{ space.code }}</td>
+      <td data-label="{% translate "Страна" %}">{{ space.country_code }}</td>
+      <td data-label="{% translate "Валюта учёта" %}">{{ space.base_currency }}</td>
+      <td class="num" data-label="{% translate "Людей" %}">{{ space.people }}</td>
+      <td class="num" data-label="{% translate "Действующих" %}">{{ space.active }}</td>
       {% comment %}
       Пусто — ответ, а не пробел: словами, потому что пустая ячейка в этой
       колонке читается как сбой выборки, а не как «никто не заходил».
       {% endcomment %}
-      <td>{% if space.last_seen %}{{ space.last_seen|date:"SHORT_DATE_FORMAT" }}{% else %}<span class="muted">{% translate "не входили" %}</span>{% endif %}</td>
+      <td data-label="{% translate "Последний вход" %}">{% if space.last_seen %}{{ space.last_seen|date:"SHORT_DATE_FORMAT" }}{% else %}<span class="muted">{% translate "не входили" %}</span>{% endif %}</td>
     </tr>
     {% empty %}
     <tr><td colspan="7">{% translate "Ни одного пространства ещё нет." %}</td></tr>
@@ -51,23 +58,4 @@
   </tbody>
 </table>{% endscroll %}
 
-<h2>{% translate "Завести пространство" %}</h2>
-<p class="sub">{% blocktranslate %}Вместе с пространством заводятся его роли и первый человек — иначе войти в него будет некому. Точки, юрлица и статьи расходов партнёр заводит сам.{% endblocktranslate %}</p>
-<form class="card" method="post" action="{% url 'platform-space-create' %}">
-  {% csrf_token %}
-  {% translate "Название" as f_title %}{% translate "Код" as f_code %}
-  {% include "web/components/field.html" with id="id_title" name="title" label=f_title placeholder="Dodo Serbia" required=1 stacked=1 %}
-  {% include "web/components/field.html" with id="id_code" name="code" label=f_code placeholder="rs-dodo" required=1 stacked=1 %}
-  {% translate "Страна" as f_country %}{% translate "Валюта учёта" as f_base %}{% translate "Валюта отчёта" as f_report %}
-  {% include "web/components/field.html" with id="id_country" name="country_code" label=f_country value="RS" required=1 stacked=1 %}
-  {% include "web/components/field.html" with id="id_base" name="base_currency" label=f_base value="RSD" required=1 stacked=1 %}
-  {% include "web/components/field.html" with id="id_report" name="report_currency" label=f_report value="EUR" required=1 stacked=1 %}
-  {% translate "Логин первого человека" as f_login %}{% translate "Как его зовут" as f_name %}{% translate "Пароль" as f_pass %}
-  {% include "web/components/field.html" with id="id_login" name="admin_username" label=f_login required=1 stacked=1 %}
-  {% include "web/components/field.html" with id="id_name" name="admin_full_name" label=f_name stacked=1 %}
-  {% include "web/components/field.html" with id="id_pass" name="admin_password" label=f_pass type="password" required=1 stacked=1 %}
-  {% translate "Его роль" as f_role %}
-  {% include "web/components/select.html" with id="id_role" name="role_code" label=f_role options=role_options stacked=1 %}
-  <button type="submit" class="primary">{% translate "Завести пространство" %}</button>
-</form>
 {% endblock %}

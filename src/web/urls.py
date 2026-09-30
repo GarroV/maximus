@@ -12,6 +12,7 @@ from . import (
     expense_items_views,
     expenses_views,
     guide,
+    inbox_split_views,
     papers_views,
     people_views,
     person_views,
@@ -158,6 +159,9 @@ urlpatterns = [
     # адреса не защита, а проверка стоит в представлении и в политиках базы.
     path("roles/", roles_views.index, name="roles"),
     path("roles/invite/", roles_views.invite, name="roles-invite"),
+    path("roles/people/", roles_views.people, name="roles-people"),
+    path("roles/history/", roles_views.history, name="roles-history"),
+    path("roles/history/export/", roles_views.history_export, name="roles-history-export"),
     path("roles/<uuid:role_id>/rights/", roles_views.role_rights, name="role-rights"),
     path("roles/people/<uuid:user_id>/", roles_views.person_roles, name="person-roles"),
     path("directory/", directory_views.index, name="directory"),
@@ -296,6 +300,8 @@ urlpatterns = [
     # раньше адреса по номеру записи, иначе `new` разбирался бы как номер.
     path("expenses/", expenses_views.expenses, name="expenses"),
     path("expenses/new/", cash_views.cash_expense, name="expense-new"),
+    # Выбор статьи для отбора списка (T224): страница вместо выпадающего списка.
+    path("expenses/filter/item/", expenses_views.expense_item_pick, name="expense-item-pick"),
     # Нераспределённое (T111): суммы без точки и пересчёт разнесения. Постоянный
     # адрес, поэтому стоит раньше адреса по номеру записи.
     path(
@@ -335,6 +341,12 @@ urlpatterns = [
     # раньше адреса по номеру записи, иначе `new` разбирался бы как номер.
     path("invoices/", suppliers_views.invoices, name="invoices"),
     path("invoices/new/", suppliers_views.invoice, name="invoice-new"),
+    # Выбор контрагента для отбора списка (T224): страница вместо выпадающего списка.
+    path(
+        "invoices/filter/counterparty/",
+        suppliers_views.counterparty_pick,
+        name="invoice-counterparty-pick",
+    ),
     path("invoices/<uuid:document_id>/", suppliers_views.invoice, name="invoice"),
     # Оплата — свой адрес, а не поле в форме счёта: платёж это отдельное
     # событие со своей датой, и привязать его дату к правке счёта значило бы
@@ -402,6 +414,8 @@ urlpatterns = [
     # за одно действие. Адрес без номера строки — их несколько, и они приезжают
     # в теле запроса.
     path("inbox/classify/", suppliers_views.inbox_batch, name="inbox-batch"),
+    # Разнести отмеченные строки по точкам одними долями (T234, D089).
+    path("inbox/split/", inbox_split_views.inbox_split, name="inbox-split"),
     # Расходы по HTTP (T112). Отдельный префикс `api/`, а не те же адреса с
     # другим заголовком: два разных ответа на один адрес разъезжаются молча — и
     # разъезжаться будут именно там, где их никто не смотрит глазами. Роль и
