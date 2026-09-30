@@ -31,7 +31,7 @@ from django.utils.translation import gettext as _
 
 from .models import Membership, PlatformAdmin, Role, Tenant, User
 from .role_delivery import product_shape
-from .roles import DEFAULT_TITLES, ROLE_ORDER, ROLE_SHAPES, permission_states
+from .roles import DEFAULT_TITLES, ROLE_ORDER, ROLE_SHAPES, leads_one_unit, permission_states
 
 __all__ = ["SpaceRefused", "NewSpace", "create_space", "is_platform_admin"]
 
@@ -107,6 +107,15 @@ def create_space(
         raise SpaceRefused(
             _("Роли «%(role)s» в продукте нет. Выберите одну из: %(known)s")
             % {"role": role_code, "known": ", ".join(ROLE_ORDER)}
+        )
+    if leads_one_unit(role_code):
+        # Точек у нового пространства нет, а членство такой роли без точки
+        # функции контекста читают как ВСЕ точки. Первым заводится тот, кто
+        # ведёт партнёра целиком; управляющему роль выдаётся, когда точки есть.
+        raise SpaceRefused(
+            _("Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. "
+              "Первым заведите того, кто ведёт партнёра целиком.")
+            % {"role": DEFAULT_TITLES[role_code]}
         )
     if Tenant.objects.filter(code=code).exists():
         raise SpaceRefused(

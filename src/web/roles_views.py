@@ -62,7 +62,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from core.models import AccessLogEntry, Membership, Role, Unit, User
-from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, ROLE_SHAPES
+from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, leads_one_unit
 
 from . import permissions
 from .principal import get_current_principal
@@ -174,36 +174,23 @@ def _history(tenant_id):
 
 
 
-def _unit_scoped(role) -> bool:
-    """Роль ведёт ОДНУ точку, а не всего партнёра.
-
-    Форма роли объявлена в `core/roles.py`: у управляющего точки там стоит
-    точка, у остальных — `None`. Сид её читает и заводит членство со списком,
-    а экран ролей — не читал вовсе (T188): членство создавалось без `unit_ids`.
-
-    Цена этой пропущенной строки велика. `unit_ids is null` в функциях
-    контекста (`0264`) означает ВСЕ точки тенанта, поэтому приглашённый
-    управляющий получал кассы, наличные, табели и надбавки всего партнёра
-    вместо своей точки — молча, вопреки D031, и тем отменяя смысл роли.
-    """
-    shape = ROLE_SHAPES.get(role.code)
-    return shape is not None and shape.unit is not None
-
-
-def _membership_units(request, who, role):
+def membership_units(chosen: str, tenant_id, role):
     """Точки членства и отказ словами, если выбор не сходится с ролью.
 
     Возвращает `(unit_ids, отказ)`. `unit_ids is None` — все точки партнёра, и
-    это законно ровно для тех ролей, которые его целиком и ведут.
+    это законно ровно для тех ролей, которые его целиком и ведут
+    (`core.roles.leads_one_unit`). Общая для страницы партнёра и платформы:
+    правило, написанное дважды, однажды разошлось бы, и платформа выдавала бы
+    управляющему все точки, как это и было до разбора прав T225.
 
     Молчаливого умолчания здесь нет намеренно: и «забыл выбрать точку», и
     «выбрал точку роли, которая ведёт всё» — это расхождение между тем, что
     человек имел в виду, и тем, что получит. Оба случая называются словами, а
     не разрешаются за него в ту или другую сторону.
     """
-    chosen = (request.POST.get("unit") or "").strip()
+    chosen = (chosen or "").strip()
 
-    if not _unit_scoped(role):
+    if not leads_one_unit(role.code):
         if chosen:
             return None, _(
                 "Роль «%(role)s» ведёт всего партнёра — точка для неё не выбирается."
@@ -217,7 +204,7 @@ def _membership_units(request, who, role):
         ) % {"role": role.title}
 
     try:
-        unit = Unit.objects.filter(pk=chosen, tenant_id=who.tenant_id).first()
+        unit = Unit.objects.filter(pk=chosen, tenant_id=tenant_id).first()
     except (DjangoValidationError, ValueError):
         unit = None
     if unit is None:
@@ -225,6 +212,10 @@ def _membership_units(request, who, role):
         # такая точка у другого партнёра (D023).
         return None, _("Такой точки у этого партнёра нет.")
     return [unit.pk], ""
+
+
+def _membership_units(request, who, role):
+    return membership_units(request.POST.get("unit"), who.tenant_id, role)
 
 
 # Ряд ссылок раздела (D081): страницы раздела — шаги внутри одного пункта левой

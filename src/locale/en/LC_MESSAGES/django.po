@@ -9155,3 +9155,10 @@ msgstr "← People in the space “%(title)s”"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Такого человека в этом пространстве нет."
 msgstr "There is no such person in this space."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. "
+"Первым заведите того, кто ведёт партнёра целиком."
+msgstr "The role “%(role)s” leads a single unit, and a new space has no units yet. Create someone who leads the whole partner first."

@@ -50,5 +50,9 @@
   "Такого человека в этом пространстве нет.": {
     "en": "There is no such person in this space.",
     "sr": "U ovom prostoru nema takve osobe."
+  },
+  "Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. Первым заведите того, кто ведёт партнёра целиком.": {
+    "en": "The role “%(role)s” leads a single unit, and a new space has no units yet. Create someone who leads the whole partner first.",
+    "sr": "Uloga „%(role)s“ vodi jedan objekat, a novi prostor još nema objekata. Prvo dodajte osobu koja vodi celog partnera."
   }
 }

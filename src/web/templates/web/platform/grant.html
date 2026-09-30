@@ -17,6 +17,8 @@
   {% translate "Идентификатор человека" as f_person %}{% translate "Роль" as f_role %}
   {% include "web/components/field.html" with id="id_person" name="user_id" label=f_person value=user_id required=1 stacked=1 %}
   {% include "web/components/select.html" with id="id_grant_role" name="role_id" label=f_role options=role_options stacked=1 %}
+  {% translate "Точка" as f_unit %}{% translate "не выбрана" as f_no_unit %}{% translate "Нужна ролям, которые ведут одну точку: без неё человек получил бы все точки партнёра." as f_unit_help %}
+  {% include "web/components/select.html" with id="id_grant_unit" name="unit" label=f_unit options=unit_options empty_label=f_no_unit help=f_unit_help stacked=1 %}
   <button type="submit" class="primary">{% translate "Выдать" %}</button>
 </form>
 {% endblock %}

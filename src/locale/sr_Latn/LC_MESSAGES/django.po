@@ -8990,3 +8990,10 @@ msgstr "← Ljudi u prostoru „%(title)s“"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Такого человека в этом пространстве нет."
 msgstr "U ovom prostoru nema takve osobe."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. "
+"Первым заведите того, кто ведёт партнёра целиком."
+msgstr "Uloga „%(role)s“ vodi jedan objekat, a novi prostor još nema objekata. Prvo dodajte osobu koja vodi celog partnera."

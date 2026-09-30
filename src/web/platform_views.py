@@ -41,11 +41,12 @@ from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
 
-from core.models import Membership, Role, Tenant, User
+from core.models import Membership, Role, Tenant, Unit, User
 from core.roles import DEFAULT_TITLES, ROLE_ORDER
 from core.spaces import SpaceRefused, create_space, is_platform_admin
 
 from .principal import get_current_principal
+from .roles_views import membership_units
 
 
 def _refuse(request):
@@ -264,6 +265,11 @@ def _grant_form(request, found, *, error: str = "", status: int = 200):
         {
             "space": found,
             "user_id": (request.POST.get("user_id") or "").strip(),
+            "unit_options": [
+                {"code": str(unit.pk), "title": f"{unit.code} — {unit.title}",
+                 "selected": str(unit.pk) == (request.POST.get("unit") or "")}
+                for unit in Unit.objects.filter(tenant_id=found.pk).order_by("code")
+            ],
             "role_options": [
                 {"code": str(role.pk), "title": role.title, "selected": str(role.pk) == chosen}
                 for role in Role.objects.filter(tenant_id=found.pk).order_by("title")
@@ -353,8 +359,14 @@ def member_role(request, tenant_id):
     if not known:
         return _grant_form(request, found, error=_("Такого человека нет."), status=400)
 
+    # Точка — тем же правилом, что на странице партнёра: управляющий без точки
+    # получил бы все точки пространства (разбор прав T225).
+    unit_ids, refused_unit = membership_units(request.POST.get("unit"), tenant_id, role)
+    if refused_unit:
+        return _grant_form(request, found, error=refused_unit, status=400)
+
     _created = Membership.objects.get_or_create(
-        tenant_id=tenant_id, user_id=user_id, role=role
+        tenant_id=tenant_id, user_id=user_id, role=role, defaults={"unit_ids": unit_ids},
     )
     request.session["platform_notice"] = _("Роль выдана.")
     return redirect("platform-space", tenant_id=tenant_id)
