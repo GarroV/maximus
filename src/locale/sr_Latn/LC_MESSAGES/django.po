@@ -9194,3 +9194,23 @@ msgstr "svi objekti"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "не входил"
 msgstr "još se nije prijavio"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выгрузить всю историю (CSV)"
+msgstr "Preuzmi celu istoriju (CSV)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действие"
+msgstr "Radnja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выдача роли"
+msgstr "dodela uloge"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "приглашение"
+msgstr "poziv"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "снятие роли"
+msgstr "uklanjanje uloge"

@@ -98,5 +98,25 @@
   "не входил": {
     "en": "has not signed in yet",
     "sr": "još se nije prijavio"
+  },
+  "Действие": {
+    "en": "Action",
+    "sr": "Radnja"
+  },
+  "приглашение": {
+    "en": "invitation",
+    "sr": "poziv"
+  },
+  "выдача роли": {
+    "en": "role granted",
+    "sr": "dodela uloge"
+  },
+  "снятие роли": {
+    "en": "role removed",
+    "sr": "uklanjanje uloge"
+  },
+  "Выгрузить всю историю (CSV)": {
+    "en": "Download the whole history (CSV)",
+    "sr": "Preuzmi celu istoriju (CSV)"
   }
 }

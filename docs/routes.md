@@ -122,6 +122,7 @@
 | `/roles/` | `roles` | `web.roles_views.index` |
 | `/roles/<uuid:role_id>/rights/` | `role-rights` | `web.roles_views.role_rights` |
 | `/roles/history/` | `roles-history` | `web.roles_views.history` |
+| `/roles/history/export/` | `roles-history-export` | `web.roles_views.history_export` |
 | `/roles/invite/` | `roles-invite` | `web.roles_views.invite` |
 | `/roles/people/` | `roles-people` | `web.roles_views.people` |
 | `/roles/people/<uuid:user_id>/` | `person-roles` | `web.roles_views.person_roles` |
