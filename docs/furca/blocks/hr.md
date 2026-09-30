@@ -95,13 +95,18 @@ P&L точки, а её управляющий этого человека не 
   подписи; пустой `PAYROLL_LINES` → «ФОТ офиса висит неразнесённым» (29.09);
 - точечный набор (payroll_across_units, employee_units_visibility/screen,
   units_on_the_payroll_screens, facts_allocation_rules, seed_dev, payroll_to_pnl,
-  payrun_retro, directory*, schema_access, unit_visibility, i18n*) — POINT_RESULT;
-- `test_payroll_to_pnl::test_the_amount_matches_the_payslips` считал родителя
-  разнесения вместе с детьми и удваивал ФОТ офиса — поправлен (`allocation <>
-  'split'`). Краснел только после `test_units_on_the_payroll_screens`, который
-  снимает точку у строки табеля и не возвращает; в полном прогоне по алфавиту
-  шёл раньше и молчал;
-- живая проверка — LIVE_RESULT.
+  payrun_retro, directory*, schema_access, unit_visibility, i18n*, demo_isolation) —
+  253 passed, 0 skipped (8 мин 48 с);
+- `test_payroll_to_pnl::test_the_amount_matches_the_payslips` удваивал ФОТ офиса
+  (считал родителя разнесения вместе с детьми) — поправлен (`allocation <> 'split'`);
+- живая проверка: `runserver` + `qcluster` локально на 8110 против базы 8111,
+  `seed_dev`. Через карточку: пустая форма → отказ «Не отмечено ни одной точки»;
+  «Вся сеть» + BG1 → отказ «Выберите что-то одно»; LENA VASIC (табель BG1) →
+  «Вся сеть», PETAR ZIVKOVIC (табель NS2) → NS1+NS2. Расчёт 35/35, утверждение:
+  P&L по точкам совпал с ожиданием из ведомостей (BG1 0,00, NS1 −0,01, NS2 0,00),
+  ждущих разнесения 0. Директор видит «BG1 Вся сеть» и «NS2 делится: NS1, NS2»
+  в ведомости и табеле; управляющий NS1 LENA не видит, PETAR видит. Снимки и
+  сверка norma — в отчёте; после — процессы остановлены, база пересеяна.
 
 ## Открытые вопросы блока
 
