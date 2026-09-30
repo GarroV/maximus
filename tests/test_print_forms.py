@@ -515,7 +515,7 @@ def test_the_print_pages_carry_nothing_that_a_sheet_of_paper_cannot_do(
     """
     for html in (payout_page(client, sql), slip_page(client, payslip_id(sql))):
         assert "<button" not in html
-        assert 'class="appbar"' not in html
+        assert 'class="sidenav"' not in html
         assert 'class="cut' not in html
 
 

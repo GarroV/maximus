@@ -1,6 +1,7 @@
 /* ─────────────────────────────────────────────────────────────
-   Оформление продукта. Правила; значения — в tokens.css, который
-   подключается раньше (T177).
+   Оформление продукта. Правила; значения — в ядре линейки
+   (dodo-ds.css и domain.css из GarroV/forma) и в tokens.css, которые
+   подключаются раньше (T177, T222).
 
    До этой задачи лист лежал внутри <style> в base.html, 336 строк,
    и каждая очередь дописывала туда свои цвета. Отсюда и жалоба
@@ -9,7 +10,7 @@
 
    Правила игры здесь три, и все три проверяются тестами:
 
-   1. Ни одного литерального цвета. Только var(--…) из tokens.css.
+   1. Ни одного литерального цвета. Только var(--…) из листов значений.
       Литерал в этом файле — это вторая палитра, то есть возврат
       к исходной беде (tests/test_visual_tokens.py).
    2. Геометрия и типографика — из дизайн-системы: отбивки
@@ -48,6 +49,14 @@ html, body {
    мобильные правила эталона включаются только с 767, и планшет получил бы
    страницу в 1280 с горизонтальной прокруткой всего, включая шапку. */
 
+/* Слой продукта из склада (`domain.css`) ставит `body { min-width: 1280px }` —
+   приём эталона, «страница держит 1280 и едет вбок целиком». Продукту так
+   нельзя (абзац выше), и живой проверкой T222 это и поймано: на 900 страница
+   уезжала вбок на 380 пикселей вместе с панелью. Перекрыто здесь, а не правкой
+   копии: копия правится только в `GarroV/forma` — туда же и предложение
+   снять это правило из слоя MAXIMUS. */
+body { min-width: 0; }
+
 a { color: var(--accent); text-decoration: none; }
 a:hover { color: var(--accent-press); text-decoration: underline; }
 
@@ -84,267 +93,230 @@ p.back { margin: calc(-1 * var(--space-3)) 0 var(--space-8); font-size: var(--fs
 p.back a { color: var(--ink-2); }
 p.back a:hover { color: var(--accent); }
 
-/* ── Шапка приложения ────────────────────────────────────────── */
+/* ── Левая панель и каркас (T222, D081) ────────────────────────
 
-/* Раздел 08 эталона: имя продукта, разделы, тенант, роль. Высота 50 —
-   единственная «магическая» цифра шапки, и она из эталона: ряд в 50 пикселей
-   держит две строки служебного текста (кто и что видит) и при этом не съедает
-   первую строку данных.
+   До 29.09.2026 здесь была верхняя шапка с областями учёта в
+   раскрывающихся меню (T207). Владелец снял её дословно: «давай мы
+   переведем навигацию в левую сторону, как это сделано в наших других
+   проектах. никаких выпадающих списков». Меню, которое надо раскрыть,
+   прячет разделы: человек не видит, что в системе есть.
 
-   Но 50 — это `min-height`, а не `height`, и это не придирка. С фиксированной
-   высотой шапка на 1440 переполнялась: содержимого правого края у вошедшего на
-   28 пикселей больше, чем есть места, и перенесённая строка оказывалась
-   СНАРУЖИ шапки — «Сотрудники» висели под её границей (issue #151, замерено:
-   `.appnav` 62px при `.appbar` 50px, верх пункта на −6). Фиксированная высота
-   не «держит» строку, она её обрезает.
+   Сама панель — компонент `.sidenav` ядра линейки (`dodo-ds.css`, эталон
+   Swarm Brain): ширина 216, группы подписями, текущий пункт мягкой
+   заливкой с полосой слева, свёртка до 56 пикселей значков от 720 до
+   1099. Здесь только то, чего ядро не знает или знает не так, как нужно
+   продукту, — каждое правило со своей причиной. Правка того, что общее
+   для трёх продуктов, идёт в `GarroV/forma`, а не сюда. */
 
-   Переносится при этом ШАПКА, а не список разделов внутри неё: `flex-wrap`
-   стоит здесь, у `.appbar`, а у `.appnav` его нет — так же, как в эталоне.
-   Разница видна глазами: перенос внутри навигации рвёт список разделов
-   посередине, перенос шапки уносит вниз правый край целиком — ровно то, что
-   эталон делает на узком экране (`height: auto; flex-wrap: wrap`), только
-   здесь это происходит от содержимого, а не от порога ширины.
+/* Панель стоит слева во всю высоту окна и не уезжает при прокрутке:
+   ведомость на шестьдесят строк прокручивается, а навигация остаётся под
+   рукой. Прокручивается при этом список разделов внутри панели (правило
+   ядра), а не страница. */
+.shell { display: flex; align-items: stretch; min-height: 100vh; min-height: 100dvh; }
+.shell > .sidenav { position: sticky; top: 0; height: 100vh; height: 100dvh; }
+.shell > main { flex: 1 1 auto; min-width: 0; }
+main:focus { outline: none; }
 
-   Порогом это и нельзя решить, и вот почему: у продукта три языка и шесть
-   ролей, и правый край у них разной длины. У администратора сети шесть
-   разделов вместо четырёх, и одной строки ему не хватит и на 1600; у
-   управляющего точки к правому краю добавляется «точка: NS1». Число, верное
-   для одной роли на одном языке, для другой роли будет либо рано, либо
-   поздно — а перенос по содержимому верен для всех.
-
-   Вертикальный отступ вместе с `min-height`: при одной строке (43px < 50)
-   высоту задаёт `min-height`, и шапка выглядит ровно как прежде — `box-sizing`
-   везде `border-box`, центр строки остаётся на 25 пикселях. При переносе
-   отступ не даёт строкам лечь вплотную к границам. */
-.appbar {
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-4) var(--space-9);
-  padding: var(--space-3) var(--gutter);
-  background: var(--surface);
-  border-bottom: 1px solid var(--line-control);
-}
-
-/* Имя продукта: «Dodo» начертанием, «P&L» акцентом. Ссылка ведёт на первый
-   экран месяца — по имени продукта уходят «в начало», это привычка, а не
-   украшение. */
-.brand {
-  display: flex; align-items: baseline; gap: var(--space-3);
-  text-decoration: none; color: var(--ink); flex: 0 0 auto;
-}
-.brand:hover { text-decoration: none; }
-.brand__name { font-weight: var(--w-bold); font-size: var(--fs-lead); letter-spacing: -.01em; }
-.brand__mark { font-weight: var(--w-medium); font-size: var(--fs-lead); color: var(--ink-2); }
-
-/* Без `flex-wrap` — как в эталоне: список разделов не рвётся посередине.
-   Место кончилось — переносится шапка целиком (см. `.appbar` выше). На узком
-   экране навигации перенос возвращают: там шапка уже растёт по содержимому, а
-   шесть разделов в одну строку на телефоне не встают вовсе. */
-.appnav { display: flex; align-items: center; gap: var(--space-1); }
-/* Раздел, в котором человек сейчас, — не ссылка, а `span[aria-current]`:
-   ссылка на текущую страницу обманывает и мышь, и клавиатуру. Тот же
-   инвариант, что у переключателя разреза ведомости, и по той же причине. */
-.appnav__current {
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--r-control);
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: var(--w-semibold);
-  white-space: nowrap;
-}
-.appnav__link {
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--r-control);
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-.appnav__link:hover { background: var(--surface-3); text-decoration: none; color: var(--ink); }
-
-/* Раздел, который ведёт другая роль (только демо). Оформления у него не было
-   вовсе — в шапке висела голая ссылка со стрелкой в тексте, и ряд читался как
-   «Directories → Rules → Roles →», будто это путь (issue #160).
-   Теперь это обычный пункт навигации, но приглушённый и с пунктиром: пунктир в
-   этой системе значит «поведение отличается от соседей» — здесь переключится
-   роль, а не только страница. Стрелка ушла в оформление и появляется при
-   наведении, когда человек и так собрался нажать. */
-.appnav .nav-offer {
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--r-control);
-  color: var(--ink-3);
-  border-bottom: 1px dashed var(--line-control-2);
-  white-space: nowrap;
-}
-.appnav .nav-offer:hover {
-  background: var(--surface-3); color: var(--ink-2);
-  text-decoration: none; border-bottom-color: var(--accent-line);
-}
-.appnav .nav-offer:hover::after { content: " →"; opacity: .6; }
-
-/* ── Области учёта: меню вместо ряда пунктов ─────────────────── */
-
-/* Модуль 10 эталона собирает разделы по фазам работы: «Сбор данных», «Расчёт»,
-   «Отчёты», «Справочники», «Настройки», — а пункты живут внутри области. Довод
-   эталона дословно: «Не „Сотрудники, Контрагенты, Документы“, а „Сбор, Расчёт,
-   Отчёты“. Человек приходит с задачей, а не с сущностью».
-
-   Плоский ряд этого не сказал бы никак. Шесть слов подряд без единой границы
-   читаются как один список равнозначных вещей, а на телефоне разваливаются на
-   три одинаковых ряда, в которых уже ничего не найти.
-
-   Меню держит `<details>`, а не скрипт — и это не про вкус. Раскрытие обязано
-   работать до того, как приедет любой скрипт, и браузер умеет его сам: с
-   клавиатурой, с диктором («свёрнуто» / «развёрнуто») и с тем, что пункты
-   закрытого меню не ловят табуляцию. Своя реализация была бы хуже во всех трёх
-   местах, а выиграла бы только в закрытии по щелчку мимо. */
-.appnav__area { position: relative; }
-
-/* Название области. Треугольник браузера убран: он свой в каждом движке, а
-   рядом стоит счётчик — два значка на одной кнопке спорят. Вместо него свой
-   знак, который поворачивается при раскрытии: без него кнопка ничем не
-   отличается от ссылки и не обещает меню.
-
-   Знак нарисован рамками, а не символом «▾» в `content`. Причина не
-   декоративная: текст псевдоэлемента экранные дикторы читают вслух, и человек
-   услышал бы «Сбор данных, чёрный треугольник вниз» — при том что состояние
-   ему уже сказано словом «свёрнуто» самим `<details>`. Нарисованному
-   треугольнику читать нечего. */
-.appnav__area-name {
-  display: inline-flex; align-items: center; gap: var(--space-3);
-  padding: var(--space-3) var(--space-5);
-  border-radius: var(--r-control);
-  color: var(--ink-2);
-  white-space: nowrap;
-  cursor: pointer;
-  list-style: none;
-}
-.appnav__area-name::-webkit-details-marker { display: none; }
-.appnav__area-name::after {
-  content: "";
-  width: 0; height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid var(--ink-3);
-  transition: transform var(--t-state) var(--ease);
-}
-.appnav__area[open] > .appnav__area-name::after { transform: rotate(180deg); }
-.appnav__area-name:hover { background: var(--surface-3); color: var(--ink); }
-
-/* Область, в которой человек сейчас. Пометка именно у области, а не вторая
-   `aria-current="page"`: страница одна и она внутри области — сказать диктору,
-   что открытых страниц две, было бы неправдой. Отсюда `aria-current="true"` в
-   разметке и цвет здесь. */
-.appnav__area--here > .appnav__area-name {
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: var(--w-semibold);
-}
-.appnav__area--here > .appnav__area-name::after { border-top-color: var(--accent); }
-
-/* Само меню. Поверх страницы, а не в потоке: панель в потоке раздвинула бы
-   шапку до своей ширины, и страница поехала бы вбок целиком — то самое
-   «рассыпалось», от которого шапку защищали в issue #151. */
-.appnav__menu {
-  position: absolute;
-  top: calc(100% + var(--space-3));
-  left: 0;
-  z-index: 20;
-  min-width: 232px;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-block);
+/* «К содержанию» — первая остановка табуляции, видна только в фокусе.
+   Панель стоит в разметке раньше экрана, и без этой ссылки человек с
+   клавиатуры проходил бы два десятка пунктов на каждой странице. */
+.skip-link {
+  position: absolute; left: var(--space-5); top: var(--space-5); z-index: 60;
+  padding: var(--space-3) var(--space-6);
+  background: var(--surface); color: var(--accent);
+  border: 1px solid var(--accent-line); border-radius: var(--r-control);
   box-shadow: var(--sh-pop);
-  overflow: hidden;
+  transform: translateY(-200%);
 }
-/* Строка меню: имя слева, счётчик справа — как в эталоне. Скругление снимается:
-   строки стоят вплотную, и скруглённые углы внутри панели читались бы как
-   отдельные кнопки. */
-.appnav__menu > * {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: var(--space-5);
-  padding: var(--space-3) var(--space-6);
-  border-radius: 0;
-  white-space: nowrap;
-}
-.appnav__menu > * + * { border-top: 1px solid var(--line); }
-.appnav__menu .appnav__link:hover { background: var(--surface-3); }
-/* Раздел, который ведёт другая роль (только демо). Пунктир — язык этой
-   системы: «поведение отличается от соседей», здесь переключится роль. Снизу
-   он в меню не годится (спорил бы с разделителем строк), поэтому переезжает
-   на левый край — в вертикальном списке это его законное место. */
-.appnav__menu .nav-offer {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: var(--space-3) var(--space-6);
-  border-radius: 0;
-  border-bottom: 0;
-  border-left: 2px dashed var(--line-control-2);
-}
-.appnav__menu .nav-offer:hover { border-left-color: var(--accent-line); }
+.skip-link:focus { transform: none; text-decoration: none; }
 
-/* Счётчик ждущей работы. Тёплая метка, а не красная: очередь — это «сюда надо
-   вернуться», а не поломка. Цифры моноширинные, как все числа продукта.
-   Ноль сюда не попадает вовсе — его не рисует разметка. */
-.appnav__count {
-  flex: 0 0 auto;
-  font-family: var(--font-num); font-size: var(--fs-num-sm); line-height: 1;
-  padding: var(--space-1) var(--space-3);
-  border-radius: 999px;
-  background: var(--warn-soft);
-  border: 1px solid var(--warn-line);
-  color: var(--warn-ink);
+/* Видно только диктору. Класс стоял в разметке инбокса и раньше, но
+   правила у него не было ни в одном листе — подпись «Отметить», задуманная
+   для диктора, стояла в шапке таблицы у всех на виду. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-/* У области счётчик плотный и без рамки: областей в ряду несколько, и тёплая
-   рамка на каждой прочиталась бы как ряд предупреждений. В открытой области он
-   акцентный — там же, где и её имя. */
-.appnav__area-name .appnav__count {
-  background: var(--ink-3); border-color: transparent; color: var(--ink-inverse);
+
+/* Знак продукта. Логотипа-картинки у MAXIMUS нет, а знак нужен: в
+   свёрнутой панели имя уходит, и верх панели остался бы пустым. Буква на
+   акценте — тот же приём, что у значков пространств в Swarm. */
+.sidenav__mark {
+  display: grid; place-items: center;
+  background: var(--accent); color: var(--ink-inverse);
+  font-weight: var(--w-bold); font-size: var(--fs-lead);
 }
-.appnav__area--here > .appnav__area-name .appnav__count { background: var(--accent); }
 
-.appbar__spacer { flex: 1 1 auto; }
+/* Пункты области — списком с подписью (`aria-labelledby` на подпись
+   группы): диктор называет область и число пунктов, входя в неё. Ядро
+   рисует пункты прямо в `.sidenav__list`; список внутри повторяет его
+   раскладку, чтобы шаг между пунктами остался тем же. */
+.sidenav__set { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 
-/* Правый край шапки. Шапка обязана держаться в ОДНУ строку: служебное (кем
-   вошли, что видно, чем переключить язык) стоит выше содержания страницы, и
-   когда его столько, что оно переносится на вторую строку, оно начинает
-   спорить с данными, ради которых человек пришёл. Отсюда мелкий кегль,
-   короткие подписи языков и метка dev-входа точкой, а не рамкой. */
-.who {
-  display: flex; align-items: center; gap: var(--space-5);
-  color: var(--ink-2); font-size: var(--fs-meta);
-  flex: 0 1 auto; min-width: 0;
+/* Состояние экрана (D064): точкой, а не словом. Слово рядом с каждым
+   вторым пунктом сделало бы панель нечитаемой; состояние читается
+   наведением, диктором (скрытая подпись внутри) и цветом — тем же, что у
+   плашки самого экрана. */
+.sidenav__stage { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; }
+.sidenav__stage--refining { background: var(--warn-mark); }
+.sidenav__stage--planned { background: var(--accent); }
+
+/* Раздел, который ведёт другая роль, в демо (T163). Выглядит пунктом
+   панели, но тише и с пунктиром: это не раздел человека, а предложение
+   посмотреть продукт чужими глазами. Разметку отдаёт тег демо, поэтому
+   значка у пункта нет. */
+.sidenav .nav-offer {
+  display: flex; align-items: center; width: 100%; min-height: 34px;
+  padding: var(--space-2) var(--space-5); border: 1px dashed var(--line-strong);
+  border-radius: var(--r-control); color: var(--ink-3);
+  font-size: 13px; line-height: 1.25;
 }
-.who .cut { white-space: nowrap; }
+.sidenav .nav-offer:hover { color: var(--accent); border-color: var(--accent-line); text-decoration: none; }
+.sidenav .nav-offer:hover::after { content: " →"; opacity: .6; }
 
-/* Кто смотрит и на что. Сильная строка — имя человека, слабая — партнёр,
-   регистры и точка: сначала «кто я», потом «что мне видно».
-
-   В эталоне в сильной строке стоит название юрлица, а имени человека нет
-   вовсе — его заменяет кружок с инициалами. Здесь наоборот, и это не вкус:
-   один и тот же экран показывает разным людям разные числа, и человек должен
-   видеть, чьими глазами смотрит, не наводя мышь ни на что. Кружок при
-   показанном имени становится вторым способом сказать то же самое — то есть
-   шумом в строке, которой и без него тесно. */
-.viewer { text-align: right; line-height: 1.25; min-width: 0; }
-.viewer__name {
-  font-size: var(--fs-dense); font-weight: var(--w-semibold); color: var(--ink);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+/* Подписи переносятся, а не режутся многоточием (сверка с эталоном по
+   T222). Ядро держит пункт в одну строку высотой 34 и обрезает хвост, и
+   в 216 пикселях «Инбокс документов» становился «Инбокс докуме…», а
+   «Reconciliation with the trainer» — загадкой. Пункт растёт вниз и не
+   бывает ниже 34: это нижняя граница, которую держит ядро. */
+.sidenav__item, .sidenav__current {
+  height: auto; min-height: 34px; padding-top: var(--space-2); padding-bottom: var(--space-2);
+  white-space: normal; line-height: 1.25;
 }
-.viewer__meta { font-size: var(--fs-meta); color: var(--ink-3); }
-.viewer__meta span:not(:first-child)::before { content: " · "; color: var(--line-strong); }
-/* Регистры в шапке — своими метками, как в таблицах. Строкой «регистры: A, B, C»
-   они занимали треть шапки серым текстом и роняли её на второй ряд; цвет
-   сообщает то же самое короче и связывает шапку с ведомостью, где у этих же
-   строк те же цвета. */
-.viewer__ledgers { display: inline-flex; gap: var(--space-2); vertical-align: middle; }
-/* Отбивка перед метками остаётся: без неё регистры слипаются с названием
-   партнёра в одно слово («Dodo Serbia (тестовые данные)Официальный»). Своя, а
-   не общая, потому что общая ставит точку вплотную к рамке первой метки. */
-.viewer__ledgers::before { content: "· " !important; color: var(--line-strong); }
-.viewer__ledgers .ledger { padding: 0 var(--space-2); }
-/* Разделитель перед ролью — раздел 08 эталона: «кто смотрит» и «чьими правами»
-   это два разных ответа, и в один ряд они читаются как один. */
-.who .role { margin-left: var(--space-3); }
+.sidenav__label { overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+
+/* Плотность списка. Требование сверки: у самых тяжёлых ролей
+   (администратор, бухгалтер) все разделы влезают в экран 1440×900 без
+   прокрутки панели. Ядро отдаёт группе 12 пикселей сверху — на пяти
+   группах это лишние три десятка пикселей; 8 по-прежнему отделяют группу
+   от предыдущего пункта. Промежутки в 2 пикселя между пунктами ядро
+   ставит на случай соседних заливок; у пунктов по 34 пикселя и заливка
+   только у текущего, так что их место отдано разделам: на двадцати
+   строках это ещё сорок пикселей. */
+.sidenav__group { padding-top: var(--space-3); }
+.sidenav__list, .sidenav__set { gap: 0; }
+.sidenav__brand { padding-top: var(--space-5); padding-bottom: var(--space-5); }
+.sidenav__list { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+
+/* Тема и язык одной строкой, подписи групп — только диктору. */
+.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) var(--space-2) 0; }
+.sidenav__prefs .sidenav__theme { margin: 0; padding: 0; }
+
+/* Выбранная тема и выбранный язык — `span`, а не кнопка: нажимать на то,
+   что уже выбрано, незачем, и кнопка обещала бы действие, которого нет.
+   Ядро рисует выбранное как нажатую кнопку; здесь тот же вид на `span`. */
+.sidenav__choice {
+  display: grid; place-items: center; width: 28px; height: 28px;
+  border-radius: 7px; background: var(--accent-soft); color: var(--accent); cursor: default;
+}
+.sidenav__choice svg { width: 15px; height: 15px; }
+.sidenav__theme button, .sidenav__choice { font-family: var(--font-mono); font-size: 11px; }
+.sidenav__form { margin: 0; }
+.sidenav__dev { margin-left: auto; }
+
+/* Кто смотрит — две строки: «имя и роль», затем «партнёр · регистры ·
+   точка». Выход — значком справа в той же строке. */
+.sidenav__user { gap: var(--space-4); padding: var(--space-4) var(--space-4) var(--space-4) var(--space-6); }
+.sidenav__who { flex: 1; gap: var(--space-1); }
+.sidenav__whoami { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); min-width: 0; }
+.sidenav__whoami b { white-space: normal; }
+.sidenav__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-3); font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
+.sidenav__meta > * + *::before { content: "·"; margin-right: var(--space-3); color: var(--ink-3); }
+/* Регистры — точками тех же цветов, что метки регистров в ведомости:
+   цвет связывает панель с таблицей. Название — в `title` и у диктора. */
+.sidenav__ledgers { display: inline-flex; align-items: center; gap: var(--space-2); }
+.sidenav__reg { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.sidenav__logout .sidenav__item { justify-content: center; width: 34px; padding: 0; }
+.sidenav__logout .sidenav__label {
+  position: absolute; width: 1px; height: 1px; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.sidenav__avatar { display: none; }
+
+/* Планшет, 720–1099. Ядро сворачивает здесь панель до 56 пикселей
+   значков. Сверка по T222 это сняла: на 900 не видно ни роли, ни партнёра,
+   ни границ между группами, а подпись у значка есть только в наведении.
+   Выбор: панель остаётся полной — 216 пикселей из 720 и больше дают экрану
+   504+, а таблицы шире этого прокручиваются внутри себя и так. Правила ядра
+   для свёртки здесь отменяются по одному; предложение сделать свёртку
+   необязательной — в `GarroV/forma`. */
+@media (min-width: 720px) and (max-width: 1099px) {
+  .sidenav { width: 216px; }
+  .sidenav__brand { justify-content: flex-start; padding-left: var(--space-7); padding-right: var(--space-7); }
+  .sidenav__name, .sidenav__who { display: flex; }
+  .sidenav__label, .sidenav__group { display: block; }
+  .sidenav__item, .sidenav__current { justify-content: flex-start; padding-left: var(--space-5); padding-right: var(--space-5); }
+  .sidenav__count { position: static; font-size: 11px; }
+  .sidenav__theme { flex-direction: row; }
+  .sidenav__user { justify-content: flex-start; padding-left: var(--space-6); }
+  .sidenav__logout .sidenav__item { justify-content: center; padding: 0; }
+}
+
+/* Телефон, до 720. Ядро здесь панели не рисует: «ниже 720px панели нет —
+   там нижняя полоса вкладок продукта». Поэтому разделы уезжают в полосу у
+   нижнего края — там, куда дотягивается большой палец, — а кто смотрит,
+   язык, тема, учётная запись и выход остаются сверху, словами.
+
+   Полоса разделов прокручивается вбок сама, а страница — нет: у
+   управляющего разделов больше, чем влезает в 375, и спрятать часть значило
+   бы сделать их с телефона недостижимыми вовсе. Что полоса едет, говорит
+   гаснущий правый край: последний видимый пункт уходит в прозрачность, как
+   у ленты, которую можно потянуть. Подписи переносятся в две строки, а не
+   режутся. Всё нажимаемое — не меньше `--tap-min`: это физика пальца. */
+@media (max-width: 719px) {
+  .shell { display: block; }
+  .shell > .sidenav { position: static; height: auto; }
+  .sidenav {
+    width: auto; flex-direction: row; flex-wrap: wrap; align-items: center;
+    gap: var(--space-3) var(--space-5); padding: var(--space-4) var(--space-6);
+    border-right: 0; border-bottom: 1px solid var(--line);
+  }
+  .sidenav__brand { min-height: var(--tap-min); padding: 0; border-bottom: 0; justify-content: flex-start; }
+  .sidenav__name { display: flex; }
+
+  .sidenav__list {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    flex-direction: row; gap: 0; overflow-x: auto; overflow-y: hidden;
+    padding: 0 0 env(safe-area-inset-bottom);
+    background: var(--surface); border-top: 1px solid var(--line);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
+  }
+  .sidenav__list .sidenav__group { display: none; }
+  .sidenav__set { flex-direction: row; gap: 0; }
+  .sidenav__list .sidenav__item, .sidenav__list .sidenav__current {
+    flex-direction: column; justify-content: center; gap: var(--space-1);
+    width: 88px; min-height: 60px; padding: var(--space-3) var(--space-3);
+    border-radius: 0; font-size: var(--fs-micro); line-height: 1.2; text-align: center;
+  }
+  .sidenav__list .sidenav__current { box-shadow: inset 0 2px 0 var(--accent); }
+  .sidenav__list .sidenav__label { display: block; flex: 0 0 auto; }
+  .sidenav__list .sidenav__count { position: absolute; top: 4px; right: 10px; }
+  .sidenav__list .sidenav__stage { position: absolute; top: 8px; left: 12px; }
+  .sidenav .nav-offer { height: 60px; width: 104px; white-space: normal; border-radius: 0; border-width: 0 0 0 1px; }
+  /* Содержимое не прячется под полосой: снизу у страницы её высота. */
+  body { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+
+  .sidenav__foot {
+    flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--space-2);
+    margin-left: auto; padding: 0; border-top: 0;
+  }
+  .sidenav__prefs { padding: 0; }
+  .sidenav__theme { flex-direction: row; margin: 0; }
+  .sidenav__theme button, .sidenav__choice { width: var(--tap-min); height: var(--tap-min); }
+  .sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,
+  .sidenav__logout .sidenav__item {
+    width: auto; min-height: var(--tap-min); padding: 0 var(--space-4);
+  }
+  /* Ядро прячет подписи ниже 1099 `display: none`; на телефоне служебные
+     пункты подписаны словами — значок замка или стрелки сам по себе ничего
+     не называет. */
+  .sidenav__foot .sidenav__label { display: inline; }
+  .sidenav__logout .sidenav__label { display: inline; position: static; width: auto; height: auto; margin: 0; clip: auto; }
+  .sidenav__user { width: 100%; justify-content: flex-start; padding: 0; border-top: 0; }
+  .sidenav__who { display: flex; }
+  .sidenav__avatar { display: none; }
+}
 
 /* Роль — одна. В эталоне рядом стоят все выданные наборы прав, но владелец
    решил иначе: у человека один уровень, а понадобилось больше — его поднимают
@@ -370,32 +342,6 @@ p.back a:hover { color: var(--accent); }
 .role--ops        { color: var(--reg-internal); background: var(--reg-internal-soft); border-color: var(--reg-internal-line); }
 .role--manager    { color: var(--warn-ink);     background: var(--warn-soft);         border-color: var(--warn-line); }
 
-/* Переключатель языка — сегментированный переключатель дизайн-системы.
-   Кнопки, а не ссылки: смена языка меняет состояние (cookie), и делать это
-   переходом по ссылке нельзя — такую ссылку пройдёт любой предзагрузчик.
-   Выбранный язык — `span`, а не кнопка: см. `.appnav__current`. */
-.seg {
-  display: inline-flex; margin: 0;
-  background: var(--seg-track); border-radius: var(--r-control);
-  padding: var(--space-1); gap: var(--space-1);
-}
-.seg__item, .seg__current {
-  display: inline-flex; align-items: center;
-  height: 22px; padding: 0 var(--space-4);
-  border: 0; border-radius: var(--r-control);
-  font: var(--w-regular) var(--fs-micro) / 1 var(--font-ui);
-  letter-spacing: .04em;
-  white-space: nowrap;
-}
-.seg__item { background: transparent; color: var(--ink-2); cursor: pointer; }
-.seg__item:hover { color: var(--ink); background: transparent; border-color: transparent; }
-.seg__current {
-  background: var(--surface); color: var(--ink);
-  font-weight: var(--w-semibold); box-shadow: var(--sh-xs);
-}
-
-/* Действия учётной записи набраны мельче разделов: уходят по ним редко. */
-.who .btn, .who button { height: var(--control-h-sm); font-size: var(--fs-meta); }
 
 /* ── Плашки состояния и метки ────────────────────────────────── */
 
@@ -890,22 +836,6 @@ nav.exports .file::before { content: "↓"; margin-right: var(--space-3); opacit
    страницу, а не кнопкой скачивания. */
 nav.exports .page::before { content: "→"; margin-right: var(--space-3); opacity: .7; }
 
-/* Переключатель языка. Кнопки, а не ссылки: смена языка меняет состояние,
-   и переходом по ссылке это делать нельзя. Выбранный язык не нажимается —
-   как и выбранный разрез ведомости, по той же причине. */
-form.lang { display: flex; gap: var(--space-2); margin: 0; }
-.lang-option {
-  font-size: var(--fs-micro); letter-spacing: .04em;
-  padding: var(--space-1) var(--space-3); color: var(--ink-2);
-  border: 1px solid var(--line-control); border-radius: var(--r-mark);
-  background: var(--surface);
-}
-.lang-option:hover { color: var(--accent); border-color: var(--accent); }
-.lang-option.current {
-  color: var(--accent); background: var(--accent-soft);
-  border-color: var(--accent-line); font-weight: var(--w-semibold); cursor: default;
-}
-
 /* ── Формы ───────────────────────────────────────────────────── */
 
 /* Формы входа и смены пароля: одна колонка, поле шире подписи — читается
@@ -1068,7 +998,10 @@ th {
   color: var(--ink-2); font-weight: var(--w-semibold);
 }
 tbody tr:hover { background: var(--surface-2); }
-tfoot td { font-weight: var(--w-semibold); border-top: 2px solid var(--line-strong); border-bottom: none; }
+/* Линия над итогом — у каждой ячейки строки, и у заголовочной тоже. Первая
+   колонка итога обычно `th` («Итого по 12 строкам»), и правило на одни `td`
+   обрывало линию ровно перед ней (сверка блока reports, T222). */
+tfoot td, tfoot th { font-weight: var(--w-semibold); border-top: 2px solid var(--line-strong); border-bottom: none; }
 
 /* Ведомость шире экрана — прокручивается сама, страница по горизонтали не едет. */
 /* Контейнер широкой таблицы — `table-wrap` эталона. Высота ограничена не ради
@@ -1492,22 +1425,6 @@ ol.steps li.now .name { color: var(--accent); }
 .guide__facts dt { color: var(--ink-3); }
 .guide__facts dd { margin: 0; color: var(--ink-2); }
 
-/* Ссылка на гайд в шапке. Не `.btn`, и это не косметика: шапка у вошедшего и
-   без неё плотная (разделы, язык, партнёр, регистры, роль, пароль, выход), а
-   рамка с отступами кнопки добавляет к ней ещё тридцать пикселей и заставляет
-   разделы переноситься на вторую строку. Гайд — не действие и не раздел,
-   которым человек работает, поэтому и весит меньше их.
-
-   `nowrap` обязателен: подпись из трёх слов иначе ломается посередине, и в
-   шапке появляется двухстрочный элемент высотой больше самой шапки. */
-.who .guide-link {
-  color: var(--ink-2); font-size: var(--fs-meta); white-space: nowrap;
-  align-self: center;
-}
-.who a.guide-link:hover { color: var(--accent); text-decoration: none; }
-/* Гайд уже открыт: не ссылка, а метка места — тот же инвариант, что у текущего
-   раздела навигации (см. `appnav_item.html`). */
-.who .guide-link.here { color: var(--accent); font-weight: var(--w-semibold); cursor: default; }
 
 /* ── Сверка с таблицей бухгалтера ─────────────────────────────── */
 
@@ -1553,11 +1470,11 @@ ol.steps li.now .name { color: var(--accent); }
    причине. */
 .report tr.refused td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
 .report tr.refused td { color: var(--warn); }
-/* Имя человека в таблице находок помечено классом `who` — тем же словом, что
-   и правый край шапки, где `.who` это flex-контейнер «кто смотрит». Разные
-   вещи с одним именем: без этого сброса ячейка таблицы становится flex-блоком
-   мелким серым кеглем. Столкновение имён само по себе — долг, оно заведено
-   задачей; здесь только чтобы ячейка оставалась ячейкой. */
+/* Имя человека в таблице находок помечено классом `who`. До T222 так же звался
+   правый край шапки — flex-контейнер «кто смотрит», и ячейка без сброса
+   становилась flex-блоком мелким серым кеглем. Шапки больше нет, сброс
+   оставлен: он дешевле, чем вспоминать эту историю при следующем совпадении
+   имён. */
 .report .who { display: table-cell; margin: 0; color: inherit; font-size: inherit; }
 /* ── Выплаты по человеку ─────────────────────────────────────── */
 
@@ -1624,30 +1541,11 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
    1280 и прокручивается вся. Здесь так нельзя: продукт обязан работать на 768,
    а прокрутка всей страницы вместе с шапкой и есть «рассыпалось».
 
-   Поэтому шапка переносится на две строки: разделы сверху, «кто смотрит» под
-   ними. Разрыв делает распорка — на широком экране она растягивает пустоту
-   между навигацией и правым краем, на узком занимает всю строку и переносит
-   правый край вниз. Одно правило вместо перестановки элементов. */
+   Каркас на планшете держит левая панель: от 720 до 1099 она сама
+   сворачивается до значков (правило ядра, дополнения — в разделе «Левая
+   панель» выше), и места для содержимого остаётся столько же, сколько было
+   при верхней шапке. */
 @media (max-width: 1023px) {
-  .appbar {
-    height: auto; flex-wrap: wrap;
-    padding: var(--space-4) var(--space-6);
-    gap: var(--space-4) var(--space-6);
-  }
-  .appbar__spacer { flex: 1 1 100%; }
-  /* Здесь навигации перенос нужен: шапка уже `height: auto`, а шесть разделов
-     администратора сети в одну строку на планшете не встают. Наружу при этом
-     ничего не выйдет — высота идёт за содержимым. */
-  .appnav { flex-wrap: wrap; }
-  /* Меню привязывается к навигации целиком, а не к своей кнопке: у последней
-     области панель, отсчитанная от её левого края, вылезла бы за экран и
-     утащила бы за собой всю страницу. */
-  .appnav { position: relative; }
-  .appnav__area { position: static; }
-  .appnav__menu { left: 0; right: 0; min-width: 0; }
-  .who { flex-wrap: wrap; row-gap: var(--space-3); }
-  .viewer { text-align: left; }
-
   main { margin: var(--space-8) auto; padding: 0 var(--space-7); }
   form.card.wide { grid-template-columns: 1fr; max-width: 560px; }
 
@@ -1695,16 +1593,6 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
   .chart__month { flex: 0 0 92px; }
   .chart__value { flex: 0 0 104px; }
 
-  /* Меню — то, чем управляющий пользуется чаще всего: он заходит на две минуты
-     отметить часы или внести расход. И кнопка области, и строка меню обязаны
-     ловиться пальцем, а не кончиком ногтя. */
-  .appnav__area-name { min-height: var(--tap-min); }
-  .appnav__menu a { min-height: var(--tap-min); }
-  /* Только прямой потомок — сама строка меню (текущий раздел рисуется `span`,
-     а не ссылкой). Без `>` под правило попадал и счётчик внутри строки: круглая
-     метка растягивалась на все 44 пикселя и превращалась в овал. Замечено на
-     снимке телефона, разбором разметки такое не ловится. */
-  .appnav__menu > span { min-height: var(--tap-min); }
 }
 
 /* ── Печать ──────────────────────────────────────────────────── */
@@ -1714,7 +1602,8 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
    делают. Прокрутку контейнера тоже снимаем, иначе на печать уйдёт видимая
    часть таблицы, а остальное молча пропадёт. */
 @media print {
-  .appbar, nav.cuts, nav.exports, .actions, button, .btn { display: none; }
+  .sidenav, .skip-link, nav.cuts, nav.exports, .actions, button, .btn { display: none; }
+  .shell { display: block; }
   /* И предел высоты тоже снимается: без него на лист уехала бы видимая часть
      ведомости, а остальные строки пропали бы молча — ровно то, чего этот блок
      и должен не допускать. */
@@ -1758,12 +1647,22 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 .stage--planned { background: var(--accent-soft); border-color: var(--accent-line); }
 .stage--planned .stage__name { color: var(--accent); }
 
-/* Значок у пункта меню. Точкой, а не словом: слово рядом с каждым вторым
-   пунктом сделало бы шапку нечитаемой, а состояние читается наведением
-   (`title`) и цветом — тем же, что у плашки самого экрана. */
-.appnav__stage {
-  display: inline-block; width: 5px; height: 5px; margin-left: var(--space-3);
-  border-radius: 50%; vertical-align: middle;
+
+
+/* Переключатель среза ядра держит пункты в одну строку и шире своего
+   места не сжимается: на 390 он выходил за край экрана (сверка блока
+   reports, T222). Здесь он переносит пункты на следующую строку и не
+   бывает шире родителя; ядро об этом — предложение в `GarroV/forma`. */
+.seg { flex-wrap: wrap; max-width: 100%; }
+
+/* ── Учётная запись (T222) ─────────────────────────────────────
+   Кто вы и что вам видно — парами «название — значение», как карточка
+   сотрудника: читается сверху вниз, без таблицы ради четырёх строк. */
+.account {
+  display: grid; grid-template-columns: max-content 1fr; gap: var(--space-4) var(--space-9);
+  max-width: 640px; margin: var(--space-8) 0;
 }
-.appnav__stage--refining { background: var(--warn-mark); }
-.appnav__stage--planned { background: var(--accent); }
+.account dt { color: var(--ink-3); }
+.account dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.account__links { display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.account__links a { display: inline-flex; align-items: center; min-height: var(--tap-min); }

@@ -21,7 +21,15 @@
 эталоном.
 
 **Одна ли палитра.** Литеральный цвет в разметке или во втором листе стилей
-возвращает исходную беду, поэтому он запрещён везде, кроме самого `tokens.css`.
+возвращает исходную беду, поэтому он запрещён везде, кроме листов значений:
+`tokens.css` и двух копий из `GarroV/forma` — ядра линейки `dodo-ds.css` и слоя
+продукта `domain.css` (T222). И в них цвет законен только значением
+переменной (`--имя: #…`): правило, покрашенное хексом, не переключится в тёмной
+теме и не поедет за правкой ядра, где бы оно ни стояло.
+
+**Копия ядра не правлена на месте.** Первая строка каждой копии — штамп с
+контрольной суммой содержимого ниже неё. Правка на месте его ломает, и такая
+правка не досталась бы соседним продуктам — ровно то, от чего склад и заведён.
 """
 from __future__ import annotations
 
@@ -95,11 +103,17 @@ WATCHED = [
 ]
 
 
+# Листы значений: здесь цвет законен, но только значением переменной.
+FORMA_COPIES = (TOKENS.parent / "dodo-ds.css", TOKENS.parent / "domain.css")
+VALUE_SHEETS = (TOKENS, *FORMA_COPIES)
+
+# Объявление переменной целиком — от имени до точки с запятой или конца блока.
+DECLARATION = re.compile(r"--[a-z0-9-]+\s*:[^;{}]*")
+
+
 def _files():
     for label, root, pattern in WATCHED:
         for path in sorted(root.rglob(pattern)):
-            if path == TOKENS:  # единственный дом значений
-                continue
             yield label, path
 
 
@@ -111,11 +125,44 @@ def test_no_literal_colours_outside_tokens(label, path):
     text = COMMENT.sub("", text)
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
     text = re.sub(r"{%\s*comment\s*%}.*?{%\s*endcomment\s*%}", "", text, flags=re.S)
+    if path in VALUE_SHEETS:
+        # Лист значений: вырезаются объявления переменных, а всё, что осталось,
+        # — правила. Хекс в правиле и здесь дефект.
+        text = DECLARATION.sub("", text)
     found = LITERAL_COLOR.findall(text)
     assert not found, (
         f"{label} {path.name}: цвет литералом {sorted(set(found))} — "
-        "значения живут только в tokens.css, иначе палитр снова станет две"
+        "значения живут только переменными в листах значений, иначе палитр "
+        "снова станет две"
     )
+
+
+@pytest.mark.parametrize("path", FORMA_COPIES, ids=lambda path: path.name)
+def test_the_copy_from_forma_is_not_edited_in_place(path):
+    """Штамп копии сходится с её содержимым: правили в `GarroV/forma`, а не тут.
+
+    Сумма считается так же, как её ставит склад (`tools/guard.py` там): sha256
+    всего, что ниже строки штампа.
+    """
+    import hashlib
+
+    first, _, rest = path.read_text(encoding="utf-8").partition("\n")
+    stamp = re.match(r"^/\* forma \S+ sha256:([0-9a-f]{64}) .*\*/$", first.strip())
+    assert stamp, f"{path.name}: нет штампа склада в первой строке — копия не из forma?"
+    assert hashlib.sha256(rest.encode("utf-8")).hexdigest() == stamp.group(1), (
+        f"{path.name} правлен на месте. Правка идёт в GarroV/forma и раскатывается "
+        "tools/spread.py — иначе она не достанется соседним продуктам"
+    )
+
+
+def test_the_core_fonts_are_on_disk():
+    """Шрифты ядра лежат рядом с ним: пропавший файл тихо уводит на системный."""
+    core = FORMA_COPIES[0]
+    urls = re.findall(r"url\(['\"]?([^'\")]+)", COMMENT.sub("", core.read_text(encoding="utf-8")))
+    assert urls, "в ядре нет ни одного @font-face — шрифты откуда-то извне?"
+    for url in urls:
+        assert not url.startswith(("http", "//")), f"{url}: внешняя загрузка запрещена"
+        assert (core.parent / url).exists(), f"{url}: файла нет рядом с ядром"
 
 
 # --- Токен, которого нет ------------------------------------------------------

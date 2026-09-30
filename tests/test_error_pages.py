@@ -73,10 +73,10 @@ def test_a_missing_address_answers_with_a_page_of_the_product(client, web_env, d
         html = body(response)
 
     assert response.status_code == 404, response.status_code
-    # Признак страницы продукта — марка в шапке. Не `<header`: техническая
+    # Признак страницы продукта — марка в левой панели (до T222 — в шапке). Не `<header`: техническая
     # страница Django тоже начинается с `<header id="summary">`, и проверка по
     # тегу зеленела бы ровно на том, ради чего написана.
-    assert 'class="brand"' in html, "на странице нет шапки продукта"
+    assert 'class="sidenav__brand"' in html, "на странице нет панели продукта"
     assert 'href="/periods/"' in html, "с отказа некуда уйти: нет дороги в работу"
     for word in TECHNICAL:
         assert word not in html, f"на странице отказа техническая подробность: {word}"
@@ -139,7 +139,7 @@ def test_a_refusal_answers_with_a_page_of_the_product(client, web_env):
         html = body(response)
 
     assert response.status_code == 403, response.status_code
-    assert 'class="brand"' in html, "отказ показан без шапки продукта"
+    assert 'class="sidenav__brand"' in html, "отказ показан без панели продукта"
     for word in TECHNICAL:
         assert word not in html, f"на странице отказа техническая подробность: {word}"
     assert "нарочный отказ" not in html, "текст исключения уехал на экран"
@@ -154,7 +154,7 @@ def test_a_form_without_a_valid_key_is_told_what_to_do(web_env):
     html = body(response)
 
     assert response.status_code == 403, response.status_code
-    assert 'class="brand"' in html, "CSRF-отказ показан без шапки продукта"
+    assert 'class="sidenav__brand"' in html, "CSRF-отказ показан без панели продукта"
     assert "CSRF" not in html, "человеку показали служебное слово"
     for word in TECHNICAL:
         assert word not in html, f"на странице отказа техническая подробность: {word}"
@@ -173,7 +173,7 @@ def test_a_broken_view_answers_with_a_page_of_the_product(web_env):
         html = body(response)
 
     assert response.status_code == 500, response.status_code
-    assert 'class="brand"' in html, "500 показана без шапки продукта"
+    assert 'class="sidenav__brand"' in html, "500 показана без панели продукта"
     assert "нарочная поломка" not in html, "текст исключения уехал на экран"
     for word in TECHNICAL:
         assert word not in html, f"на странице 500 техническая подробность: {word}"
@@ -202,14 +202,14 @@ def test_a_piece_of_a_page_stays_a_piece(client, web_env):
     """Ответ на догрузку куска страницы не подменяется целым экраном.
 
     Табель досылает ячейки через htmx, и на отказ он ждёт короткий ответ, а не
-    страницу с шапкой: страница, вставленная внутрь ячейки, — это сломанный
+    страницу с панелью: страница, вставленная внутрь ячейки, — это сломанный
     экран, а не человеческий отказ.
     """
     login_as(client, "director")
     with override_settings(DEBUG=True):
         response = client.get("/no-such-address/", headers={"hx-request": "true"})
     assert response.status_code == 404
-    assert 'class="brand"' not in body(response)
+    assert 'class="sidenav__brand"' not in body(response)
 
 
 def test_the_missing_page_keeps_its_message_inside_the_plaque(client, web_env):

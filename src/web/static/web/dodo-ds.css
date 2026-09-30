@@ -1,0 +1,1229 @@
+/* forma dodo/core/dodo-ds.css sha256:6a6d2b333bd186e1d3ff89544f86fc095bfd5c558b634996877c4b5766c1e845 — не править здесь, правка идёт в GarroV/forma */
+/* ═══════════════════════════════════════════════════════════════════════════
+   DODO — ЕДИНАЯ ДИЗАЙН-СИСТЕМА ТРЁХ ПРОДУКТОВ
+   Собрана 17.09.2026 из двух источников:
+     • dodo-design-system.html — Dodo P&L Service (будущий MAXIMUS), полный
+       каталог: слой бренда + токены + компоненты + доменный слой P&L;
+     • visual-kit.css — MERIDIUS (чек-листы), куда система пришла из P&L
+       по решению D013: «берём визуальный язык, структуру экранов — нет».
+   Третий потребитель — DECIMUS (аудиты сети).
+
+   28.09.2026 эталоном линейки стал Swarm Brain — единственный продукт с
+   живыми пользователями (MERIDIUS D164): палитра, шрифты, радиусы, левая
+   панель и выдвижная панель справа взяты оттуда. Разбор — docs/decisions.md.
+
+   Родословная у файлов одна, поэтому сборка — не компромисс двух вкусов,
+   а снятие расхождений, накопленных при копировании. Что разошлось и как
+   решено:
+
+   1. --ink-3 (метаданные). P&L #98A1AC — не добирает контраст на белом.
+      Meridius затемнил до #626B77 (D044). Взято значение Meridius:
+      доступность не обсуждается. Тёмная тема — #8A97A6 по той же причине.
+   2. body { min-width: 1280px }. В P&L — таблица на весь экран; в Meridius
+      снято ради телефона управляющего. Ядро ширину не назначает: это
+      решение экрана, а не системы. Продукт ставит min-width сам.
+   3. Доменный слой P&L (--reg-*, --st-*, --origin-*, поверхности удержаний
+      и итога, полоса шагов месяца, печать ведомости) в ядро не входит —
+      в Meridius половина не использовалась, вторая была переиспользована
+      под чужие смыслы, то есть имя врало. Заводится в продукте (слой 3).
+   4. Но --reg-supp и --reg-internal красили не «регистры учёта», а вид
+      сущности — то же нужно Meridius (типы чек-листов) и Decimus (классы
+      нарушений). Значения сохранены под честными именами: --cat-violet,
+      --cat-teal. Роли P&L (.role--accountant, .role--ops) продолжают
+      работать: они переведены на эти тона, разметку переписывать не надо.
+   5. Метка. Три продукта пришли к одной форме трижды (.role, .inbox__kind,
+      статусные плашки). Введён .tag с тонами; .role оставлен как частный
+      случай.
+   6. Общий акцент. Цвет один на все три продукта: пользователь у них
+      общий (управляющий, УК), и «вот это нажимается» он не должен
+      переучивать трижды. Различие продуктов несёт словесный знак в шапке,
+      не палитра. С 23.09.2026 акцент — фиолетовый #5B57F2 (D188); до этого
+      был синий #1F4E9C из P&L.
+
+   Добавлено при сборке (каждое — не меньше чем для двух продуктов):
+   .stat/.stats (показатели: дашборд есть у всех трёх), .crumbs (иерархия:
+   кластер→страна→город→точка, период→подразделение, группа→чек-лист).
+
+   КАК ПОЛЬЗОВАТЬСЯ
+       <link rel="stylesheet" href="dodo-ds.css">
+   Ссылаться только на var(--…), не на хексы. Тёмная тема — атрибутом на
+   корне: <html data-theme="dark">; компоненты о ней не знают.
+   Шрифты подключаются отдельно (Google Fonts или next/font):
+   Golos Text — интерфейс, IBM Plex Mono — числа.
+   Tailwind 4: нужен мост @theme inline { --color-canvas: var(--canvas); … }.
+
+   СЛОИ
+       0  бренд Dodo Brands   — справочный, для всего, что видно наружу
+       1  токены ядра         — светлая и тёмная тема
+       2  компоненты          — ни одного хекса, только var(--…)
+       3  слой продукта       — доменные токены и классы, см. конец файла
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══ СЛОЙ 0. БРЕНД ══════════════════════════════════════════════════════ */
+/* Источник значений — корпоративный скилл dodo-brands-pptx (assets/brand.js),
+   то, чем набираются презентации компании. Слой справочный: интерфейс
+   продуктов на нём не строится, но знак, акцентные материалы и всё, что
+   показывают наружу, обязаны совпадать с этими значениями.
+   Почему отдельно от токенов: интерфейсный акцент — решение продукта,
+   бренд — решение компании. Смешаешь в один слой — через месяц никто не
+   скажет, что здесь можно менять. Сейчас они близки (акцент #5B57F2 рядом
+   с брендовым #5B3DEC, D188), и именно поэтому граница нужна сильнее
+   прежнего: брендовый тон правит компания, интерфейсный — мы. */
+
+:root {
+  --brand-purple:      #5B3DEC;   /* основной цвет компании */
+  --brand-purple-dark: #4A2FD0;
+  --brand-purple-deep: #2E1A8C;
+  --brand-orange:      #FF6A1F;
+  --brand-orange-dark: #E0571A;
+  --brand-blue:        #1E2BAA;
+  --brand-green:       #1E8E5E;
+  --brand-red:         #C53030;
+  --brand-beige:       #F5F1E8;
+  --brand-beige-light: #FAF7F0;
+  --brand-tile-purple: #EFEBFF;
+  --brand-tile-orange: #FFE8DA;
+  --brand-border:      #E5E1F5;
+  --brand-text:        #1A1A1A;
+  --brand-text-muted:  #6B6B6B;
+  --brand-font: 'Inter', system-ui, sans-serif;
+}
+
+/* ═══ ШРИФТЫ ═════════════════════════════════════════════════════════════ */
+/* Файлы лежат рядом с этим CSS, в каталоге `fonts/`, и раскатываются в
+   продукты вместе с ним. Пути относительные — копия работает там, куда её
+   положили, без настройки на стороне продукта.
+
+   ПОЧЕМУ СВОИ ФАЙЛЫ, А НЕ GOOGLE FONTS. Прототип подключал шрифты ссылкой на
+   `fonts.googleapis.com`, и для прототипа это правильно. Продукту так нельзя
+   по трём причинам, и третья — та, на которой мы уже обожглись:
+     1. каждый экран внутреннего инструмента сообщал бы внешней стороне, кто
+        и когда его открыл (продукт работает в ЕС и на Кавказе);
+     2. площадка стоит за Tailscale, и закрытая наружу сеть — нормальный для
+        неё режим, а не авария;
+     3. отказ ТИХИЙ. Шрифт не приехал — браузер молча берёт системный, экран
+        выглядит «почти так же», и расхождение с каноном замечает человек
+        глазами, а не проверка. Ровно это и случилось 24.09.2026: токены
+        типографики уехали в продукт, файлов не было вовсе, и владелец
+        увидел старый на вид экран.
+
+   Эталон линейки — Swarm Brain (решение владельца 28.09.2026, MERIDIUS D164):
+   интерфейс набирается Golos Text, служебное — счётчики, роли, метаданные,
+   подсказки клавиш — IBM Plex Mono. Golos переменный (один файл на все веса),
+   Plex Mono статичный: 400, 500, 600. Подмножества разделены `unicode-range`:
+   кириллица не скачивается на латинском экране. Файлы — из fontsource
+   (лицензия OFL): `@fontsource-variable/golos-text`, `@fontsource/ibm-plex-mono`.
+   Manrope и Space Grotesk (D188) сняты вместе со сменой эталона. */
+
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('fonts/golos-text-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('fonts/golos-text-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('fonts/golos-text-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Golos Text';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('fonts/golos-text-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-latin-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-latin-ext-400.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-cyrillic-400.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-latin-500.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-latin-ext-500.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-cyrillic-500.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-latin-600.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-latin-ext-600.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('fonts/ibm-plex-mono-cyrillic-600.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* ═══ СЛОЙ 1. ТОКЕНЫ ЯДРА ════════════════════════════════════════════════ */
+/* Значения — единственный источник правды. Светлая тема ниже, тёмная —
+   отдельными значениями (она не инвертирует светлую). */
+
+:root {
+  /* ── Поверхности ─────────────────────────────────────────── */
+  --canvas:          #F7F9FB;   /* фон приложения */
+  --surface:         #FFFFFF;   /* таблицы, карточки, поповеры */
+  --surface-2:       #F7F9FB;   /* итоги, зоны только для чтения */
+  --surface-3:       #F1F4F7;   /* шапка таблицы, тулбар */
+  --surface-head:    #ECEFF3;   /* закреплённые ячейки шапки */
+  --surface-glass:   rgba(255, 255, 255, .72);   /* шапка приложения поверх прокрутки */
+
+  /* ── Текст ───────────────────────────────────────────────── */
+  --ink:             #1B2028;   /* числа и основной текст */
+  --ink-2:           #5C6672;   /* подписи, второстепенное */
+  --ink-3:           #5F6874;   /* надстрочные, метаданные — затемнён до порога доступности (D044): 5,97 на --surface, 4,70 на --canvas */
+  --ink-empty:       #A3AAB4;   /* «нет значения» — только для прочерка */
+  --ink-inverse:     #FFFFFF;
+
+  /* ── Линии ───────────────────────────────────────────────── */
+  --line:            #ECEFF3;   /* строки таблицы, границы блоков */
+  --line-2:          #F3F5F8;   /* колонки внутри группы */
+  --line-strong:     #DCE1E7;   /* границы групп колонок, закреплённые края */
+  --line-control:    #DCE1E7;   /* поля и кнопки */
+  --line-control-2:  #B4BCC6;   /* наведение, пунктир выгрузки */
+
+  /* ── Акцент ──────────────────────────────────────────────── */
+  --accent:          #1F4E9C;
+  --accent-hover:    #2A5DB0;
+  --accent-press:    #173D7C;
+  --accent-soft:     #E8EEF8;   /* акцентный текст на ней обязан проходить порог: 6,86 */
+  --accent-line:     #C9D9F0;
+
+  /* ── Внимание ────────────────────────────────────────────
+     Родство с брендом теперь несёт сам акцент (D188), поэтому янтарь
+     здесь ни с чем не перекликается и читается как чистый сигнал. */
+  --warn:            #8A5D06;
+  --warn-ink:        #6B4705;
+  --warn-mark:       #C9922E;
+  --warn-soft:       #FBF1DC;
+  --warn-line:       #EFE0BE;
+
+  /* ── Успех и рост ────────────────────────────────────────── */
+  --ok:              #0E7A51;
+  --ok-soft:         #E4F4EC;
+  --ok-line:         #C4E4D5;
+  --up:              #0E7A51;
+
+  /* ── Ошибка и падение ────────────────────────────────────── */
+  --err:             #C53030;
+  --err-soft:        #FBE9E9;
+  --err-line:        #F3CACA;
+  --down:            #C53030;
+
+  /* ── Категориальные тона ─────────────────────────────────────
+     Не статус, а вид сущности: регистр учёта (Maximus), тип
+     чек-листа (Meridius), класс нарушения (Decimus). Значения
+     пришли из --reg-supp / --reg-internal P&L; имена обобщены,
+     потому что красили они именно вид, а не учёт. ───────────── */
+  --cat-violet:      #9333EA;
+  --cat-violet-soft: #F6EBFD;
+  --cat-violet-line: #E7D2F8;
+  --cat-teal:        #0F766E;
+  --cat-teal-soft:   #E4F2F1;
+  --cat-teal-line:   #BFDEDB;
+
+
+  /* ── Служебные поверхности компонентов ───────────────────── */
+  --seg-track:            #ECEFF3;  /* дорожка переключателя среза */
+  --surface-selected:     #E8EEF8;  /* выбранная строка инбокса */
+  --overlay:              rgba(10, 13, 17, .5);
+  --overlay-soft:         rgba(10, 13, 17, .12);  /* подложка выдвижной панели: фон виден */
+  --glow-sm:              0 0 0 transparent;      /* неон текущего пункта — только в тёмной */
+
+
+
+  /* ── Типографика ─────────────────────────────────────────── */
+  --font-ui:  'Golos Text', 'Segoe UI', system-ui, sans-serif;
+  /* Числа — тем же Golos с табличными цифрами (.num): колонка ровная, а текст
+     и число рядом на карточке не выглядят вставками из разных документов.
+     Моноширинный — для служебного, как в Swarm: счётчики в меню, роль под
+     именем, подсказка клавиш, идентификаторы (D164). */
+  --font-num:  'Golos Text', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --fs-display: 20px;   --lh-display: 26px;   /* h1 экрана */
+  --fs-title:   16px;   --lh-title:   22px;   /* заголовок блока */
+  --fs-lead:    14px;   --lh-lead:    20px;   /* ввод, крупные поля */
+  --fs-body:    13px;   --lh-body:    18px;   /* база интерфейса */
+  --fs-dense: 12.5px;   --lh-dense:   17px;   /* таблицы и тулбары */
+  --fs-meta:  11.5px;   --lh-meta:    16px;   /* подписи под полем */
+  --fs-micro: 10.5px;   --lh-micro:   14px;   /* надстрочные метки */
+
+  --fs-num-hero: 22px;  /* сумма в панели раскрытия */
+  --fs-num:    12.5px;  /* деньги в таблице */
+  --fs-num-sm: 10.5px;  /* метки регистров, счётчики */
+
+  --tracking-micro: .1em;  /* только для коротких надстрочных */
+  --w-regular: 400; --w-medium: 500; --w-semibold: 600; --w-bold: 700;
+
+  /* Деньги. Применять всегда вместе. */
+  --num: var(--w-regular) var(--fs-num) / var(--lh-dense) var(--font-num);
+
+  /* ── Сетка, отступы, плотность ───────────────────────────── */
+  --page-min:   1280px;
+  --page-fold:   768px;   /* ниже — только сценарии управляющего */
+  --gutter:       24px;
+  --space-1: 2px;  --space-2: 4px;  --space-3: 6px;  --space-4: 8px;
+  --space-5: 10px; --space-6: 12px; --space-7: 16px; --space-8: 20px;
+  --space-9: 24px; --space-10: 32px; --space-11: 40px; --space-12: 48px;
+
+  --row-dense:   30px;   /* максимальная плотность */
+  --row:         34px;   /* ведомость и табель по умолчанию */
+  --row-loose:   40px;   /* списки, инбокс */
+  --cell-pad-x:  12px;
+  --control-h:   36px;
+  --control-h-sm: 30px;
+  --tap-min:     44px;   /* мобильные сценарии управляющего */
+
+  /* ── Радиусы ─────────────────────────────────────────────── */
+  --r-mark:     4px;   /* чекбоксы, цветные метки */
+  --r-control: 8px;   /* кнопки, поля */
+  --r-block:   10px;   /* карточки, таблицы, поповеры */
+  --r-screen:  14px;   /* диалоги, внешняя рамка экрана */
+  --r-pill:   999px;   /* срез, фильтры, метки — форма говорит «выбирается» */
+
+  /* ── Тени ────────────────────────────────────────────────── */
+  --sh-xs:    0 1px 2px rgba(8, 8, 10, .05);
+  --sh-card:  0 1px 2px rgba(8, 8, 10, .05), 0 10px 28px -14px rgba(8, 8, 10, .12);
+  --sh-pop:   0 2px 6px rgba(8, 8, 10, .06), 0 18px 44px -12px rgba(8, 8, 10, .18);
+  --sh-modal: 0 22px 70px rgba(10, 13, 17, .3);
+
+  /* ── Фокус: виден всегда, мышь не нужна ──────────────────── */
+  --focus-ring: 0 0 0 2px #FFFFFF, 0 0 0 4px rgba(31, 78, 156, .45);
+  --focus-soft: rgba(31, 78, 156, .14);   /* мягкое кольцо на полях ввода */
+  --focus-outline: 2px solid var(--accent);
+
+  /* ── Движение ────────────────────────────────────────────── */
+  --t-state:  90ms;
+  --t-pop:   140ms;
+  --t-panel: 220ms;
+  --ease: cubic-bezier(.2, .6, .2, 1);
+}
+
+/* Числа: правый край, табличные цифры, начертание var(--font-num).
+   Колонку держит табличная ширина знака, а не моноширинный шрифт (D188).
+   Ноль пишется цифрой, пустое значение — прочерком var(--ink-empty). */
+.num {
+  font: var(--num);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Фокус виден на всём, чем можно управлять с клавиатуры. */
+:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 1px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Тёмная тема. Переопределяются только значения — ни один
+   компонент об этом не знает, потому что читает var(--…).
+
+       <html data-theme="dark">
+
+   Правило: тёмная тема не инвертирует светлую. Поверхности
+   разводятся по светлоте меньше (шесть шагов вместо восьми),
+   акценты светлеют, а насыщенность снижается: на тёмном фоне
+   те же хексы жгут глаза за час работы с таблицей.
+   ───────────────────────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  /* ── Поверхности ─────────────────────────────────────────── */
+  --canvas:          #070A10;
+  --surface:         #0D1220;
+  --surface-2:       #131A2E;
+  --surface-3:       #172036;
+  --surface-head:    #1E2A45;
+  --surface-glass:   rgba(13, 18, 32, .72);
+
+  /* ── Текст ───────────────────────────────────────────────── */
+  --ink:             #EAF2FF;
+  --ink-2:           #93A4C3;
+  --ink-3:           #8093B8;   /* осветлён до порога доступности (D044) */
+  --ink-empty:       #4A5A7A;
+  --ink-inverse:     #04121A;
+
+  /* ── Линии ───────────────────────────────────────────────── */
+  --line:            #1E2A45;
+  --line-2:          #172036;
+  --line-strong:     #2A3A5C;
+  --line-control:    #2A3A5C;
+  --line-control-2:  #3B4F78;
+
+  /* ── Акцент ──────────────────────────────────────────────── */
+  --accent:          #00E5FF;
+  --accent-hover:    #5CEBFF;
+  --accent-press:    #8FF2FF;
+  --accent-soft:     #0A2230;
+  --accent-line:     #134A5C;
+
+  /* ── Внимание ────────────────────────────────────────────── */
+  --warn:            #E8C77A;
+  --warn-ink:        #F2D89F;
+  --warn-mark:       #C9A45A;
+  --warn-soft:       #2E2510;
+  --warn-line:       #4A3C1C;
+
+  /* ── Успех и рост ────────────────────────────────────────── */
+  --ok:              #4ED08F;
+  --ok-soft:         #10281F;
+  --ok-line:         #22503C;
+  --up:              #4ED08F;
+
+  /* ── Ошибка и падение ────────────────────────────────────── */
+  --err:             #E05252;
+  --err-soft:        #2A1216;
+  --err-line:        #55282E;
+  --down:            #E05252;
+
+  /* ── Категориальные тона ─────────────────────────────────────── */
+  --cat-violet:      #C88BF5;
+  --cat-violet-soft: #2A1B3A;
+  --cat-violet-line: #452B5E;
+  --cat-teal:        #4FC5B8;
+  --cat-teal-soft:   #10272A;
+  --cat-teal-line:   #22484A;
+
+
+  /* ── Служебные поверхности компонентов ───────────────────── */
+  --seg-track:            #1E2A45;
+  --surface-selected:     #0A2230;
+  --overlay:              rgba(4, 6, 10, .72);
+  --overlay-soft:         rgba(4, 6, 10, .35);
+  --glow-sm:              0 0 10px rgba(0, 229, 255, .55), 0 0 22px rgba(0, 229, 255, .2);
+
+
+
+  /* ── Тени. На тёмном тень почти не видна — работает граница ─ */
+  --sh-xs:    0 1px 2px rgba(0, 0, 0, .4);
+  --sh-card:  0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px -14px rgba(0, 0, 0, .6);
+  --sh-pop:   0 2px 6px rgba(0, 0, 0, .5), 0 16px 40px -12px rgba(0, 0, 0, .7);
+  --sh-modal: 0 40px 90px -28px rgba(0, 0, 0, .8);
+
+  --focus-ring: 0 0 0 2px #070A10, 0 0 0 4px rgba(0, 229, 255, .55);
+  --focus-soft: rgba(0, 229, 255, .22);
+}
+
+/* Тёмная тема не печатается: бумага всегда белая. */
+@media print {
+  [data-theme="dark"] { color-scheme: light; }
+}
+
+/* ═══ СЛОЙ 2. КОМПОНЕНТЫ  ═══════════════════════════════════════════════ */
+/* ── Сброс и каркас страницы ─────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font: var(--w-regular) var(--fs-body) / var(--lh-body) var(--font-ui);
+}
+
+/* Ширину страницы задаёт продукт. В P&L было `min-width: var(--page-min)` (1280px) —
+   для таблицы на весь экран. На телефоне это горизонтальный скролл, поэтому здесь снято. */
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-press); text-decoration: underline; }
+
+:focus-visible { outline: var(--focus-outline); outline-offset: 1px; }
+
+.page { width: var(--page-min); max-width: 100%; margin: 0 auto; }
+.page__body { padding: var(--space-10) var(--gutter) 0; }
+
+/* Раздел страницы. Заголовок + номер, как в каталоге компонентов. */
+.section { margin-bottom: var(--space-12); }
+.section__head { display: flex; align-items: baseline; gap: var(--space-4); margin-bottom: var(--space-6); }
+.section__num { font-family: var(--font-num); font-size: var(--fs-num-sm); color: var(--ink-3); }
+.section__title { margin: 0; font-size: var(--fs-title); line-height: var(--lh-title); font-weight: var(--w-semibold); }
+.section__lead { font-size: var(--fs-meta); color: var(--ink-2); margin-bottom: var(--space-5); }
+
+/* ── Числа. Инвариант 1: правый край, моно, табличные цифры ──── */
+
+.num {
+  font-family: var(--font-num);
+  font-size: var(--fs-num);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.num--lead { font-size: var(--fs-lead); }
+.num--hero { font-size: var(--fs-num-hero); font-weight: var(--w-bold); }
+.num--sm { font-size: var(--fs-num-sm); }
+.num--total { font-weight: var(--w-bold); }
+.num--muted { color: var(--ink-2); }        /* удержания, прошлый период */
+.num--zero { color: var(--ink-3); }         /* ноль — значение есть */
+.num--empty { color: var(--ink-empty); }    /* прочерк — значения нет */
+.num--up { color: var(--up); font-weight: var(--w-semibold); }
+.num--down { color: var(--down); font-weight: var(--w-semibold); }
+.num--flagged { color: var(--warn-ink); box-shadow: inset 0 -2px 0 var(--warn-mark); }
+
+/* ── Шапка приложения ────────────────────────────────────────── */
+
+.appbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-9);
+  padding: 0 var(--gutter);
+  background: var(--surface-glass);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line);
+}
+.appbar__brand { display: flex; align-items: baseline; gap: var(--space-3); }
+.appbar__brand-name { font-weight: var(--w-bold); font-size: var(--fs-lead); letter-spacing: -.01em; }
+/* Имя продукта — полужирным чернилами, имя компании/тенанта — рядом и тише.
+   Различие продуктов несёт знак, а не цвет: MAXIMUS Dodo, MERIDIUS Dodo,
+   DECIMUS Dodo набираются одинаково. */
+.appbar__brand-mark { font-weight: var(--w-regular); font-size: var(--fs-lead); color: var(--ink-2); }
+.appbar__spacer { flex: 1; }
+
+.appnav { display: flex; align-items: center; gap: var(--space-1); }
+/* Инвариант 3: текущий пункт — span, не ссылка. */
+.appnav__current {
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: var(--w-semibold);
+}
+.appnav__link { padding: var(--space-3) var(--space-6); border-radius: var(--r-pill); color: var(--ink-2); }
+.appnav__link:hover { background: var(--surface-3); text-decoration: none; color: var(--ink); }
+
+.tenant { display: flex; align-items: center; gap: var(--space-5); padding-right: var(--space-6); border-right: 1px solid var(--line-2); }
+.tenant__name { font-size: var(--fs-dense); font-weight: var(--w-semibold); text-align: right; }
+.tenant__meta { font-size: var(--fs-meta); color: var(--ink-3); text-align: right; }
+
+/* Наборы прав. Показываются все выданные, а не один ярлык. */
+.roles { display: flex; align-items: center; gap: var(--space-2); }
+.role {
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-meta);
+  font-weight: var(--w-semibold);
+  white-space: nowrap;
+}
+.role--admin { color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+/* Временно выданный набор: пунктир и срок. */
+.role--temporary { color: var(--warn-ink); background: var(--warn-soft); border: 1px dashed var(--warn-line); }
+.role__until { font-family: var(--font-num); font-size: 9.5px; opacity: .75; margin-left: var(--space-2); }
+
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--ink-inverse);
+  font-size: var(--fs-meta);
+  font-weight: var(--w-semibold);
+  display: grid; place-items: center;
+}
+
+/* ── Кнопки ──────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  flex: 0 0 auto;              /* не сжимается рядом с длинным пояснением */
+  white-space: nowrap;         /* подпись не рвётся на две строки */
+  height: var(--control-h);
+  padding: 0 var(--space-7);
+  border: 1px solid var(--line-control);
+  border-radius: var(--r-control);
+  background: var(--surface);
+  color: var(--ink);
+  font: var(--w-medium) var(--fs-body) / 1 var(--font-ui);
+  box-shadow: var(--sh-xs);
+  cursor: pointer;
+  transition: background var(--t-state) var(--ease), border-color var(--t-state) var(--ease);
+}
+.btn:hover { background: var(--surface-3); }
+.btn:active { background: var(--surface-3); transform: translateY(1px); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn--sm { height: var(--control-h-sm); padding: 0 var(--space-6); font-size: var(--fs-dense); }
+.btn--tap { min-height: var(--tap-min); font-size: var(--fs-lead); }  /* мобильные сценарии */
+
+.btn--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--ink-inverse);
+  font-weight: var(--w-semibold);
+}
+.btn--primary:hover { background: var(--accent-hover); }
+.btn--primary:active { background: var(--accent-press); }
+
+.btn--ghost { border-color: transparent; background: transparent; color: var(--ink-2); box-shadow: none; }
+.btn--ghost:hover { background: var(--surface-3); color: var(--ink); }
+
+.btn--danger { border-color: var(--err-line); color: var(--err); font-weight: var(--w-semibold); }
+.btn--danger:hover { background: var(--err-soft); }
+
+/* Инвариант 2: выгрузка отличается ВИДОМ — пунктир, стрелка, расширение. */
+.btn--download {
+  height: var(--control-h-sm);
+  border-style: dashed;
+  border-color: var(--line-control-2);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-dense);
+}
+.btn--download:hover { background: var(--surface-3); border-color: var(--ink-3); }
+.btn__ext { opacity: .55; }
+.btn__key { font-family: var(--font-num); font-size: var(--fs-num-sm); opacity: .6; }
+
+.btn__spinner { width: 12px; height: 12px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: pnl-spin 700ms linear infinite; }
+@keyframes pnl-spin { to { transform: rotate(360deg); } }
+
+/* Ряд действий: кнопки держат ширину, пояснение сжимается. */
+.actions { display: flex; align-items: center; gap: var(--space-4); }
+.actions__hint { flex: 1 1 auto; min-width: 0; font-size: var(--fs-meta); color: var(--ink-3); }
+/* Колонка действий в таблице: рассчитана на самую широкую пару кнопок,
+   иначе при переводе подписи выедут на колонку сумм. */
+.actions--cell { width: 196px; flex: 0 0 auto; justify-content: flex-end; gap: var(--space-3); }
+
+/* ── Переключатель среза ─────────────────────────────────────── */
+
+.seg { display: inline-flex; background: var(--seg-track); border-radius: var(--r-pill); padding: 3px; gap: var(--space-1); }
+.seg__item, .seg__current {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 28px;
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: var(--r-pill);
+  font: var(--w-regular) var(--fs-dense) / 1 var(--font-ui);
+  white-space: nowrap;
+}
+.seg__item { background: transparent; color: var(--ink-2); cursor: pointer; }
+.seg__item:hover { color: var(--ink); }
+/* Инвариант 3: выбранное значение — span[aria-current], не кнопка. */
+.seg__current { background: var(--surface); color: var(--ink); font-weight: var(--w-semibold); box-shadow: var(--sh-xs); }
+.seg__dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; }
+.seg__count { font-family: var(--font-num); font-size: 9.5px; color: var(--ink-3); }
+
+.field-label {
+  display: block;
+  font-size: var(--fs-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  font-weight: var(--w-semibold);
+  margin-bottom: var(--space-2);
+}
+
+/* ── Фильтр длинного списка (10–50 точек) ────────────────────── */
+
+.filter-btn {
+  display: inline-flex; align-items: center; gap: var(--space-3);
+  height: var(--control-h-sm); padding: 0 var(--space-6);
+  border: 1px solid var(--line-control); border-radius: var(--r-pill);
+  background: var(--surface); font-size: var(--fs-dense); cursor: pointer;
+}
+.filter-btn--active { border-color: var(--accent); color: var(--accent); font-weight: var(--w-semibold); }
+
+.popover {
+  width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-block);
+  box-shadow: var(--sh-pop);
+}
+.popover__search { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--line); }
+.popover__search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-size: var(--fs-dense); color: var(--ink); }
+.popover__group { padding: var(--space-3) var(--space-5) var(--space-1); font-size: 10px; letter-spacing: var(--tracking-micro); text-transform: uppercase; color: var(--ink-3); font-weight: var(--w-bold); }
+.popover__row { display: flex; align-items: center; gap: var(--space-4); height: 32px; margin: 0 var(--space-3); padding: 0 var(--space-5); border-radius: var(--r-control); font-size: var(--fs-dense); cursor: pointer; }
+.popover__row:hover { background: var(--surface-2); }
+.popover__row--on { background: var(--accent-soft); }
+.popover__row--empty { color: var(--ink-3); }
+.popover__count { margin-left: auto; font-family: var(--font-num); font-size: var(--fs-num-sm); color: var(--ink-3); }
+.popover__foot { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--line); background: var(--surface-2); font-size: 10px; color: var(--ink-3); }
+
+.checkbox {
+  width: 16px; height: 16px; flex: 0 0 auto;
+  display: grid; place-items: center; padding: 0;
+  border: 1px solid var(--line-control-2);
+  border-radius: var(--r-mark);
+  background: var(--surface);
+  cursor: pointer;
+}
+.checkbox--on { border-color: var(--accent); background: var(--accent); color: var(--ink-inverse); }
+
+/* ── Поля ────────────────────────────────────────────────────── */
+
+.input {
+  width: 100%;
+  height: var(--control-h);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line-control);
+  border-radius: var(--r-control);
+  background: var(--surface);
+  font: var(--w-regular) var(--fs-body) / 1 var(--font-ui);
+  color: var(--ink);
+}
+.input:hover { border-color: var(--line-control-2); }
+.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-soft); outline: none; }
+.input:disabled { background: var(--surface-2); border-color: var(--line); color: var(--ink-3); }
+
+/* Числовое поле выглядит как ячейка таблицы: моно, правый край. */
+.input--num {
+  font-family: var(--font-num);
+  font-size: var(--fs-lead);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.input--error { border-color: var(--err); background: var(--err-soft); color: var(--err); }
+/* Подсказка не мешает сохранить: значение принято, замечание показано. */
+.input--flagged { border-color: var(--warn-line); background: var(--warn-soft); color: var(--warn-ink); }
+
+.input-money { display: flex; align-items: center; height: var(--control-h); border: 1px solid var(--line-control); border-radius: var(--r-control); background: var(--surface); overflow: hidden; }
+.input-money:focus-within { border-color: var(--accent); }
+.input-money input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; padding: 0 var(--space-4); text-align: right; font-family: var(--font-num); font-size: var(--fs-lead); font-variant-numeric: tabular-nums; background: transparent; color: var(--ink); }
+.input-money__currency { padding: 0 var(--space-4); height: 100%; display: grid; place-items: center; background: var(--surface-3); border-left: 1px solid var(--line-control); font-family: var(--font-num); font-size: var(--fs-num-sm); color: var(--ink-2); }
+
+.field-note { font-size: var(--fs-meta); margin-top: var(--space-2); color: var(--ink-3); }
+.field-note--error { color: var(--err); }
+.field-note--warn { color: var(--warn); }
+.field-note--ok { color: var(--ok); }
+
+/* ── Таблица данных ──────────────────────────────────────────── */
+
+/* Инвариант 7: прокручивается контейнер, страница по горизонтали не едет. */
+.table-wrap {
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-card);
+  border-radius: var(--r-block);
+  overflow: auto;
+  background: var(--surface);
+  max-height: 486px;
+}
+.table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+
+/* Вертикальных линий нет: колонки держит выравнивание, а не сетка.
+   Граница остаётся там, где она несёт смысл — край группы и закреплённые
+   имя с итогом. */
+.table th, .table td { border-bottom: 1px solid var(--line); border-right: 0; }
+.table thead th {
+  position: sticky; top: 0; z-index: 3;
+  background: var(--surface-head);
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--fs-micro);
+  font-weight: var(--w-semibold);
+  color: var(--ink-2);
+  text-align: right;
+  vertical-align: bottom;
+  border-bottom: 1px solid var(--line-strong);
+}
+.table thead th.is-text { text-align: left; }
+
+/* Верхний ярус — группа колонок. Второй ярус липнет под него. */
+.table__grouphead {
+  position: sticky; top: 0; z-index: 3;
+  height: 21px; line-height: 21px;
+  padding: 0 var(--space-4);
+  background: var(--surface-3);
+  font-size: var(--fs-micro);
+  font-weight: var(--w-bold);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--ink-2);
+  border-right: 1px solid var(--line-strong);
+}
+.table__subhead { top: 21px; }
+.table__group-end { border-right: 1px solid var(--line-strong); }
+
+/* Инвариант 8: имя слева и итог справа закреплены при прокрутке. */
+.table__name {
+  position: sticky; left: 0; z-index: 2;
+  background: var(--surface);
+  text-align: left;
+  padding: 1px var(--space-5);
+  height: var(--row);
+  font-size: var(--fs-dense);
+  font-weight: var(--w-regular);
+  line-height: 15px;
+  overflow: hidden;
+  border-right: 1px solid var(--line-strong);
+}
+.table__name-main { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.table__name-main span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--w-medium); }
+.table__name-sub { display: flex; align-items: center; gap: var(--space-3); padding-left: 9px; min-width: 0; }
+.table__name-sub span { font-size: var(--fs-micro); line-height: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.table__total-col {
+  position: sticky; right: 0; z-index: 2;
+  background: var(--surface);
+  text-align: right;
+  padding: 0 var(--space-5);
+  height: var(--row);
+  font-family: var(--font-num);
+  font-size: 13px;
+  font-weight: var(--w-semibold);
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid var(--line-strong);
+  border-right: 0;
+}
+
+.table tbody tr:hover { background: var(--surface-2); }
+.table td.is-num { text-align: right; padding: 0 var(--space-4); height: var(--row); font-family: var(--font-num); font-size: var(--fs-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Инвариант 5: подкраска строки — только происхождение, не величина числа. */
+
+.row-mark { width: 3px; height: 15px; border-radius: 1px; flex: 0 0 auto; background: transparent; }
+.row-mark--frozen { background: var(--line-control-2); }
+
+.table tfoot th, .table tfoot td {
+  position: sticky; bottom: 0; z-index: 4;
+  background: var(--surface-2);
+  border-top: 2px solid var(--line-strong);
+  border-bottom: 0;
+  height: 34px;
+  font-weight: var(--w-semibold);
+}
+.table tfoot .table__name { z-index: 6; }
+.table tfoot .table__total-col { z-index: 7; background: var(--surface-3); font-size: 13.5px; font-weight: var(--w-bold); }
+
+/* Инвариант 6: действие в таблице набрано мельче сумм. */
+.table .btn--sm { height: 24px; font-size: var(--fs-meta); }
+
+/* Ячейка сетки табеля: ввод на месте, сохранение на лету. */
+.cell-input {
+  width: 100%; height: 26px;
+  border: 1px solid transparent;
+  border-radius: var(--r-mark);
+  background: transparent;
+  text-align: right;
+  padding: 0 var(--space-3);
+  font-family: var(--font-num);
+  font-size: var(--fs-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  outline: none;
+}
+.cell-input:focus { background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
+.cell-input.is-flagged { border-bottom-color: var(--warn-mark); border-bottom-width: 2px; color: var(--warn-ink); }
+.cell--edited { background: var(--warn-soft); }
+
+/* ── Плашки ──────────────────────────────────────────────────── */
+
+.note { display: flex; align-items: flex-start; gap: var(--space-6); padding: var(--space-6) var(--space-7); border-radius: var(--r-block); }
+.note__icon { flex: 0 0 auto; margin-top: 1px; }
+.note__title { font-size: var(--fs-dense); font-weight: var(--w-semibold); }
+.note__text { font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); margin-top: var(--space-1); }
+.note--ok { background: var(--ok-soft); border: 1px solid var(--ok-line); }
+.note--ok .note__title { color: var(--ok); }
+.note--warn { background: var(--warn-soft); border: 1px solid var(--warn-line); }
+.note--warn .note__title, .note--warn .note__text { color: var(--warn-ink); }
+.note--error { background: var(--err-soft); border: 1px solid var(--err-line); }
+.note--error .note__title { color: var(--err); }
+.note--info { background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.note--info .note__title { color: var(--accent); }
+
+/* ── Прогресс долгой операции ────────────────────────────────── */
+
+.progress { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-block); box-shadow: var(--sh-card); overflow: hidden; }
+.progress__head { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.progress__stage { font-size: var(--fs-dense); font-weight: var(--w-semibold); }
+.progress__counter { margin-left: auto; font-family: var(--font-num); font-size: var(--fs-num); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.progress__body { padding: var(--space-5); }
+.progress__track { height: 6px; background: var(--surface-3); border-radius: 999px; overflow: hidden; }
+.progress__bar { height: 100%; background: var(--accent); transition: width var(--t-panel) var(--ease); }
+.progress__bar--done { background: var(--ok); }
+.progress__foot { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-5); margin-top: var(--space-3); font-size: var(--fs-meta); color: var(--ink-2); }
+
+/* ── Инбокс: две разные сущности в одной очереди ─────────────── */
+
+.inbox__bar { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-4) var(--space-6); background: var(--surface-3); border-bottom: 1px solid var(--line-strong); }
+.inbox__bar--selection { background: var(--accent-soft); border-bottom-color: var(--accent-line); }
+
+.inbox__row {
+  display: flex; align-items: center; gap: var(--space-6);
+  padding: 0 var(--space-7);
+  height: var(--row-loose);
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid transparent;
+  background: var(--surface);
+}
+.inbox__row:hover { background: var(--surface-2); }
+.inbox__row--selected { background: var(--surface-selected); }
+/* Необработанное вложение — другая сущность, а не другой статус платежа. */
+.inbox__row--attachment { background: var(--warn-soft); border-left-color: var(--warn-mark); }
+
+.inbox__kind {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  height: 20px; padding: 0 var(--space-4);
+  border-radius: var(--r-pill);
+  font-size: 10px; font-weight: var(--w-semibold);
+  letter-spacing: .04em; text-transform: uppercase;
+  flex: 0 0 auto;
+}
+.inbox__kind--payment { color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-line); }
+.inbox__kind--attachment { color: var(--warn-ink); background: var(--surface); border: 1px dashed var(--warn-line); }
+.inbox__title { width: 192px; flex: 0 0 auto; font-size: var(--fs-dense); font-weight: var(--w-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inbox__state { flex: 0 0 auto; font-size: var(--fs-meta); padding: 1px var(--space-3); border-radius: var(--r-mark); color: var(--warn-ink); background: var(--warn-soft); border: 1px solid var(--warn-line); white-space: nowrap; }
+.inbox__guess { flex: 1 1 auto; min-width: 0; font-size: var(--fs-meta); color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inbox__sum { width: 84px; flex: 0 0 auto; }
+
+/* ── Диалог подтверждения ────────────────────────────────────── */
+
+.overlay { position: fixed; inset: 0; z-index: 80; background: var(--overlay); display: grid; place-items: center; }
+.dialog { width: 470px; background: var(--surface); border-radius: var(--r-screen); box-shadow: var(--sh-modal); overflow: hidden; }
+.dialog__head { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-6) var(--space-7); background: var(--surface-3); border-bottom: 1px solid var(--line); }
+.dialog__head--danger { background: var(--err-soft); border-bottom-color: var(--err-line); color: var(--err); }
+.dialog__title { font-size: var(--fs-title); font-weight: var(--w-semibold); }
+.dialog__body { padding: var(--space-6) var(--space-7); }
+.dialog__facts { margin-top: var(--space-5); border: 1px solid var(--line); border-radius: var(--r-block); overflow: hidden; }
+.dialog__fact { display: flex; align-items: baseline; gap: var(--space-5); padding: var(--space-3) var(--space-5); background: var(--surface-2); border-bottom: 1px solid var(--line); font-size: var(--fs-meta); color: var(--ink-2); }
+.dialog__fact .num { margin-left: auto; }
+.dialog__foot { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-7); background: var(--surface-2); border-top: 1px solid var(--line); }
+.dialog__esc { font-size: var(--fs-meta); color: var(--ink-3); }
+.dialog__spacer { flex: 1; }
+
+.textarea {
+  width: 100%; min-height: 58px;
+  padding: var(--space-4);
+  border: 1px solid var(--line-control);
+  border-radius: var(--r-control);
+  font: var(--w-regular) var(--fs-body) / var(--lh-body) var(--font-ui);
+  color: var(--ink);
+  resize: vertical;
+}
+.textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-soft); outline: none; }
+
+/* ── Пустые состояния и отказы ───────────────────────────────── */
+
+.empty { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-5); padding: var(--space-10) var(--space-9); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-block); box-shadow: var(--sh-card); }
+.empty__title { font-size: var(--fs-lead); font-weight: var(--w-semibold); }
+.empty__text { font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
+/* Отказ с действием: показывается только тому, кто вправе исправить сам. */
+.empty--actionable { border-color: var(--accent-line); }
+.empty__aside { font-size: 10px; line-height: 14px; color: var(--ink-3); border-top: 1px dashed var(--line-control); padding-top: var(--space-4); margin-top: var(--space-2); }
+
+/* ── Карточка сущности ───────────────────────────────────────── */
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-block); box-shadow: var(--sh-card); overflow: hidden; }
+.card__head { display: flex; align-items: center; gap: var(--space-6); padding: var(--space-7); border-bottom: 1px solid var(--line); }
+.card__title { font-size: var(--fs-title); line-height: var(--lh-title); font-weight: var(--w-semibold); }
+.card__meta { font-size: var(--fs-meta); color: var(--ink-2); margin-top: 1px; }
+.card__facts { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--line); }
+.card__fact { padding: var(--space-5) var(--space-6); border-right: 1px solid var(--line); }
+.card__fact:last-child { border-right: 0; }
+.card__fact-label { font-size: var(--fs-micro); letter-spacing: var(--tracking-micro); text-transform: uppercase; color: var(--ink-3); font-weight: var(--w-semibold); }
+.card__fact-note { font-size: 10px; color: var(--ink-3); }
+.card__body { padding: var(--space-7); }
+
+/* ── Боковая навигация ───────────────────────────────────────────
+   Эталон — левая панель Swarm Brain (D164). Сверху марка продукта с
+   подписью пространства, под ней поиск с подсказкой ⌘K, дальше пункты:
+   иконка 16px, подпись, тихий счётчик моноширинным справа. Текущий —
+   мягкая заливка и полоса 2px слева внутренней тенью (рамка ломала бы
+   скругление), в тёмной теме — ещё и неон. Внизу: тема, служебные
+   пункты, пользователь. Ширина 216px; от 720 до 1099px панель
+   сворачивается до 56px иконок, подписи уходят в title. Ниже 720px
+   панели нет — там нижняя полоса вкладок продукта.
+
+     <nav class="sidenav">
+       <a class="sidenav__brand">  img.sidenav__logo  .sidenav__name > b + small
+       <form class="sidenav__search"> label.sidenav__field > svg input kbd.kbd
+       <div class="sidenav__list">  .sidenav__group  a.sidenav__item | span.sidenav__current
+       <div class="sidenav__foot">  .sidenav__theme  a.sidenav__item …
+       <div class="sidenav__user">  .avatar  .sidenav__who > b + small
+*/
+
+.sidenav { display: flex; flex-direction: column; width: 216px; flex-shrink: 0; min-height: 0; background: var(--surface-2); border-right: 1px solid var(--line); }
+.sidenav__brand { display: flex; align-items: center; gap: var(--space-5); padding: 14px var(--space-7); border-bottom: 1px solid var(--line); color: var(--ink); }
+.sidenav__brand:hover { text-decoration: none; color: var(--ink); }
+.sidenav__logo { width: 28px; height: 28px; flex-shrink: 0; border-radius: 7px; }
+.sidenav__name { display: flex; flex-direction: column; min-width: 0; }
+.sidenav__name b { font-size: 13.5px; line-height: 18px; font-weight: var(--w-bold); letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidenav__name small { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sidenav__search { padding: var(--space-5) var(--space-4) 0; }
+.sidenav__field { display: flex; align-items: center; gap: var(--space-4); height: 30px; padding: 0 var(--space-5); border: 1px solid var(--line-strong); border-radius: 7px; background: var(--surface); color: var(--ink-3); transition: border-color var(--t-state) var(--ease); }
+.sidenav__field:hover { border-color: var(--line-control-2); }
+.sidenav__field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--focus-soft); }
+.sidenav__field svg { width: 13px; height: 13px; flex-shrink: 0; }
+.sidenav__field input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 12.5px; }
+.sidenav__field input::placeholder { color: var(--ink-3); }
+.sidenav__field input:not(:placeholder-shown) + .kbd { display: none; }
+
+.sidenav__list { display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-5) var(--space-4); }
+.sidenav__group { padding: var(--space-6) var(--space-5) var(--space-2); font-size: var(--fs-micro); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); font-weight: var(--w-semibold); }
+.sidenav__group:first-child { padding-top: var(--space-2); }
+.sidenav__item, .sidenav__current { position: relative; display: flex; align-items: center; gap: var(--space-5); width: 100%; height: 34px; padding: 0 var(--space-5); border: 0; border-radius: var(--r-control); background: transparent; font: inherit; font-size: 13.5px; text-align: left; white-space: nowrap; cursor: pointer; transition: background var(--t-state) var(--ease), color var(--t-state) var(--ease); }
+.sidenav__item { color: var(--ink-2); }
+.sidenav__item:hover { background: var(--surface); color: var(--ink); text-decoration: none; }
+/* Инвариант: текущий пункт — span[aria-current], не ссылка. */
+.sidenav__current { background: var(--accent-soft); color: var(--accent); font-weight: var(--w-semibold); box-shadow: inset 2px 0 0 var(--accent), var(--glow-sm); cursor: default; }
+.sidenav__item svg, .sidenav__current svg { width: 16px; height: 16px; flex-shrink: 0; }
+.sidenav__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.sidenav__count { margin-left: auto; font-family: var(--font-mono); font-size: 11px; font-weight: var(--w-regular); color: var(--ink-3); }
+
+.sidenav__foot { display: flex; flex-direction: column; gap: 2px; padding: var(--space-4); border-top: 1px solid var(--line); }
+.sidenav__theme { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); padding: 0 var(--space-2); }
+.sidenav__theme-label { flex: 1; font-size: 12px; color: var(--ink-3); }
+.sidenav__theme button { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: var(--ink-3); cursor: pointer; }
+.sidenav__theme button:hover { background: var(--surface); color: var(--ink); }
+.sidenav__theme button[aria-checked="true"], .sidenav__theme button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+.sidenav__theme svg { width: 15px; height: 15px; }
+
+.sidenav__user { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-6); border-top: 1px solid var(--line); }
+.sidenav__who { display: flex; flex-direction: column; min-width: 0; }
+.sidenav__who b { font-size: 13px; line-height: 17px; font-weight: var(--w-semibold); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidenav__who small { font-family: var(--font-mono); font-size: 10px; line-height: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+
+@media (max-width: 1099px) {
+  .sidenav { width: 56px; }
+  .sidenav__brand { justify-content: center; padding-left: 0; padding-right: 0; }
+  .sidenav__name, .sidenav__label, .sidenav__group, .sidenav__who, .sidenav__theme-label, .sidenav__field .kbd { display: none; }
+  /* Поле не прячется, а сжимается в ноль: скрытое `display: none` не берёт
+     фокус, и ⌘K в свёрнутой панели молча не работал бы. В фокусе поле
+     раскрывается поверх содержимого, как в Swarm. */
+  .sidenav__search { position: relative; }
+  .sidenav__field { justify-content: center; padding: 0; }
+  .sidenav__field input { flex: 0 0 0; width: 0; padding: 0; }
+  .sidenav__field:focus-within { position: absolute; left: var(--space-4); z-index: 50; width: 260px; justify-content: flex-start; padding: 0 var(--space-5); box-shadow: var(--sh-pop); }
+  .sidenav__field:focus-within input { flex: 1; width: auto; }
+  .sidenav__item, .sidenav__current { justify-content: center; padding: 0; }
+  .sidenav__count { position: absolute; top: 2px; right: 4px; font-size: 9.5px; }
+  .sidenav__theme { flex-direction: column; }
+  .sidenav__user { justify-content: center; padding-left: 0; padding-right: 0; }
+}
+
+/* ── Подсказка клавиши и аватар ─────────────────────────────────── */
+
+.kbd { display: inline-block; padding: 0 var(--space-2); border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: var(--r-mark); font-family: var(--font-mono); font-size: 10px; line-height: 14px; color: var(--ink-3); }
+.avatar { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 10px; font-weight: var(--w-bold); }
+
+/* ── Выдвижная панель справа ──────────────────────────────────────
+   Эталон — «Изменить задачу» Swarm Brain (D164): работа с элементом
+   списка, не уводя со страницы. Список остаётся виден под лёгкой
+   подложкой; 560px, во всю высоту, граница только слева. Шапка:
+   заголовок, действия-иконки (удалить, закрыть); прокручивается только
+   тело. Закрывают Esc, крестик и клик по подложке — это обязанность
+   продукта, CSS даёт только вид.
+
+     <div class="drawer-layer">
+       <a|button class="drawer-scrim" aria-label="Закрыть">
+       <aside class="drawer" role="dialog" aria-labelledby="…">
+         <header class="drawer__head"> h2.drawer__title  .drawer__actions > .icon-btn
+         <div class="drawer__body"> …  .prow …
+         <footer class="drawer__foot"> (необязателен)
+*/
+
+.drawer-layer { position: fixed; inset: 0; z-index: 50; }
+.drawer-scrim { position: absolute; inset: 0; background: var(--overlay-soft); border: 0; animation: drawer-fade var(--t-pop) var(--ease) both; }
+.drawer { position: absolute; top: 0; right: 0; display: flex; flex-direction: column; width: 560px; max-width: 96vw; height: 100dvh; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--sh-modal); animation: drawer-in var(--t-pop) var(--ease) both; }
+.drawer__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); padding: var(--space-5) 18px; border-bottom: 1px solid var(--line); }
+.drawer__title { margin: 0; font-size: 16px; line-height: 22px; font-weight: var(--w-semibold); letter-spacing: -.01em; color: var(--ink); }
+.drawer__actions { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+.drawer__body { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 18px; }
+.drawer__foot { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4); padding: var(--space-6) 18px; border-top: 1px solid var(--line); background: var(--surface-2); }
+.drawer__section { padding: var(--space-6) 0; border-top: 1px solid var(--line); }
+.drawer__section:first-child { border-top: 0; padding-top: 0; }
+.drawer__section-title { margin: 0 0 var(--space-4); font-size: var(--fs-lead); font-weight: var(--w-semibold); color: var(--ink); }
+
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 0; border-radius: 7px; background: transparent; color: var(--ink-2); cursor: pointer; transition: background var(--t-state) var(--ease), color var(--t-state) var(--ease); }
+.icon-btn:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
+.icon-btn--danger:hover { color: var(--err); }
+.icon-btn svg { width: 18px; height: 18px; }
+
+@keyframes drawer-in { from { opacity: 0; transform: translateX(2rem); } }
+@keyframes drawer-fade { from { opacity: 0; } }
+
+@media (max-width: 719px) {
+  .drawer { width: 100vw; max-width: 100vw; border-left: 0; }
+}
+
+/* ── Строка свойства ──────────────────────────────────────────────
+   Иконка и подпись слева, значение справа — как свойства задачи в
+   Swarm. Нажимается вся строка; пустое значение — прочерком. */
+
+.props { display: flex; flex-direction: column; gap: 2px; }
+.prow { display: flex; align-items: center; gap: var(--space-5); width: 100%; min-height: 34px; padding: 0 var(--space-4); border: 1px solid transparent; border-radius: var(--r-block); background: transparent; color: var(--ink); font: inherit; text-align: left; }
+a.prow:hover, button.prow:hover, label.prow:hover { background: var(--surface-2); text-decoration: none; color: var(--ink); }
+.prow__label { display: flex; align-items: center; gap: var(--space-5); flex-shrink: 0; font-size: 12.5px; color: var(--ink-2); }
+.prow__label svg { width: 15px; height: 15px; color: var(--ink-3); }
+.prow__value { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-body); font-weight: var(--w-medium); color: var(--ink); }
+.prow__value--empty { color: var(--ink-3); font-weight: var(--w-regular); }
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer, .drawer-scrim { animation: none; }
+}
+
+/* ── Метка ───────────────────────────────────────────────────────
+   Обобщение трёх независимых изобретений одной формы: .role (P&L),
+   .inbox__kind (очередь), статусные плашки аудитов. Форма одна, тон —
+   модификатором. Тон означает смысл, а не важность. */
+
+.tag {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-meta);
+  font-weight: var(--w-semibold);
+  white-space: nowrap;
+}
+.tag--accent  { color: var(--accent);     background: var(--accent-soft);     border-color: var(--accent-line); }
+.tag--ok      { color: var(--ok);         background: var(--ok-soft);         border-color: var(--ok-line); }
+.tag--warn    { color: var(--warn-ink);   background: var(--warn-soft);       border-color: var(--warn-line); }
+.tag--err     { color: var(--err);        background: var(--err-soft);        border-color: var(--err-line); }
+.tag--violet  { color: var(--cat-violet); background: var(--cat-violet-soft); border-color: var(--cat-violet-line); }
+.tag--teal    { color: var(--cat-teal);   background: var(--cat-teal-soft);   border-color: var(--cat-teal-line); }
+.tag--neutral { color: var(--ink-2);      background: var(--surface-3);       border-color: var(--line-control); }
+/* Пунктир = выдано на срок, предварительно, не окончательно. */
+.tag--dashed { border-style: dashed; }
+/* Надстрочный размер: метка внутри строки таблицы или очереди. */
+.tag--micro {
+  height: 20px; padding: 0 var(--space-4);
+  border-radius: var(--r-pill);
+  font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+}
+.tag__note { font-family: var(--font-num); font-size: 9.5px; opacity: .75; }
+
+/* Роли P&L как частный случай метки — разметка продукта не переписывается. */
+.role--accountant { color: var(--cat-violet); background: var(--cat-violet-soft); border: 1px solid var(--cat-violet-line); }
+.role--ops        { color: var(--cat-teal);   background: var(--cat-teal-soft);   border: 1px solid var(--cat-teal-line); }
+
+/* ── Показатель ──────────────────────────────────────────────────
+   Дашборд есть у всех трёх продуктов: итоги периода, прогресс
+   чек-листов, KPI страны. Число — моноширинным, как в таблице:
+   одна цифра, один шрифт, где бы она ни стояла. */
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: var(--space-5); }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-block); box-shadow: var(--sh-card); padding: var(--space-7); }
+.stat__label { font-size: var(--fs-micro); line-height: var(--lh-micro); letter-spacing: var(--tracking-micro); text-transform: uppercase; color: var(--ink-3); font-weight: var(--w-semibold); }
+.stat__value { margin-top: var(--space-3); font-family: var(--font-num); font-size: var(--fs-num-hero); font-weight: var(--w-bold); font-variant-numeric: tabular-nums; color: var(--ink); }
+.stat__unit { font-size: var(--fs-meta); font-weight: var(--w-regular); color: var(--ink-3); margin-left: var(--space-2); }
+.stat__delta { margin-top: var(--space-2); font-size: var(--fs-meta); color: var(--ink-2); }
+.stat__delta--up { color: var(--up); font-weight: var(--w-semibold); }
+.stat__delta--down { color: var(--down); font-weight: var(--w-semibold); }
+/* Показатель, требующий вмешательства: рамка, не заливка числа. */
+.stat--flagged { border-color: var(--warn-line); background: var(--warn-soft); }
+
+/* ── Путь ────────────────────────────────────────────────────────
+   Иерархия у всех трёх, только уровни разные: кластер→страна→город→
+   точка (Decimus), период→подразделение (Maximus), группа→чек-лист
+   (Meridius). Текущий уровень — не ссылка. */
+
+.crumbs { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3); font-size: var(--fs-dense); color: var(--ink-2); }
+.crumbs__sep { color: var(--ink-empty); }
+.crumbs__current { color: var(--ink); font-weight: var(--w-semibold); }
+
+/* ── Мобильные сценарии управляющего (375) ───────────────────── */
+
+@media (max-width: 767px) {
+  body { min-width: 0; }
+  .page { width: 100%; }
+  .page__body { padding: var(--space-6) var(--space-6) 0; }
+
+  /* Всё, что нажимает управляющий, — не меньше 44 px. */
+  .btn, .checkbox, .seg__item, .seg__current { min-height: var(--tap-min); }
+  .btn { width: 100%; font-size: var(--fs-lead); }
+  .actions { flex-direction: column; align-items: stretch; }
+  .actions--cell { width: auto; }
+
+  .input, .input-money { height: var(--tap-min); }
+  .input--num, .input-money input { font-size: 20px; }
+
+  /* Таблицы на телефоне не показываем: у управляющего свои экраны. */
+  .table-wrap { display: none; }
+
+  .appnav { display: none; }
+  .appbar { height: auto; flex-wrap: wrap; gap: var(--space-4); padding: var(--space-4) var(--space-6); }
+  .tenant { border-right: 0; padding-right: 0; }
+}
+
+/* ═══ СЛОЙ 3. СЛОЙ ПРОДУКТА ══════════════════════════════════════════════
+   Здесь ядро заканчивается. Доменные смыслы заводятся в продукте — файлом
+   рядом, а не правкой этого. Правило одно: имя токена говорит, что это
+   значит в предметной области, и не притворяется общим.
+
+       static/maximus/domain.css      static/decimus/domain.css
+       :root {                        :root {
+         --reg-official: var(--accent);  --audit-open:   var(--warn);
+         --reg-supp:     var(--cat-violet);
+         --reg-internal: var(--cat-teal);  --audit-fixed:  var(--ok);
+         --st-approved:  var(--ok);      --audit-overdue: var(--err);
+       }                              }
+
+   Что можно в слое продукта: назначать доменные токены значениями ядра,
+   добавлять классы своих сущностей, ставить ширину страницы
+   (body { min-width: var(--page-min) } — если экран того требует).
+   Чего нельзя: переопределять токены ядра под свой вкус и писать хексы
+   в компонентах. Разошлись значения — правится ядро, для всех трёх сразу.
+   ═══════════════════════════════════════════════════════════════════════ */
