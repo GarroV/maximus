@@ -172,7 +172,7 @@ def test_the_rules_screen_refuses_an_overlap_in_words(client, sql, monkeypatch):
     login_as(client, "admin")
     try:
         answer = client.post(
-            f"/rules/{NIGHT_PERCENT}/", {"value": "1.5", "valid_from": "2026-09-01"}
+            f"/rules/{NIGHT_PERCENT}/new/", {"value": "1.5", "valid_from": "2026-09-01"}
         )
         assert answer.status_code == 400, f"ответ {answer.status_code}"
         html = body(answer)

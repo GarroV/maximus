@@ -1,0 +1,135 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Новая версия правила — своей страницей (T227, D081/D087). Карточка правила
+только читается; сюда приходят с неё кнопкой, уже увидев историю версий и рамку.
+Без этого «действует с» набиралось бы наугад — поэтому над формой повторено то,
+что действует сейчас, и рамка страны, а ссылка «← К правилу» ведёт к истории.
+
+Значение вводится тем видом поля, какого оно типа сейчас: список — там, где
+допустимое перечислено самими правилами страны (мера работы, схема расчёта),
+«да/нет» — у выключателя, обычное поле — у остального. Свободный ввод там, где
+набор ограничен, означает опечатку, которая меняет деньги молча.
+
+Две формы — переопределение партнёра и (только администратору платформы)
+версия правил страны — одна функция: обе отвечают на «что станет с этим
+правилом с такого-то числа» (`rules_views.rule_new`).
+{% endcomment %}
+{% block title %}{% translate "Новая версия правила" %} · {{ heading }}{% endblock %}
+{% block content %}
+<p class="back"><a href="{{ back_url }}">{% translate "← К правилу" %}</a></p>
+<h1>{% translate "Новая версия правила" %}</h1>
+<p class="sub"><code>{{ heading }}</code> · {% blocktranslate with value=value origin=origin %}Сейчас действует: {{ value }} — {{ origin }}{% endblocktranslate %}{% if since %} ({% blocktranslate with day=since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
+
+{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+{% if error %}
+{% translate "Не сохранено." as not_saved %}
+{% notice "alert" title=not_saved %}{{ error }}{% endnotice %}
+{% endif %}
+
+{% if frame_locked %}
+{% comment %}
+Формы у запертого правила нет вовсе, а не «есть и отвергает». Форма, которая
+гарантированно откажет, — это работа, отнятая у человека до того, как он её
+сделал: он выберет уровень, наберёт дату и значение и только тогда прочитает,
+что так было нельзя с самого начала. Тот же приём, что у подписи правила страны.
+{% endcomment %}
+{% translate "Это правило не переопределяется." as no_override %}
+{% notice "empty" title=no_override %}{{ frame_note }}{% endnotice %}
+{% else %}
+<p class="note">{% translate "Прежняя версия закрывается днём начала новой и остаётся в истории. Ничего не изменилось — версия не заводится." %}</p>
+{% comment %}
+Что случится с уже утверждённой зарплатой, названо до правки, а не только после
+неё. Найдено в браузере: подставленная дата верная, но человек, набравший свою,
+узнавал ответ только нажав «Завести версию» — продукт молчал ровно там, где знал
+его заранее. Тот же довод, что у `components/action.html`.
+
+Обещания отказа здесь больше нет (T121): дата внутри закрытого месяца
+принимается, закрытый месяц от неё не двигается, а разница едет вперёд
+помеченной строкой (D020). Слова приходят готовыми из `web/directory` — те же,
+что на форме справочника: два объяснения одного и того же разъехались бы.
+{% endcomment %}
+{% if closed_note %}
+<p class="note">{{ closed_note }}</p>
+{% endif %}
+<form class="card" method="post">{% csrf_token %}
+  {% comment %}
+  «Кому» стоит первым полем — до даты и до значения, и это не порядок вёрстки.
+  Уровень решает, кого правка заденет: партнёра целиком, одну группу или одного
+  человека. Спрошенный последним, он читался бы как уточнение к уже набранному
+  значению, тогда как это первое решение из трёх.
+
+  Уровни, на которых это правило не действует, в список не попадают, а причина
+  сказана словами рядом (`scope_note`) — до правки, а не отказом после неё.
+  {% endcomment %}
+  <p class="field">
+    {% translate "Кому" as target_label %}
+    {% translate "Уровни складываются: значение группы сильнее значения партнёра, значение человека сильнее обоих." as target_help %}
+    {% include "web/components/select.html" with id="target" name="target" label=target_label options=targets required=True help=target_help %}
+  </p>
+  {% if scope_note %}
+  <p class="note">{{ scope_note }}</p>
+  {% endif %}
+  <p class="field">
+    {% translate "Действует с" as from_label %}
+    {% comment %}
+    Подсказка приходит из `web/rules.monthly_help` — тем же местом, откуда
+    берутся слова после правки. Прежняя жила здесь строкой и говорила только про
+    месяцы ДО даты, умалчивая о главном: правила берутся на месяц целиком, и
+    дата внутри месяца на этот месяц не влияет вовсе (issue #99).
+    {% endcomment %}
+    {% include "web/components/field.html" with id="valid_from" name="valid_from" label=from_label value=default_from required=True type="date" help=from_help %}
+  </p>
+  <p class="field">
+    {% translate "Значение" as value_label %}
+    {% if options %}
+      {% include "web/components/select.html" with id="value" name="value" label=value_label options=options required=True %}
+    {% elif kind == "bool" %}
+      {% include "web/components/select.html" with id="value" name="value" label=value_label options=bool_options required=True %}
+    {% elif kind == "number" %}
+      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value required=True inputmode="decimal" help=frame_note %}
+    {% elif kind == "list" %}
+      {% translate "Через запятую." as list_help %}
+      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value help=list_help %}
+    {% else %}
+      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value required=True %}
+    {% endif %}
+  </p>
+  <button type="submit" class="primary">{% translate "Завести версию" %}</button>
+</form>
+{% endif %}
+
+{% if country_layer and country_may_edit %}
+<h2>{% translate "Правило страны" %}</h2>
+{% comment %}
+Форма страны — ниже формы партнёра: слой страны общий для всех партнёров
+страны, и правят его единицы. Остальным раздела здесь нет вовсе: кто ведёт
+правила страны, сказано на карточке правила, а заголовок без формы под ним
+читался бы как потерянная форма.
+{% endcomment %}
+{% if country_may_edit and not country_locked %}
+<form class="card" method="post">{% csrf_token %}
+  <input type="hidden" name="level" value="country">
+  <p class="note">{% blocktranslate %}Новая версия правил страны действует на всех партнёров этой страны. Прежняя закрывается днём начала новой и остаётся в истории: уже посчитанные месяцы собираются своей версией и не двигаются.{% endblocktranslate %}</p>
+  <p class="field">
+    {% translate "Действует с" as country_from_label %}
+    {% include "web/components/field.html" with id="country_valid_from" name="valid_from" label=country_from_label value=default_from required=True type="date" help=from_help %}
+  </p>
+  <p class="field">
+    {% translate "Значение в правилах страны" as country_value_label %}
+    {% if country_options %}
+      {% include "web/components/select.html" with id="country_value" name="value" label=country_value_label options=country_options required=True %}
+    {% elif country_kind == "bool" %}
+      {% include "web/components/select.html" with id="country_value" name="value" label=country_value_label options=country_bool required=True %}
+    {% elif country_kind == "number" %}
+      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_value required=True inputmode="decimal" %}
+    {% else %}
+      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_value required=True %}
+    {% endif %}
+  </p>
+  <button type="submit" class="primary">{% translate "Завести версию правил страны" %}</button>
+</form>
+{% else %}
+<p class="note">{% translate "Название правила заведено на всех языках сразу и меняется вместе с пресетом страны, а не с этого экрана." %}</p>
+{% endif %}
+{% endif %}
+{% endblock %}

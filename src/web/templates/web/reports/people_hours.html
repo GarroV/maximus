@@ -1,0 +1,71 @@
+{% extends "web/reports/people.html" %}{% load ui i18n %}
+{% comment %}
+Часы и переработки (модуль 12 эталона) — за последний показанный месяц.
+Каркас страницы — `people.html`.
+{% endcomment %}
+{% block people_body %}
+{% comment %}
+Плитки и пояснение стоят всегда, как в эталоне: месяц без переработок — это
+ответ «ноль часов сверх нормы», а не пустая вкладка. Пустое состояние остаётся
+только у списка людей.
+{% endcomment %}
+<section class="kpi people-kpi--three">
+  <div class="kpi__cell{% if over_warn %} people-kpi--warn{% endif %}">
+    <div class="kpi__label">{% translate "Часов сверх нормы" %}</div>
+    <div class="kpi__value {{ over_hours|numclass }}">{{ over_hours }}</div>
+    <div class="kpi__about">{{ over_people }}</div>
+  </div>
+  <div class="kpi__cell">
+    <div class="kpi__label">{% translate "Стоило переработок" %}</div>
+    <div class="kpi__value num--empty">—</div>
+    <div class="kpi__about">{% translate "коэффициент переработки в правилах страны не проверен" %}</div>
+  </div>
+  <div class="kpi__cell">
+    <div class="kpi__label">{% translate "Доля в часах месяца" %}</div>
+    <div class="kpi__value {{ over_share|numclass }}">{{ over_share }}</div>
+    <div class="kpi__about">{% translate "от всех отработанных часов" %}</div>
+  </div>
+</section>
+
+<h2>{% translate "Кто вышел за норму" %}</h2>
+{% if over_rows %}
+{% scroll %}<table class="report">
+  <thead>
+    <tr>
+      <th>{% translate "Человек" %}</th>
+      <th>{% translate "Точка" %}</th>
+      <th class="num">{% translate "Часы" %}</th>
+      <th class="num">{% translate "Норма" %}</th>
+      <th class="num">{% translate "Сверх нормы" %}</th>
+      <th class="num">{% translate "Начислено за месяц" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in over_rows %}
+    <tr>
+      <td>{{ row.name }}</td>
+      <td>{{ row.unit }}</td>
+      <td class="num">{{ row.hours }}</td>
+      <td class="num num--muted">{{ row.norm }}</td>
+      <td class="num">{{ row.over }}</td>
+      <td class="num">{{ row.payroll }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% else %}
+{% translate "Переработок нет" as no_overtime %}
+{% notice "empty" title=no_overtime %}{% translate "В этом месяце никто не вышел за свою норму часов." %}{% endnotice %}
+{% endif %}
+
+{% comment %}
+Денег по коэффициенту переработки здесь нет намеренно: эталон считает их по 1,5,
+а в правилах Сербии коэффициент 1,26 и помечен как непроверенный — вопрос к
+бухгалтеру ещё открыт. Число, посчитанное по непроверенному коэффициенту,
+выглядит как знание. Поэтому рядом с часами стоит начисление человека за месяц —
+то самое, что в ведомости.
+{% endcomment %}
+<p class="note">{% blocktranslate %}Сверх нормы — это отработанные часы минус норма самого человека: у работающего на полставки она своя. Во что обошлись именно эти часы, экран не считает — коэффициент переработки в правилах страны помечен как непроверенный, и число по нему выглядело бы как знание. Рядом стоит начисление человека за месяц — то самое, что в ведомости.{% endblocktranslate %}</p>
+
+<p class="note">{% blocktranslate %}Что с этим делать — решает не отчёт. Переработка бывает дешевле, чем нанять человека на полставки, но только пока это не выгорание. Экран показывает часы и деньги и не предлагает вывод.{% endblocktranslate %}</p>
+{% endblock %}

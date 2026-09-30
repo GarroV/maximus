@@ -4119,12 +4119,12 @@ msgstr ""
 msgid ""
 "Правила страны — общая база для всех партнёров этой страны, поэтому их ведёт "
 "не партнёр, а администратор платформы. Для себя любое из них можно "
-"переопределить формой ниже: правило страны от этого не меняется."
+"переопределить своей новой версией: правило страны от этого не меняется."
 msgstr ""
 "Country rules are the shared base for every partner in that country, so "
 "they're managed by the platform administrator, not the partner. You can "
-"override any of them for yourself using the form below — the country rule "
-"itself doesn't change."
+"override any of them for yourself with a new version of your own — the "
+"country rule itself doesn't change."
 
 #: web/rules_country.py:123
 msgid ""
@@ -7204,10 +7204,10 @@ msgstr "No one has overridden this rule."
 
 #: web/templates/web/rules/rule.html:143
 msgid ""
-"Значение приходит из правил страны. Первая же версия ниже станет "
+"Значение приходит из правил страны. Первая же новая версия станет "
 "переопределением — на том уровне и с той даты, которые вы укажете."
 msgstr ""
-"The value comes from the country rules. The first version below becomes an "
+"The value comes from the country rules. The first new version becomes an "
 "override — at the level and from the date you specify."
 
 #: web/templates/web/rules/rule.html:146
@@ -8465,9 +8465,6 @@ msgstr "Bank statement"
 msgid "Выплаты"
 msgstr "Payouts"
 
-#: web/navigation.py
-msgid "Аналитика по людям"
-msgstr "People analytics"
 
 #: web/navigation.py
 msgid "Интеграция с Dodo IS"
@@ -8548,8 +8545,7 @@ msgid ""
 "  не дотягивает, и рядом написано, чего именно не хватает. «Разработка в\n"
 "  процессе» — экрана ещё нет, а вместо него страница с описанием, что "
 "здесь\n"
-"  будет: так устроены «Банковская выписка», «Выплаты», «Аналитика по людям» "
-"и\n"
+"  будет: так устроены «Банковская выписка», «Выплаты» и\n"
 "  «Интеграция с Dodo IS». Пометка стоит и точкой у пункта в левой панели, и "
 "плашкой\n"
 "  наверху самого экрана. Раздел без пометки готов."
@@ -8558,7 +8554,7 @@ msgstr ""
 "yet match what was designed, and the note beside it says what exactly is "
 "missing. “In development” means the screen does not exist yet — instead "
 "there is a page describing what will be here: that is how “Bank statement”, "
-"“Payouts”, “People analytics” and “Dodo IS integration” work. The mark "
+"“Payouts” and “Dodo IS integration” work. The mark "
 "appears both as a dot next to the item in the left panel and as a banner at "
 "the top of the screen itself. A section without a mark is ready."
 
@@ -8765,6 +8761,22 @@ msgstr "Who changes it"
 msgid "Попытки выйти за рамку"
 msgstr "Attempts to go beyond the frame"
 
+#: web/templates/web/rules/rule_attempts.html
+msgid "← К правилу"
+msgstr "← To the rule"
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Значения, которые рамка страны не пропустила. Свежие сверху."
+msgstr "Values the country frame did not let through. Newest first."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Попыток не было."
+msgstr "No attempts."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Никто не пробовал поставить этому правилу значение за рамкой страны."
+msgstr "Nobody has tried to set this rule to a value outside the country frame."
+
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Поставить можно столько же или больше."
 msgstr "You can set the same value or higher."
@@ -8904,6 +8916,10 @@ msgstr "Base"
 msgid "Без группы"
 msgstr "No group"
 
+#: src/web/templates/web/reports/people_hours.html
+msgid "Переработок нет"
+msgstr "No overtime"
+
 #: новые строки, добавлены tools/apply_translations.py
 msgid "В этом месяце никто не вышел за свою норму часов."
 msgstr "No one went over their hours standard this month."
@@ -8926,6 +8942,10 @@ msgstr "Payroll cost's share of revenue: waiting for the Dodo IS connector"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Доля в часах месяца"
 msgstr "Share of the month's hours"
+
+#: src/web/templates/web/reports/people_churn.html
+msgid "Увольнений не было"
+msgstr "No leavers"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "За показанные месяцы никто не уволился."
@@ -9062,9 +9082,6 @@ msgstr "Hours over standard"
 msgid "Часы и переработки"
 msgstr "Hours and overtime"
 
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Что показать"
-msgstr "What to show"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
