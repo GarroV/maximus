@@ -1,0 +1,38 @@
+{
+  "Позиция добавлена и учтена в периоде %(month)s.": {
+    "en": "Line item added and counted in the period %(month)s.",
+    "sr": "Stavka je dodata i uračunata u period %(month)s."
+  },
+  "Позиции счёта %(number)s": {
+    "en": "Line items of invoice %(number)s",
+    "sr": "Stavke fakture %(number)s"
+  },
+  "Позиции счёта": {
+    "en": "Line items of the invoice",
+    "sr": "Stavke fakture"
+  },
+  "← К карточке: %(card)s": {
+    "en": "← Back to %(card)s",
+    "sr": "← Nazad na %(card)s"
+  },
+  "Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на бумаге.": {
+    "en": "One paper, several P&L items. The line items must add up to the amount on the paper.",
+    "sr": "Jedan papir, više stavki P&L. Stavke moraju da se poklope sa iznosom na papiru."
+  },
+  "Позиция не добавлена.": {
+    "en": "Line item not added.",
+    "sr": "Stavka nije dodata."
+  },
+  "их в P&L ещё нет, разбираются на своей странице": {
+    "en": "they are not in the P&L yet and are sorted out on their own page",
+    "sr": "još nisu u P&L i razvrstavaju se na svojoj stranici"
+  },
+  "не сходится с бумагой на %(left)s": {
+    "en": "differs from the paper by %(left)s",
+    "sr": "ne poklapa se sa papirom za %(left)s"
+  },
+  "сумма позиций сходится с бумагой": {
+    "en": "the line items add up to the paper",
+    "sr": "zbir stavki se poklapa sa papirom"
+  }
+}
