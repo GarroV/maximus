@@ -114,16 +114,20 @@ def _refuse_partial_view(payrun) -> None:
     from django.db import connection
     from django.utils.translation import gettext as _
 
+    from web.dbcontext import APP_ROLE
+
     from .errors import PayrunRefused
 
     with connection.cursor() as cursor:
         cursor.execute(
-            # Без пользователя (сид, команды управления) проводку ведёт
-            # владелец схемы мимо политик — среза нет, как и у
-            # `reallocate_period`.
-            "select app_user_id() is null or (app_unit_ids(%s) is null "
+            # Мимо политик ходит только владелец схемы (сид, команды
+            # управления) — у него среза нет, как и у `reallocate_period`.
+            # Признак — роль, а не отсутствие человека: `app_user` без
+            # человека не видит ничего, и проводка по пустоте утвердила бы
+            # месяц без зарплаты.
+            "select current_user <> %s or (app_unit_ids(%s) is null "
             "and app_visible_ledgers(%s) @> enum_range(null::ledger))",
-            [str(payrun.tenant_id), str(payrun.tenant_id)],
+            [APP_ROLE, str(payrun.tenant_id), str(payrun.tenant_id)],
         )
         (whole,) = cursor.fetchone()
     if not whole:
