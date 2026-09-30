@@ -11,6 +11,7 @@ from . import (
     expense_items_views,
     expenses_views,
     guide,
+    inbox_split_views,
     papers_views,
     people_views,
     person_views,
@@ -399,6 +400,8 @@ urlpatterns = [
     # за одно действие. Адрес без номера строки — их несколько, и они приезжают
     # в теле запроса.
     path("inbox/classify/", suppliers_views.inbox_batch, name="inbox-batch"),
+    # Разнести отмеченные строки по точкам одними долями (T234, D089).
+    path("inbox/split/", inbox_split_views.inbox_split, name="inbox-split"),
     # Расходы по HTTP (T112). Отдельный префикс `api/`, а не те же адреса с
     # другим заголовком: два разных ответа на один адрес разъезжаются молча — и
     # разъезжаться будут именно там, где их никто не смотрит глазами. Роль и

@@ -1,0 +1,89 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+«Разнести по точкам» пачкой из инбокса (T234, эталон модуля 3; D089).
+
+Своя страница, а не поле инбокса (D081): в инбоксе разбирают статью, здесь
+делят сумму по точкам. Доли одни на всю пачку, поэтому в пачке только строки
+одного юрлица — отказ иначе говорит об этом словами.
+
+Строки приезжают скрытыми полями того же POST, а не адресом: номера фактов в
+истории браузера ни к чему.
+{% endcomment %}
+{% block title %}{% translate "Разнести по точкам" %}{% endblock %}
+{% block content %}
+<h1>{% translate "Разнести по точкам" %}</h1>
+<p class="sub">{% translate "Отмеченные строки инбокса делятся одними долями. Статья у них остаётся прежней — её назначают в инбоксе, и разнесение при этом сохранится." %}</p>
+
+{% if error %}
+{% translate "Не разнесено." as not_split %}
+{% notice "alert" title=not_split %}{{ error }}{% endnotice %}
+{% endif %}
+
+{% if rows %}
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Дата" %}</th>
+      <th>{% translate "Контрагент" %}</th>
+      <th>{% translate "Что это" %}</th>
+      <th>{% translate "Период учёта" %}</th>
+      <th class="num">{% translate "Сумма" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr data-fact="{{ row.id }}" data-amount="{{ row.amount_raw }}">
+      <td>{{ row.date }}</td>
+      <td>{{ row.counterparty }}</td>
+      <td>{{ row.title }}</td>
+      <td>{{ row.period }}</td>
+      <td class="{{ row.amount_text|numclass }}">{{ row.amount_text }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr data-total="{{ total_raw }}">
+      <th colspan="4">{% translate "Итого к разнесению" %}</th>
+      <th class="{{ total_text|numclass }}">{{ total_text }}</th>
+    </tr>
+  </tfoot>
+</table>{% endscroll %}
+
+{% if units %}
+<form method="post" action="{% url 'inbox-split' %}">{% csrf_token %}
+  {% for row in rows %}<input type="hidden" name="facts" value="{{ row.id }}">{% endfor %}
+  <input type="hidden" name="apply" value="1">
+  {% scroll %}<table>
+    <thead>
+      <tr>
+        <th>{% translate "Точка" %}</th>
+        <th class="num">{% translate "Доля, %" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for unit in units %}
+      <tr data-unit="{{ unit.id }}">
+        <td><label for="share-{{ unit.id }}">{{ unit.code }}</label></td>
+        <td class="num">
+          <input class="input input--num" type="number" min="0" max="100" step="0.01"
+                 id="share-{{ unit.id }}" name="share:{{ unit.id }}" value="{{ unit.value }}">
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>{% endscroll %}
+  <p class="note">{% translate "Доли должны дать ровно 100%: остаток, оставшийся без точки, — это сумма, которой нет ни в одном отчёте по точкам." %}</p>
+  <p class="actions">
+    <button class="primary" type="submit">{% translate "Разнести" %}</button>
+    <button type="submit" name="evenly" value="1">{% translate "Поровну" %}</button>
+    <button type="submit" name="by_revenue" value="1">{% translate "По выручке" %}</button>
+  </p>
+</form>
+{% else %}
+{% translate "Разносить не на что" as no_units %}
+{% notice "empty" title=no_units %}{% translate "У юрлица этих строк нет ни одной точки, которую вы ведёте." %}{% endnotice %}
+{% endif %}
+{% endif %}
+
+<p><a class="btn" href="{{ inbox_url }}">{% translate "Вернуться в инбокс" %}</a></p>
+{% endblock %}
