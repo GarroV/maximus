@@ -40,9 +40,9 @@ from django.utils.translation import gettext_lazy
 
 from core.models import ExpenseItem, Fact, Unit
 
-from . import allocation, cash, papers, receipts
+from . import allocation, cash, filter_links, papers, receipts
 from .cash_views import expense_fields, parse_expense
-from .directory_views import LEDGER_CODES, BadInput, _select
+from .directory_views import LEDGER_CODES, BadInput
 from .format import EMPTY, ledger_title, money
 from .i18n import month_title
 from .principal import get_current_principal
@@ -83,6 +83,9 @@ def expenses(request):
         "total_text": money(total),
         "counted": sum(1 for row in rows if row["state"] == ACTIVE),
         "filters": _filter_fields(who, chosen),
+        "reset_url": filter_links.reset(
+            reverse("expenses"), filter_links.query_of(chosen, filters_default())
+        ),
         # Сужен ли отбор — от этого зависит, что говорит пустой список (T160).
         "narrowed": narrowed(chosen),
         "add_url": reverse("expense-new"),
@@ -426,37 +429,75 @@ def state_title(fact, state: str) -> str:
 
 
 def _filter_fields(who, chosen: dict) -> list[dict]:
-    """Поля отбора. Списки — только из того, что видно роли (D023)."""
+    """Отбор ссылками (T224, D081). Варианты — только из того, что видно роли (D023).
+
+    Точки и регистры — рядом ссылок: их у партнёра единицы, и видеть их все
+    сразу и есть смысл отбора. Статей расхода десятки — у них выбранное словами и
+    отдельная страница выбора (`expense_item_pick`). Ряд из одного варианта не
+    показывается: управляющему одной точки выбирать между «все» и «моя» нечего.
+    """
+    base, query = reverse("expenses"), filter_links.query_of(chosen, filters_default())
     units = Unit.objects.order_by("code")
     if who.unit_ids:
         units = units.filter(pk__in=who.unit_ids)
-    return [
-        {"kind": "date", "name": "from", "label": LABELS["from"],
-         "value": chosen["from"].isoformat()},
-        {"kind": "date", "name": "to", "label": LABELS["to"],
-         "value": chosen["to"].isoformat()},
-        _select(
-            "unit", _("Точка"), units.values_list("id", "code"), chosen["unit"],
-            required=False, empty_label=_("Все точки"),
-        ),
-        _select(
-            "item", _("Статья расхода"),
-            [
-                (item.id, cash.item_title(item.titles))
-                for item in ExpenseItem.objects.order_by("code")
-            ],
-            chosen["item"], required=False, empty_label=_("Все статьи"),
-        ),
-        # Срез по регистру — тот же параметр, что у вызова по HTTP (T133).
-        # Список только из видимых роли: предложить регистр, которого человек не
-        # видит, значило бы обещать пустой ответ и назвать его срезом.
-        _select(
-            "ledger", LABELS["ledger"],
-            [(code, ledger_title(code)) for code in LEDGER_CODES
-             if code in who.visible_ledgers],
-            chosen["ledger"], required=False, empty_label=_("Все регистры"),
-        ),
+    units = list(units.values_list("id", "code"))
+    ledgers = [(code, ledger_title(code)) for code in LEDGER_CODES
+               if code in who.visible_ledgers]
+    fields = [filter_links.months(chosen, base=base, query=query)]
+    if len(units) > 1 or chosen["unit"]:
+        fields.append(filter_links.row(
+            "unit", LABELS["unit"], units, chosen["unit"],
+            base=base, query=query, everything=_("Все точки"),
+        ))
+    fields.append(filter_links.picked(
+        "item", LABELS["item"], _item_title(chosen["item"]), chosen["item"],
+        base=base, query=query, pick_url=reverse("expense-item-pick"),
+        everything=_("Все статьи"),
+    ))
+    # Срез по регистру — тот же параметр, что у вызова по HTTP (T133). Регистра,
+    # которого роль не видит, в ряду нет: он обещал бы пустой ответ под видом среза.
+    if len(ledgers) > 1 or chosen["ledger"]:
+        fields.append(filter_links.row(
+            "ledger", LABELS["ledger"], ledgers, chosen["ledger"],
+            base=base, query=query, everything=_("Все регистры"),
+        ))
+    return fields
+
+
+def _item_title(item_id: str) -> str:
+    """Подпись выбранной статьи; не найдена — одинаково для чужой и выдуманной."""
+    if not item_id:
+        return ""
+    item = ExpenseItem.objects.filter(pk=item_id).first()
+    return cash.item_title(item.titles) if item else _("не найдено")
+
+
+@login_required
+def expense_item_pick(request):
+    """Страница выбора статьи расхода для отбора списка (T224).
+
+    Отдельная страница, а не выпадающий список (D081): статей десятки, и выбор
+    среди них — отдельное действие со своим поиском. Каждая статья — ссылка
+    обратно на список с тем же отбором и этой статьёй; разбор отбора — тот же
+    `filters_from`, поэтому негодный адрес отвечает тем же отказом, что и список.
+    """
+    who = get_current_principal(request)
+    if who is None or who.tenant_id is None:
+        return _no_membership(request)
+    try:
+        chosen = filters_from(request)
+    except BadInput:
+        return redirect(reverse("expenses") + "?" + request.GET.urlencode())
+    base, query = reverse("expenses"), filter_links.query_of(chosen, filters_default())
+    q = (request.GET.get("q") or "").strip()
+    options = [
+        (str(item.id), cash.item_title(item.titles))
+        for item in ExpenseItem.objects.order_by("code")
     ]
+    return render(request, "web/filters/pick.html", filter_links.pick_page(
+        options, chosen["item"], name="item", q=q, base=base, query=query,
+        title=_("Статья расхода"), everything=_("Все статьи"),
+    ))
 
 
 # --- нераспределённое ---------------------------------------------------------

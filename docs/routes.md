@@ -66,6 +66,7 @@
 | `/expenses/<uuid:fact_id>/delete/` | `expense-delete` | `web.expenses_views.expense_delete` |
 | `/expenses/<uuid:fact_id>/receipt/` | `expense-receipt` | `web.expenses_views.expense_receipt` |
 | `/expenses/<uuid:fact_id>/split/` | `expense-split-form` | `web.expenses_views.split_form` |
+| `/expenses/filter/item/` | `expense-item-pick` | `web.expenses_views.expense_item_pick` |
 | `/expenses/new/` | `expense-new` | `web.cash_views.cash_expense` |
 | `/expenses/split/` | `expense-split` | `web.expenses_views.split` |
 | `/expenses/unallocated/` | `expenses-unallocated` | `web.expenses_views.unallocated` |
@@ -79,6 +80,7 @@
 | `/invoices/<uuid:document_id>/not-ours/` | `invoice-not-ours` | `web.suppliers_views.invoice_not_ours` |
 | `/invoices/<uuid:document_id>/pay/` | `invoice-pay` | `web.suppliers_views.invoice_pay` |
 | `/invoices/<uuid:document_id>/positions/` | `invoice-positions` | `web.suppliers_views.invoice_positions` |
+| `/invoices/filter/counterparty/` | `invoice-counterparty-pick` | `web.suppliers_views.counterparty_pick` |
 | `/invoices/new/` | `invoice-new` | `web.suppliers_views.invoice` |
 | `/labor-cost/` | `people-cost` | `web.people_views.cost_page` |
 | `/login/` | `login` | `web.views.login_page` |
