@@ -264,7 +264,17 @@ def _shares(across: dict, employee_id, unit_id, amount: Decimal) -> list:
     weights = [(unit, share if share is not None else Decimal("1")) for unit, share in mine]
     total = sum(weight for _unit, weight in weights)
     if total <= 0:
-        return [(unit_id, amount)]
+        # Делить не на что. Тихий возврат к точке строки табеля положил бы
+        # деньги туда, куда человека никто не ставил. База такие доли не
+        # принимает (`0273`), так что сюда доходит только дефект — громко.
+        from django.utils.translation import gettext as _
+
+        from .errors import PayrunRefused
+
+        raise PayrunRefused(
+            _("У сотрудника доли всех точек нулевые — зарплату не на что "
+              "разделить. Задайте доли на карточке сотрудника.")
+        )
 
     parts, done, carried = [], Decimal("0"), Decimal("0")
     for unit, weight in sorted(weights, key=lambda row: str(row[0])):

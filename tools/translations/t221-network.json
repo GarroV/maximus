@@ -42,5 +42,9 @@
   "Зарплата сетевых сотрудников не разнеслась по точкам: для строк «Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не утверждён — сообщите администратору продукта.": {
     "en": "Payroll of network-wide employees was not allocated to units: there is no allocation rule for the \"Payroll\" and \"Payroll taxes\" lines. The month was not approved — tell the product administrator.",
     "sr": "Plate zaposlenih na nivou mreže nisu raspoređene po objektima: za stavke „Plata“ i „Porezi na platu“ ne postoji pravilo raspodele. Mesec nije odobren — obavestite administratora proizvoda."
+  },
+  "У сотрудника доли всех точек нулевые — зарплату не на что разделить. Задайте доли на карточке сотрудника.": {
+    "en": "All unit shares of this employee are zero, so the salary cannot be split. Set the shares on the employee card.",
+    "sr": "Svi udeli objekata ovog zaposlenog su nula, pa zaradu nije moguće podeliti. Unesite udele na kartici zaposlenog."
   }
 }
