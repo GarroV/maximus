@@ -36,7 +36,7 @@ norma, 30.09.2026). Карточка складывается в столбец 
 другой.
 {% endcomment %}
 {% for held in person.roles %}
-<form method="post" action="{% url 'person-roles' person.user_id %}" class="card">{% csrf_token %}
+<form method="post" action="{% url 'person-roles' person.user_id %}" class="card held-role">{% csrf_token %}
   <input type="hidden" name="role" value="{{ held.id }}">
   <input type="hidden" name="action" value="remove">
   <p><span class="chip">{{ held.title }}</span>{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</p>
