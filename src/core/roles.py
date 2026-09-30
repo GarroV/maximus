@@ -190,6 +190,18 @@ DEFAULT_TITLES = {
 ROLE_ORDER = ("director", "accountant", "manager", "admin")
 
 
+def leads_one_unit(code: str) -> bool:
+    """Роль ведёт ОДНУ точку, а не всего партнёра (у формы роли стоит точка).
+
+    Одна развилка на все места, где заводится членство: приглашение и выдача
+    на странице партнёра, выдача на платформе, первый человек пространства.
+    Членство такой роли без точки (`unit_ids is null`) функции контекста базы
+    (`0264`) читают как ВСЕ точки партнёра — то есть тихо отменяют смысл роли.
+    """
+    shape = ROLE_SHAPES.get(code)
+    return shape is not None and shape.unit is not None
+
+
 def permission_states(code: str) -> dict[str, str]:
     """Матрица роли: состояние каждой клетки «роль × право».
 

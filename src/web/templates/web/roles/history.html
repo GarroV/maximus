@@ -1,0 +1,36 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+История доступов: кто, кому, когда и зачем (T188; своей страницей — T225).
+
+Показываются последние записи, а не все: история не удаляется никогда, и через
+год её тысячи. Сколько именно — сказано словами, иначе обрезанный список
+читается как полный.
+{% endcomment %}
+{% block title %}{% translate "История доступов" %}{% endblock %}
+{% block content %}
+{% translate "История доступов" as page_title %}
+{% include "web/roles/_head.html" with title=page_title %}
+<p class="note under">{% blocktranslate %}Кто, кому, когда и зачем. Записи не правятся и не удаляются — этого не может
+ни один экран и ни один человек: у приложения нет таких прав на эту таблицу.{% endblocktranslate %}</p>
+{% if history|length >= shown %}<p class="note">{% blocktranslate %}Показаны последние {{ shown }} записей.{% endblocktranslate %}</p>{% endif %}
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Когда" %}</th>
+      <th>{% translate "Что произошло" %}</th>
+      <th>{% translate "Зачем" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in history %}
+    <tr>
+      <td>{{ entry.at }}</td>
+      <td>{% if entry.action == "invited" %}{% blocktranslate with actor=entry.actor subject=entry.subject role=entry.role %}{{ actor }} пригласил {{ subject }} с ролью «{{ role }}»{% endblocktranslate %}{% elif entry.action == "revoked" %}{% blocktranslate with actor=entry.actor subject=entry.subject role=entry.role %}{{ actor }} снял с {{ subject }} роль «{{ role }}»{% endblocktranslate %}{% else %}{% blocktranslate with actor=entry.actor subject=entry.subject role=entry.role %}{{ actor }} выдал {{ subject }} роль «{{ role }}»{% endblocktranslate %}{% endif %}{% if entry.until %} <span class="note">{% blocktranslate with day=entry.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</td>
+      <td>{{ entry.reason }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3" class="note">{% translate "Доступы ещё не выдавали и не снимали." %}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% endblock %}

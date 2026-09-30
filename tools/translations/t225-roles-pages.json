@@ -1,0 +1,78 @@
+{
+  "Люди и их роли": {
+    "en": "People and their roles",
+    "sr": "Ljudi i njihove uloge"
+  },
+  "Показаны последние %(shown)s записей.": {
+    "en": "Showing the latest %(shown)s entries.",
+    "sr": "Prikazano je poslednjih %(shown)s zapisa."
+  },
+  "Права ролей": {
+    "en": "Role rights",
+    "sr": "Prava uloga"
+  },
+  "Причина снятия роли «%(role)s»": {
+    "en": "Reason for removing the role “%(role)s”",
+    "sr": "Razlog za uklanjanje uloge „%(role)s“"
+  },
+  "Пусто — без срока.": {
+    "en": "Empty means no end date.",
+    "sr": "Prazno — bez roka."
+  },
+  "Роли человека": {
+    "en": "This person's roles",
+    "sr": "Uloge ove osobe"
+  },
+  "Снять роль «%(role)s»": {
+    "en": "Remove the role “%(role)s”",
+    "sr": "Ukloni ulogu „%(role)s“"
+  },
+  "Страницы раздела «Роли и права»": {
+    "en": "Pages of the “Roles and rights” section",
+    "sr": "Stranice odeljka „Uloge i prava“"
+  },
+  "Такого человека у этого партнёра нет.": {
+    "en": "This partner has no such person.",
+    "sr": "Ovaj partner nema takvu osobu."
+  },
+  "Чтобы снять роль, напишите причину рядом с ней: она останется в истории\nрядом с вашим именем. Единственную роль снять нельзя — без неё человек войдёт\nи не увидит ничего.": {
+    "en": "To remove a role, write the reason next to it: it stays in the history next to your name. A person's only role cannot be removed — without it they would sign in and see nothing.",
+    "sr": "Da biste uklonili ulogu, upišite razlog pored nje: ostaje u istoriji pored vašeg imena. Jedinu ulogu osobe nije moguće ukloniti — bez nje bi se prijavila i ne bi videla ništa."
+  },
+  "← Все люди": {
+    "en": "← All people",
+    "sr": "← Svi ljudi"
+  },
+  "← Люди пространства «%(title)s»": {
+    "en": "← People in the space “%(title)s”",
+    "sr": "← Ljudi u prostoru „%(title)s“"
+  },
+  "Такого человека в этом пространстве нет.": {
+    "en": "There is no such person in this space.",
+    "sr": "U ovom prostoru nema takve osobe."
+  },
+  "Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. Первым заведите того, кто ведёт партнёра целиком.": {
+    "en": "The role “%(role)s” leads a single unit, and a new space has no units yet. Create someone who leads the whole partner first.",
+    "sr": "Uloga „%(role)s“ vodi jedan objekat, a novi prostor još nema objekata. Prvo dodajte osobu koja vodi celog partnera."
+  },
+  "Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в списке людей; если нет — проверьте адрес.": {
+    "en": "This e-mail cannot be invited. If the person already works with you, they are in the list of people; if not, check the address.",
+    "sr": "Ovu adresu nije moguće pozvati. Ako osoba već radi kod vas, nalazi se na spisku ljudi; ako ne — proverite adresu."
+  },
+  "Страну укажите кодом из двух латинских букв, например RS.": {
+    "en": "Enter the country as a two-letter Latin code, for example RS.",
+    "sr": "Unesite zemlju kodom od dva latinična slova, na primer RS."
+  },
+  "Валюту учёта укажите кодом из трёх латинских букв, например RSD.": {
+    "en": "Enter the accounting currency as a three-letter Latin code, for example RSD.",
+    "sr": "Unesite valutu knjiženja kodom od tri latinična slova, na primer RSD."
+  },
+  "Валюту отчёта укажите кодом из трёх латинских букв, например EUR.": {
+    "en": "Enter the reporting currency as a three-letter Latin code, for example EUR.",
+    "sr": "Unesite valutu izveštaja kodom od tri latinična slova, na primer EUR."
+  },
+  "Этой роли у человека нет.": {
+    "en": "This person does not hold this role.",
+    "sr": "Ova osoba nema tu ulogu."
+  }
+}
