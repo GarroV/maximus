@@ -350,7 +350,7 @@ def test_the_scheme_is_chosen_from_the_country_rules_not_typed(client, web_env, 
     ).fetchone()[0]
 
     login_as(client, "admin")
-    for url in (f"{LIST}{person}/", NEW):
+    for url in (f"{LIST}{person}/terms/", NEW):
         html = body(client.get(url))
         assert 'name="scheme"' in html
         assert '<input' not in re.search(
