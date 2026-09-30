@@ -305,6 +305,8 @@ def test_removing_a_role_the_person_does_not_hold_is_refused(client, web_env):
         })
         assert response.status_code == 409
         assert "Этой роли у человека нет" in body(response)
-        assert AccessLogEntry.objects.count() == before, "в историю записано снятие того, чего не было"
+        assert AccessLogEntry.objects.count() == before, (
+            "в историю записано снятие того, чего не было"
+        )
     finally:
         extra.delete()
