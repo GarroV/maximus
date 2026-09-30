@@ -18,7 +18,14 @@ import psycopg
 import pytest
 
 from conftest import (
-    I_LABOUR, R_MANAGER, T1, T2, U_NS1, USER_ADMIN, USER_MANAGER, as_app_user,
+    I_LABOUR,
+    R_MANAGER,
+    T1,
+    T2,
+    U_NS1,
+    USER_ADMIN,
+    USER_MANAGER,
+    as_app_user,
 )
 
 
