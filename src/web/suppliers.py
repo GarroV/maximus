@@ -827,7 +827,6 @@ def classify(who, fact, *, item, unit_id) -> Recorded:
     неразобранного — это правка задним числом, и переписать ею закрытый месяц
     нельзя: июнь сегодня и июнь через полгода обязаны давать одно число.
     """
-    remember(who, fact.counterparty_id, item)
     # Разнесённая строка остаётся разнесённой (D089, issue #288): разбор меняет
     # статью, а не точки. Точка, пришедшая в форме, у неё не применяется — иначе
     # разбор складывал доли, поставленные человеком, в одну строку молча.
@@ -838,6 +837,9 @@ def classify(who, fact, *, item, unit_id) -> Recorded:
     if shares:
         unit_id = None
     with transaction.atomic():
+        # Память «поставщик → статья» — внутри той же транзакции: отказанный
+        # разбор не должен оставлять подсказку, строка ведь не разобрана.
+        remember(who, fact.counterparty_id, item)
         if not cash.month_is_closed(who.tenant_id, fact.period):
             recorded = _reclassified(who, fact, item=item, unit_id=unit_id,
                                      dedup_key=fact.dedup_key)
@@ -861,8 +863,10 @@ def shares_of(fact) -> dict:
     """
     if fact.allocation != "split":
         return {}
+    # Веса — по модулю: у кредит-ноты доли отрицательные, а база принимает
+    # только положительные веса. Знак долям даёт сумма самой строки.
     return {
-        row.unit_id: row.amount
+        row.unit_id: abs(row.amount)
         for row in Fact.objects.filter(parent_fact_id=fact.id, superseded_at__isnull=True,
                                        allocation="allocated")
     }
