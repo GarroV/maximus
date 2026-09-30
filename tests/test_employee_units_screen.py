@@ -96,7 +96,7 @@ def bindings(sql, employee_id) -> list[tuple]:
     """Что лежит в базе: точка, доля, с какого дня, по какой."""
     return sql.execute(
         """select u.code, eu.share, eu.valid_from, eu.valid_to
-             from employee_units eu join units u on u.id = eu.unit_id
+             from employee_units eu left join units u on u.id = eu.unit_id
             where eu.employee_id = %s
             order by eu.valid_from, u.code""",
         (employee_id,),
@@ -148,12 +148,12 @@ def test_the_shares_of_the_units_are_saved_as_typed(client, web_env, sql):
     client.post("/logout/")
 
 
-def test_an_empty_set_means_the_whole_network_and_says_so(client, web_env, sql):
-    """Ни одной точки — это офис, и продукт называет это словами.
+def test_the_whole_network_is_a_choice_and_says_so(client, web_env, sql):
+    """«Вся сеть» — явная галка: одна строка без точки, и продукт называет это.
 
-    Молчание здесь читалось бы как «точки не сохранились»: человек нажал
-    «Сохранить» и не увидел ничего. Владелец про офис сказал прямо: «офис на
-    всех работает, вне зависимости».
+    Раньше сетью было пустое поле, а оно неотличимо от «набор не задан», при
+    котором деньги идут на точку строки табеля (D085). Молчание после
+    сохранения читалось бы как «точки не сохранились».
     """
     person, _ext = somebody(sql)
     login_as(client, "admin")
@@ -162,14 +162,59 @@ def test_an_empty_set_means_the_whole_network_and_says_so(client, web_env, sql):
     })
 
     answer = client.post(f"{LIST}{person}/", {
-        "what": "units", "units_from": "2026-06-01", "units": [],
+        "what": "units", "units_from": "2026-06-01", "network": "1",
     }, follow=True)
     page = body(answer)
     assert "на всю сеть" in page, page[:600]
 
     now = [row for row in bindings(sql, person) if row[3] is None]
-    assert not now, f"после снятия со всех точек действующая привязка осталась: {now}"
+    assert len(now) == 1 and now[0][0] is None, (
+        f"после выбора «вся сеть» действует не одна строка без точки: {now}"
+    )
     client.post("/logout/")
+
+
+def test_an_empty_set_is_refused_not_read_as_the_network(client, web_env, sql):
+    """Ни одной галки — отказ словами, а не молчаливая «сеть» или «не задан»."""
+    person, _ext = somebody(sql)
+    login_as(client, "admin")
+    answer = client.post(f"{LIST}{person}/", {
+        "what": "units", "units_from": "2026-06-01", "units": [],
+    }, follow=True)
+    assert "Не отмечено ни одной точки" in body(answer)
+    assert not bindings(sql, person), "пустая форма всё-таки что-то записала"
+    client.post("/logout/")
+
+
+def test_the_network_and_units_together_are_refused(client, web_env, sql):
+    """«Вся сеть» и NS1 сразу — противоречие, и оно отвергается до записи."""
+    person, _ext = somebody(sql)
+    login_as(client, "admin")
+    answer = client.post(f"{LIST}{person}/", {
+        "what": "units", "units_from": "2026-06-01",
+        "network": "1", "units": [unit(sql, "NS1")],
+    }, follow=True)
+    assert "Выберите что-то одно" in body(answer)
+    assert not bindings(sql, person)
+    client.post("/logout/")
+
+
+def test_the_database_keeps_the_network_alone(sql):
+    """Сеть не соседствует с точкой и со второй сетью в одном периоде (`0271`)."""
+    import psycopg
+
+    person, _ext = somebody(sql)
+    tenant = sql.execute(
+        "select tenant_id from employees where id = %s", (person,),
+    ).fetchone()[0]
+    insert = (
+        "insert into employee_units (tenant_id, employee_id, unit_id, valid_from) "
+        "values (%s, %s, %s, %s)"
+    )
+    sql.execute(insert, (tenant, person, None, "2026-01-01"))
+    for other, since in ((unit(sql, "BG1"), "2026-06-01"), (None, "2026-03-01")):
+        with pytest.raises(psycopg.errors.ExclusionViolation):
+            sql.execute(insert, (tenant, person, other, since))
 
 
 # --- 2. Версии: перевод не переписывает прошлое --------------------------------
@@ -614,3 +659,73 @@ def test_the_database_refuses_two_overlapping_rows_of_one_unit(sql):
             "insert into employee_units (tenant_id, employee_id, unit_id, valid_from) "
             "values (%s, %s, %s, '2026-06-01')", (tenant, person, bg1),
         )
+
+
+def test_the_base_refuses_a_zero_or_negative_share(sql):
+    """Доля не бывает нулевой или отрицательной — это держит база, а не форма.
+
+    Форма такие доли отвергает словами, но запись мимо формы (импорт, SQL,
+    следующий экран) дала бы расчёту набор с суммой весов ноль, и делить было
+    бы не на что. Пустая доля («поровну») остаётся законной.
+    """
+    import psycopg
+
+    person, _ext = sql.execute(
+        "select id, external_id from employees order by external_id limit 1"
+    ).fetchone()
+    for bad in ("0", "-0.5"):
+        with pytest.raises(psycopg.errors.CheckViolation):
+            sql.execute(
+                """insert into employee_units
+                       (tenant_id, employee_id, unit_id, share, valid_from)
+                   select e.tenant_id, e.id, %s, %s, '2031-01-01'
+                     from employees e where e.id = %s""",
+                (unit(sql, "NS1"), bad, person),
+            )
+    assert not bindings(sql, person), "нулевая доля записалась"
+
+
+def test_a_hidden_network_row_gives_the_manager_a_neutral_refusal(client, web_env, sql):
+    """Скрытая от управляющего строка «вся сеть» не выдаёт себя отказом базы.
+
+    Строку «вся сеть» видит только роль без ограничения по точкам (`0271`).
+    Управляющий, привязывая своего человека к своей точке, упирается в неё
+    ограничением `employee_units_network_alone` — и сырой отказ базы сказал бы
+    ему, что у человека есть невидимая ему привязка, да ещё какая. Ответ —
+    словами, без упоминания сети, и ничего не записано.
+    """
+    person, _ext = sql.execute(
+        """select e.id, e.external_id from employees e
+             join employment_terms t on t.employee_id = e.id
+             join units u on u.id = t.unit_id
+            where u.code = 'NS1' order by e.external_id limit 1"""
+    ).fetchone()
+    sql.execute(
+        """insert into employee_units (tenant_id, employee_id, unit_id, valid_from)
+           select tenant_id, id, null, '2026-01-01' from employees where id = %s""",
+        (person,),
+    )
+    granted = sql.execute(
+        """update roles set permissions = permissions || '["directory.manage"]'::jsonb
+            where code = 'manager' and not permissions ? 'directory.manage'
+        returning id"""
+    ).fetchall()
+    try:
+        login_as(client, "manager")
+        answer = client.post(f"{LIST}{person}/", {
+            "what": "units", "units_from": "2026-06-01", "units": [unit(sql, "NS1")],
+        })
+    finally:
+        for (role_id,) in granted:
+            sql.execute(
+                "update roles set permissions = permissions - 'directory.manage' where id = %s",
+                (role_id,),
+            )
+        client.post("/logout/")
+
+    assert answer.status_code == 409, (answer.status_code, str(answer.context["error"]))
+    error = str(answer.context["error"])
+    assert "оперативному директору" in error, error
+    for leak in ("сет", "network", "период уже занят"):
+        assert leak not in error.lower(), f"отказ выдаёт скрытую строку: {error}"
+    assert [row[0] for row in bindings(sql, person)] == [None], "запись всё-таки прошла"

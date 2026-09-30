@@ -25,6 +25,7 @@ from django.db import connection, transaction
 from django.utils.timezone import now
 
 from core import models
+from core.allocation_defaults import ensure_network_payroll_rules
 from core.role_delivery import product_shape
 from core.roles import DEFAULT_TITLES, ROLE_ORDER, ROLE_SHAPES, permission_states
 from core.rules import import_presets
@@ -323,6 +324,10 @@ class Command(BaseCommand):
                 defaults={"id": det_id("pnl_item", code), "title": title,
                           "kind": kind, "sort_order": order},
             )
+        # Правило «ФОТ сети делится поровну» стоит рядом со строками, к которым
+        # привязано (T221, D055): заведи его отдельно — и расхождение «строка
+        # есть, правила нет» обнаружилось бы висящей суммой через месяц.
+        ensure_network_payroll_rules(items)
         return items
 
     def _groups(self, tenant, preset: dict, items: dict) -> dict[str, models.EmployeeGroup]:
