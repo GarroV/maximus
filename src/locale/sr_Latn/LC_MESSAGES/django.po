@@ -9149,3 +9149,63 @@ msgstr[2] "Papiri sa objekata: %(counter)s čeka razvrstavanje"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Разнести по статьям"
 msgstr "Rasporedi po stavkama troškova"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вернуться в инбокс"
+msgstr "Nazad u prijemno sanduče"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итого к разнесению"
+msgstr "Ukupno za raspodelu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не разнесено."
+msgstr "Nije raspoređeno."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отметьте строки, которые разносятся по точкам: без отметки разносить "
+"нечего."
+msgstr "Označite redove koji se raspoređuju po objektima: bez oznake nema šta da se rasporedi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки инбокса делятся одними долями. Статья у них остаётся "
+"прежней — её назначают в инбоксе, и разнесение при этом сохранится."
+msgstr "Označeni redovi iz prijemnog sandučeta dele se istim udelima. Stavka troška ostaje ista — dodeljuje se u prijemnom sandučetu, a raspodela će se sačuvati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки относятся к разным юрлицам, а делятся накладные только "
+"на точки своего юрлица: общих точек у них нет. Разнесите их по одной или "
+"отметьте строки одного юрлица."
+msgstr "Označeni redovi pripadaju različitim pravnim licima, a otpremnica se deli samo na objekte svog pravnog lica: zajedničkih objekata nemaju. Rasporedite ih pojedinačno ili označite redove jednog pravnog lica."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнесено по точкам строк: %(count)d."
+msgstr "Redova raspoređenih po objektima: %(count)d."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнести по точкам"
+msgstr "Rasporedi po objektima"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Среди отмеченных есть строки, у которых точка уже есть или которые уже "
+"разнесены: %(what)s. Снимите с них отметку — разносить их нечего."
+msgstr "Među označenima ima redova koji već imaju objekat ili su već raspoređeni: %(what)s. Uklonite im oznaku — nema šta da se rasporedi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Строка разнесена по точкам, часть которых вам не видна, — разобрать её "
+"может тот, кто ведёт все точки партнёра."
+msgstr "Red je raspoređen po objektima od kojih neke ne vidite — može ga razvrstati onaj ko vodi sve objekte partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "У юрлица этих строк нет ни одной точки, которую вы ведёте."
+msgstr "Pravno lice ovih redova nema nijedan objekat koji vodite."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "разнесена по точкам — доли сохранятся"
+msgstr "raspoređeno po objektima — udeli će se sačuvati"

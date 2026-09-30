@@ -277,9 +277,17 @@ def papers(who, *, only_waiting: bool = False) -> list[SourceDocument]:
     return list(rows)
 
 
-def waiting_count(who) -> int:
-    """Сколько бумаг ждёт разбора — одно число для инбокса и списка бумаг."""
-    return len(papers(who, only_waiting=True))
+def waiting_count(who, *, tenant_id=None) -> int:
+    """Сколько бумаг ждёт разбора — одно число для инбокса, списка бумаг и
+    готовности месяца к закрытию (`payrun.readiness`).
+
+    `tenant_id` — для того, кто считает не от вошедшего человека, а от
+    пространства партнёра (проверка закрытия месяца). Условие «ждёт» то же.
+    """
+    found = papers(who, only_waiting=True)
+    if tenant_id is not None:
+        found = [document for document in found if document.tenant_id == tenant_id]
+    return len(found)
 
 
 def lines_of_many(found) -> dict[str, list]:

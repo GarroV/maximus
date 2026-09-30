@@ -343,6 +343,34 @@ def test_the_inbox_and_the_list_count_waiting_papers_alike(
     assert waiting_by_the_inbox(client) == 1, "инбокс и список бумаг считают по-разному"
 
 
+def test_month_closing_counts_waiting_papers_like_the_list(
+    client, units, counterparty, item, papers_removed, payruns_restored, sql,  # noqa: F811
+):
+    """Готовность месяца к закрытию считает ждущие бумаги тем же условием.
+
+    Своё условие закрытия («у бумаги нет ни одного факта») считало бумагу без
+    единой действующей строки разобранной — и месяц закрывался с бумагой, денег
+    которой в отчёте нет, пока список бумаг называл её ждущей.
+    """
+    from payrun.readiness import check
+
+    login_as(client, "manager")
+    card_of(hand_over(client, units))
+    document_id = document_id_of(sql)
+    login_as(client, "accountant")
+    review(client, counterparty=counterparty, item=item, units=units,
+           document_id=document_id)
+    space, period = sql.execute(
+        "select tenant_id, period from facts where document_id = %s limit 1", (document_id,)
+    ).fetchone()
+    sql.execute("update facts set superseded_at = now() where document_id = %s",
+                (document_id,))
+
+    assert waiting_by_the_list(client) == 1, "предохранитель: список бумаг её не ждёт"
+    codes = [finding.code for finding in check(space, period).findings]
+    assert "papers" in codes, f"закрытие не видит ждущую бумагу: {codes}"
+
+
 def test_a_sorted_out_paper_leaves_the_inbox(
     client, units, counterparty, item, papers_removed, payruns_restored, sql,  # noqa: F811
 ):
