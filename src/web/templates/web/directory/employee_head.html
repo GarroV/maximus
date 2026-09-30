@@ -1,0 +1,19 @@
+{% load ui i18n %}
+{% comment %}
+Шапка страниц сотрудника (D081, T229): имя, ряд его страниц и итог записи.
+
+Одна на все три страницы — карточку, условия найма и точки затрат, — чтобы
+человек видел, что у сотрудника есть, и не искал вторую половину экрана в
+раскрытии. Ряд — тот же компонент `cuts`, что у разрезов отчёта: текущая
+страница не ссылка, а `aria-current`. Выплат в ряду нет у того, кому их экран
+откажет (T166).
+{% endcomment %}
+<p class="note"><a href="{{ back_url }}">{% translate "← К сотрудникам" %}</a></p>
+<h1>{{ person.last_name }} {{ person.first_name }}</h1>
+{% include "web/components/cuts.html" with cuts=pages label=pages_label %}
+
+{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+{% if error %}
+{% translate "Не сохранено." as not_saved %}
+{% notice "alert" title=not_saved %}{{ error }}{% endnotice %}
+{% endif %}

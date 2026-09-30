@@ -289,11 +289,17 @@ def test_the_card_of_such_a_person_opens_and_hides_the_foreign_unit(client, web_
     bind(sql, person, ALIEN)
 
     login_as(client, "manager")
-    answer = client.get(f"{LIST}{person}/")
+    # Точки живут на своей странице (T229), но молчать о чужой обязаны все
+    # страницы человека: карточка и условия найма тоже называют точку.
+    for page in ("", "terms/"):
+        other = client.get(f"{LIST}{person}/{page}")
+        assert other.status_code == 200, (page, other.status_code)
+        assert ALIEN not in body(other), f"на странице {page or 'карточки'} видна чужая точка"
+    answer = client.get(f"{LIST}{person}/units/")
     assert answer.status_code == 200, answer.status_code
     shown = body(answer)
-    assert ALIEN not in shown, "в карточке видна точка, о которой управляющий знать не должен"
-    assert MINE in shown, "в карточке не видно точки самого управляющего"
+    assert ALIEN not in shown, "в точках человека видна чужая точка"
+    assert MINE in shown, "в точках человека не видно точки самого управляющего"
 
 
 # --- 5. «Вся сеть» не открывает человека каждому (D085, `0271`) ---------------

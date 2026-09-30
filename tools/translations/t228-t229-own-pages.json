@@ -1,0 +1,22 @@
+{
+  "Поднимать ставки некому: сначала заведите группу.": {
+    "en": "There is no one to raise rates for: create a group first.",
+    "sr": "Nema kome da se podignu cene rada: prvo napravite grupu."
+  },
+  "Загрузить статьи из файла": {
+    "en": "Upload expense items from a file",
+    "sr": "Učitaj stavke troškova iz fajla"
+  },
+  "Точки затрат": {
+    "en": "Cost units",
+    "sr": "Objekti troškova"
+  },
+  "Страницы сотрудника": {
+    "en": "Employee pages",
+    "sr": "Stranice zaposlenog"
+  },
+  "Версии условий найма": {
+    "en": "Employment terms versions",
+    "sr": "Verzije uslova zapošljavanja"
+  }
+}
