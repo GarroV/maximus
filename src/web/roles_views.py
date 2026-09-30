@@ -116,13 +116,20 @@ def _people(tenant_id, user_id=None):
                    array_agg(r.title order by r.title)       as role_titles,
                    array_agg(r.code order by r.title)        as role_codes,
                    array_agg(coalesce(to_char(m.expires_at, 'DD.MM.YYYY'), '')
-                             order by r.title)               as role_until
+                             order by r.title)               as role_until,
+                   bool_or(m.unit_ids is null)               as all_units,
+                   (select array_agg(distinct un.title)
+                      from memberships m2
+                      join units un on un.id = any(m2.unit_ids)
+                     where m2.tenant_id = m.tenant_id
+                       and m2.user_id = m.user_id)           as unit_titles,
+                   u.last_login                              as seen
               from memberships m
               join roles r on r.id = m.role_id
               left join users u on u.id = m.user_id
              where m.tenant_id = %s
                and (%s::uuid is null or m.user_id = %s::uuid)
-             group by m.user_id, who, mail
+             group by m.tenant_id, m.user_id, who, mail, u.last_login
              order by who
             """,
             [tenant_id, user_id, user_id],
@@ -137,6 +144,12 @@ def _people(tenant_id, user_id=None):
                      "until": until}
                     for rid, title, code, until in zip(row[3], row[4], row[5], row[6], strict=True)
                 ],
+                # Точки — объединение по всем ролям человека: роль без точек
+                # (`unit_ids is null`) означает все точки партнёра, и тогда
+                # перечислять отдельные бессмысленно (D047 — роли складываются).
+                "all_units": row[7],
+                "units": sorted(row[8] or []),
+                "seen": row[9],
             }
             for row in cur.fetchall()
         ]

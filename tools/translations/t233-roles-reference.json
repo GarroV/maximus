@@ -90,5 +90,13 @@
   "Сейчас у человека нет ни одного права — только просмотр того, что открывают его роли.": {
     "en": "Right now the person has no rights — only viewing what their roles open.",
     "sr": "Trenutno osoba nema nijedno pravo — samo pregled onoga što otvaraju njene uloge."
+  },
+  "все точки": {
+    "en": "all units",
+    "sr": "svi objekti"
+  },
+  "не входил": {
+    "en": "has not signed in yet",
+    "sr": "još se nije prijavio"
   }
 }

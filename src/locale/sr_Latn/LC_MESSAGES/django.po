@@ -9186,3 +9186,11 @@ msgstr "registar „%(ledger)s“"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "человек получит:"
 msgstr "osoba dobija:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все точки"
+msgstr "svi objekti"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не входил"
+msgstr "još se nije prijavio"

@@ -9350,3 +9350,11 @@ msgstr "the “%(ledger)s” ledger"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "человек получит:"
 msgstr "the person gets:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все точки"
+msgstr "all units"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не входил"
+msgstr "has not signed in yet"
