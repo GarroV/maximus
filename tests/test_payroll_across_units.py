@@ -24,7 +24,7 @@ from decimal import Decimal
 
 import pytest
 
-from conftest import login_as
+from conftest import body, login_as
 from test_closing_readiness import calculated  # noqa: F401
 from test_directory import sql  # noqa: F401
 
@@ -330,3 +330,73 @@ def test_no_set_keeps_the_timesheet_unit(client, sql, calculated):  # noqa: F811
     assert_lands(payroll_by_unit(sql), {
         "NS2": others.get("NS2", Decimal("0")) + own,
     })
+
+
+# --- проводку делает полный доступ, и отсутствие правила не молчит ------------
+
+
+def payrun_facts(sql) -> int:  # noqa: F811
+    return sql.execute(
+        "select count(*) from facts where dedup_key like 'payrun:%%' and superseded_at is null"
+    ).fetchone()[0]
+
+
+def test_a_role_with_a_partial_view_cannot_post_the_month(client, sql, calculated):  # noqa: F811
+    """Утверждает урезанная роль — отказ словами, а не проводка по её срезу.
+
+    Проводка читает ведомости и привязки под политиками того, кто утверждает.
+    Управляющий NS1 видит только свои строки и свои точки: человек на двух
+    точках ушёл бы целиком на одну, сетевой — на точку табеля, а ведомости
+    соседних точек не попали бы в P&L вовсе. И никто бы этого не увидел.
+    """
+    who = somebody_on(sql, "NS1")
+    put_on_units(sql, who, ["NS1", "NS2"])
+    granted = sql.execute(
+        """update roles set permissions = permissions || '["period.approve"]'::jsonb
+            where code = 'manager' and not permissions ? 'period.approve'
+        returning id"""
+    ).fetchall()
+    try:
+        login_as(client, "manager")
+        page = body(approve(client, calculated))
+    finally:
+        for (role_id,) in granted:
+            sql.execute(
+                "update roles set permissions = permissions - 'period.approve' where id = %s",
+                (role_id,),
+            )
+        client.post("/logout/")
+
+    assert payrun_facts(sql) == 0, "урезанная роль провела месяц по своему срезу"
+    assert "все точки" in page, f"отказ без объяснения: {page[:600]}"
+
+
+def test_a_missing_network_rule_stops_the_approval_loudly(client, sql, calculated):  # noqa: F811
+    """Нет общего правила «поровну» — утверждение отказывает, а не оставляет `pending`.
+
+    Правило поставляет продукт (`0270`), но строка P&L может появиться путём,
+    который правила не заводит. Тогда ФОТ офиса повис бы неразнесённым молча, и
+    узналось бы это через месяц по дыре в P&L точек.
+    """
+    who = somebody_on(sql, "NS2")
+    put_on_network(sql, who)
+    saved = sql.execute(
+        """delete from allocation_rules where tenant_id is null
+        returning id, pnl_item_id, method, ledger, valid_from, valid_to"""
+    ).fetchall()
+    try:
+        login_as(client, "director")
+        page = body(approve(client, calculated))
+    finally:
+        for row in saved:
+            sql.execute(
+                """insert into allocation_rules
+                       (id, tenant_id, pnl_item_id, method, ledger, valid_from, valid_to)
+                   values (%s, null, %s, %s, %s, %s, %s)""",
+                row,
+            )
+        client.post("/logout/")
+
+    assert saved, "общих правил не было и до теста — проверять нечего"
+    assert payrun_facts(sql) == 0, "месяц утверждён с ФОТ, висящим без разнесения"
+    assert "правил" in page, f"отказ без объяснения: {page[:600]}"
