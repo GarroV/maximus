@@ -77,6 +77,12 @@ class DateRange(models.Func):
     output_field = DateRangeField()
 
 
+# Чем считается пустой `tenant_id` в ограничениях-исключениях: общая строка
+# продукта сравнивается сама с собой, как отдельный партнёр. Настоящего
+# партнёра с таким номером нет и не будет — идентификаторы заводит `uuid4`.
+SHARED_TENANT = uuid.UUID(int=0)
+
+
 def validity_range() -> DateRange:
     """Период действия. Конец не входит: «по 1 июля» и «с 1 июля» — не пересечение.
 
@@ -818,10 +824,19 @@ class AllocationRule(models.Model):
             # строка отчёта уже названа, а набор точек сети от регистра не
             # зависит (в отличие от поставщика, которому платят и официально, и
             # из кассы, — там регистр различает два разных правила).
+            # Пустой `tenant_id` — общее правило продукта, и сравнивается оно
+            # как отдельный «партнёр»: `null = null` в исключении не совпадает
+            # никогда, и два общих правила на одну строку ужились бы молча.
             ExclusionConstraint(
                 name="allocation_rules_line_no_overlap",
                 expressions=[
-                    ("tenant", RangeOperators.EQUAL),
+                    (
+                        Coalesce(
+                            "tenant", models.Value(SHARED_TENANT),
+                            output_field=models.UUIDField(),
+                        ),
+                        RangeOperators.EQUAL,
+                    ),
                     ("pnl_item", RangeOperators.EQUAL),
                     (validity_range(), RangeOperators.OVERLAPS),
                 ],

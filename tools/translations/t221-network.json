@@ -34,5 +34,13 @@
   "целиком на %(code)s": {
     "en": "all to %(code)s",
     "sr": "sve na %(code)s"
+  },
+  "Утвердить месяц может только тот, кому видны все точки и все регистры партнёра: зарплата переносится в P&L целиком, и по части сети она легла бы не на те точки.": {
+    "en": "Only someone who sees all of the partner's units and ledgers can approve the month: payroll is carried into the P&L as a whole, and from part of the network it would land on the wrong units.",
+    "sr": "Mesec može da odobri samo onaj ko vidi sve objekte i sve registre partnera: zarade se prenose u P&L u celini, a iz dela mreže bi pale na pogrešne objekte."
+  },
+  "Зарплата сетевых сотрудников не разнеслась по точкам: для строк «Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не утверждён — сообщите администратору продукта.": {
+    "en": "Payroll of network-wide employees was not allocated to units: there is no allocation rule for the \"Payroll\" and \"Payroll taxes\" lines. The month was not approved — tell the product administrator.",
+    "sr": "Plate zaposlenih na nivou mreže nisu raspoređene po objektima: za stavke „Plata“ i „Porezi na platu“ ne postoji pravilo raspodele. Mesec nije odobren — obavestite administratora proizvoda."
   }
 }

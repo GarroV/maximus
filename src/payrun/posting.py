@@ -52,6 +52,7 @@ def post(payrun) -> int:
 
     from web import cash
 
+    _refuse_partial_view(payrun)
     rows = _lines_of(payrun)
     titles = {code: _line_title(code) for code in (LABOUR, TAXES)}
     written = 0
@@ -97,7 +98,65 @@ def post(payrun) -> int:
                 "and superseded_at is null",
                 [f"{PREFIX}{payrun.period:%Y-%m}:%"],
             )
+        _refuse_if_left_pending(payrun)
     return written
+
+
+def _refuse_partial_view(payrun) -> None:
+    """Проводить месяц может только тот, кому видна вся сеть и все регистры.
+
+    Проводка читает ведомости и привязки к точкам под политиками того, кто
+    утверждает. Роль с частью точек увидела бы часть людей и часть их точек:
+    человек на двух точках ушёл бы целиком на одну, сетевой — на точку табеля,
+    а ведомости соседних точек не попали бы в P&L вовсе. Ошибки бы никто не
+    увидел — поэтому отказ, а не проводка по срезу.
+    """
+    from django.db import connection
+    from django.utils.translation import gettext as _
+
+    from .errors import PayrunRefused
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "select app_unit_ids(%s) is null "
+            "and app_visible_ledgers(%s) @> enum_range(null::ledger)",
+            [str(payrun.tenant_id), str(payrun.tenant_id)],
+        )
+        (whole,) = cursor.fetchone()
+    if not whole:
+        raise PayrunRefused(
+            _("Утвердить месяц может только тот, кому видны все точки и все "
+              "регистры партнёра: зарплата переносится в P&L целиком, и по части "
+              "сети она легла бы не на те точки.")
+        )
+
+
+def _refuse_if_left_pending(payrun) -> None:
+    """ФОТ, оставшийся неразнесённым, останавливает утверждение, а не молчит.
+
+    Сетевую зарплату разносит общее правило «поровну» (`0270`). Если его нет —
+    строка P&L появилась путём, который правила не завёл, — сумма повисла бы
+    `pending` и в затраты точек не вошла; узналось бы это через месяц по дыре в
+    P&L. Отказ откатывает и проводку, и утверждение: они в одной транзакции.
+    """
+    from django.db import connection
+    from django.utils.translation import gettext as _
+
+    from .errors import PayrunRefused
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "select count(*) from facts where dedup_key like %s "
+            "and allocation = 'pending' and superseded_at is null",
+            [f"{PREFIX}{payrun.period:%Y-%m}:%"],
+        )
+        (left,) = cursor.fetchone()
+    if left:
+        raise PayrunRefused(
+            _("Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
+              "«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
+              "утверждён — сообщите администратору продукта.")
+        )
 
 
 def _lines_of(payrun) -> dict:

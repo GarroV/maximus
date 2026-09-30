@@ -9122,3 +9122,17 @@ msgstr "no previous month in the report — nothing to compare with"
 #, python-format
 msgid "против %(value)s (%(month)s)"
 msgstr "vs %(value)s (%(month)s)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Зарплата сетевых сотрудников не разнеслась по точкам: для строк "
+"«Зарплата» и «Налоги с зарплаты» нет правила разнесения. Месяц не "
+"утверждён — сообщите администратору продукта."
+msgstr "Payroll of network-wide employees was not allocated to units: there is no allocation rule for the \"Payroll\" and \"Payroll taxes\" lines. The month was not approved — tell the product administrator."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Утвердить месяц может только тот, кому видны все точки и все регистры "
+"партнёра: зарплата переносится в P&L целиком, и по части сети она легла "
+"бы не на те точки."
+msgstr "Only someone who sees all of the partner's units and ledgers can approve the month: payroll is carried into the P&L as a whole, and from part of the network it would land on the wrong units."
