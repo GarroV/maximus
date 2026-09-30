@@ -14,6 +14,10 @@
 поэтому человек, у которого ролей нет, в нём не появляется вовсе. Молча это
 читается как «такого человека в системе нет» — то есть ровно как «не
 загрузилось», хотя данные на месте. Поэтому сказано словами.
+
+Точка и «был в системе» — как в эталоне «Роли и права» (T233): список людей
+отвечает, кто из выданных доступов живой, а кто висит без дела. Время входа —
+`last_login` учётки, его ставит сам вход Django; своей колонки не заводили.
 {% endcomment %}
 {% block title %}{% translate "Люди и их роли" %}{% endblock %}
 {% block content %}
@@ -22,18 +26,22 @@
 <p class="note under">{% blocktranslate %}В списке только те, кому уже выдана хотя бы одна роль: он и собирается из
 выданных ролей. Человек, у которого ролей нет, здесь не появится — и это не
 значит, что его нет в системе.{% endblocktranslate %}</p>
-{% scroll %}<table>
+{% scroll %}<table class="stack">
   <thead>
     <tr>
       <th>{% translate "Человек" %}</th>
       <th>{% translate "Роли" %}</th>
+      <th>{% translate "Точка" %}</th>
+      <th>{% translate "Последний вход" %}</th>
     </tr>
   </thead>
   <tbody>
     {% for person in people %}
     <tr>
-      <td><a href="{% url 'person-roles' person.user_id %}">{{ person.who }}</a>{% if person.mail %}<br><span class="note">{{ person.mail }}</span>{% endif %}</td>
-      <td>{% for held in person.roles %}<span class="chip">{{ held.title }}{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</span> {% endfor %}</td>
+      <td data-label="{% translate "Человек" %}"><a href="{% url 'person-roles' person.user_id %}">{{ person.who }}</a>{% if person.mail %}<br><span class="note">{{ person.mail }}</span>{% endif %}</td>
+      <td data-label="{% translate "Роли" %}">{% for held in person.roles %}<span class="chip">{{ held.title }}{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</span> {% endfor %}</td>
+      <td data-label="{% translate "Точка" %}">{% if person.all_units %}{% translate "все точки" %}{% else %}{{ person.units|join:", " }}{% endif %}</td>
+      <td data-label="{% translate "Последний вход" %}">{% if person.seen %}{{ person.seen|date:"SHORT_DATETIME_FORMAT" }}{% else %}<span class="muted">{% translate "не входил" %}</span>{% endif %}</td>
     </tr>
     {% endfor %}
   </tbody>

@@ -1,6 +1,7 @@
 {% extends "web/base.html" %}{% load ui i18n %}
 {% comment %}
-Роли одного человека: что у него есть, снять, выдать ещё одну (T225).
+Роли одного человека: что у него есть, снять, выдать ещё одну (T225); что он
+получит и что потеряет при смене роли (T233).
 
 Прежде это была строка общей таблицы людей с формой выдачи прямо в ней. Здесь
 человек один, и форма выдачи — обычная карточка с подписанными полями, а не
@@ -17,6 +18,12 @@
 {% if person.mail %}<p class="sub">{{ person.mail }}</p>{% endif %}
 
 <h2>{% translate "Роли человека" %}</h2>
+<dl class="abilities">
+  <dt>{% translate "Сейчас человек может:" %}</dt>
+  <dd>{% if now %}{{ now|join:", " }}{% else %}{% translate "ни одного права — только просмотр того, что открывают его роли" %}{% endif %}</dd>
+  {% if cannot %}<dt>{% translate "Не может:" %}</dt>
+  <dd>{{ cannot|join:", " }}</dd>{% endif %}
+</dl>
 <p class="note under">{% blocktranslate %}Чтобы снять роль, напишите причину рядом с ней: она останется в истории
 рядом с вашим именем. Единственную роль снять нельзя — без неё человек войдёт
 и не увидит ничего.{% endblocktranslate %}</p>
@@ -33,6 +40,7 @@ norma, 30.09.2026). Карточка складывается в столбец 
   <input type="hidden" name="role" value="{{ held.id }}">
   <input type="hidden" name="action" value="remove">
   <p><span class="chip">{{ held.title }}</span>{% if held.until %} <span class="note">{% blocktranslate with day=held.until %}до {{ day }}{% endblocktranslate %}</span>{% endif %}</p>
+  <p class="note">{% if held.loses %}{% translate "Если снять, человек потеряет:" %} {{ held.loses|join:", " }}.{% else %}{% translate "Если снять, человек ничего не потеряет: всё это есть в других его ролях." %}{% endif %}</p>
   <label>{% blocktranslate with role=held.title %}Причина снятия роли «{{ role }}»{% endblocktranslate %}
     <input type="text" name="reason" required maxlength="200">
   </label>
@@ -41,6 +49,15 @@ norma, 30.09.2026). Карточка складывается в столбец 
 {% endfor %}
 
 <h2>{% translate "Выдать роль" %}</h2>
+{% comment %}
+Что даст каждая роль — списком для всех ролей сразу, а не подсказкой по выбору
+в списке: так ответ виден без скрипта и до того, как человек что-то выбрал.
+Называется только новое: право, которое у человека уже есть в другой роли,
+выдачей не приобретается (D047 — роли складываются).
+{% endcomment %}
+{% if offers %}<ul class="role-offers">{% for offer in offers %}
+  <li data-role-id="{{ offer.id }}"><b>{{ offer.title }}</b> — {% if offer.gains %}{% translate "человек получит:" %} {{ offer.gains|join:", " }}{% else %}{% translate "ничего нового: всё это у человека уже есть" %}{% endif %}</li>
+{% endfor %}</ul>{% endif %}
 <form method="post" action="{% url 'person-roles' person.user_id %}" class="card wide">{% csrf_token %}
   <label>{% translate "Роль" %}
     <select name="role">

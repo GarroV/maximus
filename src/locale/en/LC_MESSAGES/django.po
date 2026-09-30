@@ -7028,10 +7028,6 @@ msgstr ""
 "administrator, while separation of duties stays intact wherever those are "
 "different people."
 
-#: web/templates/web/roles/index.html:31
-msgid "Права"
-msgstr "Rights"
-
 #: web/templates/web/roles/index.html:70
 msgid ""
 "В списке только те, кому уже выдана хотя бы одна роль: он и собирается из\n"
@@ -8293,21 +8289,9 @@ msgid "Логин или пароль не подходят"
 msgstr "Login or password is incorrect"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Галочка — право, которое партнёр выдаёт и снимает сам. Прочерк — "
-"право,\nкоторого у этого набора не бывает: его не выдать ни отсюда, ни в "
-"обход экрана.\nНужны права старшего набора — человеку выдают старшую "
-"роль."
-msgstr "A checkbox is a right the partner grants and revokes themselves. A dash is a right this set never has: it cannot be granted from here, nor around this screen.\nIf someone needs the rights of a senior set, they are given the senior role."
-
-#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid "Права роли не изменены: «%(right)s» у этой роли не бывает."
 msgstr "The rights of the role are unchanged: “%(right)s” is never available to this role."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Этого права у роли не бывает: набор не расширяется в эту сторону"
-msgstr "This role never has this right: the set does not extend in this direction"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -9253,6 +9237,126 @@ msgid ""
 msgstr "The units of this employee can only be changed by a role that sees all of the partner's units. Contact the operations director or the accountant."
 
 #: новые строки, добавлены tools/apply_translations.py
+msgid "АДМ"
+msgstr "ADM"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "БУХ"
+msgstr "ACC"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ДИР"
+msgstr "DIR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ и история"
+msgstr "Access and history"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата и деньги"
+msgstr "Payroll and money"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правила и справочники"
+msgstr "Rules and directories"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Право"
+msgstr "Right"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сохранить права"
+msgstr "Save rights"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сохранить права роли «%(role)s»"
+msgstr "Save the rights of the role “%(role)s”"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срезы по регистрам учёта"
+msgstr "Ledger views"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Табель и операционка"
+msgstr "Timesheet and operations"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "УПР"
+msgstr "MGR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "право выдано — партнёр выдаёт и снимает его сам"
+msgstr "right granted — the partner grants and removes it"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "регистр не виден"
+msgstr "ledger not visible"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"у этой роли такого права не бывает: нужны права старшей роли — человеку "
+"выдают старшую роль"
+msgstr "this role never has such a right: if a person needs it, give them a senior role"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "этого права у роли не бывает"
+msgstr "this role never has this right"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Если снять, человек ничего не потеряет: всё это есть в других его ролях."
+msgstr "If removed, the person loses nothing: their other roles give all of this."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Если снять, человек потеряет:"
+msgstr "If removed, the person loses:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сейчас человек может:"
+msgstr "Right now the person can:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ничего нового: всё это у человека уже есть"
+msgstr "nothing new: the person already has all of this"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "регистр «%(ledger)s»"
+msgstr "the “%(ledger)s” ledger"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "человек получит:"
+msgstr "the person gets:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все точки"
+msgstr "all units"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не входил"
+msgstr "has not signed in yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выгрузить всю историю (CSV)"
+msgstr "Download the whole history (CSV)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действие"
+msgstr "Action"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выдача роли"
+msgstr "role granted"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "приглашение"
+msgstr "invitation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "снятие роли"
+msgstr "role removed"
+
 msgid ""
 "Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на "
 "бумаге."
@@ -9307,3 +9411,27 @@ msgid "Бумаги с точек: ждёт разбора %(counter)s"
 msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
 msgstr[0] "Papers from the units: %(counter)s waiting to be sorted out"
 msgstr[1] "Papers from the units: %(counter)s waiting to be sorted out"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не может:"
+msgstr "Cannot:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "бухгалтер"
+msgstr "accountant"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "директор"
+msgstr "director"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "партнёр"
+msgstr "partner"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "точка"
+msgstr "unit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ни одного права — только просмотр того, что открывают его роли"
+msgstr "no rights at all — only viewing what their roles open"

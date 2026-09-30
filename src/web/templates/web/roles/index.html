@@ -1,15 +1,20 @@
 {% extends "web/base.html" %}{% load ui i18n %}
 {% comment %}
-Права ролей: что позволяет каждая роль (T225 — одна функция из прежнего общего
-экрана; люди, приглашение и история — соседние страницы раздела).
+Права ролей: сетка «право × роль», как в эталоне «Роли и права» (T233). Строки —
+права по группам работы, столбцы — роли. Прежде на роль была строка со списком
+галочек, и чтобы понять, у кого есть «Откат периода», читали все блоки подряд.
 
-Права показываются названиями действий, а не кодами: `payrun.calculate` —
-слова для разработчика. Названия берутся оттуда же, откуда их берёт отказ
-(`web/permissions.py`), чтобы человек прочитал на экране ролей ровно то, что
-прочитает в отказе, если права не окажется.
+Права показываются названиями действий, а не кодами: названия берутся оттуда
+же, откуда их берёт отказ (`web/permissions.py`), чтобы человек прочитал на
+экране ролей ровно то, что прочитает в отказе, если права не окажется.
 
-Форма на роль своя — сохранение построчное. Одна форма на всю таблицу означала
-бы, что правка одной роли переписывает заодно и остальные: незаметно и молча.
+Форма на роль своя, и галочки столбца привязаны к ней атрибутом `form`: одна
+форма на всю сетку означала бы, что правка одной роли переписывает заодно и
+остальные — незаметно и молча. Кнопки сохранения — строкой под сеткой, по
+одной на столбец.
+
+Регистры — строки той же сетки, но только на чтение: их задаёт форма роли
+(`core/roles.py`), а не экран партнёра.
 {% endcomment %}
 {% block title %}{% translate "Права ролей" %}{% endblock %}
 {% block content %}
@@ -17,38 +22,36 @@
 {% include "web/roles/_head.html" with title=page_title %}
 <p class="sub">{% blocktranslate %}Роль — это набор прав, а человеку можно дать несколько ролей сразу. Так бухгалтер, который ведёт весь проект, становится ещё и администратором, а там, где это разные люди, разделение обязанностей остаётся.{% endblocktranslate %}</p>
 
-<p class="note under">{% blocktranslate %}Галочка — право, которое партнёр выдаёт и снимает сам. Прочерк — право,
-которого у этого набора не бывает: его не выдать ни отсюда, ни в обход экрана.
-Нужны права старшего набора — человеку выдают старшую роль.{% endblocktranslate %}</p>
-{% scroll %}<table>
+<p class="note under matrix-legend">
+  <span><input type="checkbox" checked tabindex="-1" aria-hidden="true"> {% translate "право выдано — партнёр выдаёт и снимает его сам" %}</span>
+  <span><span class="wall">–</span> {% translate "у этой роли такого права не бывает: нужны права старшей роли — человеку выдают старшую роль" %}</span>
+</p>
+<p class="note matrix-legend">{% for column in columns %}<span><b>{{ column.short }}</b> — {{ column.title }}</span>{% endfor %}</p>
+
+{% for column in columns %}<form method="post" action="{% url 'role-rights' column.id %}" id="rights-{{ column.id }}">{% csrf_token %}</form>{% endfor %}
+<div class="matrix-wrap"><table class="matrix" style="--matrix-cols: {{ columns|length }}">
   <thead>
     <tr>
-      <th>{% translate "Роль" %}</th>
-      <th>{% translate "Права" %}</th>
-      <th></th>
+      <th scope="col" class="matrix-right">{% translate "Право" %}</th>
+      {% for column in columns %}<th scope="col" title="{{ column.title }}" data-role="{{ column.code }}" data-role-id="{{ column.id }}">{{ column.short }}{% if column.note %}<small>{{ column.note }}</small>{% endif %}</th>{% endfor %}
     </tr>
   </thead>
   <tbody>
-    {% for row in rows %}
+    {% for group in groups %}
+    <tr class="matrix-group"><td colspan="{{ columns|length|add:1 }}">{{ group.title }}</td></tr>
+    {% for row in group.rows %}
     <tr>
-      <td>{{ row.role.title }}<br><span class="note">{{ row.role.code }}</span></td>
-      <td>
-        <form method="post" action="{% url 'role-rights' row.role.id %}" id="rights-{{ row.role.id }}">{% csrf_token %}
-          <div class="rights">
-            {% for right in row.rights %}{% if right.walled %}
-            <span class="right note" title="{% translate "Этого права у роли не бывает: набор не расширяется в эту сторону" %}">— {{ right.title }}</span>
-            {% else %}
-            <label class="right">
-              <input type="checkbox" name="right:{{ right.code }}"{% if right.granted %} checked{% endif %}>
-              {{ right.title }}
-            </label>
-            {% endif %}{% endfor %}
-          </div>
-        </form>
-      </td>
-      <td><button type="submit" form="rights-{{ row.role.id }}">{% translate "Сохранить" %}</button></td>
+      <th scope="row" class="matrix-right">{{ row.title }}</th>
+      {% for cell in row.cells %}<td>{% if row.ledger %}{% if cell.granted %}<span class="granted-mark" data-role="{{ cell.role.code }}" title="{{ cell.role.title }}: {{ row.title }}"><span class="sr-only">{% translate "да" %}</span></span>{% else %}<span class="wall" data-role="{{ cell.role.code }}" title="{{ cell.role.title }}: {% translate "регистр не виден" %}">–</span>{% endif %}{% elif cell.walled %}<span class="wall" data-role="{{ cell.role.code }}" title="{{ cell.role.title }}: {% translate "этого права у роли не бывает" %}">–<span class="sr-only">{{ row.title }}</span></span>{% else %}<input type="checkbox" name="right:{{ row.code }}" form="rights-{{ cell.role.id }}" data-role="{{ cell.role.code }}" aria-label="{{ cell.role.title }}: {{ row.title }}"{% if cell.granted %} checked{% endif %}>{% endif %}</td>{% endfor %}
     </tr>
     {% endfor %}
+    {% endfor %}
   </tbody>
-</table>{% endscroll %}
+  <tfoot>
+    <tr>
+      <th scope="row" class="matrix-right">{% translate "Сохранить права" %}</th>
+      {% for column in columns %}<td><button type="submit" form="rights-{{ column.id }}" title="{% blocktranslate with role=column.title %}Сохранить права роли «{{ role }}»{% endblocktranslate %}">{{ column.short }}</button></td>{% endfor %}
+    </tr>
+  </tfoot>
+</table></div>
 {% endblock %}

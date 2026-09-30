@@ -1,0 +1,142 @@
+{
+  "Табель и операционка": {
+    "en": "Timesheet and operations",
+    "sr": "Evidencija i operativa"
+  },
+  "Зарплата и деньги": {
+    "en": "Payroll and money",
+    "sr": "Plate i novac"
+  },
+  "Правила и справочники": {
+    "en": "Rules and directories",
+    "sr": "Pravila i šifarnici"
+  },
+  "Доступ и история": {
+    "en": "Access and history",
+    "sr": "Pristup i istorija"
+  },
+  "Срезы по регистрам учёта": {
+    "en": "Ledger views",
+    "sr": "Preseci po registrima"
+  },
+  "ДИР": {
+    "en": "DIR",
+    "sr": "DIR"
+  },
+  "БУХ": {
+    "en": "ACC",
+    "sr": "KNJ"
+  },
+  "УПР": {
+    "en": "MGR",
+    "sr": "UPR"
+  },
+  "АДМ": {
+    "en": "ADM",
+    "sr": "ADM"
+  },
+  "Право": {
+    "en": "Right",
+    "sr": "Pravo"
+  },
+  "регистр не виден": {
+    "en": "ledger not visible",
+    "sr": "registar nije vidljiv"
+  },
+  "этого права у роли не бывает": {
+    "en": "this role never has this right",
+    "sr": "ova uloga nikad nema ovo pravo"
+  },
+  "Сохранить права": {
+    "en": "Save rights",
+    "sr": "Sačuvaj prava"
+  },
+  "Сохранить права роли «%(role)s»": {
+    "en": "Save the rights of the role “%(role)s”",
+    "sr": "Sačuvaj prava uloge „%(role)s“"
+  },
+  "право выдано — партнёр выдаёт и снимает его сам": {
+    "en": "right granted — the partner grants and removes it",
+    "sr": "pravo dodeljeno — partner ga sam dodeljuje i uklanja"
+  },
+  "у этой роли такого права не бывает: нужны права старшей роли — человеку выдают старшую роль": {
+    "en": "this role never has such a right: if a person needs it, give them a senior role",
+    "sr": "ova uloga nikad nema takvo pravo: ako je osobi potrebno, dodelite joj stariju ulogu"
+  },
+  "регистр «%(ledger)s»": {
+    "en": "the “%(ledger)s” ledger",
+    "sr": "registar „%(ledger)s“"
+  },
+  "Если снять, человек потеряет:": {
+    "en": "If removed, the person loses:",
+    "sr": "Ako se ukloni, osoba gubi:"
+  },
+  "Если снять, человек ничего не потеряет: всё это есть в других его ролях.": {
+    "en": "If removed, the person loses nothing: their other roles give all of this.",
+    "sr": "Ako se ukloni, osoba ništa ne gubi: sve to daju njene druge uloge."
+  },
+  "человек получит:": {
+    "en": "the person gets:",
+    "sr": "osoba dobija:"
+  },
+  "ничего нового: всё это у человека уже есть": {
+    "en": "nothing new: the person already has all of this",
+    "sr": "ništa novo: osoba sve to već ima"
+  },
+  "Сейчас человек может:": {
+    "en": "Right now the person can:",
+    "sr": "Trenutno osoba može:"
+  },
+  "все точки": {
+    "en": "all units",
+    "sr": "svi objekti"
+  },
+  "не входил": {
+    "en": "has not signed in yet",
+    "sr": "još se nije prijavio"
+  },
+  "Действие": {
+    "en": "Action",
+    "sr": "Radnja"
+  },
+  "приглашение": {
+    "en": "invitation",
+    "sr": "poziv"
+  },
+  "выдача роли": {
+    "en": "role granted",
+    "sr": "dodela uloge"
+  },
+  "снятие роли": {
+    "en": "role removed",
+    "sr": "uklanjanje uloge"
+  },
+  "Выгрузить всю историю (CSV)": {
+    "en": "Download the whole history (CSV)",
+    "sr": "Preuzmi celu istoriju (CSV)"
+  },
+  "партнёр": {
+    "en": "partner",
+    "sr": "partner"
+  },
+  "директор": {
+    "en": "director",
+    "sr": "direktor"
+  },
+  "бухгалтер": {
+    "en": "accountant",
+    "sr": "knjigovođa"
+  },
+  "точка": {
+    "en": "unit",
+    "sr": "objekat"
+  },
+  "Не может:": {
+    "en": "Cannot:",
+    "sr": "Ne može:"
+  },
+  "ни одного права — только просмотр того, что открывают его роли": {
+    "en": "no rights at all — only viewing what their roles open",
+    "sr": "nijedno pravo — samo pregled onoga što otvaraju njene uloge"
+  }
+}
