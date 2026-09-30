@@ -8,6 +8,7 @@ from . import (
     cash_views,
     counterparties_views,
     directory_views,
+    employee_views,
     expense_items_views,
     expenses_views,
     guide,
@@ -166,10 +167,23 @@ urlpatterns = [
         directory_views.employee_new,
         name="directory-employee-new",
     ),
+    # Сотрудник — тремя страницами (D081, T229): карточка, условия найма и
+    # точки затрат. Прежде это был один экран с четырьмя формами; устройство и
+    # права — в шапке `web/employee_views.py`.
     path(
         "directory/employees/<uuid:employee_id>/",
-        directory_views.employee,
+        employee_views.employee,
         name="directory-employee",
+    ),
+    path(
+        "directory/employees/<uuid:employee_id>/terms/",
+        employee_views.employee_terms,
+        name="directory-employee-terms",
+    ),
+    path(
+        "directory/employees/<uuid:employee_id>/units/",
+        employee_views.employee_units,
+        name="directory-employee-units",
     ),
     # Выплаты человека по месяцам (T166). Адрес под карточкой, а не отдельным
     # корнем: приходят сюда с карточки, и вложенность делает это видно по адресу.

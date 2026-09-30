@@ -95,7 +95,7 @@ const text = () => evalIn(`document.body.innerText`);
 const PERSON = sql(
   "select id from employees order by external_id limit 1",
 );
-const CARD = `${APP}/directory/employees/${PERSON}/`;
+const CARD = `${APP}/directory/employees/${PERSON}/units/`;
 const HAS_BLOCK = `document.body.innerText.includes("между которыми делятся затраты")`;
 
 /** Отметить точку по её коду и, если надо, вписать долю. */
@@ -123,7 +123,7 @@ async function submitUnits(from) {
   await evalIn(`
     (() => {
       const form = [...document.querySelectorAll("form")]
-        .find((f) => f.querySelector('[name=what][value=units]'));
+        .find((f) => f.querySelector('[name=units_from]'));
       form.querySelector('[name=units_from]').value = ${JSON.stringify(from)};
       form.submit();
     })()
@@ -253,14 +253,14 @@ sql(
 
 await signIn("manager");
 await visit(
-  `${APP}/directory/employees/${NS1_PERSON}/`,
+  `${APP}/directory/employees/${NS1_PERSON}/units/`,
   HAS_BLOCK,
 );
 page = await text();
 check("управляющий видит блок точек своего человека", page.includes("делятся затраты"));
 check(
   "формы записи у читателя нет",
-  await evalIn(`!document.querySelector('[name=what][value=units]')`),
+  await evalIn(`!document.querySelector('[name=units_from]')`),
 );
 const seenByBoss = await evalIn(`
   [...document.querySelectorAll('tr[data-unit]')].map((r) => r.dataset.unit).sort().join(",")

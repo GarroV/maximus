@@ -170,6 +170,30 @@ def test_a_person_of_another_unit_is_not_openable_by_address(client, web_env, sq
     client.post("/logout/")
 
 
+@pytest.mark.parametrize("page", ["terms/", "units/"])
+def test_the_other_pages_of_a_hidden_person_answer_404_too(client, web_env, sql, page):
+    """Условия найма и точки — страницы того же человека (T229), и скрыт он на них так же.
+
+    Отдельная страница — новый адрес, а новый адрес — новое место, где отбор
+    могли забыть. Чтение и запись вслепую — оба 404; контроль администратором на
+    том же адресе — чтобы 404 не означал битую ссылку.
+    """
+    alien = card(sql, ANOTHER_UNIT) + page
+    login_as(client, "manager")
+    try:
+        assert client.get(alien).status_code == 404
+        assert client.post(alien, {"valid_from": "2026-09-01", "units_from": "2026-09-01",
+                                   "base_rate": "999", "coefficient": "1"}).status_code == 404
+    finally:
+        client.post("/logout/")
+
+    login_as(client, "admin")
+    try:
+        assert client.get(alien).status_code == 200, "адрес битый — проверка выше ничего не значит"
+    finally:
+        client.post("/logout/")
+
+
 def test_a_person_of_a_ledger_he_does_not_see_is_hidden_too(client, web_env, sql):
     """Своя точка ещё не значит «видно»: регистр режет отдельно (D023).
 
@@ -180,6 +204,9 @@ def test_a_person_of_a_ledger_he_does_not_see_is_hidden_too(client, web_env, sql
     page = body(client.get(LIST))
     assert "Курьеры" not in page, "названа группа регистра, которого роль не видит"
     assert client.get(card(sql, HIDDEN_LEDGER)).status_code == 404
+    # И на остальных страницах того же человека (T229): условия найма и точки.
+    for page in ("terms/", "units/"):
+        assert client.get(card(sql, HIDDEN_LEDGER) + page).status_code == 404, page
     client.post("/logout/")
 
 
@@ -251,6 +278,12 @@ def test_the_reader_gets_facts_instead_of_forms_and_is_told_why(client, web_env,
     # Факты, ради которых экран и открыли: группа, точка, ставка.
     for expected in ("Ставка", "Группа", "Точка", "Офис", "NS1"):
         assert expected in page, f"на карточке нет главного: {expected}"
+    # Условия найма и точки — свои страницы (T229), и правило у них то же: вместо
+    # формы слова, а не пустота.
+    for other in ("terms/", "units/"):
+        shown = body(client.get(mine + other))
+        assert '<form class="card"' not in shown, f"читателю отдали форму на {other}"
+        assert "Ведение справочников" in shown, f"форма на {other} пропала молча"
     client.post("/logout/")
 
 
@@ -389,7 +422,7 @@ def test_a_post_from_the_reader_is_refused_and_changes_nothing(client, web_env, 
     assert answer.status_code == 403, body(answer)
     assert "Ведение справочников" in body(answer)
 
-    versions = client.post(f"{LIST}{person}/", {
+    versions = client.post(f"{LIST}{person}/terms/", {
         "what": "terms", "valid_from": "2026-09-01", "base_rate": "999", "coefficient": "1",
     })
     assert versions.status_code == 403
@@ -406,9 +439,11 @@ def test_a_post_from_the_reader_is_refused_and_changes_nothing(client, web_env, 
 def test_the_one_who_manages_the_directory_still_edits(client, web_env, sql):
     """Обратная сторона: формы скрыты по праву, а не пропали у всех."""
     login_as(client, "admin")
-    page = body(client.get(card(sql, MINE)))
-    assert '<form class="card"' in page and "Новая версия условий" in page
-    assert "Ведение справочников" not in page, "тому, у кого право есть, объясняют запрет"
+    for other, form in (("", "Сохранить карточку"), ("terms/", "Новая версия условий"),
+                        ("units/", "Набор точек с даты")):
+        page = body(client.get(card(sql, MINE) + other))
+        assert '<form class="card"' in page and form in page, f"формы нет на {other or 'карточке'}"
+        assert "Ведение справочников" not in page, "тому, у кого право есть, объясняют запрет"
     client.post("/logout/")
 
 

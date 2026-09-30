@@ -165,10 +165,12 @@ def test_an_employee_is_created_together_with_his_employment_terms(
     assert terms[0][2] == Decimal("400.5000")
     assert str(terms[0][4]) == str(a_group().id)
 
-    # И он виден там, где его будут искать: в списке и своей карточкой.
+    # И он виден там, где его будут искать: в списке, своей карточкой и своими
+    # условиями найма — ставка живёт на их странице (T229).
     assert "ПРОВЕРКА" in body(client.get(LIST))
     card = body(client.get(f"{LIST}{person[0]}/"))
-    assert "ПРОВЕРКА" in card and "400,5" in card.replace("&nbsp;", " ")
+    terms = body(client.get(f"{LIST}{person[0]}/terms/"))
+    assert "ПРОВЕРКА" in card and "400,5" in terms.replace("&nbsp;", " ")
     client.post("/logout/")
 
 
@@ -407,7 +409,7 @@ def test_a_scheme_that_is_not_in_the_rules_is_refused(
     assert client.post(NEW, hire_form()).status_code == 302
     person = created(sql)[0]
 
-    refused = client.post(f"{LIST}{person}/", {
+    refused = client.post(f"{LIST}{person}/terms/", {
         "what": "terms", "valid_from": "2026-07-01",
         "group": str(a_group().id), "unit": str(a_unit().id),
         "base_rate": "400", "coefficient": "1",
@@ -438,7 +440,7 @@ def test_a_measure_that_is_not_in_the_rules_is_refused(
     assert client.post(NEW, hire_form()).status_code == 302
     person = created(sql)[0]
 
-    refused = client.post(f"{LIST}{person}/", {
+    refused = client.post(f"{LIST}{person}/terms/", {
         "what": "terms", "valid_from": "2026-07-01",
         "group": str(a_group().id), "unit": str(a_unit().id),
         "base_rate": "400", "coefficient": "1",
@@ -472,7 +474,7 @@ def test_a_stored_scheme_unknown_to_the_rules_is_kept_and_marked(
         (person,),
     )
 
-    html = body(client.get(f"{LIST}{person}/"))
+    html = body(client.get(f"{LIST}{person}/terms/"))
     assert "привет_из_прошлого" in options_of(html, "scheme"), (
         "лежащее в базе значение выброшено из списка — «Сохранить» подменит схему"
     )
@@ -480,7 +482,7 @@ def test_a_stored_scheme_unknown_to_the_rules_is_kept_and_marked(
 
     # И его можно сохранить обратно как есть: отказ на своём же предложении был
     # бы тупиком — карточку нельзя было бы править вовсе.
-    kept = client.post(f"{LIST}{person}/", {
+    kept = client.post(f"{LIST}{person}/terms/", {
         "what": "terms", "valid_from": "2026-07-01",
         "group": str(a_group().id), "unit": str(a_unit().id),
         "base_rate": "500", "coefficient": "1",
@@ -508,7 +510,7 @@ def test_the_card_reads_the_scheme_back_in_words_not_in_yaml(
     assert client.post(NEW, hire_form()).status_code == 302
     person = created(sql)[0]
 
-    html = body(client.get(f"{LIST}{person}/"))
+    html = body(client.get(f"{LIST}{person}/terms/"))
     table = re.search(r"<table>.*?</table>", html, re.S)
     assert table, "на карточке нет истории условий найма"
     cells = [re.sub(r"<[^>]+>", "", cell).strip()
@@ -558,12 +560,12 @@ def test_the_work_measure_is_offered_and_stored_for_one_person(
     assert client.post(NEW, hire_form()).status_code == 302
     person = created(sql)[0]
 
-    html = body(client.get(f"{LIST}{person}/"))
+    html = body(client.get(f"{LIST}{person}/terms/"))
     assert measures <= options_of(html, "work_measure"), (
         "список способов не сходится с правилами страны"
     )
 
-    saved = client.post(f"{LIST}{person}/", {
+    saved = client.post(f"{LIST}{person}/terms/", {
         "what": "terms", "valid_from": "2026-07-01",
         "group": str(a_group().id), "unit": str(a_unit().id),
         "base_rate": "400,50", "coefficient": "1",
@@ -605,7 +607,7 @@ def test_setting_the_measure_needs_no_right_to_manage_rules(
         login_as(client, "admin")
         assert client.post(NEW, hire_form()).status_code == 302
         person = created(sql)[0]
-        saved = client.post(f"{LIST}{person}/", {
+        saved = client.post(f"{LIST}{person}/terms/", {
             "what": "terms", "valid_from": "2026-07-01",
             "group": str(a_group().id), "unit": str(a_unit().id),
             "base_rate": "400,50", "coefficient": "1",
