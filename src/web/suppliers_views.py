@@ -27,6 +27,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404, HttpResponseNotAllowed
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -1290,12 +1291,19 @@ def inbox_rows(who) -> list[dict]:
                  "selected": guess is not None and code == guess.id}
                 for code, title in items
             ],
-            "units": [
+            # Разнесённой строке точку не предлагают: разбор её доли сохраняет
+            # (D089), и список, который ничего не делает, врал бы.
+            "split": row.allocation == "split",
+            "units": [] if row.allocation == "split" else [
                 {"code": str(code), "title": title,
                  "selected": str(code) == (str(row.unit_id) if row.unit_id
                                            else cash.NETWORK_UNIT)}
                 for code, title in unit_options
             ],
+            # Строку на всю сеть можно разнести по точкам её экраном «Чья
+            # накладная» (модуль 15) — прямо отсюда (T234).
+            "split_url": (reverse("expense-split-form", args=[row.id])
+                          if row.allocation == "pending" and not row.unit_id else ""),
         })
     return rows
 
@@ -1324,8 +1332,10 @@ def inbox_classify(request, fact_id):
             raise BadInput(
                 _("Поле «%(label)s» обязательно.") % {"label": _("Статья расхода")}
             )
+        # У разнесённой строки точку не спрашивают и не применяют (D089).
+        was_split = fact.allocation == "split"
         recorded = suppliers.classify(
-            who, fact, item=item, unit_id=_unit(request, who),
+            who, fact, item=item, unit_id=None if was_split else _unit(request, who),
         )
     except (BadInput, cash.UnitRefused, cash.CashRefused):
         # Отказ уезжает в адрес признаком, а не готовой фразой: фразу в адресе не
@@ -1336,9 +1346,10 @@ def inbox_classify(request, fact_id):
     landed = reverse("inbox") + f"?done={recorded.landing.period:%Y-%m}"
     if recorded.landing.moved_from is not None:
         landed += f"&moved={recorded.landing.moved_from:%Y-%m}"
-    if _unit(request, who) is None:
+    if not was_split and _unit(request, who) is None:
         # Строка на всю сеть разносится сразу, как расход и как счёт: узнать
         # через месяц, что сумма висела нераспределённой, — худший из ответов.
+        # Разнесённую разносить заново правилом нельзя: доли поставил человек.
         cash.spread_now(recorded.fact_id)
     return redirect(landed)
 
@@ -1397,10 +1408,14 @@ def inbox_batch(request):
                 _("Поле «%(label)s» обязательно.") % {"label": _("Статья расхода")}
             )
         unit_id = _unit(request, who)
-        landed = [
-            suppliers.classify(who, fact, item=item, unit_id=unit_id)
-            for fact in facts
-        ]
+        # Своя транзакция, а не только ATOMIC_REQUESTS: отказ здесь ловится и
+        # превращается в обычный ответ, и запрос, завершившийся ответом,
+        # фиксирует всё, что успело записаться. Пачка либо целиком, либо никак.
+        with transaction.atomic():
+            landed = [
+                suppliers.classify(who, fact, item=item, unit_id=unit_id)
+                for fact in facts
+            ]
     except (BadInput, cash.UnitRefused, cash.CashRefused) as refused:
         return _inbox_refused(
             request, who, refused.message,
@@ -1410,9 +1425,11 @@ def inbox_batch(request):
     if unit_id is None:
         # Строки на всю сеть разносятся сразу — тем же доводом, что и
         # поодиночке: узнать через месяц, что суммы висели нераспределёнными,
-        # хуже, чем разнести их в момент разбора.
-        for recorded in landed:
-            cash.spread_now(recorded.fact_id)
+        # хуже, чем разнести их в момент разбора. Разнесённые уже разнесены
+        # своими долями (D089) — правилом их не трогаем.
+        for recorded, fact in zip(landed, facts, strict=True):
+            if fact.allocation != "split":
+                cash.spread_now(recorded.fact_id)
 
     address = reverse("inbox") + f"?sorted={len(landed)}"
     moved = [r.landing.moved_from for r in landed if r.landing.moved_from is not None]
@@ -1456,6 +1473,9 @@ def _inbox_notice(request) -> str:
         # «…: 40», и обходится одной формой вместо трёх на каждый язык. Формы
         # заводятся там, где без них фраза ломается, — здесь не тот случай.
         said.append(_("Разобрано строк: %(count)d.") % {"count": int(sorted_out)})
+    spread = request.GET.get("spread")
+    if spread and spread.isdigit():
+        said.append(_("Разнесено по точкам строк: %(count)d.") % {"count": int(spread)})
     done = _month_or_none(request.GET.get("done"))
     if done is not None:
         said.append(_("Строка разобрана и учтена в периоде %(month)s.")

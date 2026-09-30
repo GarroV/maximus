@@ -47,6 +47,9 @@
   <p class="field">{% include "web/components/select.html" with id="batch-item" name="item" label=item_label options=batch_items required=1 empty_label=not_chosen empty_selected=1 %}</p>
   <p class="field">{% include "web/components/select.html" with id="batch-unit" name="unit" label=unit_label options=batch_units required=1 %}</p>
   <button class="primary" type="submit">{% translate "Присвоить статью отмеченным" %}</button>
+  {% comment %}Та же отметка, другая страница: разнесение — своя функция (D081).
+  formnovalidate — поля статьи и точки здесь ни при чём.{% endcomment %}
+  <button type="submit" formaction="{% url 'inbox-split' %}" formnovalidate>{% translate "Разнести по точкам" %}</button>
 </form>
 {% translate "Отмечено строк: {n}. Статья присвоится всем сразу." as picked_text %}
 <p class="note" data-selected="0" data-picked="{{ picked_text }}">{% translate "Отметьте несколько строк одного поставщика — статья присвоится всем сразу. Пробел отмечает строку, Shift со щелчком — диапазон." %}</p>
@@ -80,9 +83,10 @@
       <td>
         <form class="inline" method="post" action="{{ row.url }}">{% csrf_token %}
           {% include "web/components/select.html" with id=row.id|add:"-item" name="item" label="" options=row.items required=1 empty_label="" empty_selected=1 %}
-          {% include "web/components/select.html" with id=row.id|add:"-unit" name="unit" label="" options=row.units required=1 %}
+          {% if row.split %}<span class="hint">{% translate "разнесена по точкам — доли сохранятся" %}</span>{% else %}{% include "web/components/select.html" with id=row.id|add:"-unit" name="unit" label="" options=row.units required=1 %}{% endif %}
           <button type="submit">{% translate "Разобрать" %}</button>
         </form>
+        {% if row.split_url %}<a href="{{ row.split_url }}">{% translate "Разнести по точкам" %}</a>{% endif %}
       </td>
     </tr>
     {% endfor %}

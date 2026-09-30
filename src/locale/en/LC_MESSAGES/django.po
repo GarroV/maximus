@@ -9311,3 +9311,63 @@ msgstr[1] "Papers from the units: %(counter)s waiting to be sorted out"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Разнести по статьям"
 msgstr "Split across expense items"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вернуться в инбокс"
+msgstr "Back to the inbox"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итого к разнесению"
+msgstr "Total to split"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не разнесено."
+msgstr "Not split."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отметьте строки, которые разносятся по точкам: без отметки разносить "
+"нечего."
+msgstr "Check the rows to split across units: with nothing checked there is nothing to split."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки инбокса делятся одними долями. Статья у них остаётся "
+"прежней — её назначают в инбоксе, и разнесение при этом сохранится."
+msgstr "The checked inbox rows are split with one set of shares. Their expense item stays as it is — it is assigned in the inbox, and the split will be kept."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки относятся к разным юрлицам, а делятся накладные только "
+"на точки своего юрлица: общих точек у них нет. Разнесите их по одной или "
+"отметьте строки одного юрлица."
+msgstr "The checked rows belong to different legal entities, and a delivery note is split only across the units of its own legal entity: they have no units in common. Split them one by one or check rows of one legal entity."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнесено по точкам строк: %(count)d."
+msgstr "Rows split across units: %(count)d."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнести по точкам"
+msgstr "Split across units"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Среди отмеченных есть строки, у которых точка уже есть или которые уже "
+"разнесены: %(what)s. Снимите с них отметку — разносить их нечего."
+msgstr "Some checked rows already have a unit or are already split: %(what)s. Uncheck them — there is nothing to split."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Строка разнесена по точкам, часть которых вам не видна, — разобрать её "
+"может тот, кто ведёт все точки партнёра."
+msgstr "The row is split across units some of which you cannot see — it can be sorted out by someone who manages all of the partner's units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "У юрлица этих строк нет ни одной точки, которую вы ведёте."
+msgstr "The legal entity of these rows has no unit that you manage."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "разнесена по точкам — доли сохранятся"
+msgstr "split across units — the shares will be kept"
