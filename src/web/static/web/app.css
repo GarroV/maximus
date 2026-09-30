@@ -1689,4 +1689,8 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
   .filters__label { flex-basis: auto; }
   .filters .seg__item, .filters .seg__current { height: var(--tap-min); }
   .filters__pick a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
+  /* Заголовок с кнопкой действия («Внести расход», «Внести счёт») на 375 не
+     умещался в строку и тянул страницу вбок на 70px: кнопка переносится под
+     заголовок. Найдено сверкой T224 на /expenses/ и /invoices/. */
+  .head { flex-wrap: wrap; }
 }
