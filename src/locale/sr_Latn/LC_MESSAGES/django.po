@@ -4056,11 +4056,11 @@ msgstr ""
 msgid ""
 "Правила страны — общая база для всех партнёров этой страны, поэтому их ведёт "
 "не партнёр, а администратор платформы. Для себя любое из них можно "
-"переопределить формой ниже: правило страны от этого не меняется."
+"переопределить своей новой версией: правило страны от этого не меняется."
 msgstr ""
 "Pravila zemlje su zajednička osnova za sve partnere te zemlje, pa ih ne vodi "
 "partner nego administrator platforme. Za sebe možete da izmenite bilo koje "
-"od njih formom ispod: pravilo zemlje se time ne menja."
+"od njih sopstvenom novom verzijom: pravilo zemlje se time ne menja."
 
 #: web/rules_country.py:123
 msgid ""
@@ -7032,10 +7032,10 @@ msgstr "Za ovo pravilo nema nijedne izmene."
 
 #: web/templates/web/rules/rule.html:143
 msgid ""
-"Значение приходит из правил страны. Первая же версия ниже станет "
+"Значение приходит из правил страны. Первая же новая версия станет "
 "переопределением — на том уровне и с той даты, которые вы укажете."
 msgstr ""
-"Vrednost dolazi iz pravila zemlje. Prva verzija ispod postaje izmena — na "
+"Vrednost dolazi iz pravila zemlje. Prva nova verzija postaje izmena — na "
 "nivou i od datuma koji navedete."
 
 #: web/templates/web/rules/rule.html:146
@@ -8581,6 +8581,22 @@ msgstr "Ko menja"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Попытки выйти за рамку"
 msgstr "Pokušaji izlaska iz okvira"
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "← К правилу"
+msgstr "← Na pravilo"
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Значения, которые рамка страны не пропустила. Свежие сверху."
+msgstr "Vrednosti koje okvir zemlje nije propustio. Najnovije na vrhu."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Попыток не было."
+msgstr "Pokušaja nije bilo."
+
+#: web/templates/web/rules/rule_attempts.html
+msgid "Никто не пробовал поставить этому правилу значение за рамкой страны."
+msgstr "Niko nije pokušao da ovom pravilu postavi vrednost izvan okvira zemlje."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Поставить можно столько же или больше."

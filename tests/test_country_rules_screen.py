@@ -109,7 +109,7 @@ def country_rule(path: str, when: date):
 
 def post_country(client, path: str, *, value: str, valid_from: str):
     return client.post(
-        f"/rules/{path}/",
+        f"/rules/{path}/new/",
         {"value": value, "valid_from": valid_from, "level": "country"},
     )
 
@@ -137,7 +137,27 @@ def test_the_partner_is_told_who_keeps_the_country_rules(client):
     login_as(client, "admin")
     html = body(client.get(f"/rules/{NIGHT_PERCENT}/"))
     assert "администратор платформы" in html, html[:900]
-    assert "Завести версию правил страны" not in html, "форма страны показана не тому"
+    # Форма страны живёт на странице новой версии (T227) — там её и ищем.
+    form = body(client.get(f"/rules/{NIGHT_PERCENT}/new/"))
+    assert 'name="valid_from"' in form, "страница новой версии без формы вовсе"
+    assert "Завести версию правил страны" not in form, "форма страны показана не тому"
+    client.post("/logout/")
+
+
+def test_the_platform_admin_gets_the_country_form_on_the_new_version_page(
+    client, platform_admin,
+):
+    """Кому можно — форма правил страны на странице новой версии, а не на карточке.
+
+    Карточка только читается (T227, D081): форма, оставшаяся на ней, значила
+    бы две функции на одной странице, а пропавшая совсем — что правило страны
+    с экрана больше не правится.
+    """
+    login_as(client, "admin")
+    card = body(client.get(f"/rules/{NIGHT_PERCENT}/"))
+    assert "Завести версию правил страны" not in card, "форма страны осталась на карточке"
+    form = body(client.get(f"/rules/{NIGHT_PERCENT}/new/"))
+    assert "Завести версию правил страны" in form, "администратору платформы формы страны нет"
     client.post("/logout/")
 
 
@@ -246,7 +266,7 @@ def test_the_name_of_a_country_rule_is_not_edited_here(
     answer = post_country(client, NIGHT_TITLE, value="Ночь", valid_from="2026-09-01")
     assert answer.status_code == 400, answer.status_code
     assert "на всех языках сразу" in body(answer)
-    html = body(client.get(f"/rules/{NIGHT_TITLE}/"))
+    html = body(client.get(f"/rules/{NIGHT_TITLE}/new/"))
     assert "Завести версию правил страны" not in html, "форма подписи всё-таки показана"
     client.post("/logout/")
     assert sql.execute("select count(*) from rule_presets").fetchone()[0] == 1
