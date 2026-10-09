@@ -1,0 +1,16 @@
+// Фронт MAXIMUS на Cloudflare (app). Деплой: npx wrangler deploy -c wrangler.app.jsonc
+// Ключ: npx wrangler secret put FRONT_KEY -c wrangler.app.jsonc (тот же, что в
+// /srv/edge/sites/maximus-front.snippet на VPS). Устройство — src/index.js.
+{
+  "name": "maximus",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  // Туннель до Caddy на VPS (VPC-сервис vps-edge-caddy, общий с decimus и meridius).
+  "vpc_services": [
+    { "binding": "EDGE", "service_id": "01a11a74-ba20-7ea3-a9c1-581681d0c341" },
+  ],
+  // Внутреннее имя сайта в Caddy (vps-infra edge/sites/maximus.caddy). В DNS его
+  // нет: снаружи до продукта можно дойти только через этот Worker.
+  "vars": { "ORIGIN_HOST": "maximus.vps.internal" },
+}
