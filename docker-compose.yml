@@ -32,6 +32,13 @@ x-app-env: &app-env
   DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-config.settings}
   DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
   DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+  # Работа за обратным прокси с TLS (T161). До переезда на VPS эта пара доезжала
+  # только до демо: продукт наружу не публиковался, и разница была не видна.
+  # За Caddy и фронтом Cloudflare без неё вход в продукт отвечает 403 на верный
+  # пароль — тот же дефект, что был у DEV_LOGIN: значение есть в .env, а до
+  # контейнера не доходит.
+  CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS-}
+  BEHIND_TLS_PROXY: ${BEHIND_TLS_PROXY-}
   # Вход-заглушка на время стройки. Переменную обязательно передавать в
   # контейнер: без этой строки `DEV_LOGIN=0` в .env не доезжал до приложения,
   # умолчание в настройках включало заглушку обратно, и на площадке любой
