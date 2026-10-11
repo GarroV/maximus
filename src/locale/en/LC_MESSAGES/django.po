@@ -5314,6 +5314,10 @@ msgstr ""
 msgid "Какую работу он снимает:"
 msgstr "What work it takes off your hands:"
 
+#: web/templates/web/guide.html
+msgid "Разделы продукта — так они называются в левой панели после входа:"
+msgstr "The product's sections, named as they appear in the left panel after you log in:"
+
 #: web/templates/web/guide.html:34
 msgid "Повторный ввод."
 msgstr "Re-entering data."

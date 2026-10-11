@@ -197,4 +197,22 @@ def role_cards() -> list[dict]:
 
 def page(request):
     """«Как это работает». Ни одного запроса к базе — страница открыта до входа."""
-    return render(request, "web/guide.html", {"roles": role_cards(), "steps": STEPS})
+    return render(request, "web/guide.html", {
+        "roles": role_cards(), "steps": STEPS, "areas": section_areas(),
+    })
+
+
+def section_areas() -> list[dict]:
+    """Разделы продукта по областям — из того же словаря, что и левая панель.
+
+    До входа панель разделов не показывает (гостю каждый из них ответил бы
+    формой входа), и гайд остаётся единственным местом, где видно, из чего
+    продукт состоит. Список берётся из `web.navigation`, а не пишется руками:
+    переименуют раздел — гайд назовёт его новым именем сам.
+    """
+    from .navigation import GROUPS
+
+    return [
+        {"title": group.title, "items": [item.title for item in group.items]}
+        for group in GROUPS
+    ]
