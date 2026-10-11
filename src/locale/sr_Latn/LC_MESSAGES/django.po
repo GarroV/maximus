@@ -5222,6 +5222,10 @@ msgstr ""
 msgid "Какую работу он снимает:"
 msgstr "Koji posao preuzima na sebe:"
 
+#: web/templates/web/guide.html
+msgid "Разделы продукта — так они называются в левой панели после входа:"
+msgstr "Odeljci proizvoda — tako se zovu u levom panelu posle prijave:"
+
 #: web/templates/web/guide.html:34
 msgid "Повторный ввод."
 msgstr "Ponovni unos."
