@@ -225,3 +225,12 @@ nav.tools {
   margin: 0 0 16px; font-size: var(--fs-dense);
 }
 nav.tools .hint { color: var(--ink-2); font-size: var(--fs-meta); }
+
+/* Карточка точки на узком экране (T231, находка T223 #298): подписи «17 чел.» и
+   «часы открыты» не рвутся посреди, а карточка переносит кнопку на свою строку. */
+section.units .unit { flex-wrap: wrap; }
+section.units .unit .hint, section.units .unit-state { white-space: nowrap; }
+@media (max-width: 600px) {
+  section.units { flex-direction: column; }
+  section.units .unit { width: 100%; box-sizing: border-box; }
+}

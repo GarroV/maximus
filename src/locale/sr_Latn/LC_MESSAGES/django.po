@@ -9414,3 +9414,7 @@ msgstr "Nema šta da se zatvori: za ovaj mesec evidencija sati nema nijedan red 
 #: timesheets/templates/timesheets/grid.html
 msgid "Привычная таблица партнёра — второй путь ввода часов рядом с сеткой. Колонки подбираются сами; что не распознано, попадёт в отчёт."
 msgstr "Partnerova uobičajena tabela je drugi način unosa sati pored mreže. Kolone se prepoznaju same; ono što nije prepoznato ulazi u izveštaj."
+
+#: timesheets/templates/timesheets/close.html
+msgid "Показаны только ваши точки."
+msgstr "Prikazani su samo vaši objekti."
