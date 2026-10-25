@@ -567,14 +567,16 @@ def manager_manages(sql):
     обратно, что бы ни случилось с тестом.
     """
     sql.execute(
-        "update roles set permissions = permissions || '[\"directory.manage\", \"staff.manage\", \"terms.manage\"]'::jsonb "
+        "update roles set permissions = permissions"
+        " || '[\"directory.manage\", \"staff.manage\", \"terms.manage\"]'::jsonb "
         "where code = 'manager' and tenant_id is not null"
     )
     try:
         yield
     finally:
         sql.execute(
-            "update roles set permissions = permissions - 'directory.manage' - 'staff.manage' - 'terms.manage' "
+            "update roles set permissions = permissions"
+            " - 'directory.manage' - 'staff.manage' - 'terms.manage' "
             "where code = 'manager' and tenant_id is not null"
         )
 

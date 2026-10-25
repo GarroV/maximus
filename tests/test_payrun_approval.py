@@ -278,9 +278,12 @@ def test_approval_without_the_right_is_refused_past_the_interface(client, clean_
     assert payrun_status(clean_payruns) == "calculated"
 
 
+# Откатывает администратор (T236, эталон «Роли и права»): у директора и
+# бухгалтера права отката по умолчанию больше нет.
 def test_reopening_without_a_reason_is_refused_by_the_page(client, clean_payruns):
     url = calculated_period(client, clean_payruns)
     client.post(url + "approve/", follow=True)
+    login_as(client, "admin")
 
     response = client.post(url + "reopen/", {"reason": "   "}, follow=True)
     assert response.status_code == 400
@@ -291,6 +294,7 @@ def test_reopening_without_a_reason_is_refused_by_the_page(client, clean_payruns
 def test_reopening_shows_the_reason_and_the_author_in_the_history(client, clean_payruns):
     url = calculated_period(client, clean_payruns)
     client.post(url + "approve/", follow=True)
+    login_as(client, "admin")
 
     response = client.post(url + "reopen/", {"reason": REASON}, follow=True)
     assert response.status_code == 200
@@ -299,7 +303,7 @@ def test_reopening_shows_the_reason_and_the_author_in_the_history(client, clean_
     shown = history_block(body(response))
     assert REASON in shown
     # Автор — тот, кто нажал: в сиде имя учётки равно названию роли.
-    assert "Оперативный директор" in shown
+    assert "Администратор сети" in shown
     assert "Открыт заново" in shown
 
 
@@ -307,6 +311,7 @@ def test_a_reopened_period_is_not_approved_again_without_a_recalculation(client,
     """Открыли — пересчитайте. Иначе утверждение накрыло бы старые числа."""
     url = calculated_period(client, clean_payruns)
     client.post(url + "approve/", follow=True)
+    login_as(client, "admin")
     client.post(url + "reopen/", {"reason": REASON}, follow=True)
 
     page = body(client.get(url))

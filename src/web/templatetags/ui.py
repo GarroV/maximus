@@ -231,6 +231,7 @@ def role_badge(title):
         "admin": "role--admin",
         "director": "role--ops",
         "manager": "role--manager",
+        "regional_manager": "role--manager",
     }
     css = known.get(getattr(title, "code", ""), "")
     return format_html('<span class="role {}">{}</span>', css, title)

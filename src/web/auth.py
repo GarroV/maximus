@@ -59,7 +59,7 @@ class DevUser:
     code: str
     seeded_title: str
     ledgers: tuple[str, ...]
-    unit: str | None
+    units: tuple[str, ...]
 
     @property
     def username(self) -> str:
@@ -89,7 +89,7 @@ DEV_USERS: dict[str, DevUser] = {
         code=role.code,
         seeded_title=role.title,
         ledgers=tuple(role.ledgers),
-        unit=role.unit,
+        units=tuple(role.units),
     )
     for role in ROLES
 }

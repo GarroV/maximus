@@ -1,0 +1,134 @@
+"""Право видеть ведомость и роль регионального управляющего (T236, эталон «Роли и права»).
+
+**`payroll.view` — «Видеть ведомость и суммы расчёта».** До сих пор суммы
+расчёта видел каждый, кого завели к партнёру: ведомость резали только регистры
+и точки. Эталон делает это отдельной строкой и не даёт её управляющему региона
+— «больше точек — не значит больше денег». Без права такую роль не настроить
+вовсе.
+
+**Никто ничего не теряет.** Право получает каждая роль, которая уже есть в
+базе, — и в наборе, и в снимке формы (`shipped_shape`), тем же приёмом, что в
+`0274`: доставка форм (`core/role_delivery.py`) сравнивает базу со снимком, и
+роль с выросшим набором при прежнем снимке приняла бы за правленную партнёром.
+
+**Стена — в политике, а не в экране.** На `pay_components` и
+`payslip_totals` встаёт сужающая (`as restrictive`) политика чтения: строки
+видит тот, у кого есть `payroll.view` — или право, которое без чтения сумм
+невозможно исполнить: расчёт (`insert … returning` расчёта проходит через
+политики чтения), утверждение (проводка в P&L читает компоненты) и перенос
+разницы за закрытый месяц. Разрешающей её сделать нельзя: разрешающие
+политики складываются через ИЛИ и не сужают ничего (правило 2 блока).
+
+**Роль регионального управляющего** заводится каждому уже поднятому партнёру:
+доставка форм правит существующие роли, но новых не заводит. Значения —
+снимком на момент миграции, а не импортом из `core.roles`: код уходит вперёд,
+миграция остаётся прежней.
+
+**Проверка в конце** — как в `0230` и `0274`: `update` под политиками меняет
+ноль строк молча, поэтому проверяется результат, а не оператор.
+"""
+from django.db import migrations
+
+VIEW = "'[\"payroll.view\"]'::jsonb"
+
+GRANT = f"""
+update roles
+   set permissions = permissions || {VIEW}
+ where not permissions ? 'payroll.view';
+
+update roles
+   set shipped_shape = jsonb_set(
+           shipped_shape, '{{permissions}}',
+           (shipped_shape -> 'permissions') || {VIEW})
+ where jsonb_typeof(shipped_shape -> 'permissions') = 'array'
+   and not ((shipped_shape -> 'permissions') ? 'payroll.view');
+
+do $$
+declare
+    stuck int;
+begin
+    select count(*) into stuck from roles where not permissions ? 'payroll.view';
+    if stuck > 0 then
+        raise exception
+            'право видеть ведомость не доехало до % ролей: строки отрезаны политиками',
+            stuck;
+    end if;
+end $$;
+"""
+
+REVOKE = """
+update roles set permissions = permissions - 'payroll.view';
+update roles
+   set shipped_shape = jsonb_set(
+           shipped_shape, '{permissions}', (shipped_shape -> 'permissions') - 'payroll.view')
+ where jsonb_typeof(shipped_shape -> 'permissions') = 'array';
+"""
+
+# Кто видит суммы расчёта: право смотреть — или право, которое без чтения сумм
+# не исполнить (см. шапку).
+SEES_SUMS = """(
+    app_has_permission(tenant_id, 'payroll.view')
+    or app_has_permission(tenant_id, 'payrun.calculate')
+    or app_has_permission(tenant_id, 'period.approve')
+    or app_has_permission(tenant_id, 'retro.post')
+)"""
+
+POLICIES = f"""
+create policy payroll_view on pay_components as restrictive for select using {SEES_SUMS};
+create policy payroll_view on payslip_totals as restrictive for select using {SEES_SUMS};
+"""
+
+DROP_POLICIES = """
+drop policy if exists payroll_view on pay_components;
+drop policy if exists payroll_view on payslip_totals;
+"""
+
+REGIONAL = """
+insert into roles (tenant_id, code, title, permissions, permission_states,
+                   visible_ledgers, shipped_shape)
+select t.id, 'regional_manager', 'Региональный управляющий',
+       '["timesheet.edit", "unit.close"]'::jsonb,
+       '{"rules.manage": "never", "roles.manage": "never"}'::jsonb,
+       '{official,supplementary}'::ledger[],
+       '{"visible_ledgers": ["official", "supplementary"],
+         "permissions": ["timesheet.edit", "unit.close"]}'::jsonb
+  from tenants t
+ where not exists (
+           select 1 from roles r where r.tenant_id = t.id and r.code = 'regional_manager'
+       );
+
+do $$
+declare
+    missing int;
+begin
+    select count(*) into missing
+      from tenants t
+     where not exists (
+               select 1 from roles r where r.tenant_id = t.id and r.code = 'regional_manager'
+           );
+    if missing > 0 then
+        raise exception
+            'роль регионального управляющего не заведена у % партнёров: '
+            'строки отрезаны политиками', missing;
+    end if;
+end $$;
+"""
+
+DROP_REGIONAL = """
+delete from roles r
+ where r.code = 'regional_manager'
+   and not exists (select 1 from memberships m where m.role_id = r.id);
+"""
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("core", "0274_staff_and_terms_rights"),
+    ]
+
+    operations = [
+        migrations.RunSQL(GRANT, REVOKE),
+        migrations.RunSQL(POLICIES, DROP_POLICIES),
+        migrations.RunSQL(REGIONAL, DROP_REGIONAL),
+    ]

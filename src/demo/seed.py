@@ -96,6 +96,7 @@ DEMO_LANGUAGE = "en"
 ROLE_TITLES = {
     "director": "Operations director",
     "accountant": "Accountant",
+    "regional_manager": "Regional manager (Novi Sad)",
     "manager": "Unit manager (Novi Sad Bulevar)",
     "admin": "Network administrator",
 }
@@ -104,7 +105,7 @@ ROLES = [
     (
         code, ROLE_TITLES[code],
         list(ROLE_SHAPES[code].ledgers),
-        ROLE_SHAPES[code].unit,
+        ROLE_SHAPES[code].units,
         list(ROLE_SHAPES[code].permissions),
     )
     for code in ROLE_ORDER
@@ -384,7 +385,7 @@ def _groups(tenant, items: dict) -> dict[str, models.EmployeeGroup]:
 
 def _roles_and_users(tenant) -> None:
     units = {u.code: u for u in models.Unit.objects.filter(tenant=tenant)}
-    for code, title, ledgers, unit, permissions in ROLES:
+    for code, title, ledgers, unit_codes, permissions in ROLES:
         role = models.Role.objects.create(
             id=det_id("role", code), tenant=tenant, code=code, title=title,
             visible_ledgers=list(ledgers), permissions=list(permissions),
@@ -403,7 +404,7 @@ def _roles_and_users(tenant) -> None:
         models.Membership.objects.create(
             id=det_id("membership", code), tenant=tenant,
             user_id=user.pk, role=role,
-            unit_ids=[units[unit].id] if unit else None,
+            unit_ids=[units[c].id for c in unit_codes] if unit_codes else None,
         )
 
     # Простая учётка на случай, когда человек вышел из демо и попал на форму

@@ -12,6 +12,7 @@ from __future__ import annotations
 import pytest
 
 from conftest import body, login_as
+from core.roles import ROLE_ORDER
 
 pytestmark = pytest.mark.usefixtures("web_env")
 
@@ -107,7 +108,7 @@ def test_creating_a_space_gives_a_working_partner(client, platform_admin, spaces
 
     tenant = Tenant.objects.filter(code="hr-dodo").first()
     assert tenant is not None, "пространство не появилось"
-    assert Role.objects.filter(tenant=tenant).count() == 4, (
+    assert Role.objects.filter(tenant=tenant).count() == len(ROLE_ORDER), (
         "у пространства должны быть все роли продукта — иначе человека некуда пустить"
     )
     assert Membership.objects.filter(tenant=tenant).count() == 1
@@ -368,7 +369,7 @@ def test_platform_grants_a_unit_role_only_with_a_unit(client, platform_admin, sp
         "action": "grant", "user_id": str(person.pk), "role_id": str(manager.pk),
     })
     assert refused.status_code == 400
-    assert "выберите её" in body(refused)
+    assert "отметьте их" in body(refused)
     assert not Membership.objects.filter(user_id=person.pk).exists()
 
     client.post(f"/platform/{tenant.pk}/roles/", {

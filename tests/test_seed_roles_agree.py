@@ -28,7 +28,7 @@ def shapes_of_dev() -> dict:
     from core.management.commands.seed_dev import ROLES
 
     return {
-        role.code: (tuple(role.ledgers), role.unit, tuple(sorted(role.permissions)))
+        role.code: (tuple(role.ledgers), tuple(role.units), tuple(sorted(role.permissions)))
         for role in ROLES
     }
 
@@ -37,8 +37,8 @@ def shapes_of_demo() -> dict:
     from demo.seed import ROLES
 
     return {
-        code: (tuple(ledgers), unit, tuple(sorted(permissions)))
-        for code, _title, ledgers, unit, permissions in ROLES
+        code: (tuple(ledgers), tuple(units), tuple(sorted(permissions)))
+        for code, _title, ledgers, units, permissions in ROLES
     }
 
 
@@ -61,7 +61,7 @@ def test_the_roles_come_from_one_place():
     from core.roles import ROLE_SHAPES
 
     from_source = {
-        code: (shape.ledgers, shape.unit, tuple(sorted(shape.permissions)))
+        code: (shape.ledgers, tuple(shape.units), tuple(sorted(shape.permissions)))
         for code, shape in ROLE_SHAPES.items()
     }
     assert shapes_of_dev() == from_source
