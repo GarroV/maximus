@@ -66,62 +66,24 @@
 {% if notice %}{% notice "alert" %}{{ notice }}{% endnotice %}{% endif %}
 
 {% comment %}
-Закрытие часов по точке (T022). Точка закрывается отдельно от соседних: смысл
-действия в том, чтобы управляющий не ждал всю сеть, а спорная точка не держала
-остальные. Панель строится из точек, показанных на самой сетке: кнопка, которой
-нечего закрывать, читалась бы как поломка.
+Загрузка таблицы и закрытие часов по точкам — не часть сетки, у каждой своя
+страница (T231, D081/D087). Сетка на первом экране остаётся главным, а входы в
+две соседние функции видны рядом с ней: две ссылки, а не форма и ряд карточек,
+которые на телефоне занимали весь первый экран.
 {% endcomment %}
 {% if units %}
-<section class="units">
-  {% for unit in units %}
-    <div class="unit {% if unit.closed %}is-closed{% endif %}">
-      <span class="unit-code">{{ unit.code }}</span>
-      <span class="hint">{% blocktranslate with unit_count=unit.rows %}{{ unit_count }} чел.{% endblocktranslate %}</span>
-      {% if unit.closed %}
-        {% comment %}
-        Дата+время закрытия точки — формат языка страницы, а не жёсткий русский
-        (T103). `DATETIME_FORMAT`, а не `SHORT_DATETIME_FORMAT`: рядом на той же
-        странице период показывает `calculated_at` без фильтра (см.
-        web/period.html) — Django локализует datetime сам через полный
-        `DATETIME_FORMAT`, и вторая дата не должна выглядеть третьим вариантом.
-        `unit.closed_at` — datetime в UTC (models.py), фильтр `date` сам
-        переводит его в текущий часовой пояс перед форматированием.
-        {% endcomment %}
-        {% with closed_at=unit.closed_at|date:"DATETIME_FORMAT" %}<span class="unit-state closed">{% blocktranslate %}часы закрыты {{ closed_at }}{% endblocktranslate %}</span>{% endwith %}
-        {% translate "Открыть заново" as reopen_label %}
-        {% url 'timesheet-reopen' period.id as reopen_unit_url %}
-        {% include "web/components/action.html" with allowed=can_close url=reopen_unit_url label=reopen_label button_class="secondary" hidden_name="unit" hidden_value=unit.unit_id denied="" note="" inline=True reason_name="" primary=False %}
-      {% else %}
-        <span class="unit-state">{% translate "часы открыты" %}</span>
-        {% translate "Закрыть часы точки" as close_label %}
-        {% url 'timesheet-close' period.id as close_unit_url %}
-        {% include "web/components/action.html" with allowed=can_close url=close_unit_url label=close_label hidden_name="unit" hidden_value=unit.unit_id denied="" note="" inline=True reason_name="" primary=False button_class="" %}
-      {% endif %}
-    </div>
-  {% endfor %}
-  {% comment %}
-  Права нет — кнопки нет, но молчать об этом нельзя: исчезнувшее без объяснения
-  действие читается как поломка продукта, а не как запрет (T064).
-  {% endcomment %}
-  {% if not can_close %}<p class="note">{{ close_denied }}</p>{% endif %}
-</section>
-{% endif %}
-
-{% if can_edit %}
-{% comment %}
-Загрузка привычной таблицы — второй равноправный путь ввода часов рядом с
-сеткой (контракт блока), поэтому форма стоит здесь, а не на отдельном экране,
-куда надо догадаться зайти. Обычная форма без htmx: отчёт бывает длинным, его
-место — целая страница, а не уголок поверх 35 строк.
-{% endcomment %}
-<form class="import" method="post" enctype="multipart/form-data"
-      action="{% url 'timesheet-import' period.id %}">
-  {% csrf_token %}
-  {% translate "Загрузить таблицу партнёра (.xlsx)" as import_field_label %}
-  {% include "web/components/field.html" with id="table" name="table" type="file" label=import_field_label accept=".xlsx" %}
-  <button type="submit">{% translate "Загрузить" %}</button>
-  <span class="hint">{% translate "Повторная загрузка того же файла ничего не изменит." %}</span>
-</form>
+<nav class="tools" aria-label="{% translate "Что ещё можно сделать с часами" %}">
+  {% if can_edit %}
+  <a class="tool" href="{% url 'timesheet-import' period.id %}">{% translate "Загрузить таблицу (.xlsx)" %}</a>
+  {% endif %}
+  <a class="tool" href="{% url 'timesheet-close' period.id %}">{% translate "Закрытие часов по точкам" %}</a>
+  {% comment %}Сводка считается из тех же состояний, что страница закрытия.{% endcomment %}
+  <span class="hint">{% blocktranslate with open_count=open_count total_count=units|length %}часы открыты на {{ open_count }} из {{ total_count }} точек{% endblocktranslate %}</span>
+</nav>
+{% elif can_edit %}
+<nav class="tools">
+  <a class="tool" href="{% url 'timesheet-import' period.id %}">{% translate "Загрузить таблицу (.xlsx)" %}</a>
+</nav>
 {% endif %}
 
 {% comment %}
@@ -147,7 +109,7 @@
       появляются вместе с ними.{% endblocktranslate %}
     {% elif can_edit %}
       {% blocktranslate %}Строки табеля появляются вместе с сотрудниками месяца. Заведите их в
-      справочнике или загрузите таблицу партнёра формой выше — она заводит
+      справочнике или загрузите таблицу партнёра (ссылка над сеткой) — она заводит
       строки табеля сама.{% endblocktranslate %}
     {% else %}
       {% blocktranslate %}За этот месяц не заведено ни одного сотрудника, поэтому и часов пока нет.

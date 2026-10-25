@@ -1,0 +1,28 @@
+{% extends "web/base.html" %}{% load static ui i18n %}{% comment %}
+Загрузка таблицы партнёра — своя страница (T231, раньше форма стояла над сеткой).
+Отчёт о загрузке показывает `import_report.html` на этом же адресе.
+{% endcomment %}
+
+{% block title %}{% blocktranslate %}Загрузка таблицы · {{ title }}{% endblocktranslate %}{% endblock %}
+
+{% block head %}<link rel="stylesheet" href="{% static 'timesheets/grid.css' %}">{% endblock %}
+
+{% block content %}
+<h1>{% blocktranslate %}Загрузка таблицы · {{ title }}{% endblocktranslate %}</h1>
+<p class="back"><a href="{% url 'timesheets' period.id %}">{% translate "← К табелю" %}</a></p>
+
+<p class="sub">{% translate "Привычная таблица партнёра — второй путь ввода часов рядом с сеткой. Колонки подбираются сами; что не распознано, попадёт в отчёт." %}</p>
+
+{% if can_edit %}
+<form class="import" method="post" enctype="multipart/form-data"
+      action="{% url 'timesheet-import' period.id %}">
+  {% csrf_token %}
+  {% translate "Загрузить таблицу партнёра (.xlsx)" as import_field_label %}
+  {% include "web/components/field.html" with id="table" name="table" type="file" label=import_field_label accept=".xlsx" %}
+  <button type="submit">{% translate "Загрузить" %}</button>
+  <span class="hint">{% translate "Повторная загрузка того же файла ничего не изменит." %}</span>
+</form>
+{% else %}
+<p class="note">{{ edit_denied }}</p>
+{% endif %}
+{% endblock %}

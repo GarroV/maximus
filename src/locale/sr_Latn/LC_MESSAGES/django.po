@@ -855,12 +855,12 @@ msgstr ""
 #: timesheets/templates/timesheets/grid.html:153
 msgid ""
 "Строки табеля появляются вместе с сотрудниками месяца. Заведите их в\n"
-"      справочнике или загрузите таблицу партнёра формой выше — она заводит\n"
+"      справочнике или загрузите таблицу партнёра (ссылка над сеткой) — она заводит\n"
 "      строки табеля сама."
 msgstr ""
 "Redovi evidencije sati se pojavljuju zajedno sa zaposlenima za mesec. "
 "Upišite ih u\n"
-"      imenik ili učitajte partnerovu tabelu pomoću forme iznad — ona sama\n"
+"      imenik ili učitajte partnerovu tabelu pomoću veze iznad mreže — ona sama\n"
 "      kreira redove evidencije sati."
 
 #: timesheets/templates/timesheets/grid.html:157
@@ -9374,3 +9374,47 @@ msgid ""
 "Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из "
 "пачки не записано — откройте инбокс заново."
 msgstr "Red „%(what)s“ nije raspoređen: već je raspoređen ili razvrstan. Ništa iz grupe nije sačuvano — ponovo otvorite prijemno sanduče."
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Что ещё можно сделать с часами"
+msgstr "Šta još možete uraditi sa satima"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Загрузить таблицу (.xlsx)"
+msgstr "Učitaj tabelu (.xlsx)"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Закрытие часов по точкам"
+msgstr "Zatvaranje sati po objektima"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "часы открыты на %(open_count)s из %(total_count)s точек"
+msgstr "sati su otvoreni na %(open_count)s od %(total_count)s objekata"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Закрытие часов · %(title)s"
+msgstr "Zatvaranje sati · %(title)s"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "← К табелю"
+msgstr "← Ka evidenciji sati"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Точка закрывается отдельно от соседних: управляющий не ждёт всю сеть, а спорная точка не держит остальные."
+msgstr "Objekat se zatvara odvojeno od susednih: upravnik ne čeka celu mrežu, a sporni objekat ne zadržava ostale."
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Точек в табеле нет"
+msgstr "Nema objekata u evidenciji sati"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Закрывать нечего: за этот месяц в табеле нет ни одной строки на вашей точке."
+msgstr "Nema šta da se zatvori: za ovaj mesec evidencija sati nema nijedan red na vašem objektu."
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Привычная таблица партнёра — второй путь ввода часов рядом с сеткой. Колонки подбираются сами; что не распознано, попадёт в отчёт."
+msgstr "Partnerova uobičajena tabela je drugi način unosa sati pored mreže. Kolone se prepoznaju same; ono što nije prepoznato ulazi u izveštaj."
+
+#: timesheets/templates/timesheets/close.html
+msgid "Показаны только ваши точки."
+msgstr "Prikazani su samo vaši objekti."
