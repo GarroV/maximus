@@ -216,3 +216,12 @@ section.units .note { margin: 0; flex-basis: 100%; }
    правило стоит в листе табеля, а не в общем. */
 section.units button.secondary { color: var(--ink-2); }
 section.units button.secondary:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Входы в загрузку и закрытие часов над сеткой (T231). Одна тихая строка:
+   это соседние функции, а не главное на экране, и на телефоне они не должны
+   отодвигать сетку — ссылки переносятся, а не растут в карточки. */
+nav.tools {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px;
+  margin: 0 0 16px; font-size: var(--fs-dense);
+}
+nav.tools .hint { color: var(--ink-2); font-size: var(--fs-meta); }

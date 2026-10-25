@@ -442,6 +442,13 @@ def first_cell(html: str) -> tuple[str, str]:
     return match.group(1), match.group(2)
 
 
+def close_page(client, url: str) -> str:
+    """Страница закрытия часов — после T231 точки живут на ней, а не на сетке."""
+    response = client.get(f"{url}close/")
+    assert response.status_code == 200, response.content.decode()[:300]
+    return body(response)
+
+
 def closable_unit(html: str) -> str:
     """Точка, которую экран предлагает закрыть — так же, как её берёт человек."""
     match = re.search(r'name="unit" value="([0-9a-f-]{36})"', html)
@@ -452,13 +459,13 @@ def closable_unit(html: str) -> str:
 def test_manager_closes_own_unit_from_the_screen(client, clean_closures):
     login_as(client, "manager")
     url = grid_url(client)
-    html = body(client.get(url))
-    unit = closable_unit(html)
+    html = close_page(client, url)
+    unit = closable_unit(close_page(client, url))
 
     response = client.post(f"{url}close/", {"unit": unit})
     assert response.status_code in (200, 302)
 
-    after = body(client.get(url, follow=True))
+    after = body(client.get(f"{url}close/", follow=True))
     assert "закрыт" in after.lower()
 
 
@@ -468,7 +475,7 @@ def test_closed_unit_refuses_the_cell_and_says_why(client, clean_closures, perio
     html = body(client.get(url))
     row_id, kind = first_cell(html)
     client.post(f"{url}cell/", {"row": row_id, "kind": kind, "hours": "12.00"})
-    client.post(f"{url}close/", {"unit": closable_unit(html)})
+    client.post(f"{url}close/", {"unit": closable_unit(close_page(client, url))})
 
     response = client.post(f"{url}cell/", {"row": row_id, "kind": kind, "hours": "77.00"})
     assert response.status_code == 409
@@ -492,7 +499,7 @@ def test_closing_one_unit_does_not_block_the_others_on_screen(
     login_as(client, "manager")
     url = grid_url(client)
     manager_html = body(client.get(url))
-    client.post(f"{url}close/", {"unit": closable_unit(manager_html)})
+    client.post(f"{url}close/", {"unit": closable_unit(close_page(client, url))})
 
     own = set(
         Membership.objects.get(user_id=User.objects.get(username="manager").pk).unit_ids
@@ -524,7 +531,7 @@ def test_role_without_the_right_gets_no_button_and_no_action(
     """
     login_as(client, "admin")
     url = grid_url(client)
-    html = body(client.get(url))
+    html = close_page(client, url)
     assert 'name="unit"' not in html
     assert "не входит в права вашей роли" in html
 
@@ -545,7 +552,7 @@ def test_manager_is_offered_only_his_own_unit(client, clean_closures):
     from core.models import Membership, Unit, User
 
     login_as(client, "manager")
-    html = body(client.get(grid_url(client)))
+    html = close_page(client, grid_url(client))
     offered = re.findall(r'name="unit" value="([0-9a-f-]{36})"', html)
 
     own = Membership.objects.get(
@@ -567,7 +574,7 @@ def test_director_closes_and_reopens_any_unit_from_the_screen(client, clean_clos
 
     login_as(client, "director")
     url = grid_url(client)
-    html = body(client.get(url))
+    html = close_page(client, url)
     offered = re.findall(r'name="unit" value="([0-9a-f-]{36})"', html)
     assert len(offered) > 1, f"директору предложена не вся сеть: {offered}"
 
@@ -591,7 +598,7 @@ def test_closed_rows_lose_their_input_fields(client, clean_closures):
     url = grid_url(client)
     html = body(client.get(url))
     row_id, _ = first_cell(html)
-    client.post(f"{url}close/", {"unit": closable_unit(html)})
+    client.post(f"{url}close/", {"unit": closable_unit(close_page(client, url))})
 
     after = body(client.get(url))
     assert f'data-row="{row_id}"' not in after
@@ -602,10 +609,55 @@ def test_reopening_from_the_screen_restores_editing(client, clean_closures, peri
     url = grid_url(client)
     html = body(client.get(url))
     row_id, kind = first_cell(html)
-    unit = closable_unit(html)
+    unit = closable_unit(close_page(client, url))
 
     client.post(f"{url}close/", {"unit": unit})
     client.post(f"{url}reopen/", {"unit": unit})
 
     response = client.post(f"{url}cell/", {"row": row_id, "kind": kind, "hours": "9.00"})
     assert response.status_code == 200, response.content.decode()[:300]
+
+
+# =============================================================================
+# 3. Разбор экрана (T231): закрытие и загрузка — свои страницы
+# =============================================================================
+
+
+def test_grid_has_no_closing_panel_but_links_to_it(client, clean_closures):
+    """На сетке нет ни кнопок закрытия, ни формы загрузки — только входы в них."""
+    login_as(client, "director")
+    url = grid_url(client)
+    html = body(client.get(url))
+    assert 'name="unit"' not in html
+    assert 'name="table"' not in html
+    assert f'href="{url}close/"' in html
+    assert f'href="{url}import/"' in html
+
+
+def test_manager_cannot_close_a_foreign_unit_from_the_page(client, clean_closures):
+    """Чужую точку управляющий не закроет и в обход страницы: 404, и закрытия нет."""
+    from core.models import Membership, TimesheetClosure, Unit, User
+
+    login_as(client, "manager")
+    url = grid_url(client)
+    own = set(
+        map(str, Membership.objects.get(
+            user_id=User.objects.get(username="manager").pk
+        ).unit_ids or [])
+    )
+    alien = next(
+        str(unit.id) for unit in Unit.objects.filter(tenant__code="rs-dev")
+        if str(unit.id) not in own
+    )
+    response = client.post(f"{url}close/", {"unit": alien})
+    assert response.status_code == 404
+    assert not TimesheetClosure.objects.filter(unit_id=alien).exists()
+    assert alien not in close_page(client, url)
+
+
+def test_close_and_reopen_return_to_the_close_page(client, clean_closures, period_restored):
+    login_as(client, "manager")
+    url = grid_url(client)
+    unit = closable_unit(close_page(client, url))
+    assert client.post(f"{url}close/", {"unit": unit})["Location"] == f"{url}close/"
+    assert client.post(f"{url}reopen/", {"unit": unit})["Location"] == f"{url}close/"
