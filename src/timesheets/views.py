@@ -18,7 +18,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 
 from payrun.errors import PayrunRefused
 from web import permissions
@@ -119,11 +119,9 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
     # о запрете, лишь покинув ячейку: значение уходило на сервер и возвращалось
     # отказом. Проверку в `cell` это не отменяет — она ниже и остаётся.
     denied = permissions.explain(who, permissions.TIMESHEET_EDIT)
-    # То же самое для закрытия часов: кнопки нет — сказано, почему её нет.
-    # Экран, который молча теряет действие, читается как поломка, а не как
-    # запрет (T064).
-    close_denied = permissions.explain(who, permissions.UNIT_CLOSE)
-
+    units = (
+        unit_states(period.tenant_id, period.period, table.rows) if table else []
+    )
     return render(
         request,
         "timesheets/grid.html",
@@ -138,12 +136,10 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
             "limited_to_units": bool(who.unit_ids),
             "can_edit": not denied,
             "edit_denied": denied,
-            "can_close": not close_denied,
-            "close_denied": close_denied,
-            "units": (
-                unit_states(period.tenant_id, period.period, table.rows)
-                if table else []
-            ),
+            # Закрытие и загрузка живут на своих страницах (T231); на сетке от
+            # них — две ссылки и сводка «сколько точек открыто».
+            "units": units,
+            "open_count": sum(1 for unit in units if not unit.closed),
         },
         status=refusal.http_status if refusal else status,
     )
@@ -413,10 +409,19 @@ def insured(request, period_id):
 
 
 @login_required
-@require_POST
+@require_http_methods(["GET", "HEAD", "POST"])
 def close(request, period_id):
-    """Закрыть часы точки за месяц (T022)."""
-    return _switch_closing(request, period_id, closing=True)
+    """Закрытие часов по точкам: страница (GET) и закрытие одной точки (POST, T022).
+
+    Раньше панель точек стояла над сеткой и теснила её (T231). Адрес один на
+    показ и на действие, как у загрузки: обновить страницу после отказа не
+    значит отправить закрытие второй раз, потому что POST всегда редиректит.
+    """
+    if request.method == "POST":
+        return _switch_closing(request, period_id, closing=True)
+    period = find_period(period_id)
+    who = _context(request, period)
+    return _close_page(request, period, who)
 
 
 @login_required
@@ -440,8 +445,8 @@ def _switch_closing(request, period_id, *, closing: bool):
     try:
         permissions.check(who, permissions.UNIT_CLOSE)
     except permissions.PermissionRefused as refusal:
-        return _grid_page(request, period, who, notice=refusal.message,
-                          status=refusal.http_status)
+        return _close_page(request, period, who, notice=refusal.message,
+                           status=refusal.http_status)
 
     wanted = request.POST.get("unit") or ""
     table = build_grid(period.tenant_id, period.period, unit_ids=who.unit_ids)
@@ -461,14 +466,49 @@ def _switch_closing(request, period_id, *, closing: bool):
         period=period.period, actor_id=who.user_id,
     )
     # Редирект, а не отрисовка на месте: после POST обновление страницы не
-    # должно повторять действие.
-    return redirect("timesheets", period_id=period.id)
+    # должно повторять действие. Возвращаем туда, где человек нажал: он
+    # закрывает точки по очереди, и сетка ему для этого не нужна.
+    return redirect("timesheet-close", period_id=period.id)
+
+
+def _close_page(request, period, who, *, notice: str = "", status: int = 200):
+    table, refusal = None, None
+    try:
+        table = build_grid(period.tenant_id, period.period, unit_ids=who.unit_ids)
+    except PayrunRefused as denied:
+        refusal = denied
+    # Права нет — кнопок нет, но сказано, почему их нет: исчезнувшее без
+    # объяснения действие читается как поломка, а не как запрет (T064).
+    close_denied = permissions.explain(who, permissions.UNIT_CLOSE)
+    return render(
+        request,
+        "timesheets/close.html",
+        {
+            "period": period,
+            "title": month_title(period.period),
+            "error": refusal.message if refusal else None,
+            "details": refusal.details if refusal else [],
+            "notice": notice,
+            "limited_to_units": bool(who.unit_ids),
+            "can_close": not close_denied,
+            "close_denied": close_denied,
+            "units": (
+                unit_states(period.tenant_id, period.period, table.rows)
+                if table else []
+            ),
+        },
+        status=refusal.http_status if refusal else status,
+    )
 
 
 @login_required
-@require_POST
+@require_http_methods(["GET", "HEAD", "POST"])
 def import_table(request, period_id):
-    """Загрузка таблицы партнёра и отчёт о ней (T020, T021).
+    """Загрузка таблицы партнёра: форма (GET) и отчёт о загрузке (POST, T020, T021).
+
+    До T231 форма стояла над сеткой, а на этот адрес можно было только
+    отправить файл. Теперь у загрузки своя страница: форма, пояснение и отчёт
+    живут на одном адресе.
 
     Отдельная страница, а не фрагмент на сетке: отчёт бывает длинным (десятки
     находок), и показывать его в углу экрана, поверх 35 строк, значило бы
@@ -479,6 +519,9 @@ def import_table(request, period_id):
     """
     period = find_period(period_id)
     who = _context(request, period)
+
+    if request.method != "POST":
+        return _upload_form(request, period, who)
 
     try:
         permissions.check(who, permissions.TIMESHEET_EDIT)
@@ -521,6 +564,21 @@ def import_table(request, period_id):
         )
 
     return _report(request, period, result=result)
+
+
+def _upload_form(request, period, who):
+    # Нет права — формы нет, но причина названа теми же словами, что на сетке.
+    denied = permissions.explain(who, permissions.TIMESHEET_EDIT)
+    return render(
+        request,
+        "timesheets/import.html",
+        {
+            "period": period,
+            "title": month_title(period.period),
+            "can_edit": not denied,
+            "edit_denied": denied,
+        },
+    )
 
 
 def _report(request, period, *, result=None, error=None, details=(), status=200):

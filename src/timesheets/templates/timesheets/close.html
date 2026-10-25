@@ -1,0 +1,68 @@
+{% extends "web/base.html" %}{% load static timesheet_extras ui i18n %}{% comment %}
+Закрытие часов по точкам — своя страница (T231, раньше панель стояла над сеткой).
+Права и правила закрытия не менялись: страница показывает те же состояния точек
+и те же две кнопки, что стояли на табеле.
+{% endcomment %}
+
+{% block title %}{% blocktranslate %}Закрытие часов · {{ title }}{% endblocktranslate %}{% endblock %}
+
+{% block head %}<link rel="stylesheet" href="{% static 'timesheets/grid.css' %}">{% endblock %}
+
+{% block content %}
+<h1>{% blocktranslate %}Закрытие часов · {{ title }}{% endblocktranslate %}</h1>
+<p class="back"><a href="{% url 'timesheets' period.id %}">{% translate "← К табелю" %}</a></p>
+
+{% if error %}
+{% translate "Табель показать нельзя." as grid_error_title %}
+{% notice "alert" title=grid_error_title %}{{ error }}
+  {% if details %}<div class="details">{{ details|join:", " }}</div>{% endif %}
+{% endnotice %}
+{% else %}
+<p class="sub">
+  {% translate "Точка закрывается отдельно от соседних: управляющий не ждёт всю сеть, а спорная точка не держит остальные." %}
+  {% if limited_to_units %}· {% translate "только ваши точки" %}{% endif %}
+</p>
+
+{% if notice %}{% notice "alert" %}{{ notice }}{% endnotice %}{% endif %}
+
+{% if units %}
+<section class="units">
+  {% for unit in units %}
+    <div class="unit {% if unit.closed %}is-closed{% endif %}">
+      <span class="unit-code">{{ unit.code }}</span>
+      <span class="hint">{% blocktranslate with unit_count=unit.rows %}{{ unit_count }} чел.{% endblocktranslate %}</span>
+      {% if unit.closed %}
+        {% comment %}
+        Дата+время закрытия точки — формат языка страницы, а не жёсткий русский
+        (T103). `DATETIME_FORMAT`, а не `SHORT_DATETIME_FORMAT`: рядом на той же
+        странице период показывает `calculated_at` без фильтра (см.
+        web/period.html) — Django локализует datetime сам через полный
+        `DATETIME_FORMAT`, и вторая дата не должна выглядеть третьим вариантом.
+        `unit.closed_at` — datetime в UTC (models.py), фильтр `date` сам
+        переводит его в текущий часовой пояс перед форматированием.
+        {% endcomment %}
+        {% with closed_at=unit.closed_at|date:"DATETIME_FORMAT" %}<span class="unit-state closed">{% blocktranslate %}часы закрыты {{ closed_at }}{% endblocktranslate %}</span>{% endwith %}
+        {% translate "Открыть заново" as reopen_label %}
+        {% url 'timesheet-reopen' period.id as reopen_unit_url %}
+        {% include "web/components/action.html" with allowed=can_close url=reopen_unit_url label=reopen_label button_class="secondary" hidden_name="unit" hidden_value=unit.unit_id denied="" note="" inline=True reason_name="" primary=False %}
+      {% else %}
+        <span class="unit-state">{% translate "часы открыты" %}</span>
+        {% translate "Закрыть часы точки" as close_label %}
+        {% url 'timesheet-close' period.id as close_unit_url %}
+        {% include "web/components/action.html" with allowed=can_close url=close_unit_url label=close_label hidden_name="unit" hidden_value=unit.unit_id denied="" note="" inline=True reason_name="" primary=False button_class="" %}
+      {% endif %}
+    </div>
+  {% endfor %}
+  {% comment %}
+  Права нет — кнопки нет, но молчать об этом нельзя: исчезнувшее без объяснения
+  действие читается как поломка продукта, а не как запрет (T064).
+  {% endcomment %}
+  {% if not can_close %}<p class="note">{{ close_denied }}</p>{% endif %}
+</section>
+{% endif %}
+{% if not units %}
+  {% translate "Точек в табеле нет" as no_units %}
+  {% notice "empty" title=no_units %}{% translate "Закрывать нечего: за этот месяц в табеле нет ни одной строки на вашей точке." %}{% endnotice %}
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -37,7 +37,7 @@ const ROLES = (process.env.ROLES || "accountant,manager").split(",");
 const WIDTHS = { wide: [1440, 900], tablet: [1024, 1000], narrow: [768, 1000], phone: [375, 812] };
 // Шапка телефона до содержимого — требование сверки по T222 (issue #268).
 const PHONE_HEAD_MAX = 120;
-const SHOTS = new Set(["/timesheets/", "/payroll/sheet/", "/analytics/people/", "/periods/"]);
+const SHOTS = new Set(["/timesheets/", "/timesheets/close/", "/timesheets/import/", "/payroll/sheet/", "/analytics/people/", "/periods/"]);
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function size(w, h) {
@@ -68,6 +68,9 @@ const pages = () => evalIn(`(async () => {
   for (const period of periods) {
     out.add(period);
     out.add('/timesheets/' + period.split('/')[2] + '/');
+    // Закрытие часов и загрузка таблицы — свои страницы табеля (T231).
+    out.add('/timesheets/' + period.split('/')[2] + '/close/');
+    out.add('/timesheets/' + period.split('/')[2] + '/import/');
   }
   out.add('/payroll/sheet/');
   // Вложенные экраны, куда из панели не попасть одним нажатием, но где
