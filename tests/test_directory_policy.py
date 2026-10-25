@@ -290,7 +290,7 @@ def test_the_protection_is_the_policy_and_not_luck(db, rows):
     ничего.
     """
     db.execute("savepoint before_damage")
-    db.execute("drop policy directory_manage_update on employees")
+    db.execute("drop policy staff_manage_update on employees")
     try:
         with as_app_user(db, USER_DIRECTOR) as conn:
             assert conn.execute(

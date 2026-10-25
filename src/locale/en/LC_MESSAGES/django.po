@@ -3659,6 +3659,14 @@ msgstr "Payslip row freeze"
 msgid "Перенос разницы за закрытый месяц"
 msgstr "Posting a difference for a closed month"
 
+#: web/permissions.py
+msgid "Ведение сотрудников"
+msgstr "Staff management"
+
+#: web/permissions.py
+msgid "Ведение ставок и условий найма"
+msgstr "Rates and employment terms management"
+
 #: web/permissions.py:99
 msgid "Ведение справочников"
 msgstr "Directory management"

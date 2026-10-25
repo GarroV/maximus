@@ -174,7 +174,7 @@ def test_creating_an_employee_is_refused_to_the_others_in_words(client, role):
     for method in ("get", "post"):
         answer = getattr(client, method)("/directory/employees/new/", {})
         assert answer.status_code == 403, f"{role} {method}: {answer.status_code}"
-        assert "Ведение справочников" in body(answer), f"{role} {method}: отказ без действия"
+        assert "Ведение сотрудников" in body(answer), f"{role} {method}: отказ без действия"
     client.post("/logout/")
 
 
@@ -567,14 +567,14 @@ def manager_manages(sql):
     обратно, что бы ни случилось с тестом.
     """
     sql.execute(
-        "update roles set permissions = permissions || '[\"directory.manage\"]'::jsonb "
+        "update roles set permissions = permissions || '[\"directory.manage\", \"staff.manage\", \"terms.manage\"]'::jsonb "
         "where code = 'manager' and tenant_id is not null"
     )
     try:
         yield
     finally:
         sql.execute(
-            "update roles set permissions = permissions - 'directory.manage' "
+            "update roles set permissions = permissions - 'directory.manage' - 'staff.manage' - 'terms.manage' "
             "where code = 'manager' and tenant_id is not null"
         )
 

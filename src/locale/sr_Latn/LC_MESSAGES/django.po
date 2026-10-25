@@ -3597,6 +3597,14 @@ msgstr "Zamrzavanje reda obračunske liste"
 msgid "Перенос разницы за закрытый месяц"
 msgstr "Prenos razlike za zatvoreni mesec"
 
+#: web/permissions.py
+msgid "Ведение сотрудников"
+msgstr "Upravljanje zaposlenima"
+
+#: web/permissions.py
+msgid "Ведение ставок и условий найма"
+msgstr "Upravljanje stopama i uslovima zaposlenja"
+
 #: web/permissions.py:99
 msgid "Ведение справочников"
 msgstr "Upravljanje imenicima"
