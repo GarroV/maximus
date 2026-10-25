@@ -11,13 +11,16 @@
 `0274`: доставка форм (`core/role_delivery.py`) сравнивает базу со снимком, и
 роль с выросшим набором при прежнем снимке приняла бы за правленную партнёром.
 
-**Стена — в политике, а не в экране.** На `pay_components` и
-`payslip_totals` встаёт сужающая (`as restrictive`) политика чтения: строки
+**Стена — в политике, а не в экране.** На `pay_components`, `payslip_totals`
+и `retro_adjustments` (перенесённая разница — тоже суммы расчёта) встаёт
+сужающая (`as restrictive`) политика чтения: строки
 видит тот, у кого есть `payroll.view` — или право, которое без чтения сумм
 невозможно исполнить: расчёт (`insert … returning` расчёта проходит через
 политики чтения), утверждение (проводка в P&L читает компоненты) и перенос
 разницы за закрытый месяц. Разрешающей её сделать нельзя: разрешающие
 политики складываются через ИЛИ и не сужают ничего (правило 2 блока).
+Условие — функцией `app_sees_payroll`: её же спрашивает `payrun.retro`, где
+суммы считаются движком заново, мимо таблиц, и политика их не видит.
 
 **Роль регионального управляющего** заводится каждому уже поднятому партнёру:
 доставка форм правит существующие роли, но новых не заводит. Значения —
@@ -65,23 +68,30 @@ update roles
 """
 
 # Кто видит суммы расчёта: право смотреть — или право, которое без чтения сумм
-# не исполнить (см. шапку).
-SEES_SUMS = """(
-    app_has_permission(tenant_id, 'payroll.view')
-    or app_has_permission(tenant_id, 'payrun.calculate')
-    or app_has_permission(tenant_id, 'period.approve')
-    or app_has_permission(tenant_id, 'retro.post')
-)"""
+# не исполнить (см. шапку). Одной функцией на все места: политики трёх таблиц
+# и охрана пересчёта в `payrun.retro` обязаны отвечать одинаково.
+SUMS_TABLES = ("pay_components", "payslip_totals", "retro_adjustments")
 
-POLICIES = f"""
-create policy payroll_view on pay_components as restrictive for select using {SEES_SUMS};
-create policy payroll_view on payslip_totals as restrictive for select using {SEES_SUMS};
-"""
+POLICIES = """
+create or replace function app_sees_payroll(p_tenant uuid)
+returns boolean
+language sql stable
+set search_path = public
+as $$
+    select app_has_permission(p_tenant, 'payroll.view')
+        or app_has_permission(p_tenant, 'payrun.calculate')
+        or app_has_permission(p_tenant, 'period.approve')
+        or app_has_permission(p_tenant, 'retro.post')
+$$;
+""" + "".join(
+    f"create policy payroll_view on {table} as restrictive for select"
+    f" using (app_sees_payroll(tenant_id));\n"
+    for table in SUMS_TABLES
+)
 
-DROP_POLICIES = """
-drop policy if exists payroll_view on pay_components;
-drop policy if exists payroll_view on payslip_totals;
-"""
+DROP_POLICIES = "".join(
+    f"drop policy if exists payroll_view on {table};\n" for table in SUMS_TABLES
+) + "drop function if exists app_sees_payroll(uuid);\n"
 
 REGIONAL = """
 insert into roles (tenant_id, code, title, permissions, permission_states,

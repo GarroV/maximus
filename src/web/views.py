@@ -525,7 +525,10 @@ def period_page(
             period.tenant_id, period.period,
             visible_ledgers=who.visible_ledgers if who else [],
         )
-        if frozen else retro.Drift()
+        # Расхождение движок считает заново, мимо таблиц, — политика чтения
+        # сумм его не режет. Без права видеть суммы его не считают (T236), а
+        # `retro.drift` откажет и сам, если его позовут.
+        if frozen and not payroll_denied else retro.Drift()
     )
     retro_denied = permissions.explain(who, permissions.RETRO_POST) if found else ""
     # Разница за этот месяц уже лежит в утверждённом периоде — откат отсюда
@@ -756,7 +759,12 @@ def period_page(
                     "shown": money(item.shown),
                     "cancelled": item.cancelled,
                 }
-                for item in retro.pending(period.tenant_id, period.period)
+                # Суммы переносов — суммы расчёта: без права их видеть список
+                # не собирается вовсе (`retro.pending` и сам откажет, T236).
+                for item in (
+                    retro.pending(period.tenant_id, period.period)
+                    if not payroll_denied else []
+                )
             ],
             "retro_carried": [
                 retro.month_title(source)

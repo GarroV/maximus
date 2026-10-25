@@ -67,3 +67,4 @@ def test_the_protection_is_the_policy_and_not_luck(db):
         db.execute("rollback to savepoint before_damage")
     with as_app_user(db, USER_DIRECTOR) as conn:
         assert _seen(conn) == (0, 0)
+
