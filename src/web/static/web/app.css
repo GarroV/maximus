@@ -231,15 +231,8 @@ main:focus { outline: none; }
 .sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) var(--space-2) 0; }
 .sidenav__prefs .sidenav__theme { margin: 0; padding: 0; }
 
-/* Выбранная тема и выбранный язык — `span`, а не кнопка: нажимать на то,
-   что уже выбрано, незачем, и кнопка обещала бы действие, которого нет.
-   Ядро рисует выбранное как нажатую кнопку; здесь тот же вид на `span`. */
-.sidenav__choice {
-  display: grid; place-items: center; width: 28px; height: 28px;
-  border-radius: 7px; background: var(--accent-soft); color: var(--accent); cursor: default;
-}
-.sidenav__choice svg { width: 15px; height: 15px; }
-.sidenav__theme button, .sidenav__choice { font-family: var(--font-mono); font-size: 11px; }
+/* Выбранная тема и язык рисует ядро (`button[aria-checked]`, `.langpill__item[aria-pressed]`). */
+.sidenav__theme button, .langpill__item { font-family: var(--font-mono); font-size: 11px; }
 .sidenav__form { margin: 0; }
 .sidenav__dev { margin-left: auto; }
 
@@ -352,7 +345,8 @@ main:focus { outline: none; }
   }
   .sidenav__prefs { padding: 0; }
   .sidenav__theme { flex-direction: row; margin: 0; }
-  .sidenav__theme button, .sidenav__choice { width: var(--tap-min); height: var(--tap-min); }
+  .sidenav__theme button { width: var(--tap-min); height: var(--tap-min); }
+  .langpill__item { min-width: var(--tap-min); height: var(--tap-min); }
   .sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,
   .sidenav__logout .sidenav__item {
     width: auto; min-height: var(--tap-min); padding: 0 var(--space-4);
@@ -733,7 +727,8 @@ form.upload.card { max-width: 640px; }   /* специфичнее общего 
   border: 1px solid var(--line-strong);
   border-radius: var(--r-block);
 }
-table.matrix { table-layout: fixed; min-width: calc(160px + var(--matrix-cols, 4) * 48px); }
+/* Число столбцов задаёт страница инлайном; 4 — на случай без него. */
+table.matrix { --matrix-cols: 4; table-layout: fixed; min-width: calc(160px + var(--matrix-cols) * 48px); }
 table.matrix th, table.matrix td {
   height: var(--row); padding: var(--space-2) var(--space-3);
   text-align: center; width: 56px;
@@ -1927,7 +1922,7 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 .account__prefs { display: none; }
 @media (max-width: 719px) {
   .account__prefs { display: flex; justify-content: flex-start; gap: var(--space-8); margin: 0 0 var(--space-8); padding: 0; }
-  .account__prefs .sidenav__theme { display: flex; flex-direction: row; gap: var(--space-2); margin: 0; }
+  .account__prefs .sidenav__theme { flex-direction: row; margin: 0; }
 }
 
 /* ── Отбор списка ссылками (T224, D081) ────────────────────────

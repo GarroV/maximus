@@ -12,31 +12,28 @@
 бы имя группы у диктора.
 
 Смена темы и языка — формами с кнопками, а не ссылками: смена меняет
-состояние (cookie), ссылку пройдёт любой предзагрузчик. Выбранное —
-`span[aria-current]`, а не кнопка.
+состояние (cookie), ссылку пройдёт любой предзагрузчик. Разметка — как в
+ядре линейки (GarroV/forma, `.sidenav__prefs`): тема — капсула
+`role="radiogroup"` с кнопками `role="radio" aria-checked`, язык —
+`.langpill` с `aria-pressed`; выбранный — кнопка `type="button"`, нажатие
+ничего не отправляет.
 {% endcomment %}{% translate "Как в системе" as theme_system %}{% translate "Светлая тема" as theme_light %}{% translate "Тёмная тема" as theme_dark %}
-    <form class="sidenav__theme" method="post" action="{% url 'set-theme' %}" role="group" aria-labelledby="{{ prefs_id }}-theme">{% csrf_token %}
+    <form class="sidenav__theme" method="post" action="{% url 'set-theme' %}" role="radiogroup" aria-labelledby="{{ prefs_id }}-theme">{% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
       <span class="sidenav__theme-label sr-only" id="{{ prefs_id }}-theme">{% translate "Тема" %}</span>
       {% for option in themes %}
         {% if option.code == "system" %}{% firstof theme_system as theme_name %}{% elif option.code == "light" %}{% firstof theme_light as theme_name %}{% else %}{% firstof theme_dark as theme_name %}{% endif %}
-        {% if option.current %}
-          <span class="sidenav__choice" aria-current="true" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</span>
-        {% else %}
-          <button type="submit" name="theme" value="{{ option.code }}" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</button>
-        {% endif %}
+        <button type="{% if option.current %}button{% else %}submit{% endif %}" name="theme" value="{{ option.code }}" role="radio" aria-checked="{% if option.current %}true{% else %}false{% endif %}" title="{{ theme_name }}"><span class="sr-only">{{ theme_name }}</span>{% if option.code == "system" %}{% icon "monitor" %}{% elif option.code == "light" %}{% icon "sun" %}{% else %}{% icon "moon" %}{% endif %}</button>
       {% endfor %}
     </form>
     {% if languages %}
-    <form class="sidenav__theme" method="post" action="{% url 'set_language' %}" role="group" aria-labelledby="{{ prefs_id }}-lang">{% csrf_token %}
+    <form class="sidenav__lang" method="post" action="{% url 'set_language' %}">{% csrf_token %}
       <input type="hidden" name="next" value="{{ request.get_full_path }}">
-      <span class="sidenav__theme-label sr-only" id="{{ prefs_id }}-lang">{% translate "Язык" %}</span>
+      <span class="sidenav__lang-label sr-only" id="{{ prefs_id }}-lang">{% translate "Язык" %}</span>
+      <div class="langpill" role="group" aria-labelledby="{{ prefs_id }}-lang">
       {% for language in languages %}
-        {% if language.current %}
-          <span class="sidenav__choice" aria-current="true" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</span>
-        {% else %}
-          <button type="submit" name="language" value="{{ language.code }}" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</button>
-        {% endif %}
+        <button type="{% if language.current %}button{% else %}submit{% endif %}" class="langpill__item" name="language" value="{{ language.code }}" aria-pressed="{% if language.current %}true{% else %}false{% endif %}" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</button>
       {% endfor %}
+      </div>
     </form>
     {% endif %}

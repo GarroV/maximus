@@ -256,8 +256,11 @@ def test_language_and_logout_live_in_the_foot_of_the_panel(client, web_env):
     assert logout, "выход не формой: его запустила бы картинка на чужой странице"
     # Выход — значком, поэтому название обязано быть у самой кнопки.
     assert 'aria-label="Выйти"' in logout.group(0), "у кнопки выхода нет названия"
-    # Выбранное не нажимается — тот же инвариант, что у текущего раздела.
-    assert re.search(r'<span class="sidenav__choice" aria-current="true"[^>]*lang="ru"', foot)
+    # Разметка — как у ядра: капсула темы radiogroup, язык — langpill; выбранный
+    # — кнопка без отправки формы (type=button), а не ещё одна цель нажатия.
+    assert 'role="radiogroup"' in foot and 'class="langpill"' in foot
+    assert re.search(r'<button type="button" class="langpill__item"[^>]*aria-pressed="true"[^>]*lang="ru"', foot)
+    assert re.search(r'<button type="button" name="theme"[^>]*role="radio" aria-checked="true"', foot)
 
 
 def test_password_and_guide_live_behind_one_service_item(client, web_env):
@@ -513,7 +516,7 @@ def test_the_tap_targets_of_the_unit_manager_are_finger_sized():
         ".sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,\n"
         "  .sidenav__logout .sidenav__item",
     ), "учётная запись и выход на телефоне меньше пальца"
-    assert "var(--tap-min)" in block(phone, ".sidenav__theme button, .sidenav__choice"), (
+    assert "var(--tap-min)" in block(phone, ".sidenav__theme button"), (
         "язык и тема на телефоне меньше пальца"
     )
 
