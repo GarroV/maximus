@@ -27,7 +27,7 @@ from reports import pnl as pnl_report
 from reports.reconcile import reconcile
 from reports.sheet import build_slice
 
-from . import reconciliation_log, runslice
+from . import permissions, reconciliation_log, runslice
 from .cash import item_title
 from .format import EMPTY, day, ledger_title, money
 from .labels import labeller
@@ -392,6 +392,16 @@ def period_export(request, period_id, kind):
         raise Http404("такой выгрузки нет")
 
     period = find_period(period_id)
+    # Все три файла собираются из сумм расчёта — значит, по праву их видеть
+    # (T236, `payroll.view`). Политика чтения (`0275`) отдала бы пустой файл,
+    # а пустой файл читается как «ничего не начислено»; здесь отказ словами.
+    try:
+        permissions.check(get_current_principal(request), permissions.PAYROLL_VIEW)
+    except permissions.PermissionRefused as refusal:
+        return HttpResponse(
+            refusal.message, status=refusal.http_status,
+            content_type="text/plain; charset=utf-8",
+        )
     view = build_slice(period.tenant_id, period.period, request.GET.get("ledger", ""))
     book, name = build(
         view, tenant_id=period.tenant_id, period=period.period,

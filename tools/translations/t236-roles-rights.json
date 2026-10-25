@@ -1,0 +1,42 @@
+{
+  "Отвечает за несколько точек и ездит между ними. Делает то же, что\n        управляющий точки, только по всем своим точкам сразу: проверяет и правит\n        часы, закрывает их по точке. Ведомости и сумм расчёта не видит: больше\n        точек — не значит больше денег.": {
+    "en": "Responsible for several units and travels between them. Does the same as\n        a unit manager, only across all of his units at once: checks and corrects\n        hours and closes them per unit. Does not see the payout sheet or calculated\n        amounts: more units does not mean more money.",
+    "sr": "Odgovoran je za nekoliko objekata i obilazi ih. Radi isto što i\n        menadžer objekta, samo za sve svoje objekte odjednom: proverava i ispravlja\n        sate i zatvara ih po objektu. Platni spisak i obračunate iznose ne vidi:\n        više objekata ne znači više novca."
+  },
+  "свои, несколько": {
+    "en": "their own, several",
+    "sr": "svoji, nekoliko"
+  },
+  "Просмотр ведомости и сумм расчёта": {
+    "en": "Viewing the payout sheet and calculated amounts",
+    "sr": "Pregled platnog spiska i obračunatih iznosa"
+  },
+  "РЕГ": {
+    "en": "REG",
+    "sr": "REG"
+  },
+  "регион": {
+    "en": "region",
+    "sr": "region"
+  },
+  "Точек у партнёра пока нет.": {
+    "en": "The partner has no units yet.",
+    "sr": "Partner još nema objekata."
+  },
+  "Управляющему точки — одна, управляющему региона — его точки. Ролям, которые ведут всего партнёра, точки не отмечаются.": {
+    "en": "A unit manager gets one unit, a regional manager gets their units. Roles that cover the whole partner get no units.",
+    "sr": "Menadžeru objekta — jedan objekat, regionalnom menadžeru — njegovi objekti. Ulogama koje vode celog partnera objekti se ne označavaju."
+  },
+  "Роль «%(role)s» ведёт выбранные точки — отметьте их. Без точки человек получил бы все точки партнёра.": {
+    "en": "The role “%(role)s” covers selected units — tick them. Without a unit the person would get every unit of the partner.",
+    "sr": "Uloga „%(role)s“ vodi izabrane objekte — označite ih. Bez objekta osoba bi dobila sve objekte partnera."
+  },
+  "Роль «%(role)s» ведёт одну точку — отметьте одну. Нескольким точкам соответствует роль регионального управляющего.": {
+    "en": "The role “%(role)s” covers one unit — tick just one. Several units call for the regional manager role.",
+    "sr": "Uloga „%(role)s“ vodi jedan objekat — označite samo jedan. Za više objekata postoji uloga regionalnog menadžera."
+  },
+  "Роль «%(role)s» ведёт выбранные точки, а точек у нового пространства ещё нет. Первым заведите того, кто ведёт партнёра целиком.": {
+    "en": "The role “%(role)s” covers selected units, and the new space has no units yet. Add someone who runs the whole partner first.",
+    "sr": "Uloga „%(role)s“ vodi izabrane objekte, a novi prostor još nema objekata. Prvo dodajte nekoga ko vodi celog partnera."
+  }
+}

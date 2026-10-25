@@ -300,7 +300,9 @@ P_DIRECTOR = (
 P_ACCOUNTANT = (
     '["timesheet.edit", "payrun.calculate", "period.approve", "payslip.freeze"]'
 )
-P_MANAGER = '["timesheet.edit", "unit.close"]'
+# `payroll.view` у управляющего — как у роли продукта (D031, T236): ведомость
+# своей смены он видит, и с `0275` это держит политика чтения сумм.
+P_MANAGER = '["timesheet.edit", "unit.close", "payroll.view"]'
 # Люди и условия найма — свои права с T236 (`0274`): кто ведёт справочники,
 # ведёт и их, как у ролей продукта.
 P_ADMIN = (

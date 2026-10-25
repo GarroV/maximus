@@ -63,7 +63,7 @@ class SeedRole(NamedTuple):
     code: str
     title: str
     ledgers: list[str]
-    unit: str | None  # None — все точки тенанта
+    units: tuple[str, ...]  # пусто — все точки тенанта
     permissions: list[str]
 
 
@@ -80,7 +80,7 @@ ROLES = [
     SeedRole(
         code, TITLES[code],
         list(ROLE_SHAPES[code].ledgers),
-        ROLE_SHAPES[code].unit,
+        ROLE_SHAPES[code].units,
         list(ROLE_SHAPES[code].permissions),
     )
     for code in ROLE_ORDER
@@ -197,7 +197,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 f"  {role_def.code:<11} {role_def.title}: "
                 f"регистры {','.join(role_def.ledgers)}"
-                + (f", точка {role_def.unit}" if role_def.unit else ", все точки")
+                + (f", точки {','.join(role_def.units)}" if role_def.units else ", все точки")
             )
 
     # --- шаги -----------------------------------------------------------
@@ -376,7 +376,7 @@ class Command(BaseCommand):
             models.Membership.objects.create(
                 id=det_id("membership", role_def.code), tenant=tenant,
                 user_id=user.pk, role=role,
-                unit_ids=[units[role_def.unit].id] if role_def.unit else None,
+                unit_ids=[units[c].id for c in role_def.units] if role_def.units else None,
             )
 
     def _calendar(self, preset: dict) -> None:

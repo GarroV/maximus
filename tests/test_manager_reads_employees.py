@@ -281,7 +281,8 @@ def test_the_reader_gets_facts_instead_of_forms_and_is_told_why(client, web_env,
     # Условия найма и точки — свои страницы (T229), и правило у них то же: вместо
     # формы слова, а не пустота.
     # У каждой страницы своё право (T236): условия найма — ставки, точки — люди.
-    for other, right in (("terms/", "Ведение ставок и условий найма"), ("units/", "Ведение сотрудников")):
+    pages = (("terms/", "Ведение ставок и условий найма"), ("units/", "Ведение сотрудников"))
+    for other, right in pages:
         shown = body(client.get(mine + other))
         assert '<form class="card"' not in shown, f"читателю отдали форму на {other}"
         assert right in shown, f"форма на {other} пропала молча"

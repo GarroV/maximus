@@ -1,0 +1,19 @@
+{% load i18n %}{% comment %}
+Точки членства галками, а не одним выпадающим списком (T236): управляющему
+региона их нужно несколько. Сколько можно отметить, решает роль, и ответ на
+неверный выбор — словами (`roles_views.membership_units`), а не молчаливая
+подмена. Ждёт `units` (у каждой `id`, `code`, `title`) и `picked` — строки
+идентификаторов, отмеченных в прошлой отправке.
+{% endcomment %}
+<fieldset class="checks">
+  <legend class="field-label">{% translate "Точки" %}</legend>
+  {% for unit in units %}
+  <span class="check">
+    <input type="checkbox" id="unit_{{ unit.id }}" name="unit" value="{{ unit.id }}"{% if unit.id|stringformat:"s" in picked %} checked{% endif %}>
+    <label for="unit_{{ unit.id }}">{{ unit.code }} — {{ unit.title }}</label>
+  </span>
+  {% empty %}
+  <span class="note">{% translate "Точек у партнёра пока нет." %}</span>
+  {% endfor %}
+  <span class="note">{% translate "Управляющему точки — одна, управляющему региона — его точки. Ролям, которые ведут всего партнёра, точки не отмечаются." %}</span>
+</fieldset>

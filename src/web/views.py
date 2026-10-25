@@ -451,6 +451,10 @@ def period_page(
     # ответят отказом. Адрес расчёта остаётся рабочим, и он остаётся закрытым.
     who = get_current_principal(request)
     calculate_denied = permissions.explain(who, permissions.PAYRUN_CALCULATE)
+    # Ведомость и суммы — по своему праву (T236). Строки без него срежет и
+    # политика чтения (`0275`), но пустая таблица читалась бы как «не
+    # посчитано»; здесь вместо неё слова отказа.
+    payroll_denied = permissions.explain(who, permissions.PAYROLL_VIEW)
 
     # Что цикл позволяет сделать с расчётом дальше — спрашивается у базы, а не
     # выводится из статуса здесь (T025): единственный источник истины о цикле
@@ -547,6 +551,7 @@ def period_page(
             # экран показывает то, что человек открыл, а утверждение приходит
             # запросом.
             "readiness": _readiness_of(period),
+            "payroll_denied": payroll_denied,
             "sheet": {
                 "columns": [label(column.code, column.title) for column in sheet.columns],
                 # Ярус групп над колонками (issue #163). Названия переводятся

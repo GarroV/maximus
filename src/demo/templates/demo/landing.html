@@ -83,7 +83,7 @@
             <a href="{% url 'demo-enter-as' role.code %}">Enter as {{ role.title }}</a>
             <span>
               — sees {{ role.ledgers|join:", " }}
-              {% if role.unit %}· one unit only ({{ role.unit }}){% else %}· all units{% endif %}
+              {% if role.units|length == 1 %}· one unit only ({{ role.units.0 }}){% elif role.units %}· several units ({{ role.units|join:", " }}){% else %}· all units{% endif %}
             </span>
           </li>
         {% endif %}

@@ -267,11 +267,8 @@ def _grant_form(request, found, *, error: str = "", status: int = 200):
         {
             "space": found,
             "user_id": (request.POST.get("user_id") or "").strip(),
-            "unit_options": [
-                {"code": str(unit.pk), "title": f"{unit.code} — {unit.title}",
-                 "selected": str(unit.pk) == (request.POST.get("unit") or "")}
-                for unit in Unit.objects.filter(tenant_id=found.pk).order_by("code")
-            ],
+            "unit_options": list(Unit.objects.filter(tenant_id=found.pk).order_by("code")),
+            "picked_units": request.POST.getlist("unit"),
             "role_options": [
                 {"code": str(role.pk), "title": shown_role_title(role.title, role.code),
                  "selected": str(role.pk) == chosen}
@@ -364,7 +361,7 @@ def member_role(request, tenant_id):
 
     # Точка — тем же правилом, что на странице партнёра: управляющий без точки
     # получил бы все точки пространства (разбор прав T225).
-    unit_ids, refused_unit = membership_units(request.POST.get("unit"), tenant_id, role)
+    unit_ids, refused_unit = membership_units(request.POST.getlist("unit"), tenant_id, role)
     if refused_unit:
         return _grant_form(request, found, error=refused_unit, status=400)
 

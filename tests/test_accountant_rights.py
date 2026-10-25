@@ -55,8 +55,13 @@ def payrun_status(dsn: str) -> str:
 # --- страницей, как это делает человек ---------------------------------------
 
 
-def test_the_accountant_reopens_what_she_approved(client, clean_payruns):
-    """Спека, must: «хочу откатить утверждение с указанием причины»."""
+def test_the_accountant_does_not_reopen_by_default(client, clean_payruns):
+    """Откат утверждения — у администратора (эталон «Роли и права», T236).
+
+    Спека давала его бухгалтеру; решения владельца об этом нет, и по D056
+    побеждает эталон: «требует причины, остаётся в истории» — только АДМ.
+    Отказ громкий и словами, утверждённый месяц остаётся утверждённым.
+    """
     dsn = clean_payruns
     login_as(client, "accountant")
     url = period_url(client)
@@ -64,27 +69,19 @@ def test_the_accountant_reopens_what_she_approved(client, clean_payruns):
     client.post(url + "approve/", follow=True)
     assert payrun_status(dsn) == "approved"
 
-    response = client.post(url + "reopen/", {"reason": REASON}, follow=True)
-
-    assert response.status_code == 200
-    assert payrun_status(dsn) == "reopened"
-    page = body(response)
-    assert REASON in page
-    # Автор — тот, кто нажал: в сиде имя учётки равно названию роли.
-    assert "Бухгалтер" in page
-
-
-def test_the_accountant_is_offered_the_reopen_button(client, clean_payruns):
-    """Кнопка на месте, а не «адрес работает, но предлагать некому» (T072)."""
-    login_as(client, "accountant")
-    url = period_url(client)
-    client.post(url + "calculate/", follow=True)
-    client.post(url + "approve/", follow=True)
+    refused = client.post(url + "reopen/", {"reason": REASON})
+    assert refused.status_code == 403, refused.status_code
+    assert payrun_status(dsn) == "approved", "отказ на словах, а откат прошёл"
 
     page = body(client.get(url))
+    assert "Откат периода не входит в права" in page, "кнопка пропала без объяснения"
+    client.post("/logout/")
 
-    assert "reopen/" in page
-    assert "Откат периода не входит в права" not in page
+    login_as(client, "admin")
+    response = client.post(url + "reopen/", {"reason": REASON}, follow=True)
+    assert response.status_code == 200
+    assert payrun_status(dsn) == "reopened", "администратор не откатил утверждение"
+    assert REASON in body(response)
 
 
 def test_the_accountant_closes_the_hours_of_a_unit(client, clean_payruns):
