@@ -5222,6 +5222,10 @@ msgstr ""
 msgid "Какую работу он снимает:"
 msgstr "Koji posao preuzima na sebe:"
 
+#: web/templates/web/guide.html
+msgid "Разделы продукта — так они называются в левой панели после входа:"
+msgstr "Odeljci proizvoda — tako se zovu u levom panelu posle prijave:"
+
 #: web/templates/web/guide.html:34
 msgid "Повторный ввод."
 msgstr "Ponovni unos."
@@ -9071,6 +9075,26 @@ msgid ""
 "Набор точек этого сотрудника меняет роль, которой видны все точки "
 "партнёра. Обратитесь к оперативному директору или бухгалтеру."
 msgstr "Objekte ovog zaposlenog može da menja samo uloga koja vidi sve objekte partnera. Obratite se operativnom direktoru ili knjigovođi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Версии условий найма"
+msgstr "Verzije uslova zapošljavanja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузить статьи из файла"
+msgstr "Učitaj stavke troškova iz fajla"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поднимать ставки некому: сначала заведите группу."
+msgstr "Nema kome da se podignu cene rada: prvo napravite grupu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы сотрудника"
+msgstr "Stranice zaposlenog"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точки затрат"
+msgstr "Objekti troškova"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "АДМ"
