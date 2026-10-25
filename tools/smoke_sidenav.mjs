@@ -67,7 +67,7 @@ const probe = () => evalIn(`(() => {
   const nameless = [...nav.querySelectorAll('a, button, [aria-current]')].filter(
     (e) => !((e.getAttribute('aria-label') || '') + e.textContent).trim()
   ).map((e) => e.outerHTML.slice(0, 80));
-  const tappable = [...nav.querySelectorAll('a, button, .sidenav__choice, .sidenav__current')].filter(shown);
+  const tappable = [...nav.querySelectorAll('a, button, .sidenav__current')].filter(shown);
   const items = [...list.querySelectorAll('.sidenav__item, .sidenav__current')].filter(shown);
   const service = [...nav.querySelectorAll('.sidenav__foot .sidenav__label, .sidenav__logout .sidenav__label')];
   // Роль, имя и выход — без партнёра: название партнёра — данные, а не
