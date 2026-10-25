@@ -165,6 +165,15 @@ main:focus { outline: none; }
 .sidenav__stage { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; }
 .sidenav__stage--refining { background: var(--warn-mark); }
 .sidenav__stage--planned { background: var(--accent); }
+/* Легенда точек (issue #268) — первой строкой подвала, мелко и тише
+   подписей групп: она поясняет, а не называет раздел. */
+.sidenav__legend {
+  display: flex; flex-wrap: wrap; gap: 0 var(--space-5);
+  margin: 0 0 var(--space-2); padding: 0 var(--space-5);
+  list-style: none;
+  font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-3);
+}
+.sidenav__legend li { display: flex; align-items: center; gap: var(--space-3); }
 
 /* Раздел, который ведёт другая роль, в демо (T163). Выглядит пунктом
    панели, но тише и с пунктиром: это не раздел человека, а предложение
@@ -193,29 +202,40 @@ main:focus { outline: none; }
 /* Плотность списка. Требование сверки: у самых тяжёлых ролей
    (администратор, бухгалтер) все разделы влезают в экран 1440×900 без
    прокрутки панели. Ядро отдаёт группе 12 пикселей сверху — на пяти
-   группах это лишние три десятка пикселей; 8 по-прежнему отделяют группу
+   группах это лишние три десятка пикселей; 4 по-прежнему отделяют группу
    от предыдущего пункта. Промежутки в 2 пикселя между пунктами ядро
    ставит на случай соседних заливок; у пунктов по 34 пикселя и заливка
    только у текущего, так что их место отдано разделам: на двадцати
    строках это ещё сорок пикселей. */
-.sidenav__group { padding-top: var(--space-3); }
+.sidenav__group { padding-top: var(--space-2); }
 .sidenav__list, .sidenav__set { gap: 0; }
 .sidenav__brand { padding-top: var(--space-5); padding-bottom: var(--space-5); }
 .sidenav__list { padding-top: var(--space-4); padding-bottom: var(--space-4); }
 
+/* Тень у края списка, когда за краем ещё есть разделы (issue #268). На
+   1440×768 у администратора список прокручивается на сотню пикселей, и без
+   подсказки последняя область выглядела концом панели. Приём «тени
+   прокрутки» без скрипта: две заливки цветом панели едут вместе со
+   списком (`local`) и закрывают две тени, стоящие у краёв окна списка
+   (`scroll`). Пока край списка у края окна — тень закрыта, отъехал — видна.
+   Список, который влез целиком, тени не показывает вовсе. */
+.sidenav__list {
+  background:
+    linear-gradient(var(--surface-2) 30%, transparent) center top / 100% 32px no-repeat local,
+    linear-gradient(transparent, var(--surface-2) 70%) center bottom / 100% 32px no-repeat local,
+    linear-gradient(color-mix(in srgb, var(--ink) 10%, transparent), transparent) center top / 100% 10px no-repeat scroll,
+    linear-gradient(transparent, color-mix(in srgb, var(--ink) 10%, transparent)) center bottom / 100% 10px no-repeat scroll;
+}
+
 /* Тема и язык одной строкой, подписи групп — только диктору. */
-.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) var(--space-2) 0; }
+.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 0 var(--space-2); margin-bottom: 0; }
 .sidenav__prefs .sidenav__theme { margin: 0; padding: 0; }
 
-/* Выбранная тема и выбранный язык — `span`, а не кнопка: нажимать на то,
-   что уже выбрано, незачем, и кнопка обещала бы действие, которого нет.
-   Ядро рисует выбранное как нажатую кнопку; здесь тот же вид на `span`. */
-.sidenav__choice {
-  display: grid; place-items: center; width: 28px; height: 28px;
-  border-radius: 7px; background: var(--accent-soft); color: var(--accent); cursor: default;
-}
-.sidenav__choice svg { width: 15px; height: 15px; }
-.sidenav__theme button, .sidenav__choice { font-family: var(--font-mono); font-size: 11px; }
+/* Выбранная тема и язык рисует ядро (`button[aria-checked]`, `.langpill__item[aria-pressed]`). */
+.sidenav__theme button, .langpill__item { font-family: var(--font-mono); font-size: 11px; }
+/* В 216 px подвала две капсулы рядом с зазором не помещаются при 34-пиксельных
+   сегментах ядра (вылезали на 6 px) — сегменты языка здесь уже. */
+.sidenav__prefs .langpill__item { min-width: 30px; padding: 0 var(--space-3); }
 .sidenav__form { margin: 0; }
 .sidenav__dev { margin-left: auto; }
 
@@ -225,12 +245,22 @@ main:focus { outline: none; }
 .sidenav__who { flex: 1; gap: var(--space-1); }
 .sidenav__whoami { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); min-width: 0; }
 .sidenav__whoami b { white-space: normal; }
-.sidenav__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-3); font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
-.sidenav__meta > * + *::before { content: "·"; margin-right: var(--space-3); color: var(--ink-3); }
-/* Регистры — точками тех же цветов, что метки регистров в ведомости:
-   цвет связывает панель с таблицей. Название — в `title` и у диктора. */
-.sidenav__ledgers { display: inline-flex; align-items: center; gap: var(--space-2); }
-.sidenav__reg { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+/* Партнёр и точка — строками, а не через «·»: название партнёра длинное,
+   перенос ставил разделитель в начало следующей строки, и у управляющего
+   она читалась как «· точка: NS1» (issue #268). */
+.sidenav__meta { display: flex; flex-direction: column; font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-2); }
+/* Регистры — словами, каждый с точкой того же цвета, что метки регистров
+   в ведомости: цвет связывает панель с таблицей, а слово говорит, что это.
+   До issue #268 здесь были одни точки, различимые только цветом. Слово
+   набрано цветом текста, а не регистра: мелкий цветной текст на панели
+   читается хуже, а цвет уже несёт точка. */
+.sidenav__user { flex-wrap: wrap; }
+.sidenav__ledgers { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 0 var(--space-4); margin-top: calc(-1 * var(--space-2)); font-size: var(--fs-micro); line-height: var(--lh-meta); color: var(--ink-2); }
+.sidenav__reg { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--ink-2); }
+.sidenav__reg::before { content: ""; flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.sidenav__reg.reg--official::before { background: var(--reg-official); }
+.sidenav__reg.reg--supplementary::before { background: var(--reg-supp); }
+.sidenav__reg.reg--internal::before { background: var(--reg-internal); }
 .sidenav__logout .sidenav__item { justify-content: center; width: 34px; padding: 0; }
 .sidenav__logout .sidenav__label {
   position: absolute; width: 1px; height: 1px; margin: -1px;
@@ -253,6 +283,11 @@ main:focus { outline: none; }
   .sidenav__item, .sidenav__current { justify-content: flex-start; padding-left: var(--space-5); padding-right: var(--space-5); }
   .sidenav__count { position: static; font-size: 11px; }
   .sidenav__theme { flex-direction: row; }
+  /* Тема и язык — одной строкой, как на широком экране: панель здесь полная,
+     столбик ядра рассчитан на 56 px (сверка norma, 1024). */
+  .sidenav__prefs { flex-direction: row; padding: 0 var(--space-2); }
+  .sidenav__lang { flex-direction: row; }
+  .sidenav__lang .langpill { flex-direction: row; }
   .sidenav__user { justify-content: flex-start; padding-left: var(--space-6); }
   .sidenav__logout .sidenav__item { justify-content: center; padding: 0; }
 }
@@ -271,11 +306,16 @@ main:focus { outline: none; }
 @media (max-width: 719px) {
   .shell { display: block; }
   .shell > .sidenav { position: static; height: auto; }
+  /* Шапка до содержимого — две строки по 44 (issue #268: было около 200).
+     Первая — знак продукта, «Учётная запись» и выход, вторая — кто смотрит.
+     Тема и язык уехали на страницу учётной записи, регистры словами — туда
+     же: здесь их некуда поставить, не добавив строку. */
   .sidenav {
     width: auto; flex-direction: row; flex-wrap: wrap; align-items: center;
-    gap: var(--space-3) var(--space-5); padding: var(--space-4) var(--space-6);
+    gap: var(--space-2) var(--space-5); padding: var(--space-3) var(--space-6);
     border-right: 0; border-bottom: 1px solid var(--line);
   }
+  .sidenav > .sidenav__foot .sidenav__prefs, .sidenav__ledgers, .sidenav__legend { display: none; }
   .sidenav__brand { min-height: var(--tap-min); padding: 0; border-bottom: 0; justify-content: flex-start; }
   .sidenav__name { display: flex; }
 
@@ -284,14 +324,19 @@ main:focus { outline: none; }
     flex-direction: row; gap: 0; overflow-x: auto; overflow-y: hidden;
     padding: 0 0 env(safe-area-inset-bottom);
     background: var(--surface); border-top: 1px solid var(--line);
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
-    mask-image: linear-gradient(to right, black calc(100% - 40px), transparent);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+    scroll-snap-type: x proximity;
   }
   .sidenav__list .sidenav__group { display: none; }
   .sidenav__set { flex-direction: row; gap: 0; }
   .sidenav__list .sidenav__item, .sidenav__list .sidenav__current {
     flex-direction: column; justify-content: center; gap: var(--space-1);
-    width: 88px; min-height: 60px; padding: var(--space-3) var(--space-3);
+    /* Ровно четыре пункта в окне и полоска пятого в гаснущем крае: пункт,
+       срезанный краем посередине слова, читался как обрезанная подпись
+       («Вед…», сверка T224), а полоска у края — как «дальше ещё». */
+    width: calc((100vw - 24px) / 4); min-height: 60px; padding: var(--space-3) var(--space-3);
+    scroll-snap-align: start;
     border-radius: 0; font-size: var(--fs-micro); line-height: 1.2; text-align: center;
   }
   .sidenav__list .sidenav__current { box-shadow: inset 0 2px 0 var(--accent); }
@@ -308,7 +353,8 @@ main:focus { outline: none; }
   }
   .sidenav__prefs { padding: 0; }
   .sidenav__theme { flex-direction: row; margin: 0; }
-  .sidenav__theme button, .sidenav__choice { width: var(--tap-min); height: var(--tap-min); }
+  .sidenav__theme button { width: var(--tap-min); height: var(--tap-min); }
+  .sidenav__prefs .langpill__item { min-width: var(--tap-min); height: var(--tap-min); }
   .sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,
   .sidenav__logout .sidenav__item {
     width: auto; min-height: var(--tap-min); padding: 0 var(--space-4);
@@ -319,7 +365,9 @@ main:focus { outline: none; }
   .sidenav__foot .sidenav__label { display: inline; }
   .sidenav__logout .sidenav__label { display: inline; position: static; width: auto; height: auto; margin: 0; clip: auto; }
   .sidenav__user { width: 100%; justify-content: flex-start; padding: 0; border-top: 0; }
-  .sidenav__who { display: flex; }
+  /* Кто смотрит — одной строкой с переносом: плашка роли, партнёр, точка. */
+  .sidenav__who { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 0 var(--space-4); }
+  .sidenav__meta { flex-direction: row; flex-wrap: wrap; gap: 0 var(--space-4); }
   .sidenav__avatar { display: none; }
 }
 
@@ -449,6 +497,9 @@ a.mark--ok:hover { background: var(--ok-line); }
 .alert { color: var(--warn-ink); background: var(--warn-soft); border: 1px solid var(--warn-line); }
 .alert .details { color: var(--ink); font-size: var(--fs-meta); margin-top: var(--space-3); }
 .ok { color: var(--ok); background: var(--ok-soft); border: 1px solid var(--ok-line); }
+/* Заголовок плашки — своей строкой над текстом, как `.note__title` эталона
+   (issue #268: в строку с текстом он сливался с ним). */
+.notice__title { display: block; margin-bottom: var(--space-1); font-size: var(--fs-dense); font-weight: var(--w-semibold); }
 /* Ещё два вида из эталона, которых в продукте не было: «к сведению» и «ошибка».
    Без них любое сообщение приходилось красить как предупреждение — и обычная
    подсказка выглядела тревожно, а настоящая ошибка ничем от неё не отличалась. */
@@ -497,8 +548,23 @@ a.mark--ok:hover { background: var(--ok-line); }
 }
 .empty .next:hover { background: var(--accent-hover); text-decoration: none; }
 
-/* Примечание — абзац, а не блок: это текст рядом с данными. */
-.note { color: var(--ink-2); font-size: var(--fs-meta); margin-top: var(--space-9); }
+/* Примечание — абзац, а не блок: это текст рядом с данными.
+   В ядре `.note` — плашка (flex, поля 12×16, скругление), а у продукта это
+   имя с самого начала занято мелким пояснением (issue #165). Поля и flex
+   ядра доезжали и сюда: пояснения под кнопками стояли сдвинутыми вправо на
+   16 px и с пустотами (сверки T223, T233). Сброшены здесь — плашки продукта
+   рисует `{% notice %}` своими классами. */
+.note {
+  display: block; padding: 0; border: 0; border-radius: 0; background: none;
+  color: var(--ink-2); font-size: var(--fs-meta); margin-top: var(--space-9);
+}
+span.note { display: inline; }
+/* Первым в `main` пояснение не отодвигает страницу: его верхнее поле схлопывалось
+   с полем `main`, и шапка телефона вырастала на 12 px (смоук раскладки). */
+main > .note:first-child { margin-top: 0; }
+/* Пояснение к действию — сразу под его кнопкой, а не через 24 пикселя:
+   оторванное, оно читалось отдельным абзацем страницы. */
+form.action > .note, .actions > .note { display: block; margin-top: var(--space-3); }
 /* Пояснение под кнопками. Отрицательного отступа здесь быть не должно: ряд
    кнопок — flex-блок со своим нижним полем, и подтягивание «поближе» наложило
    текст прямо на кнопки. Поймано на снимке экрана — в разметке этого не
@@ -672,7 +738,8 @@ form.upload.card { max-width: 640px; }   /* специфичнее общего 
   border: 1px solid var(--line-strong);
   border-radius: var(--r-block);
 }
-table.matrix { table-layout: fixed; min-width: calc(160px + var(--matrix-cols, 4) * 48px); }
+/* Число столбцов задаёт страница инлайном; 4 — на случай без него. */
+table.matrix { --matrix-cols: 4; table-layout: fixed; min-width: calc(160px + var(--matrix-cols) * 48px); }
 table.matrix th, table.matrix td {
   height: var(--row); padding: var(--space-2) var(--space-3);
   text-align: center; width: 56px;
@@ -961,6 +1028,11 @@ form.card {
 form.card.wide { max-width: 860px; display: grid; gap: 0 var(--space-9); grid-template-columns: 1fr 1fr; }
 form.card.wide > p, form.card.wide > .field { margin-bottom: var(--space-6); }
 form.card.wide > .full, form.card.wide > .actions { grid-column: 1 / -1; }
+/* Кнопка под последним полем — с воздухом, а не впритык: поле без своего
+   нижнего поля ставило «Выдать» в десяти пикселях от поля причины, и кнопка
+   читалась частью поля (сверка T233, /roles/people/<id>/). */
+form.card > label + button, form.card > label + .btn,
+form.card > .field + button, form.card > .field + .btn { margin-top: var(--space-6); }
 form.card p { margin: 0 0 var(--space-7); }
 form.card p:last-child { margin-bottom: 0; }
 form.card label { color: var(--ink-2); font-size: var(--fs-meta); }
@@ -1089,6 +1161,29 @@ form.search.row input, form.search.row select {
   background: var(--surface); color: var(--ink);
 }
 
+/* Поле выбора файла (issue #268). Браузер рисует его своей серой кнопкой и
+   системным шрифтом — на экране продукта это чужой элемент, и человек не
+   узнаёт в нём кнопку. Само поле остаётся нативным и видимым: подпись с
+   именем взятого файла нужна (человек должен видеть, что взял), а подмена
+   поля своей разметкой отняла бы клавиатуру и диктора. Меняется только
+   кнопка внутри — видом вторичной кнопки `.btn` ядра. */
+input[type="file"] {
+  max-width: 100%;
+  font: var(--w-regular) var(--fs-meta) / var(--lh-meta) var(--font-ui);
+  color: var(--ink-2);
+}
+form.card input[type="file"] { height: auto; padding: 0; border: 0; background: none; }
+input[type="file"]::file-selector-button {
+  height: var(--control-h); margin-right: var(--space-5); padding: 0 var(--space-7);
+  border: 1px solid var(--line-control); border-radius: var(--r-control);
+  background: var(--surface); color: var(--ink);
+  font: var(--w-medium) var(--fs-body) / 1 var(--font-ui);
+  box-shadow: var(--sh-xs); cursor: pointer;
+}
+input[type="file"]:hover::file-selector-button { background: var(--surface-3); }
+input[type="file"]:focus-visible { outline: none; }
+input[type="file"]:focus-visible::file-selector-button { outline: var(--focus-outline); outline-offset: 1px; }
+
 /* ── Таблицы ─────────────────────────────────────────────────── */
 
 table { border-collapse: collapse; width: 100%; background: var(--surface); }
@@ -1105,6 +1200,18 @@ th {
   font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro);
   color: var(--ink-2); font-weight: var(--w-semibold);
 }
+/* Подпись числовой колонки — подпись, а не число. Класс `.num` ядра ставит
+   ячейке шрифт цифр целиком (`font: var(--num)`), и в шапке правые
+   колонки («ЧАСЫ», «ФОТ») выходили крупнее и тоньше левых — шапка читалась
+   двумя гарнитурами (сверка T223). Выравнивание по правому краю остаётся. */
+th.num {
+  font-family: var(--font-ui); font-size: var(--fs-micro); font-weight: var(--w-semibold);
+  line-height: inherit; color: var(--ink-2); font-variant-numeric: normal;
+}
+/* Шапка таблицы залита целиком, как `.table thead th` эталона. Раньше фон
+   был только у первой колонки там, где её закрепляли (аналитика по людям),
+   и шапка читалась как одна серая ячейка и строка текста (issue #268). */
+thead th { background: var(--surface-head); }
 tbody tr:hover { background: var(--surface-2); }
 /* Линия над итогом — у каждой ячейки строки, и у заголовочной тоже. Первая
    колонка итога обычно `th` («Итого по 12 строкам»), и правило на одни `td`
@@ -1122,10 +1229,30 @@ tfoot td, tfoot th { font-weight: var(--w-semibold); border-top: 2px solid var(-
 .scroll {
   overflow: auto;
   max-height: 70vh;
-  background: var(--surface);
   border: 1px solid var(--line-strong);
   border-radius: var(--r-block);
+  /* Тень у края, за которым ещё есть колонки (issue #268). На планшете рядом
+     с панелью и на телефоне широкая таблица прокручивается внутри себя, а
+     полоса прокрутки в macOS и на телефоне не видна, пока её не тронешь, —
+     и таблица выглядела обрезанной: «правые колонки табеля пропали». Приём
+     тот же, что у аналитики по людям (people.css): заслонки цветом таблицы
+     едут с содержимым (`local`) и гасят тень у края, до которого дошли. */
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) left / 24px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right / 24px 100% no-repeat local,
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 12%, transparent), transparent) left / 12px 100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in srgb, var(--ink) 12%, transparent), transparent) right / 12px 100% no-repeat scroll,
+    var(--surface);
 }
+/* Таблица внутри прозрачна, иначе её белый фон закрыл бы тень. Липкие
+   ячейки (шапка, закреплённые колонки, итоги) свой фон сохраняют. */
+.scroll > table { background: transparent; }
+/* Шапка любой таблицы в контейнере держится у верхнего края, пока строки
+   прокручиваются, — не только у ведомости. Контейнер ограничен по высоте
+   (70vh), и у длинного справочника или списка правил подписи колонок
+   уезжали вверх вместе со строками (смоук раскладки, T223). Фон у шапки
+   есть всегда (`thead th` выше), так что строки под ней не просвечивают. */
+.scroll > table > thead { position: sticky; top: 0; z-index: 3; }
 
 table.sheet { font-size: var(--fs-dense); }
 /* Плотность строки — `--row` эталона, 30 пикселей. Замер показал 45: высота
@@ -1166,9 +1293,16 @@ table.sheet th {
      В ведомости 35 строк и полтора десятка колонок: без этого через экран
      прокрутки человек видит числа, но уже не помнит, что в какой колонке,
      и сверяется, пролистывая туда-сюда. */
-  position: sticky; top: 0; z-index: 3;
   box-shadow: 0 1px 0 var(--line-strong);
 }
+/* Прилипает шапка целиком, а не каждая ячейка: у ведомости два яруса
+   (группы колонок и сами колонки), и при `top: 0` у каждой ячейки второй
+   ярус наезжал на первый, а под ними просвечивали строки (issue #268 —
+   «липкая шапка налезает на первую строку»). Высота яруса групп не
+   постоянна — длинное название группы переносится, — так что сдвиг второго
+   яруса на число пикселей ломался бы на первой же стране с длинными
+   словами. Шапка одним блоком складывает ярусы сама. */
+table.sheet thead { position: sticky; top: 0; z-index: 3; }
 /* Ярус групп над колонками ведомости — модуль 9 эталона. Он тише самих
    заголовков: его дело — разделить пятнадцать колонок на смысловые куски, а не
    спорить с ними за внимание. Отсюда мелкий кегль вразрядку и фон на тон
@@ -1315,7 +1449,9 @@ table.variance td.threshold { white-space: nowrap; }
 table.variance td:nth-child(2) .hint { display: block; }
 
 /* Свёрнутая история периода: строка-заголовок вместо таблицы на треть экрана. */
-details.history-box { margin: 0 0 var(--space-9); }
+/* Таблица истории на телефоне шире экрана на десяток пикселей и уезжала за
+   край без прокрутки (смоук раскладки, T223): прокручивается сам блок. */
+details.history-box { margin: 0 0 var(--space-9); overflow-x: auto; }
 details.history-box > summary {
   cursor: pointer; color: var(--ink-2); font-size: var(--fs-meta); width: max-content;
 }
@@ -1383,8 +1519,11 @@ ol.steps {
   border: 1px solid var(--line-control); border-radius: var(--r-control);
   overflow: hidden;
 }
+/* Основа шага — 160, а не 220: три шага по 220 не вставали рядом с левой
+   панелью на планшете (на 900 содержимому остаётся 650), и полоса ломалась
+   на два ряда (issue #268). Короткие названия шагов в 160 помещаются. */
 ol.steps li {
-  flex: 1 1 220px; padding: var(--space-4) var(--space-7);
+  flex: 1 1 160px; padding: var(--space-4) var(--space-7);
   border-right: 1px solid var(--line-2);
   color: var(--ink-2); font-size: var(--fs-meta);
 }
@@ -1697,6 +1836,12 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
   /* Плитки и полосы на 375: плитка одна в ряд, у полосы месяц и сумма
      сжимаются — иначе на саму полосу остаётся десяток пикселей и она перестаёт
      что-либо показывать. */
+  /* Первая колонка широкой таблицы — ключ строки (дата, имя, точка) — не
+     переносится: на 390 дата «12 июня 2026» ломалась в три строки, и строка
+     списка вырастала втрое (сверка T224). Таблица и так прокручивается
+     внутри себя, а ключ строки читается одним взглядом. */
+  .scroll td:first-child, .scroll th:first-child { white-space: nowrap; }
+
   .kpi { grid-template-columns: 1fr; }
   .chart__month { flex: 0 0 92px; }
   .chart__value { flex: 0 0 104px; }
@@ -1762,6 +1907,15 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
    reports, T222). Здесь он переносит пункты на следующую строку и не
    бывает шире родителя; ядро об этом — предложение в `GarroV/forma`. */
 .seg { flex-wrap: wrap; max-width: 100%; }
+/* Выбранная капсула в тёмной теме (сверка T224). Ядро красит её `--surface`,
+   а в тёмной теме он ТЕМНЕЕ дорожки `--seg-track`: выбранное отличалось от
+   соседей в основном жирностью. Здесь — рамкой и цветом акцента, как у
+   выбранного пункта панели. Правка общая для линейки — предложение в
+   `GarroV/forma`; до него перекрыто здесь. */
+:root[data-theme="dark"] .seg__current { color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .seg__current { color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+}
 
 /* ── Учётная запись (T222) ─────────────────────────────────────
    Кто вы и что вам видно — парами «название — значение», как карточка
@@ -1774,6 +1928,13 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 .account dd { margin: 0; display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 .account__links { display: flex; flex-direction: column; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
 .account__links a { display: inline-flex; align-items: center; min-height: var(--tap-min); }
+/* Тема и язык на странице учётной записи — только на телефоне: там их нет в
+   шапке (issue #268, см. правила телефона в «Левой панели»). */
+.account__prefs { display: none; }
+@media (max-width: 719px) {
+  .account__prefs { display: flex; justify-content: flex-start; gap: var(--space-8); margin: 0 0 var(--space-8); padding: 0; }
+  .account__prefs .sidenav__theme { flex-direction: row; margin: 0; }
+}
 
 /* ── Отбор списка ссылками (T224, D081) ────────────────────────
    Подпись слева, значения рядом: подписи стоят столбиком одной ширины, и ряды
