@@ -467,7 +467,7 @@ def test_the_screen_does_not_promise_a_delta_that_will_never_come(client, web_en
 
 
 def test_a_role_without_the_right_cannot_bind_units(rls, sql):
-    """Запись в `employee_units` закрыта правом `directory.manage` — проверено базой.
+    """Запись в `employee_units` закрыта правом `staff.manage` (T236) — проверено базой.
 
     Ролью `app_user`, а не владельцем схемы: на владельца политики не действуют,
     и зелёный результат ничего не значил бы. Именами людей, а не «первым
@@ -490,7 +490,7 @@ def test_a_role_without_the_right_cannot_bind_units(rls, sql):
             continue
         with as_app_user(rls, str(user_id[0])):
             has_right = rls.execute(
-                "select app_has_permission(%s, 'directory.manage')", (tenant,),
+                "select app_has_permission(%s, 'staff.manage')", (tenant,),
             ).fetchone()[0]
             if has_right:
                 continue
@@ -568,7 +568,7 @@ def test_the_reader_is_refused_in_words_if_he_posts_anyway(client, web_env, sql)
         "what": "units", "units_from": "2026-06-01", "units": [unit(sql, "NS1")],
     })
     assert answer.status_code == 403, answer.status_code
-    assert "Ведение справочников" in body(answer), body(answer)[:600]
+    assert "Ведение сотрудников" in body(answer), body(answer)[:600]
     assert not bindings(sql, person), "отказ 403 всё-таки завёл набор точек"
     client.post("/logout/")
 
@@ -707,8 +707,8 @@ def test_a_hidden_network_row_gives_the_manager_a_neutral_refusal(client, web_en
         (person,),
     )
     granted = sql.execute(
-        """update roles set permissions = permissions || '["directory.manage"]'::jsonb
-            where code = 'manager' and not permissions ? 'directory.manage'
+        """update roles set permissions = permissions || '["staff.manage"]'::jsonb
+            where code = 'manager' and not permissions ? 'staff.manage'
         returning id"""
     ).fetchall()
     try:
@@ -719,7 +719,7 @@ def test_a_hidden_network_row_gives_the_manager_a_neutral_refusal(client, web_en
     finally:
         for (role_id,) in granted:
             sql.execute(
-                "update roles set permissions = permissions - 'directory.manage' where id = %s",
+                "update roles set permissions = permissions - 'staff.manage' where id = %s",
                 (role_id,),
             )
         client.post("/logout/")
