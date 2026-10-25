@@ -54,7 +54,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
-from django.db import transaction
+from django.db import connection, transaction
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_noop
 
@@ -64,8 +64,34 @@ from .errors import PayrunRefused
 
 __all__ = [
     "DELTA", "RECALCULATE", "Drift", "Line", "adjustments_for", "drift",
-    "mode", "next_open_period", "pending", "post",
+    "mode", "next_open_period", "pending", "post", "require_sums_visible",
 ]
+
+# Видит ли текущий смотрящий суммы расчёта партнёра (T236, `payroll.view`).
+# Тот же ответ, что у политик чтения сумм (`app_sees_payroll`, миграция `0275`),
+# плюс то же исключение, что у самих политик: роль подключения, которая RLS
+# обходит (владелец схемы в командах и тестах), видит всё.
+_SEES_SUMS_SQL = """
+select coalesce((select rolbypassrls or rolsuper from pg_roles where rolname = current_user), false)
+    or app_sees_payroll(%s)
+"""
+
+
+def require_sums_visible(tenant_id: UUID) -> None:
+    """Отказ, если смотрящему не открыты суммы расчёта.
+
+    Охрана стоит здесь, а не в экране: расхождение (`drift`) движок считает
+    заново из условий найма, мимо таблиц, и политика чтения сумм его не видит.
+    Проверка в представлении закрыла бы одну страницу, а функцию позвал бы
+    следующий экран — тот же довод, что у `payrun.person`.
+    """
+    from web import permissions
+
+    with connection.cursor() as cursor:
+        cursor.execute(_SEES_SUMS_SQL, [str(tenant_id)])
+        if not cursor.fetchone()[0]:
+            raise permissions.PermissionRefused(permissions.PAYROLL_VIEW)
+
 
 DELTA = "delta"
 RECALCULATE = "recalculate"
@@ -281,6 +307,7 @@ def drift(tenant_id: UUID, period: date, *, visible_ledgers) -> Drift:
     seen = set(visible_ledgers or [])
     if not seen:
         return Drift()
+    require_sums_visible(tenant_id)
 
     fresh, error = _fresh(tenant_id, period, seen)
     if error:
@@ -394,6 +421,7 @@ def post(*, tenant_id: UUID, source: date, actor_id, visible_ledgers) -> tuple[d
 
 def adjustments_for(tenant_id: UUID, period: date) -> list[RetroAdjustment]:
     """Живые переносы, которые этот месяц обязан взять в свою ведомость."""
+    require_sums_visible(tenant_id)
     return list(
         RetroAdjustment.objects.filter(
             tenant_id=tenant_id, target_period=period, cancelled_at__isnull=True

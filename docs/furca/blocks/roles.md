@@ -102,8 +102,9 @@
 `unit_scope`), названия прав — `web/permissions.py`, точки при выдаче —
 `roles_views.membership_units` и галки `web/roles/unit_picks.html`.
 Миграции: `0274` (люди и условия найма — свои права), `0275` (`payroll.view`
-всем существующим ролям, сужающая политика чтения `payroll_view` на
-`pay_components`/`payslip_totals`, роль региона каждому поднятому партнёру).
+всем ролям; политика чтения `payroll_view` через `app_sees_payroll` на
+`pay_components`, `payslip_totals`, `retro_adjustments`; её же спрашивает
+`retro.require_sums_visible`; роль региона каждому поднятому партнёру).
 Откат у ДИР/БУХ и закрытие часов у УПР снимает доставка форм — только у ролей,
 которые партнёр не правил.
 
@@ -116,5 +117,4 @@
 `app_user` с проверкой «сняли политику — покраснело» (`test_rights_split`,
 `test_payroll_view`); выдача — `test_roles_screen_access`.
 
-**Открыто:** галки точек не сверены с эталоном в живом браузере;
-`tools/smoke_roles_unit_scope.mjs` не прогнан — стенд на Маке (D084).
+**Открыто:** галки точек не сверены с эталоном в браузере; смоук `.mjs` — D084.
