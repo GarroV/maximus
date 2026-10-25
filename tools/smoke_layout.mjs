@@ -70,6 +70,18 @@ const pages = () => evalIn(`(async () => {
     out.add('/timesheets/' + period.split('/')[2] + '/');
   }
   out.add('/payroll/sheet/');
+  // Вложенные экраны, куда из панели не попасть одним нажатием, но где
+  // сверки находили поломки раскладки: разнесение расхода, карточка счёта,
+  // страница человека в ролях. Недоступное роли отвечает отказом — и
+  // страница отказа тоже обязана помещаться.
+  for (const extra of ['/expenses/split/', '/expenses/unallocated/']) out.add(extra);
+  for (const [list, re] of [['/invoices/', /^\\/invoices\\/[0-9a-f-]{36}\\/$/], ['/roles/people/', /^\\/roles\\/people\\/[0-9a-f-]{36}\\/$/]]) {
+    const resp = await fetch(list);
+    if (!resp.ok) continue;
+    const page = new DOMParser().parseFromString(await resp.text(), 'text/html');
+    const hit = [...page.querySelectorAll('main a')].map((a) => a.getAttribute('href')).find((h) => re.test(h || ''));
+    if (hit) out.add(hit);
+  }
   return [...out];
 })()`);
 
@@ -178,6 +190,25 @@ const probe = (phone) => evalIn(`(() => {
     // никому не видна — она не «закрыта полосой».
     const last = [...main.children].filter(shown).pop();
     if (bar && last) r.barCovers = Math.max(0, Math.round(last.getBoundingClientRect().bottom - bar.getBoundingClientRect().top));
+    // Докрученная до конца страница: ни одна кнопка, ссылка или поле не
+    // остаётся под полосой — иначе до неё не дотянуться вовсе.
+    if (bar) {
+      const bt = bar.getBoundingClientRect().top;
+      const under = [...main.querySelectorAll('a, button, input:not([type=hidden]), select, textarea')].filter((e) => {
+        if (!shown(e)) return false;
+        const q = e.getBoundingClientRect();
+        if (q.bottom <= bt + 1 || q.top >= window.innerHeight) return false;
+        // Спрятанное прокруткой своего контейнера не видно и так — это не
+        // «под полосой».
+        const box = scroller(e);
+        if (box) {
+          const bq = box.getBoundingClientRect();
+          if (q.top >= bq.bottom || q.bottom <= bq.top) return false;
+        }
+        return true;
+      });
+      if (under.length) { r.barCovers = Math.max(r.barCovers, 1); r.under = under.slice(0, 3).map(name); }
+    }
     window.scrollTo(0, 0);
   }
   r.over = r.over.slice(0, 6); r.clipped = r.clipped.slice(0, 6); r.thBroken = r.thBroken.slice(0, 4); r.scrolls = r.scrolls.slice(0, 4);
@@ -217,7 +248,7 @@ for (const [k, v] of Object.entries(report)) {
   if (v.thFill.length) bad.push(`${k}: шапка залита не целиком: ${v.thFill.join("; ")}`);
   if (v.file) bad.push(`${k}: нативное поле выбора файла: ${v.file}`);
   if (v.headTop > PHONE_HEAD_MAX) bad.push(`${k}: шапка телефона ${v.headTop}px > ${PHONE_HEAD_MAX}`);
-  if (v.barCovers > 0) bad.push(`${k}: нижняя полоса закрывает конец страницы на ${v.barCovers}px`);
+  if (v.barCovers > 0) bad.push(`${k}: нижняя полоса закрывает конец страницы на ${v.barCovers}px${v.under ? ": " + v.under.join("; ") : ""}`);
 }
 console.log(`страниц×ширин: ${Object.keys(report).length}; снимки: ${shots.join(" ")}`);
 if (bad.length) {

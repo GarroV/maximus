@@ -546,8 +546,20 @@ a.mark--ok:hover { background: var(--ok-line); }
 }
 .empty .next:hover { background: var(--accent-hover); text-decoration: none; }
 
-/* Примечание — абзац, а не блок: это текст рядом с данными. */
-.note { color: var(--ink-2); font-size: var(--fs-meta); margin-top: var(--space-9); }
+/* Примечание — абзац, а не блок: это текст рядом с данными.
+   В ядре `.note` — плашка (flex, поля 12×16, скругление), а у продукта это
+   имя с самого начала занято мелким пояснением (issue #165). Поля и flex
+   ядра доезжали и сюда: пояснения под кнопками стояли сдвинутыми вправо на
+   16 px и с пустотами (сверки T223, T233). Сброшены здесь — плашки продукта
+   рисует `{% notice %}` своими классами. */
+.note {
+  display: block; padding: 0; border: 0; border-radius: 0; background: none;
+  color: var(--ink-2); font-size: var(--fs-meta); margin-top: var(--space-9);
+}
+span.note { display: inline; }
+/* Пояснение к действию — сразу под его кнопкой, а не через 24 пикселя:
+   оторванное, оно читалось отдельным абзацем страницы. */
+form.action > .note, .actions > .note { display: block; margin-top: var(--space-3); }
 /* Пояснение под кнопками. Отрицательного отступа здесь быть не должно: ряд
    кнопок — flex-блок со своим нижним полем, и подтягивание «поближе» наложило
    текст прямо на кнопки. Поймано на снимке экрана — в разметке этого не
@@ -907,6 +919,11 @@ form.card {
 form.card.wide { max-width: 860px; display: grid; gap: 0 var(--space-9); grid-template-columns: 1fr 1fr; }
 form.card.wide > p, form.card.wide > .field { margin-bottom: var(--space-6); }
 form.card.wide > .full, form.card.wide > .actions { grid-column: 1 / -1; }
+/* Кнопка под последним полем — с воздухом, а не впритык: поле без своего
+   нижнего поля ставило «Выдать» в десяти пикселях от поля причины, и кнопка
+   читалась частью поля (сверка T233, /roles/people/<id>/). */
+form.card > label + button, form.card > label + .btn,
+form.card > .field + button, form.card > .field + .btn { margin-top: var(--space-6); }
 form.card p { margin: 0 0 var(--space-7); }
 form.card p:last-child { margin-bottom: 0; }
 form.card label { color: var(--ink-2); font-size: var(--fs-meta); }
