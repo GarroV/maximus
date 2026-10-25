@@ -34,7 +34,7 @@ const OUT = process.env.OUT || "/tmp/layout-shots";
 mkdirSync(OUT, { recursive: true });
 const pass = process.env.USER_PASS;
 const ROLES = (process.env.ROLES || "accountant,manager").split(",");
-const WIDTHS = { wide: [1440, 900], tablet: [900, 1000], narrow: [768, 1000], phone: [390, 844] };
+const WIDTHS = { wide: [1440, 900], tablet: [1024, 1000], narrow: [768, 1000], phone: [375, 812] };
 // Шапка телефона до содержимого — требование сверки по T222 (issue #268).
 const PHONE_HEAD_MAX = 120;
 const SHOTS = new Set(["/timesheets/", "/payroll/sheet/", "/analytics/people/", "/periods/"]);
@@ -71,22 +71,25 @@ const pages = () => evalIn(`(async () => {
   }
   out.add('/payroll/sheet/');
   // Вложенные экраны, куда из панели не попасть одним нажатием, но где
-  // сверки находили поломки раскладки: разнесение расхода, карточка счёта,
+  // сверки находили поломки раскладки: разнесение расхода (форма у записи), карточка расхода и счёта,
   // страница человека в ролях. Недоступное роли отвечает отказом — и
   // страница отказа тоже обязана помещаться.
-  for (const extra of ['/expenses/split/', '/expenses/unallocated/']) out.add(extra);
-  for (const [list, re] of [['/invoices/', /^\\/invoices\\/[0-9a-f-]{36}\\/$/], ['/roles/people/', /^\\/roles\\/people\\/[0-9a-f-]{36}\\/$/]]) {
+  out.add('/expenses/unallocated/');
+  for (const [list, re] of [['/invoices/', /^\\/invoices\\/[0-9a-f-]{36}\\/$/], ['/expenses/', /^\\/expenses\\/[0-9a-f-]{36}\\/$/], ['/roles/people/', /^\\/roles\\/people\\/[0-9a-f-]{36}\\/$/]]) {
     const resp = await fetch(list);
     if (!resp.ok) continue;
     const page = new DOMParser().parseFromString(await resp.text(), 'text/html');
     const hit = [...page.querySelectorAll('main a')].map((a) => a.getAttribute('href')).find((h) => re.test(h || ''));
     if (hit) out.add(hit);
+    if (hit && list === '/expenses/') out.add(hit + 'split/');
   }
   return [...out];
 })()`);
 
 const probe = (phone) => evalIn(`(() => {
   const main = document.querySelector('main');
+  // Страница без основной области — это страница ошибки, а не продукта.
+  if (!main) return { noMain: document.title + ' / ' + document.body.innerText.trim().slice(0, 80).replace(/\\s+/g, ' ') };
   const mr = main.getBoundingClientRect();
   const cs = (e) => getComputedStyle(e);
   const shown = (e) => e.getClientRects().length > 0 && cs(e).visibility !== 'hidden';
@@ -238,6 +241,7 @@ writeFileSync(`${OUT}/report.json`, JSON.stringify({ report, shots }, null, 1));
 
 const bad = [];
 for (const [k, v] of Object.entries(report)) {
+  if (v.noMain) { bad.push(`${k}: нет основной области, это не страница продукта: ${v.noMain}`); continue; }
   const wide = / (wide|tablet) /.test(k);
   if (v.hscroll > 0) bad.push(`${k}: страница едет вбок на ${v.hscroll}px`);
   if (v.over.length) bad.push(`${k}: за правым краем: ${v.over.join("; ")}`);
