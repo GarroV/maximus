@@ -30,7 +30,8 @@ import pytest
 from conftest import body, login_as
 from web.expense_items_upload import COLUMNS, _norm
 
-LIST_URL = "/directory/expense-items/"
+# С T228 загрузка статей живёт на своей странице (D087), а не под списком.
+UPLOAD_URL = "/directory/expense-items/upload/"
 
 LANGUAGES = ["ru", "en", "sr-latn"]
 
@@ -47,11 +48,11 @@ def upload_hint(client, language: str) -> str:
     """Текст над формой загрузки на выбранном языке — с живой страницы."""
     client.cookies["django_language"] = language
     try:
-        html = body(client.get(LIST_URL))
+        html = body(client.get(UPLOAD_URL))
     finally:
         client.cookies.pop("django_language", None)
     found = re.search(
-        r'<form class="upload".*?<p class="sub">(.*?)</p>', html, re.S
+        r'<p class="sub">(.*?)</p>.*?<form class="upload', html, re.S
     )
     assert found, f"на странице ({language}) не нашлось текста над формой загрузки"
     # Разметку возвращаем в текст: «Строка P&L» доезжает до страницы как
