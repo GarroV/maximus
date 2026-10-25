@@ -118,14 +118,17 @@ def _unit_hours(tenant_id: UUID, period: date) -> list[Finding]:
 def _papers(tenant_id: UUID, period: date) -> list[Finding]:
     """Бумаги с точек, которые никто не разобрал.
 
-    Разобрана — значит у документа появились строки; отдельного признака нет
+    Разобрана — значит у документа есть строка учёта; отдельного признака нет
     намеренно (`web/papers`). Пока строк нет, денег этой бумаги в P&L нет вовсе.
-    """
-    from core.models import SourceDocument
 
-    waiting = SourceDocument.objects.filter(
-        tenant_id=tenant_id, handed_over_at__isnull=False, fact__isnull=True,
-    ).count()
+    Считает тот же `waiting_count`, что инбокс и список бумаг (issue #287): своё
+    условие здесь уже расходилось с ними — бумагу, у которой не осталось ни
+    одной действующей строки, закрытие считало разобранной, а список бумаг —
+    ждущей.
+    """
+    from web.papers import waiting_count
+
+    waiting = waiting_count(None, tenant_id=tenant_id)
     if not waiting:
         return []
     return [Finding(

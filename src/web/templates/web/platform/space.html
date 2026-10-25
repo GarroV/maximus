@@ -25,7 +25,7 @@
 
 <h2>{% translate "Люди пространства" %}</h2>
 <p><a class="btn" href="{% url 'platform-member-role' tenant_id=space.id %}">{% translate "Выдать роль" %}</a></p>
-{% scroll %}<table>
+{% scroll %}<table class="stack">
   <thead>
     <tr>
       <th>{% translate "Человек" %}</th>
@@ -36,9 +36,9 @@
   <tbody>
     {% for person in people %}
     <tr>
-      <td>{{ person.name }}{% if not person.is_active %} <span class="muted">{% translate "(отключён)" %}</span>{% endif %}</td>
-      <td>{{ person.username }}</td>
-      <td>{% for role in person.roles %}
+      <td data-label="{% translate "Человек" %}">{{ person.name }}{% if not person.is_active %} <span class="muted">{% translate "(отключён)" %}</span>{% endif %}</td>
+      <td data-label="{% translate "Логин" %}">{{ person.username }}</td>
+      <td data-label="{% translate "Роли" %}">{% for role in person.roles %}
         <form method="post" action="{% url 'platform-member-role' tenant_id=space.id %}" class="inline">
           {% csrf_token %}
           <input type="hidden" name="user_id" value="{{ person.user_id }}">

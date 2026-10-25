@@ -8,9 +8,11 @@ from . import (
     cash_views,
     counterparties_views,
     directory_views,
+    employee_views,
     expense_items_views,
     expenses_views,
     guide,
+    inbox_split_views,
     papers_views,
     people_views,
     person_views,
@@ -159,6 +161,7 @@ urlpatterns = [
     path("roles/invite/", roles_views.invite, name="roles-invite"),
     path("roles/people/", roles_views.people, name="roles-people"),
     path("roles/history/", roles_views.history, name="roles-history"),
+    path("roles/history/export/", roles_views.history_export, name="roles-history-export"),
     path("roles/<uuid:role_id>/rights/", roles_views.role_rights, name="role-rights"),
     path("roles/people/<uuid:user_id>/", roles_views.person_roles, name="person-roles"),
     path("directory/", directory_views.index, name="directory"),
@@ -168,10 +171,23 @@ urlpatterns = [
         directory_views.employee_new,
         name="directory-employee-new",
     ),
+    # Сотрудник — тремя страницами (D081, T229): карточка, условия найма и
+    # точки затрат. Прежде это был один экран с четырьмя формами; устройство и
+    # права — в шапке `web/employee_views.py`.
     path(
         "directory/employees/<uuid:employee_id>/",
-        directory_views.employee,
+        employee_views.employee,
         name="directory-employee",
+    ),
+    path(
+        "directory/employees/<uuid:employee_id>/terms/",
+        employee_views.employee_terms,
+        name="directory-employee-terms",
+    ),
+    path(
+        "directory/employees/<uuid:employee_id>/units/",
+        employee_views.employee_units,
+        name="directory-employee-units",
     ),
     # Выплаты человека по месяцам (T166). Адрес под карточкой, а не отдельным
     # корнем: приходят сюда с карточки, и вложенность делает это видно по адресу.
@@ -398,6 +414,8 @@ urlpatterns = [
     # за одно действие. Адрес без номера строки — их несколько, и они приезжают
     # в теле запроса.
     path("inbox/classify/", suppliers_views.inbox_batch, name="inbox-batch"),
+    # Разнести отмеченные строки по точкам одними долями (T234, D089).
+    path("inbox/split/", inbox_split_views.inbox_split, name="inbox-split"),
     # Расходы по HTTP (T112). Отдельный префикс `api/`, а не те же адреса с
     # другим заголовком: два разных ответа на один адрес разъезжаются молча — и
     # разъезжаться будут именно там, где их никто не смотрит глазами. Роль и

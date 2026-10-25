@@ -185,7 +185,7 @@ def test_the_card_shows_the_allowance_with_its_own_name(client, sql, somebody): 
     add(sql, somebody["employee"])
 
     login_as(client, "director")
-    shown = body(client.get(f"/directory/employees/{somebody['employee']}/"))
+    shown = body(client.get(f"/directory/employees/{somebody['employee']}/terms/"))
 
     assert "Наставничество" in shown, "надбавки нет на карточке"
     assert "За отработанный час" in shown, "не сказано, как считается величина"
@@ -202,7 +202,7 @@ def test_a_finished_allowance_stays_on_the_card(client, sql, somebody):  # noqa:
     add(sql, somebody["employee"], valid_from="2026-01-01", valid_to="2026-07-01")
 
     login_as(client, "director")
-    shown = body(client.get(f"/directory/employees/{somebody['employee']}/"))
+    shown = body(client.get(f"/directory/employees/{somebody['employee']}/terms/"))
     assert "Наставничество" in shown and "01.07.2026" in shown
 
 
@@ -215,7 +215,7 @@ def test_the_manager_sees_the_allowance_but_not_its_money(client, sql, somebody)
     add(sql, somebody["employee"], ledger="official")
 
     login_as(client, "manager")
-    answer = client.get(f"/directory/employees/{somebody['employee']}/")
+    answer = client.get(f"/directory/employees/{somebody['employee']}/terms/")
     if answer.status_code == 404:
         return   # человек не его точки — проверять нечего, это D023
     assert "Наставничество" in body(answer)

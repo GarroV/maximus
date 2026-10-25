@@ -334,7 +334,7 @@ def post_new_version(client, sql, employee_id, *, valid_from: str, rate: str):
         (employee_id,),
     ).fetchone()
     group_id, unit_id, coefficient, scheme, ledger = current
-    return client.post(f"/directory/employees/{employee_id}/", {
+    return client.post(f"/directory/employees/{employee_id}/terms/", {
         "what": "terms",
         "valid_from": valid_from,
         "group": str(group_id),

@@ -59,6 +59,8 @@ from decimal import Decimal
 
 from django.db import Error as DatabaseError
 from django.db import connection, models, transaction
+from django.db.models import Exists, OuterRef, Value
+from django.db.models.functions import Concat
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -810,10 +812,38 @@ def waiting_for_an_article(who):
     точки партнёра (`app_network_row_is_visible`, `0236`).
     """
     return list(
-        Fact.objects.select_related("counterparty", "unit", "document")
-        .filter(pnl_item_id=line(UNCLASSIFIED).id, superseded_at__isnull=True)
-        .exclude(allocation="allocated")
+        awaiting_an_article()
+        .select_related("counterparty", "unit", "document")
         .order_by("-doc_date", "created_at")
+    )
+
+
+def awaiting_an_article():
+    """Строки, которые реально ждут статьи, — одно правило для всех (issue #290).
+
+    Без статьи, действующая, не дочь разнесения — и ещё два условия, без которых
+    закрытый месяц врал. Разбор строки закрытого месяца её саму не трогает
+    (`facts_guard`, D020): в открытом периоде ложатся сторно и исправление со
+    статьёй. Исходная строка остаётся без статьи, сторно — тоже (оно копирует
+    исходную), и обе стояли в инбоксе, хотя трата разобрана. Поэтому:
+
+    * сторнированная строка не ждёт — её уже разобрали или признали чужой;
+    * сторно не ждёт никогда — это отмена, а не трата.
+
+    Этим же отвечают разбор по номеру (`unclassified_fact`), инбокс, счётчик
+    левой панели и готовность месяца к закрытию — второе условие в любом из них
+    разошлось бы с экраном молча, как уже было у бумаг (#287).
+    """
+    stornoed = Fact.objects.filter(
+        tenant_id=OuterRef("tenant_id"),
+        dedup_key=Concat(OuterRef("dedup_key"), Value(cash.STORNO_SUFFIX)),
+        superseded_at__isnull=True,
+    )
+    return (
+        Fact.objects.filter(pnl_item_id=line(UNCLASSIFIED).id, superseded_at__isnull=True)
+        .exclude(allocation="allocated")
+        .exclude(dedup_key__endswith=cash.STORNO_SUFFIX)
+        .exclude(Exists(stornoed))
     )
 
 
@@ -827,13 +857,64 @@ def classify(who, fact, *, item, unit_id) -> Recorded:
     неразобранного — это правка задним числом, и переписать ею закрытый месяц
     нельзя: июнь сегодня и июнь через полгода обязаны давать одно число.
     """
-    remember(who, fact.counterparty_id, item)
-    if not cash.month_is_closed(who.tenant_id, fact.period):
-        return _reclassified(who, fact, item=item, unit_id=unit_id,
-                             dedup_key=fact.dedup_key)
-    storno_line(who, fact)
-    return _reclassified(who, fact, item=item, unit_id=unit_id,
-                         dedup_key=fact.dedup_key + cash.FIX_SUFFIX)
+    # Разнесённая строка остаётся разнесённой (D089, issue #288): разбор меняет
+    # статью, а не точки. Точка, пришедшая в форме, у неё не применяется — иначе
+    # разбор складывал доли, поставленные человеком, в одну строку молча.
+    #
+    # Одной транзакцией: отказ повторного разнесения обязан откатить и замену
+    # строки, иначе в базе осталась бы разобранная строка на всю сеть без долей.
+    shares = shares_of(fact)
+    if shares:
+        unit_id = None
+    with transaction.atomic():
+        # Память «поставщик → статья» — внутри той же транзакции: отказанный
+        # разбор не должен оставлять подсказку, строка ведь не разобрана.
+        remember(who, fact.counterparty_id, item)
+        if not cash.month_is_closed(who.tenant_id, fact.period):
+            recorded = _reclassified(who, fact, item=item, unit_id=unit_id,
+                                     dedup_key=fact.dedup_key)
+        else:
+            storno_id = storno_line(who, fact)
+            if shares:
+                _split_again(storno_id, shares, who)
+            recorded = _reclassified(who, fact, item=item, unit_id=unit_id,
+                                     dedup_key=fact.dedup_key + cash.FIX_SUFFIX)
+        if shares:
+            _split_again(recorded.fact_id, shares, who)
+    return recorded
+
+
+def shares_of(fact) -> dict:
+    """Доли разнесённой строки: точка → сумма. Не разнесена — пусто.
+
+    Суммы, а не проценты: их база и примет весами, и разнесёт той же функцией —
+    копейка в копейку так же, как было, потому что вес каждой точки и есть её
+    сумма.
+    """
+    if fact.allocation != "split":
+        return {}
+    # Веса — по модулю: у кредит-ноты доли отрицательные, а база принимает
+    # только положительные веса. Знак долям даёт сумма самой строки.
+    return {
+        row.unit_id: abs(row.amount)
+        for row in Fact.objects.filter(parent_fact_id=fact.id, superseded_at__isnull=True,
+                                       allocation="allocated")
+    }
+
+
+def _split_again(fact_id, shares: dict, who) -> None:
+    """Разнести новую версию строки теми же долями. Отказ — не молча.
+
+    Отказ здесь значит, что разнесение ставил один человек, а разбирает другой,
+    кому часть точек не видна. Проглотить его значило бы оставить строку на всю
+    сеть — то самое свёртывание долей, от которого правило D089.
+    """
+    written = cash.split_by_hand(fact_id, shares, getattr(who, "user_id", None))
+    if not written:
+        raise cash.CashRefused(_(
+            "Строка разнесена по точкам, часть которых вам не видна, — разобрать её "
+            "может тот, кто ведёт все точки партнёра."
+        ))
 
 
 def _reclassified(who, fact, *, item, unit_id, dedup_key: str) -> Recorded:
@@ -948,8 +1029,7 @@ def unclassified_fact(fact_id) -> Fact | None:
     неё — тот же ответ, что на чужую (D023).
     """
     return (
-        Fact.objects.select_related("counterparty", "unit")
-        .filter(pk=fact_id, pnl_item_id=line(UNCLASSIFIED).id, superseded_at__isnull=True)
-        .exclude(allocation="allocated")
+        awaiting_an_article().select_related("counterparty", "unit")
+        .filter(pk=fact_id)
         .first()
     )

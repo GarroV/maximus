@@ -1,4 +1,4 @@
-/* forma dodo/core/dodo-ds.css sha256:6a6d2b333bd186e1d3ff89544f86fc095bfd5c558b634996877c4b5766c1e845 — не править здесь, правка идёт в GarroV/forma */
+/* forma dodo/core/dodo-ds.css sha256:d6e48d6505a2e35e6263a95bf8185c93c421d2093a37c0ced67a8a9b878d27c1 — не править здесь, правка идёт в GarroV/forma */
 /* ═══════════════════════════════════════════════════════════════════════════
    DODO — ЕДИНАЯ ДИЗАЙН-СИСТЕМА ТРЁХ ПРОДУКТОВ
    Собрана 17.09.2026 из двух источников:
@@ -999,7 +999,7 @@ a:hover { color: var(--accent-press); text-decoration: underline; }
        <a class="sidenav__brand">  img.sidenav__logo  .sidenav__name > b + small
        <form class="sidenav__search"> label.sidenav__field > svg input kbd.kbd
        <div class="sidenav__list">  .sidenav__group  a.sidenav__item | span.sidenav__current
-       <div class="sidenav__foot">  .sidenav__theme  a.sidenav__item …
+       <div class="sidenav__foot">  .sidenav__prefs > (.sidenav__theme  .sidenav__lang > .langpill)  a.sidenav__item …
        <div class="sidenav__user">  .avatar  .sidenav__who > b + small
 */
 
@@ -1033,12 +1033,41 @@ a:hover { color: var(--accent-press); text-decoration: underline; }
 .sidenav__count { margin-left: auto; font-family: var(--font-mono); font-size: 11px; font-weight: var(--w-regular); color: var(--ink-3); }
 
 .sidenav__foot { display: flex; flex-direction: column; gap: 2px; padding: var(--space-4); border-top: 1px solid var(--line); }
+/* Тема — такой же капсулой, как язык (владелец DECIMUS 30.09.2026: «я просил
+   и язык и тему сделать пилюлей. при этом без надписей»). Обе капсулы стоят
+   одной строкой в `.sidenav__prefs`, подписей нет: иконки и буквы говорят
+   сами, а название выбора есть в aria-label группы и в title сегмента.
+   Подписи `.sidenav__theme-label` и `.sidenav__lang-label` остаются для
+   старой разметки, но в строке `.sidenav__prefs` не показываются. */
+.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-2); padding: 0 var(--space-2); }
+.sidenav__prefs .sidenav__theme, .sidenav__prefs .sidenav__lang { margin: 0; padding: 0; }
+.sidenav__prefs .sidenav__theme-label, .sidenav__prefs .sidenav__lang-label { display: none; }
 .sidenav__theme { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); padding: 0 var(--space-2); }
 .sidenav__theme-label { flex: 1; font-size: 12px; color: var(--ink-3); }
-.sidenav__theme button { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; color: var(--ink-3); cursor: pointer; }
-.sidenav__theme button:hover { background: var(--surface); color: var(--ink); }
+.sidenav__theme[role="radiogroup"] { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface); }
+.sidenav__theme button { display: grid; place-items: center; width: 28px; height: 24px; border: 0; border-radius: var(--r-pill); background: transparent; color: var(--ink-3); cursor: pointer; transition: background var(--t-state) var(--ease), color var(--t-state) var(--ease); }
+.sidenav__theme button:hover { background: var(--surface-2); color: var(--ink); }
+.sidenav__theme button:focus-visible { outline: var(--focus-outline); outline-offset: 1px; }
 .sidenav__theme button[aria-checked="true"], .sidenav__theme button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
 .sidenav__theme svg { width: 15px; height: 15px; }
+
+/* Язык интерфейса — пилюлей рядом с темой (владелец DECIMUS 30.09.2026:
+   «переключение языка сделай более адекватным, пилюлей как в сворме»).
+   Строка устроена как тема над ней: подпись слева, выбор справа, — а сам
+   выбор — одна капсула с двумя сегментами, текущий залит мягким акцентом,
+   как текущая тема и текущий пункт. Две отдельные буквы без общей рамки,
+   как было, читались подписями, а не переключателем.
+   Капсула — `.langpill`, она же стоит на экране входа, где панели нет.
+   Сегменты — кнопки с aria-pressed: язык выбирают, а не переходят по
+   ссылке, и читалка должна сказать «нажата», а не «ссылка». */
+.sidenav__lang { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); padding: 0 var(--space-2); }
+.sidenav__lang-label { flex: 1; font-size: 12px; color: var(--ink-3); }
+
+.langpill { display: inline-flex; align-items: center; gap: 2px; margin: 0; padding: 2px; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface); }
+.langpill__item { display: inline-grid; place-items: center; min-width: 34px; height: 24px; padding: 0 var(--space-4); border: 0; border-radius: var(--r-pill); background: transparent; color: var(--ink-3); font-family: var(--font-mono); font-size: 11px; font-weight: var(--w-semibold); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; transition: background var(--t-state) var(--ease), color var(--t-state) var(--ease); }
+.langpill__item:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
+.langpill__item[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); cursor: default; }
+.langpill__item:focus-visible { outline: var(--focus-outline); outline-offset: 1px; }
 
 .sidenav__user { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-6); border-top: 1px solid var(--line); }
 .sidenav__who { display: flex; flex-direction: column; min-width: 0; }
@@ -1060,6 +1089,11 @@ a:hover { color: var(--accent-press); text-decoration: underline; }
   .sidenav__item, .sidenav__current { justify-content: center; padding: 0; }
   .sidenav__count { position: absolute; top: 2px; right: 4px; font-size: 9.5px; }
   .sidenav__theme { flex-direction: column; }
+  .sidenav__prefs { flex-direction: column; padding: 0; }
+  /* В 56px две буквы в ряд не входят: капсула встаёт столбиком. */
+  .sidenav__lang { flex-direction: column; padding: 0; }
+  .sidenav__lang-label { display: none; }
+  .sidenav__lang .langpill { flex-direction: column; }
   .sidenav__user { justify-content: center; padding-left: 0; padding-right: 0; }
 }
 

@@ -46,6 +46,7 @@ from core.roles import DEFAULT_TITLES, ROLE_ORDER
 from core.spaces import SpaceRefused, create_space, is_platform_admin
 
 from .principal import get_current_principal
+from .roles_display import role_choice, shown_role_title
 from .roles_views import membership_units
 
 
@@ -117,7 +118,8 @@ def _role_options(selected: str = "admin") -> list:
     """Роли продукта, а не роли какого-то пространства: пространства ещё нет.
     Названия — те же, что лягут в базу при заведении."""
     return [
-        {"code": code, "title": DEFAULT_TITLES[code], "selected": code == selected}
+        {"code": code, "title": shown_role_title(DEFAULT_TITLES[code], code),
+         "selected": code == selected}
         for code in ROLE_ORDER
     ]
 
@@ -214,7 +216,7 @@ def _people(tenant_id):
         row = found.setdefault(
             membership.user_id, {"user_id": membership.user_id, "roles": [], "name": ""}
         )
-        row["roles"].append(membership.role)
+        row["roles"].append(role_choice(membership.role))
 
     for user in User.objects.filter(pk__in=found):
         found[user.pk]["name"] = user.full_name or user.username
@@ -271,7 +273,8 @@ def _grant_form(request, found, *, error: str = "", status: int = 200):
                 for unit in Unit.objects.filter(tenant_id=found.pk).order_by("code")
             ],
             "role_options": [
-                {"code": str(role.pk), "title": role.title, "selected": str(role.pk) == chosen}
+                {"code": str(role.pk), "title": shown_role_title(role.title, role.code),
+                 "selected": str(role.pk) == chosen}
                 for role in Role.objects.filter(tenant_id=found.pk).order_by("title")
             ],
             "error": error,
