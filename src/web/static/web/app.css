@@ -551,6 +551,9 @@ a.mark--ok:hover { background: var(--ok-line); }
   color: var(--ink-2); font-size: var(--fs-meta); margin-top: var(--space-9);
 }
 span.note { display: inline; }
+/* Первым в `main` пояснение не отодвигает страницу: его верхнее поле схлопывалось
+   с полем `main`, и шапка телефона вырастала на 12 px (смоук раскладки). */
+main > .note:first-child { margin-top: 0; }
 /* Пояснение к действию — сразу под его кнопкой, а не через 24 пикселя:
    оторванное, оно читалось отдельным абзацем страницы. */
 form.action > .note, .actions > .note { display: block; margin-top: var(--space-3); }
