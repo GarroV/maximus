@@ -228,11 +228,14 @@ main:focus { outline: none; }
 }
 
 /* Тема и язык одной строкой, подписи групп — только диктору. */
-.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-2) var(--space-2) 0; }
+.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 0 var(--space-2); margin-bottom: 0; }
 .sidenav__prefs .sidenav__theme { margin: 0; padding: 0; }
 
 /* Выбранная тема и язык рисует ядро (`button[aria-checked]`, `.langpill__item[aria-pressed]`). */
 .sidenav__theme button, .langpill__item { font-family: var(--font-mono); font-size: 11px; }
+/* В 216 px подвала две капсулы рядом с зазором не помещаются при 34-пиксельных
+   сегментах ядра (вылезали на 6 px) — сегменты языка здесь уже. */
+.sidenav__prefs .langpill__item { min-width: 30px; padding: 0 var(--space-3); }
 .sidenav__form { margin: 0; }
 .sidenav__dev { margin-left: auto; }
 
@@ -280,6 +283,11 @@ main:focus { outline: none; }
   .sidenav__item, .sidenav__current { justify-content: flex-start; padding-left: var(--space-5); padding-right: var(--space-5); }
   .sidenav__count { position: static; font-size: 11px; }
   .sidenav__theme { flex-direction: row; }
+  /* Тема и язык — одной строкой, как на широком экране: панель здесь полная,
+     столбик ядра рассчитан на 56 px (сверка norma, 1024). */
+  .sidenav__prefs { flex-direction: row; padding: 0 var(--space-2); }
+  .sidenav__lang { flex-direction: row; }
+  .sidenav__lang .langpill { flex-direction: row; }
   .sidenav__user { justify-content: flex-start; padding-left: var(--space-6); }
   .sidenav__logout .sidenav__item { justify-content: center; padding: 0; }
 }
@@ -346,7 +354,7 @@ main:focus { outline: none; }
   .sidenav__prefs { padding: 0; }
   .sidenav__theme { flex-direction: row; margin: 0; }
   .sidenav__theme button { width: var(--tap-min); height: var(--tap-min); }
-  .langpill__item { min-width: var(--tap-min); height: var(--tap-min); }
+  .sidenav__prefs .langpill__item { min-width: var(--tap-min); height: var(--tap-min); }
   .sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,
   .sidenav__logout .sidenav__item {
     width: auto; min-height: var(--tap-min); padding: 0 var(--space-4);
