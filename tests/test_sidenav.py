@@ -294,6 +294,17 @@ def test_a_guest_still_finds_the_guide_in_the_panel(client, web_env):
     assert 'aria-current="page"' in nav and 'href="/login/"' in nav
 
 
+def test_a_guest_sees_no_sections_before_the_login(client, web_env):
+    """До входа в панели только гайд и вход: разделы гостю всё равно ответят формой входа."""
+    nav = nav_of(body(client.get("/login/")))
+
+    assert "sidenav__group" not in nav, "гостю показаны области учёта"
+    assert 'href="/periods/"' not in nav.split("sidenav__list", 1)[1].split("sidenav__foot", 1)[0], (
+        "гостю показаны разделы продукта"
+    )
+    assert 'href="/guide/"' in nav and 'aria-current="page"' in nav, "до входа нет гайда или входа"
+
+
 def test_the_role_is_named_once_and_in_the_page_language(client, web_env):
     """У учёток сида имя совпадает с названием роли — на любом из языков.
 
