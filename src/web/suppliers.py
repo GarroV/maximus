@@ -59,6 +59,8 @@ from decimal import Decimal
 
 from django.db import Error as DatabaseError
 from django.db import connection, models, transaction
+from django.db.models import Exists, OuterRef, Value
+from django.db.models.functions import Concat
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -810,10 +812,38 @@ def waiting_for_an_article(who):
     точки партнёра (`app_network_row_is_visible`, `0236`).
     """
     return list(
-        Fact.objects.select_related("counterparty", "unit", "document")
-        .filter(pnl_item_id=line(UNCLASSIFIED).id, superseded_at__isnull=True)
-        .exclude(allocation="allocated")
+        awaiting_an_article()
+        .select_related("counterparty", "unit", "document")
         .order_by("-doc_date", "created_at")
+    )
+
+
+def awaiting_an_article():
+    """Строки, которые реально ждут статьи, — одно правило для всех (issue #290).
+
+    Без статьи, действующая, не дочь разнесения — и ещё два условия, без которых
+    закрытый месяц врал. Разбор строки закрытого месяца её саму не трогает
+    (`facts_guard`, D020): в открытом периоде ложатся сторно и исправление со
+    статьёй. Исходная строка остаётся без статьи, сторно — тоже (оно копирует
+    исходную), и обе стояли в инбоксе, хотя трата разобрана. Поэтому:
+
+    * сторнированная строка не ждёт — её уже разобрали или признали чужой;
+    * сторно не ждёт никогда — это отмена, а не трата.
+
+    Этим же отвечают разбор по номеру (`unclassified_fact`), инбокс, счётчик
+    левой панели и готовность месяца к закрытию — второе условие в любом из них
+    разошлось бы с экраном молча, как уже было у бумаг (#287).
+    """
+    stornoed = Fact.objects.filter(
+        tenant_id=OuterRef("tenant_id"),
+        dedup_key=Concat(OuterRef("dedup_key"), Value(cash.STORNO_SUFFIX)),
+        superseded_at__isnull=True,
+    )
+    return (
+        Fact.objects.filter(pnl_item_id=line(UNCLASSIFIED).id, superseded_at__isnull=True)
+        .exclude(allocation="allocated")
+        .exclude(dedup_key__endswith=cash.STORNO_SUFFIX)
+        .exclude(Exists(stornoed))
     )
 
 
@@ -999,8 +1029,7 @@ def unclassified_fact(fact_id) -> Fact | None:
     неё — тот же ответ, что на чужую (D023).
     """
     return (
-        Fact.objects.select_related("counterparty", "unit")
-        .filter(pk=fact_id, pnl_item_id=line(UNCLASSIFIED).id, superseded_at__isnull=True)
-        .exclude(allocation="allocated")
+        awaiting_an_article().select_related("counterparty", "unit")
+        .filter(pk=fact_id)
         .first()
     )

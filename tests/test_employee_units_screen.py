@@ -104,7 +104,8 @@ def bindings(sql, employee_id) -> list[tuple]:
 
 
 def card(client, employee_id) -> str:
-    return body(client.get(f"{LIST}{employee_id}/"))
+    """Страница точек человека (T229): прежде блок карточки, теперь свой адрес."""
+    return body(client.get(f"{LIST}{employee_id}/units/"))
 
 
 # --- 1. Набор точек заводится с экрана ----------------------------------------
@@ -115,7 +116,7 @@ def test_a_manager_of_two_pizzerias_is_bound_from_the_screen(client, web_env, sq
     person, _ext = somebody(sql)
     login_as(client, "admin")
 
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units",
         "units_from": "2026-06-01",
         "units": [unit(sql, "BG1"), unit(sql, "NS1")],
@@ -137,7 +138,7 @@ def test_the_shares_of_the_units_are_saved_as_typed(client, web_env, sql):
     bg1, ns1 = unit(sql, "BG1"), unit(sql, "NS1")
     login_as(client, "admin")
 
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01", "units": [bg1, ns1],
         f"share_{bg1}": "0,7", f"share_{ns1}": "0,3",
     })
@@ -157,11 +158,11 @@ def test_the_whole_network_is_a_choice_and_says_so(client, web_env, sql):
     """
     person, _ext = somebody(sql)
     login_as(client, "admin")
-    client.post(f"{LIST}{person}/", {
+    client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-01-01", "units": [unit(sql, "BG1")],
     })
 
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01", "network": "1",
     }, follow=True)
     page = body(answer)
@@ -178,7 +179,7 @@ def test_an_empty_set_is_refused_not_read_as_the_network(client, web_env, sql):
     """Ни одной галки — отказ словами, а не молчаливая «сеть» или «не задан»."""
     person, _ext = somebody(sql)
     login_as(client, "admin")
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01", "units": [],
     }, follow=True)
     assert "Не отмечено ни одной точки" in body(answer)
@@ -190,7 +191,7 @@ def test_the_network_and_units_together_are_refused(client, web_env, sql):
     """«Вся сеть» и NS1 сразу — противоречие, и оно отвергается до записи."""
     person, _ext = somebody(sql)
     login_as(client, "admin")
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01",
         "network": "1", "units": [unit(sql, "NS1")],
     }, follow=True)
@@ -230,10 +231,10 @@ def test_a_transfer_closes_the_previous_set_instead_of_rewriting_it(client, web_
     person, _ext = somebody(sql)
     login_as(client, "admin")
 
-    client.post(f"{LIST}{person}/", {
+    client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-01-01", "units": [unit(sql, "BG1")],
     })
-    client.post(f"{LIST}{person}/", {
+    client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-09-01", "units": [unit(sql, "NS1")],
     })
 
@@ -255,8 +256,8 @@ def test_the_same_set_does_not_breed_a_version(client, web_env, sql):
     login_as(client, "admin")
     form = {"what": "units", "units_from": "2026-06-01", "units": [unit(sql, "BG1")]}
 
-    client.post(f"{LIST}{person}/", form)
-    answer = client.post(f"{LIST}{person}/", form, follow=True)
+    client.post(f"{LIST}{person}/units/", form)
+    answer = client.post(f"{LIST}{person}/units/", form, follow=True)
 
     assert "не изменился" in body(answer), body(answer)[:600]
     assert len(bindings(sql, person)) == 1, bindings(sql, person)
@@ -273,13 +274,13 @@ def test_a_set_typed_backwards_does_not_swallow_a_future_transfer(client, web_en
     person, _ext = somebody(sql)
     login_as(client, "admin")
 
-    client.post(f"{LIST}{person}/", {
+    client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-01-01", "units": [unit(sql, "BG1")],
     })
-    client.post(f"{LIST}{person}/", {
+    client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-09-01", "units": [unit(sql, "NS1")],
     })
-    client.post(f"{LIST}{person}/", {
+    client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-05-01",
         "units": [unit(sql, "BG1"), unit(sql, "NS2")],
     })
@@ -306,7 +307,7 @@ def test_the_form_comes_checked_by_what_is_effective_now(client, web_env, sql):
     person, _ext = somebody(sql)
     bg1 = unit(sql, "BG1")
     login_as(client, "admin")
-    client.post(f"{LIST}{person}/", {
+    client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2020-01-01", "units": [bg1],
     })
 
@@ -335,7 +336,7 @@ def test_half_typed_shares_are_refused_with_the_real_arithmetic(client, web_env,
     bg1, ns1 = unit(sql, "BG1"), unit(sql, "NS1")
     login_as(client, "admin")
 
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01", "units": [bg1, ns1],
         f"share_{bg1}": "0,7",
     })
@@ -356,7 +357,7 @@ def test_a_share_without_a_tick_is_refused_not_swallowed(client, web_env, sql):
     bg1, ns1 = unit(sql, "BG1"), unit(sql, "NS1")
     login_as(client, "admin")
 
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01", "units": [bg1],
         f"share_{ns1}": "0,3",
     })
@@ -372,7 +373,7 @@ def test_a_zero_share_is_refused(client, web_env, sql):
     bg1, ns1 = unit(sql, "BG1"), unit(sql, "NS1")
     login_as(client, "admin")
 
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01", "units": [bg1, ns1],
         f"share_{bg1}": "0", f"share_{ns1}": "1",
     })
@@ -434,7 +435,7 @@ def test_the_screen_does_not_promise_a_delta_that_will_never_come(client, web_en
         assert "не переедет" in page, page[-3000:]
         assert "разнесена по тем" in page, page[-3000:]
 
-        answer = client.post(f"{LIST}{person}/", {
+        answer = client.post(f"{LIST}{person}/units/", {
             "what": "units", "units_from": "2026-05-15", "units": [unit(sql, "BG1")],
         }, follow=True)
         # Спрашивается ПЛАШКА, а не страница целиком: слова про перенос разницы
@@ -563,7 +564,7 @@ def test_the_reader_is_refused_in_words_if_he_posts_anyway(client, web_env, sql)
             where u.code = 'NS1' order by e.external_id limit 1"""
     ).fetchone()
     login_as(client, "manager")
-    answer = client.post(f"{LIST}{person}/", {
+    answer = client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-01", "units": [unit(sql, "NS1")],
     })
     assert answer.status_code == 403, answer.status_code
@@ -618,7 +619,7 @@ def test_the_splitter_reads_exactly_what_the_screen_wrote(client, web_env, sql):
     july = SimpleNamespace(tenant_id=tenant, period=date(2026, 7, 1))
 
     login_as(client, "admin")
-    assert client.post(f"{LIST}{person}/", {
+    assert client.post(f"{LIST}{person}/units/", {
         "what": "units", "units_from": "2026-06-15",
         "units": [unit(sql, "BG1"), unit(sql, "NS1")],
     }).status_code == 302
@@ -712,7 +713,7 @@ def test_a_hidden_network_row_gives_the_manager_a_neutral_refusal(client, web_en
     ).fetchall()
     try:
         login_as(client, "manager")
-        answer = client.post(f"{LIST}{person}/", {
+        answer = client.post(f"{LIST}{person}/units/", {
             "what": "units", "units_from": "2026-06-01", "units": [unit(sql, "NS1")],
         })
     finally:

@@ -273,10 +273,38 @@ def test_items_missing_from_the_file_are_kept_and_named(client, sql, items_remov
 
 
 def test_the_screen_offers_the_upload(client, items_removed):  # noqa: F811
-    """Кнопка загрузки живёт на самом справочнике, а не по прямому адресу."""
+    """Со справочника до загрузки — ссылкой, а сама форма живёт на своей странице (T228)."""
     login_as(client, "admin")
     try:
-        assert UPLOAD_URL in body(client.get(LIST_URL))
+        listing = body(client.get(LIST_URL))
+        assert f'href="{UPLOAD_URL}"' in listing, "со справочника не дойти до загрузки"
+        assert 'type="file"' not in listing, "форма загрузки осталась на списке статей"
+
+        page = client.get(UPLOAD_URL)
+        assert page.status_code == 200, page.status_code
+        assert 'type="file"' in body(page) and 'name="pnl_item"' in body(page)
+    finally:
+        client.post("/logout/")
+
+
+def test_the_upload_page_is_refused_in_words_without_the_right(client, items_removed):  # noqa: F811
+    """Открыть форму без права — тот же отказ, что и отправить её, а не форма."""
+    login_as(client, "manager")
+    try:
+        page = client.get(UPLOAD_URL)
+        assert page.status_code == 403, page.status_code
+        assert 'type="file"' not in body(page), "форму показали тому, кто её не отправит"
+    finally:
+        client.post("/logout/")
+
+
+def test_a_refused_file_stays_on_the_upload_page(client, sql, items_removed):  # noqa: F811
+    """Отказ по файлу — на странице загрузки: выбрать другой файл можно сразу."""
+    login_as(client, "admin")
+    try:
+        answer = client.post(UPLOAD_URL, {})
+        assert answer.status_code == 400, answer.status_code
+        assert 'type="file"' in body(answer), "после отказа формы загрузки на странице нет"
     finally:
         client.post("/logout/")
 
