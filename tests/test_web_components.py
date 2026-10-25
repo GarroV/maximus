@@ -97,7 +97,7 @@ def test_notice_marks_what_happened_apart_from_what_went_wrong(django_templates)
     empty = render('{% notice "empty" %}Данных нет{% endnotice %}')
 
     assert ok == '<div class="ok">Готово</div>'
-    assert alert == '<div class="alert"><strong>Не вышло.</strong> причина</div>'
+    assert alert == '<div class="alert"><strong class="notice__title">Не вышло.</strong> причина</div>'
     # Пустое состояние — абзац: это текст на месте данных, а не блок поверх них.
     assert empty == '<p class="empty">Данных нет</p>'
 
