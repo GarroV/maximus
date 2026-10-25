@@ -74,15 +74,15 @@
 {% if units %}
 <nav class="tools" aria-label="{% translate "Что ещё можно сделать с часами" %}">
   {% if can_edit %}
-  <a class="tool" href="{% url 'timesheet-import' period.id %}">{% translate "Загрузить таблицу (.xlsx)" %}</a>
+  <a class="btn btn--sm" href="{% url 'timesheet-import' period.id %}">{% translate "Загрузить таблицу (.xlsx)" %}</a>
   {% endif %}
-  <a class="tool" href="{% url 'timesheet-close' period.id %}">{% translate "Закрытие часов по точкам" %}</a>
+  <a class="btn btn--sm" href="{% url 'timesheet-close' period.id %}">{% translate "Закрытие часов по точкам" %}</a>
   {% comment %}Сводка считается из тех же состояний, что страница закрытия.{% endcomment %}
   <span class="hint">{% blocktranslate with open_count=open_count total_count=units|length %}часы открыты на {{ open_count }} из {{ total_count }} точек{% endblocktranslate %}</span>
 </nav>
 {% elif can_edit %}
 <nav class="tools">
-  <a class="tool" href="{% url 'timesheet-import' period.id %}">{% translate "Загрузить таблицу (.xlsx)" %}</a>
+  <a class="btn btn--sm" href="{% url 'timesheet-import' period.id %}">{% translate "Загрузить таблицу (.xlsx)" %}</a>
 </nav>
 {% endif %}
 
