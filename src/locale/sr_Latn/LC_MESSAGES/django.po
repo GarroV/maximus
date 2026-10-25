@@ -5222,6 +5222,10 @@ msgstr ""
 msgid "Какую работу он снимает:"
 msgstr "Koji posao preuzima na sebe:"
 
+#: web/templates/web/guide.html
+msgid "Разделы продукта — так они называются в левой панели после входа:"
+msgstr "Odeljci proizvoda — tako se zovu u levom panelu posle prijave:"
+
 #: web/templates/web/guide.html:34
 msgid "Повторный ввод."
 msgstr "Ponovni unos."
@@ -6879,10 +6883,6 @@ msgstr ""
 "računovođa koji vodi ceo projekat postaje i administrator, a tamo gde su to "
 "različiti ljudi podela odgovornosti ostaje."
 
-#: web/templates/web/roles/index.html:31
-msgid "Права"
-msgstr "Prava"
-
 #: web/templates/web/roles/index.html:70
 msgid ""
 "В списке только те, кому уже выдана хотя бы одна роль: он и собирается из\n"
@@ -8130,21 +8130,9 @@ msgid "Логин или пароль не подходят"
 msgstr "Korisničko ime ili lozinka nisu ispravni"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Галочка — право, которое партнёр выдаёт и снимает сам. Прочерк — "
-"право,\nкоторого у этого набора не бывает: его не выдать ни отсюда, ни в "
-"обход экрана.\nНужны права старшего набора — человеку выдают старшую "
-"роль."
-msgstr "Kvačica je pravo koje partner sam dodeljuje i oduzima. Crtica je pravo koje ovaj skup nikada nema: ne može se dodeliti ni odavde ni mimo ovog ekrana.\nAko su nekome potrebna prava starijeg skupa, dobija stariju ulogu."
-
-#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid "Права роли не изменены: «%(right)s» у этой роли не бывает."
 msgstr "Prava uloge nisu promenjena: „%(right)s“ ova uloga nikada nema."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Этого права у роли не бывает: набор не расширяется в эту сторону"
-msgstr "Ova uloga nikada nema ovo pravo: skup se ne širi u tom pravcu"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -9089,6 +9077,146 @@ msgid ""
 msgstr "Objekte ovog zaposlenog može da menja samo uloga koja vidi sve objekte partnera. Obratite se operativnom direktoru ili knjigovođi."
 
 #: новые строки, добавлены tools/apply_translations.py
+msgid "Версии условий найма"
+msgstr "Verzije uslova zapošljavanja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузить статьи из файла"
+msgstr "Učitaj stavke troškova iz fajla"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поднимать ставки некому: сначала заведите группу."
+msgstr "Nema kome da se podignu cene rada: prvo napravite grupu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы сотрудника"
+msgstr "Stranice zaposlenog"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точки затрат"
+msgstr "Objekti troškova"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "АДМ"
+msgstr "ADM"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "БУХ"
+msgstr "KNJ"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ДИР"
+msgstr "DIR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ и история"
+msgstr "Pristup i istorija"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата и деньги"
+msgstr "Plate i novac"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правила и справочники"
+msgstr "Pravila i šifarnici"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Право"
+msgstr "Pravo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сохранить права"
+msgstr "Sačuvaj prava"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сохранить права роли «%(role)s»"
+msgstr "Sačuvaj prava uloge „%(role)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срезы по регистрам учёта"
+msgstr "Preseci po registrima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Табель и операционка"
+msgstr "Evidencija i operativa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "УПР"
+msgstr "UPR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "право выдано — партнёр выдаёт и снимает его сам"
+msgstr "pravo dodeljeno — partner ga sam dodeljuje i uklanja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "регистр не виден"
+msgstr "registar nije vidljiv"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"у этой роли такого права не бывает: нужны права старшей роли — человеку "
+"выдают старшую роль"
+msgstr "ova uloga nikad nema takvo pravo: ako je osobi potrebno, dodelite joj stariju ulogu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "этого права у роли не бывает"
+msgstr "ova uloga nikad nema ovo pravo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Если снять, человек ничего не потеряет: всё это есть в других его ролях."
+msgstr "Ako se ukloni, osoba ništa ne gubi: sve to daju njene druge uloge."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Если снять, человек потеряет:"
+msgstr "Ako se ukloni, osoba gubi:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сейчас человек может:"
+msgstr "Trenutno osoba može:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ничего нового: всё это у человека уже есть"
+msgstr "ništa novo: osoba sve to već ima"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "регистр «%(ledger)s»"
+msgstr "registar „%(ledger)s“"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "человек получит:"
+msgstr "osoba dobija:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все точки"
+msgstr "svi objekti"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не входил"
+msgstr "još se nije prijavio"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выгрузить всю историю (CSV)"
+msgstr "Preuzmi celu istoriju (CSV)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действие"
+msgstr "Radnja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выдача роли"
+msgstr "dodela uloge"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "приглашение"
+msgstr "poziv"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "снятие роли"
+msgstr "uklanjanje uloge"
+
 msgid ""
 "Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на "
 "бумаге."
@@ -9145,3 +9273,104 @@ msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
 msgstr[0] "Papiri sa objekata: %(counter)s čeka razvrstavanje"
 msgstr[1] "Papiri sa objekata: %(counter)s čekaju razvrstavanje"
 msgstr[2] "Papiri sa objekata: %(counter)s čeka razvrstavanje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не может:"
+msgstr "Ne može:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "бухгалтер"
+msgstr "knjigovođa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "директор"
+msgstr "direktor"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "партнёр"
+msgstr "partner"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "точка"
+msgstr "objekat"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ни одного права — только просмотр того, что открывают его роли"
+msgstr "nijedno pravo — samo pregled onoga što otvaraju njene uloge"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнести по статьям"
+msgstr "Rasporedi po stavkama troškova"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вернуться в инбокс"
+msgstr "Nazad u prijemno sanduče"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итого к разнесению"
+msgstr "Ukupno za raspodelu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не разнесено."
+msgstr "Nije raspoređeno."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отметьте строки, которые разносятся по точкам: без отметки разносить "
+"нечего."
+msgstr "Označite redove koji se raspoređuju po objektima: bez oznake nema šta da se rasporedi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки инбокса делятся одними долями. Статья у них остаётся "
+"прежней — её назначают в инбоксе, и разнесение при этом сохранится."
+msgstr "Označeni redovi iz prijemnog sandučeta dele se istim udelima. Stavka troška ostaje ista — dodeljuje se u prijemnom sandučetu, a raspodela će se sačuvati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки относятся к разным юрлицам, а делятся накладные только "
+"на точки своего юрлица: общих точек у них нет. Разнесите их по одной или "
+"отметьте строки одного юрлица."
+msgstr "Označeni redovi pripadaju različitim pravnim licima, a otpremnica se deli samo na objekte svog pravnog lica: zajedničkih objekata nemaju. Rasporedite ih pojedinačno ili označite redove jednog pravnog lica."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнесено по точкам строк: %(count)d."
+msgstr "Redova raspoređenih po objektima: %(count)d."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнести по точкам"
+msgstr "Rasporedi po objektima"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Среди отмеченных есть строки, у которых точка уже есть или которые уже "
+"разнесены: %(what)s. Снимите с них отметку — разносить их нечего."
+msgstr "Među označenima ima redova koji već imaju objekat ili su već raspoređeni: %(what)s. Uklonite im oznaku — nema šta da se rasporedi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Строка разнесена по точкам, часть которых вам не видна, — разобрать её "
+"может тот, кто ведёт все точки партнёра."
+msgstr "Red je raspoređen po objektima od kojih neke ne vidite — može ga razvrstati onaj ko vodi sve objekte partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "У юрлица этих строк нет ни одной точки, которую вы ведёте."
+msgstr "Pravno lice ovih redova nema nijedan objekat koji vodite."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "разнесена по точкам — доли сохранятся"
+msgstr "raspoređeno po objektima — udeli će se sačuvati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Среди долей есть точка, на которую эту накладную разнести нельзя: "
+"делится она только на точки своего юрлица, которые вы ведёте."
+msgstr "Među udelima je objekat na koji se ova otpremnica ne može rasporediti: deli se samo na objekte svog pravnog lica koje vodite."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из "
+"пачки не записано — откройте инбокс заново."
+msgstr "Red „%(what)s“ nije raspoređen: već je raspoređen ili razvrstan. Ništa iz grupe nije sačuvano — ponovo otvorite prijemno sanduče."

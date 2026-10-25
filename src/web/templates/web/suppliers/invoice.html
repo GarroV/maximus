@@ -63,14 +63,16 @@
 {% if summary %}
 {% comment %}
 Позиции — своей страницей (T232, D081: одна страница — одна функция). Здесь
-только сколько их и сходятся ли они с бумагой: счёт с потерянной позицией не
-должен выглядеть на карточке целым.
+только сколько их и сходятся ли они с бумагой — счёт с потерянной позицией не
+должен выглядеть на карточке целым — и кнопка «Разнести по статьям» (эталон
+модуля 3, «Разделить»): ссылка в тексте не читается как действие.
 {% endcomment %}
 <h2>{% translate "Позиции документа" %}</h2>
 <p data-positions="{{ positions_counted }}" data-difference="{{ positions_difference_raw }}">
   <a href="{{ positions_url }}">{% blocktranslate count counter=positions_counted %}{{ counter }} позиция{% plural %}{{ counter }} позиций{% endblocktranslate %}</a>
   · {% if positions_balanced %}{% translate "сумма позиций сходится с бумагой" %}{% else %}{% blocktranslate with left=positions_difference_text %}не сходится с бумагой на {{ left }}{% endblocktranslate %}{% endif %}
 </p>
+<p class="actions"><a class="btn" href="{{ positions_url }}">{% translate "Разнести по статьям" %}</a></p>
 {% endif %}
 
 {% if payments %}

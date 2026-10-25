@@ -5314,6 +5314,10 @@ msgstr ""
 msgid "Какую работу он снимает:"
 msgstr "What work it takes off your hands:"
 
+#: web/templates/web/guide.html
+msgid "Разделы продукта — так они называются в левой панели после входа:"
+msgstr "The product's sections, named as they appear in the left panel after you log in:"
+
 #: web/templates/web/guide.html:34
 msgid "Повторный ввод."
 msgstr "Re-entering data."
@@ -7028,10 +7032,6 @@ msgstr ""
 "administrator, while separation of duties stays intact wherever those are "
 "different people."
 
-#: web/templates/web/roles/index.html:31
-msgid "Права"
-msgstr "Rights"
-
 #: web/templates/web/roles/index.html:70
 msgid ""
 "В списке только те, кому уже выдана хотя бы одна роль: он и собирается из\n"
@@ -8293,21 +8293,9 @@ msgid "Логин или пароль не подходят"
 msgstr "Login or password is incorrect"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Галочка — право, которое партнёр выдаёт и снимает сам. Прочерк — "
-"право,\nкоторого у этого набора не бывает: его не выдать ни отсюда, ни в "
-"обход экрана.\nНужны права старшего набора — человеку выдают старшую "
-"роль."
-msgstr "A checkbox is a right the partner grants and revokes themselves. A dash is a right this set never has: it cannot be granted from here, nor around this screen.\nIf someone needs the rights of a senior set, they are given the senior role."
-
-#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid "Права роли не изменены: «%(right)s» у этой роли не бывает."
 msgstr "The rights of the role are unchanged: “%(right)s” is never available to this role."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Этого права у роли не бывает: набор не расширяется в эту сторону"
-msgstr "This role never has this right: the set does not extend in this direction"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -9253,6 +9241,146 @@ msgid ""
 msgstr "The units of this employee can only be changed by a role that sees all of the partner's units. Contact the operations director or the accountant."
 
 #: новые строки, добавлены tools/apply_translations.py
+msgid "Версии условий найма"
+msgstr "Employment terms versions"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузить статьи из файла"
+msgstr "Upload expense items from a file"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поднимать ставки некому: сначала заведите группу."
+msgstr "There is no one to raise rates for: create a group first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы сотрудника"
+msgstr "Employee pages"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точки затрат"
+msgstr "Cost units"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "АДМ"
+msgstr "ADM"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "БУХ"
+msgstr "ACC"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ДИР"
+msgstr "DIR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ и история"
+msgstr "Access and history"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата и деньги"
+msgstr "Payroll and money"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правила и справочники"
+msgstr "Rules and directories"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Право"
+msgstr "Right"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сохранить права"
+msgstr "Save rights"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сохранить права роли «%(role)s»"
+msgstr "Save the rights of the role “%(role)s”"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срезы по регистрам учёта"
+msgstr "Ledger views"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Табель и операционка"
+msgstr "Timesheet and operations"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "УПР"
+msgstr "MGR"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "право выдано — партнёр выдаёт и снимает его сам"
+msgstr "right granted — the partner grants and removes it"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "регистр не виден"
+msgstr "ledger not visible"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"у этой роли такого права не бывает: нужны права старшей роли — человеку "
+"выдают старшую роль"
+msgstr "this role never has such a right: if a person needs it, give them a senior role"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "этого права у роли не бывает"
+msgstr "this role never has this right"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Если снять, человек ничего не потеряет: всё это есть в других его ролях."
+msgstr "If removed, the person loses nothing: their other roles give all of this."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Если снять, человек потеряет:"
+msgstr "If removed, the person loses:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сейчас человек может:"
+msgstr "Right now the person can:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ничего нового: всё это у человека уже есть"
+msgstr "nothing new: the person already has all of this"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "регистр «%(ledger)s»"
+msgstr "the “%(ledger)s” ledger"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "человек получит:"
+msgstr "the person gets:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все точки"
+msgstr "all units"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не входил"
+msgstr "has not signed in yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выгрузить всю историю (CSV)"
+msgstr "Download the whole history (CSV)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действие"
+msgstr "Action"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выдача роли"
+msgstr "role granted"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "приглашение"
+msgstr "invitation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "снятие роли"
+msgstr "role removed"
+
 msgid ""
 "Одна бумага — несколько статей P&L. Позиции обязаны сойтись с суммой на "
 "бумаге."
@@ -9307,3 +9435,104 @@ msgid "Бумаги с точек: ждёт разбора %(counter)s"
 msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
 msgstr[0] "Papers from the units: %(counter)s waiting to be sorted out"
 msgstr[1] "Papers from the units: %(counter)s waiting to be sorted out"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не может:"
+msgstr "Cannot:"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "бухгалтер"
+msgstr "accountant"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "директор"
+msgstr "director"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "партнёр"
+msgstr "partner"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "точка"
+msgstr "unit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ни одного права — только просмотр того, что открывают его роли"
+msgstr "no rights at all — only viewing what their roles open"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнести по статьям"
+msgstr "Split across expense items"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вернуться в инбокс"
+msgstr "Back to the inbox"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итого к разнесению"
+msgstr "Total to split"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не разнесено."
+msgstr "Not split."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отметьте строки, которые разносятся по точкам: без отметки разносить "
+"нечего."
+msgstr "Check the rows to split across units: with nothing checked there is nothing to split."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки инбокса делятся одними долями. Статья у них остаётся "
+"прежней — её назначают в инбоксе, и разнесение при этом сохранится."
+msgstr "The checked inbox rows are split with one set of shares. Their expense item stays as it is — it is assigned in the inbox, and the split will be kept."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отмеченные строки относятся к разным юрлицам, а делятся накладные только "
+"на точки своего юрлица: общих точек у них нет. Разнесите их по одной или "
+"отметьте строки одного юрлица."
+msgstr "The checked rows belong to different legal entities, and a delivery note is split only across the units of its own legal entity: they have no units in common. Split them one by one or check rows of one legal entity."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнесено по точкам строк: %(count)d."
+msgstr "Rows split across units: %(count)d."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнести по точкам"
+msgstr "Split across units"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Среди отмеченных есть строки, у которых точка уже есть или которые уже "
+"разнесены: %(what)s. Снимите с них отметку — разносить их нечего."
+msgstr "Some checked rows already have a unit or are already split: %(what)s. Uncheck them — there is nothing to split."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Строка разнесена по точкам, часть которых вам не видна, — разобрать её "
+"может тот, кто ведёт все точки партнёра."
+msgstr "The row is split across units some of which you cannot see — it can be sorted out by someone who manages all of the partner's units."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "У юрлица этих строк нет ни одной точки, которую вы ведёте."
+msgstr "The legal entity of these rows has no unit that you manage."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "разнесена по точкам — доли сохранятся"
+msgstr "split across units — the shares will be kept"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Среди долей есть точка, на которую эту накладную разнести нельзя: "
+"делится она только на точки своего юрлица, которые вы ведёте."
+msgstr "One of the shares is on a unit this delivery note cannot be split to: it is split only across the units of its own legal entity that you manage."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из "
+"пачки не записано — откройте инбокс заново."
+msgstr "The row “%(what)s” was not split: it has already been split or sorted out. Nothing from the batch was saved — open the inbox again."

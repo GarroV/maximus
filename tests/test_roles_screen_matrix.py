@@ -15,15 +15,7 @@ import re
 
 from conftest import body, login_as
 from core.roles import ALL_PERMISSIONS
-from test_roles_screen import granted_rights, role_id
-
-
-def rights_block(html: str, code: str) -> str:
-    block = re.search(
-        r'<span class="note">' + code + r'</span>.*?</form>', html, flags=re.S,
-    )
-    assert block, f"на экране нет формы прав роли {code}"
-    return block.group(0)
+from test_roles_screen import granted_rights, role_cells, role_id
 
 
 def test_the_screen_offers_every_permission_the_product_has(client, web_env):
@@ -42,7 +34,7 @@ def test_a_walled_permission_is_shown_as_a_wall_and_not_as_a_checkbox(client, we
     """У управляющего точки «Ведение ролей» — прочерк, а не пустая галочка."""
     login_as(client, "admin")
     html = body(client.get("/roles/"))
-    block = rights_block(html, "manager")
+    block = role_cells(html, "manager")
     assert 'name="right:roles.manage"' not in block, "стена предлагается галочкой"
     assert "Ведение ролей" in block, "стена не названа — человек не поймёт, чего нет"
 
@@ -50,7 +42,7 @@ def test_a_walled_permission_is_shown_as_a_wall_and_not_as_a_checkbox(client, we
 def test_the_wall_stands_only_where_the_matrix_puts_it(client, web_env):
     """У администратора стен нет: он может всё (D052)."""
     login_as(client, "admin")
-    block = rights_block(body(client.get("/roles/")), "admin")
+    block = role_cells(body(client.get("/roles/")), "admin")
     assert 'name="right:roles.manage"' in block
     assert 'name="right:rules.manage"' in block
 

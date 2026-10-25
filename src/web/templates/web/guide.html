@@ -58,6 +58,13 @@
       валюты — в одну валюту консолидации.{% endblocktranslate %}
     </li>
   </ul>
+
+  <p class="guide__note">{% translate "Разделы продукта — так они называются в левой панели после входа:" %}</p>
+  <ul class="guide__list">
+    {% for area in areas %}
+    <li><b>{{ area.title }}.</b> {% for title in area.items %}{{ title }}{% if not forloop.last %} · {% endif %}{% endfor %}</li>
+    {% endfor %}
+  </ul>
 </section>
 
 {# ── 2. Путь до первой ведомости ──────────────────────────────── #}

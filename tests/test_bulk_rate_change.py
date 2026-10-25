@@ -136,3 +136,37 @@ def test_zero_change_is_refused_in_words(client, kitchen):
     assert response.status_code in (400, 422)
     text = body(response).lower()
     assert "ноль" in text or "проценты" in text or "сумм" in text
+    # Отказ стоит на той же форме, с тем, что человек уже ввёл (T228): дату он
+    # набирал руками и терять её из-за ошибки в одном поле не должен.
+    assert 'value="2026-07-01"' in body(response), "отказ потерял введённую дату"
+    assert 'name="percent"' in body(response), "отказ ушёл со страницы формы"
+
+
+# --- своя страница (D081, T228) ------------------------------------------------
+
+
+def test_the_raise_lives_on_its_own_page_not_on_the_list(client, kitchen):
+    """Список групп — список: формы индексации в нём нет, есть ссылка на её страницу."""
+    login_as(client, "admin")
+    try:
+        listing = body(client.get("/directory/groups/"))
+        assert 'href="/directory/groups/raise/"' in listing, "со списка не дойти до индексации"
+        assert 'name="percent"' not in listing, "форма индексации осталась на списке групп"
+        assert "<details" not in listing, "на списке групп осталось раскрытие"
+
+        page = client.get("/directory/groups/raise/")
+        assert page.status_code == 200, body(page)[:300]
+        assert 'name="percent"' in body(page) and kitchen.title in body(page)
+    finally:
+        client.post("/logout/")
+
+
+def test_the_raise_page_is_refused_in_words_without_the_right(client, kitchen):
+    """Открыть форму без права — тот же отказ словами, что и отправить её."""
+    login_as(client, "manager")
+    try:
+        page = client.get("/directory/groups/raise/")
+        assert page.status_code == 403, page.status_code
+        assert 'name="percent"' not in body(page), "форму показали тому, кто её не отправит"
+    finally:
+        client.post("/logout/")
