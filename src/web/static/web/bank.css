@@ -15,5 +15,5 @@
 .bank-pick li .what { flex: 1 1 160px; min-width: 0; }
 .bank-mapping { max-width: 560px; }
 @media (max-width: 1099px) {
-  .bank-split { grid-template-columns: 1fr; }
+  .bank-split { grid-template-columns: minmax(0, 1fr); }
 }
