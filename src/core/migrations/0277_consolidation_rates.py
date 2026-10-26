@@ -18,9 +18,11 @@
 число с восемью знаками теряло бы копейки на крупных суммах.
 
 **Закрытый месяц держит ссылку на строку курса** (`period_fx_rates`). При
-закрытии месяца (триггер на `periods`) для каждой валюты партнёра — валюты учёта
-и валют фактов месяца — запоминается, какая строка справочника была курсом на
-конец месяца. Строка справочника неизменна, поэтому закрытый месяц пересчитывается
+закрытии месяца (триггер на `periods`) для валюты учёта и каждой валюты, у
+которой есть курс к валюте консолидации, запоминается, какая строка
+справочника была курсом на конец месяца. Факты при этом не читаются: функция
+видела бы их глазами закрывающего. Валюту, курса к которой ещё нет, закрепит
+за уже закрытыми месяцами её первый курс. Строка справочника неизменна, поэтому закрытый месяц пересчитывается
 в то же число сколько угодно раз: новый курс задним числом его не трогает.
 Открытие месяца (откат расчёта, D021) ссылки снимает: месяц снова считается
 по живому курсу и при следующем закрытии закрепит тот, что действует тогда.
@@ -29,10 +31,21 @@
 «нет курса», а не ноль. Первый введённый подходящий курс её заполняет — один
 раз; дальше она неизменна, как и заполненная при закрытии.
 
+**Закрепление не зависит от контекста пользователя.** При накате миграции и
+при вводе курса администратором платформы партнёра в контексте нет, а `force`
+закрыл бы владельцу схемы `tenants` и `periods`: уже закрытые месяцы молча
+остались бы без курса. Поэтому владельцу — политики только на чтение этих двух
+таблиц (проверяет `test_consolidation_plain_owner`).
+
+**`fill_report_amounts` и `fx_rate_on` (из `0230`) сняты:** первая приколачивала
+сумму к факту мимо закреплённого курса.
+
 **`pnl_lines.amount_report` считает через то же правило** (`report_amount`):
 закреплённый курс у закрытого месяца, живой — у открытого. Одно правило на
 продукт — иначе экран консолидации и выгрузки разошлись бы на закрытом месяце.
 """
+
+from importlib import import_module
 
 import django.db.models.deletion
 from django.db import migrations, models
@@ -135,20 +148,6 @@ $$;
 comment on function fx_convert(numeric, uuid, text) is
     'Сумма в другой валюте по строке курса. null — строки нет';
 
--- Множитель по последнему известному курсу — прежняя функция, теперь через то же
--- правило выбора строки.
-create or replace function fx_rate_on(p_base text, p_quote text, p_on date)
-returns numeric
-language sql stable
-as $$
-    select case
-             when p_base = p_quote then 1::numeric
-             else (select case when r.base_currency = p_base then r.rate else 1 / r.rate end
-                     from fx_rates r
-                    where r.id = fx_rate_row_on(p_base, p_quote, p_on))
-           end
-$$;
-
 -- Курс, которым считается месяц партнёра: закреплённый, если месяц закрыт,
 -- иначе действующий на конец месяца.
 create or replace function report_rate_row(p_tenant uuid, p_period date, p_from text, p_to text)
@@ -229,6 +228,17 @@ $$;
 revoke all on period_fx_rates from app_user;
 grant select on period_fx_rates to app_user;
 
+-- Закрепление читает партнёра и его месяцы владельцем — при накате миграции и
+-- когда курс вводит администратор платформы, контекста партнёра нет, а `force`
+-- закрыл бы владельцу обе таблицы: уже закрытые месяцы молча остались бы без
+-- курса. Только чтение; факты закрепление не читает вовсе (см. ниже).
+do $$
+begin
+    execute format('create policy owner_reads on tenants for select to %I using (true)', current_user);
+    execute format('create policy owner_reads on periods for select to %I using (true)', current_user);
+end
+$$;
+
 comment on table period_fx_rates is
     'Курс, закреплённый за закрытым месяцем партнёра: ссылка на неизменную строку справочника. Пишут только триггеры';
 comment on column period_fx_rates.fx_rate_id is
@@ -237,7 +247,7 @@ comment on column period_fx_rates.fx_rate_id is
 create or replace function fix_period_rates(p_tenant uuid, p_period date)
 returns int
 language plpgsql security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
     v_report text;
@@ -259,14 +269,11 @@ begin
 
     insert into period_fx_rates (tenant_id, period, currency, report_currency, fx_rate_id)
     select p_tenant, p_period, c.currency, v_report, fx_rate_row_on(c.currency, v_report, v_end)
+      -- Валюта учёта и все валюты, у которых есть курс к валюте консолидации.
+      -- Факты не читаются намеренно: функция видела бы их глазами закрывающего,
+      -- и валюта скрытой от него строки осталась бы без закрепления. Валюту без
+      -- курса закрепит первый введённый курс (триггер ниже).
       from (select base_currency as currency from tenants where id = p_tenant
-            union
-            select distinct f.currency from facts f
-             where f.tenant_id = p_tenant and f.period = p_period
-               and f.superseded_at is null
-            -- Факты функция видит глазами закрывающего: строку, скрытую от него
-            -- политикой, она бы пропустила. Поэтому закрепляются и все валюты,
-            -- для которых в справочнике есть курс к валюте консолидации.
             union
             select case when r.base_currency = v_report then r.quote_currency
                         else r.base_currency end
@@ -290,7 +297,7 @@ revoke execute on function fix_period_rates(uuid, date) from app_user;
 create or replace function periods_fix_rates()
 returns trigger
 language plpgsql security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
     if new.status = 'closed'
@@ -338,7 +345,7 @@ create trigger period_fx_rates_guard
 create or replace function fx_rates_complete_fixes()
 returns trigger
 language plpgsql security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
     update period_fx_rates x
@@ -349,6 +356,23 @@ begin
        and ((x.currency = new.base_currency and x.report_currency = new.quote_currency)
          or (x.currency = new.quote_currency and x.report_currency = new.base_currency))
        and new.rate_date <= (x.period + interval '1 month - 1 day')::date;
+
+    -- Валюта, курса к которой при закрытии не было вовсе: строки закрепления у
+    -- месяца нет, и без этой вставки месяц считал бы её по живому курсу.
+    insert into period_fx_rates (tenant_id, period, currency, report_currency, fx_rate_id)
+    select p.tenant_id, p.period, c.currency, t.report_currency,
+           fx_rate_row_on(c.currency, t.report_currency,
+                          (p.period + interval '1 month - 1 day')::date)
+      from periods p
+      join tenants t on t.id = p.tenant_id
+      cross join lateral (
+          select case when t.report_currency = new.base_currency then new.quote_currency
+                      else new.base_currency end as currency
+      ) c
+     where p.status = 'closed'
+       and t.report_currency in (new.base_currency, new.quote_currency)
+       and new.rate_date <= (p.period + interval '1 month - 1 day')::date
+    on conflict (tenant_id, period, currency, report_currency) do nothing;
     return null;
 end
 $$;
@@ -370,6 +394,8 @@ drop trigger if exists periods_fix_rates on periods;
 drop function if exists periods_fix_rates();
 drop function if exists fix_period_rates(uuid, date);
 revoke all on period_fx_rates from app_user;
+drop policy if exists owner_reads on periods;
+drop policy if exists owner_reads on tenants;
 drop policy if exists maintained_by_owner on period_fx_rates;
 drop policy if exists tenant_isolation on period_fx_rates;
 alter table period_fx_rates no force row level security;
@@ -418,6 +444,30 @@ select f.id           as fact_id,
   left join units u on u.id = f.unit_id
  where f.superseded_at is null
    and f.allocation <> 'split';
+"""
+
+# Прежний пересчёт снимается: `fill_report_amounts` приколачивал сумму к факту
+# мимо закреплённого курса, а `fx_rate_on` нужен был только ему и старому
+# представлению. Откат возвращает их ровно в том виде, в каком их завёл `0230`.
+DROP_OLD = """
+drop function if exists fill_report_amounts(uuid, date);
+drop function if exists fx_rate_on(text, text, date);
+"""
+RESTORE_OLD = import_module("core.migrations.0230_facts").FX
+
+# Откат возвращает уникальность (курс, дата) без версий. Если курс уже
+# исправляли, две строки одной даты её нарушат — и откат упал бы посреди
+# операций с непонятной ошибкой. Поэтому проверка идёт первой и словами.
+REVERSE_GUARD = """
+do $$
+begin
+    if exists (select 1 from fx_rates
+                group by base_currency, quote_currency, rate_date having count(*) > 1) then
+        raise exception 'откат 0277 невозможен: есть исправленные курсы (две строки одной даты)'
+            using hint = 'оставьте по одной строке на дату вручную, понимая, что закрытые месяцы ссылались на них';
+    end if;
+end
+$$;
 """
 
 VIEW = PNL_LINES.format(
@@ -500,4 +550,6 @@ class Migration(migrations.Migration):
         migrations.RunSQL(LOOKUP, LOOKUP_BACK),
         migrations.RunSQL(FIXING, FIXING_BACK),
         migrations.RunSQL(VIEW, VIEW_BACK),
+        migrations.RunSQL(DROP_OLD, RESTORE_OLD),
+        migrations.RunSQL(migrations.RunSQL.noop, REVERSE_GUARD),
     ]

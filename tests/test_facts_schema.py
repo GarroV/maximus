@@ -338,20 +338,6 @@ def test_report_tree_rolls_children_into_the_subtotal(db):
     assert rows["food_cost"] == -400
 
 
-def test_report_amounts_are_pinned_to_the_rate(db):
-    """Курс приколачивается к факту, чтобы закрытый месяц не поехал при обновлении справочника."""
-    fact_id, _ = upsert_fact(db, fact_payload(unit=U_BG1, amount="1000.00", key="fx"))
-
-    assert db.execute("select fill_report_amounts(%s, %s)", (T1, JUNE)).fetchone()[0] >= 1
-
-    amount_report, rate, currency = db.execute(
-        "select amount_report, fx_rate, report_currency from facts where id = %s", (fact_id,)
-    ).fetchone()
-    assert currency == "EUR"
-    assert rate == Decimal("0.00854")
-    assert amount_report == Decimal("8.54")
-
-
 def test_report_amount_is_computed_on_the_fly_when_not_pinned(db):
     """Пока курс не приколочен, отчёт считает по курсу конца периода, а не молчит нулём."""
     upsert_fact(db, fact_payload(unit=U_BG1, amount="1000.00", key="fx"))
