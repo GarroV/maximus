@@ -547,8 +547,32 @@
     "en": "Currency",
     "sr": "Valuta"
   },
-  "Счёт и валюта берутся из файла; поля нужны, если таблица банка их не несёт. Без счёта выписка не загружается: операции двух счетов иначе не отличить.": {
-    "en": "The account and currency are taken from the file; these fields are needed when the bank's table does not carry them. Without an account the statement is not uploaded: otherwise transactions of two accounts cannot be told apart.",
-    "sr": "Račun i valuta se uzimaju iz fajla; polja su potrebna ako ih bankina tabela ne sadrži. Bez računa izvod se ne otprema: inače se transakcije dva računa ne mogu razlikovati."
+  "В книге Excel больше %(n)s частей — это не выписка за месяц.": {
+    "en": "The Excel workbook has more than %(n)s parts — this is not a monthly statement.",
+    "sr": "Excel radna sveska ima više od %(n)s delova — to nije mesečni izvod."
+  },
+  "слишком большая сумма: %(value)s": {
+    "en": "amount too large: %(value)s",
+    "sr": "prevelik iznos: %(value)s"
+  },
+  "В файле нет валюты. Укажите валюту счёта — трёхбуквенный код, например RSD или EUR.": {
+    "en": "The file has no currency. Enter the account currency as a three-letter code, e.g. RSD or EUR.",
+    "sr": "Fajl nema valutu. Unesite valutu računa troslovnim kodom, npr. RSD ili EUR."
+  },
+  "Валюта — трёхбуквенный латинский код, например RSD или EUR, а не «%(value)s».": {
+    "en": "The currency must be a three-letter Latin code such as RSD or EUR, not “%(value)s”.",
+    "sr": "Valuta mora biti troslovni latinični kod, npr. RSD ili EUR, a ne „%(value)s“."
+  },
+  "Код валюты, если его нет в файле": {
+    "en": "Currency code, if the file has none",
+    "sr": "Kod valute, ako ga nema u fajlu"
+  },
+  "Счёт и валюта берутся из файла; поля нужны, если таблица банка их не несёт. Без счёта и валюты выписка не загружается: операции двух счетов иначе не отличить, а валюта учёта за выписку не подставляется.": {
+    "en": "Account and currency are taken from the file; fill these fields in if the bank's table does not carry them. A statement without an account and currency is not loaded: otherwise operations of two accounts cannot be told apart, and the accounting currency is not assumed for the statement.",
+    "sr": "Račun i valuta uzimaju se iz fajla; polja su potrebna ako ih bankina tabela ne sadrži. Izvod bez računa i valute se ne učitava: inače se transakcije dva računa ne mogu razlikovati, a valuta knjigovodstva se ne podrazumeva za izvod."
+  },
+  "Этот платёж только что сведён с другой строкой. Обновите страницу и выберите другой.": {
+    "en": "This payment has just been matched to another line. Reload the page and choose another one.",
+    "sr": "Ovo plaćanje je upravo upareno sa drugim redom. Osvežite stranicu i izaberite drugo."
   }
 }

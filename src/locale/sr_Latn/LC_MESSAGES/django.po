@@ -8260,20 +8260,12 @@ msgid "Именованные надбавки и вилка ставки дол
 msgstr "Imenovani dodaci i raspon stope radnog mesta"
 
 #: web/stages.py
-msgid "Шестая очередь продуктовой карты"
-msgstr "Šesta faza mape proizvoda"
-
-#: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Nakon što se obračun zarada završi u celini"
 
 #: web/stages.py
 msgid "Седьмая очередь; ждёт доступа к API Dodo IS"
 msgstr "Sedma faza; čeka pristup Dodo IS API-ju"
-
-#: web/stages.py
-msgid "Загрузка выписки банка и сопоставление платежей со счетами поставщиков: что оплачено, что ждёт, что пришло без счёта."
-msgstr "Učitavanje bankovnog izvoda i uparivanje plaćanja sa fakturama dobavljača: šta je plaćeno, šta čeka, šta je stiglo bez fakture."
 
 #: web/stages.py
 msgid "Что и когда ушло людям: ведомость к выплате, отметки о переводе, остаток задолженности по каждому человеку."
@@ -10545,13 +10537,6 @@ msgid "Счёт в банке"
 msgstr "Račun u banci"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
-"несёт. Без счёта выписка не загружается: операции двух счетов иначе не "
-"отличить."
-msgstr "Račun i valuta se uzimaju iz fajla; polja su potrebna ako ih bankina tabela ne sadrži. Bez računa izvod se ne otprema: inače se transakcije dva računa ne mogu razlikovati."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Счёт контрагента"
 msgstr "Račun druge strane"
 
@@ -10736,3 +10721,67 @@ msgstr "već je bio u ranijem izvodu"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "человек не нужен"
 msgstr "čovek nije potreban"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В книге Excel больше %(n)s частей — это не выписка за месяц."
+msgstr "Excel radna sveska ima više od %(n)s delova — to nije mesečni izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет валюты. Укажите валюту счёта — трёхбуквенный код, например "
+"RSD или EUR."
+msgstr "Fajl nema valutu. Unesite valutu računa troslovnim kodom, npr. RSD ili EUR."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта — трёхбуквенный латинский код, например RSD или EUR, а не "
+"«%(value)s»."
+msgstr "Valuta mora biti troslovni latinični kod, npr. RSD ili EUR, a ne „%(value)s“."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код валюты, если его нет в файле"
+msgstr "Kod valute, ako ga nema u fajlu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
+"несёт. Без счёта и валюты выписка не загружается: операции двух счетов "
+"иначе не отличить, а валюта учёта за выписку не подставляется."
+msgstr "Račun i valuta uzimaju se iz fajla; polja su potrebna ako ih bankina tabela ne sadrži. Izvod bez računa i valute se ne učitava: inače se transakcije dva računa ne mogu razlikovati, a valuta knjigovodstva se ne podrazumeva za izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот платёж только что сведён с другой строкой. Обновите страницу и "
+"выберите другой."
+msgstr "Ovo plaćanje je upravo upareno sa drugim redom. Osvežite stranicu i izaberite drugo."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "слишком большая сумма: %(value)s"
+msgstr "prevelik iznos: %(value)s"
+
+#: web/templates/web/bank/statement.html:29
+#, python-format
+msgid "ждёт решения %(counter)s строка за месяц — в учёт она не идёт"
+msgid_plural "ждут решения %(counter)s строк за месяц — в учёт они не идут"
+msgstr[0] "%(counter)s red ovog meseca čeka odluku — ne ulazi u knjige"
+msgstr[1] "%(counter)s reda ovog meseca čekaju odluku — ne ulaze u knjige"
+msgstr[2] "%(counter)s redova ovog meseca čeka odluku — ne ulaze u knjige"
+
+#: web/templates/web/bank/statement.html:40
+#, python-format
+msgid "%(counter)s строка"
+msgid_plural "%(counter)s строк"
+msgstr[0] "%(counter)s red"
+msgstr[1] "%(counter)s reda"
+msgstr[2] "%(counter)s redova"
+
+#: web/templates/web/suppliers/inbox.html:39
+#, python-format
+msgid "Банковская выписка: ждёт решения %(counter)s строка"
+msgid_plural "Банковская выписка: ждут решения %(counter)s строк"
+msgstr[0] "Bankovni izvod: %(counter)s red čeka odluku"
+msgstr[1] "Bankovni izvod: %(counter)s reda čekaju odluku"
+msgstr[2] "Bankovni izvod: %(counter)s redova čeka odluku"
