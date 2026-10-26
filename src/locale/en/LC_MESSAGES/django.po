@@ -9782,6 +9782,8 @@ msgstr "Needs your attention"
 #, python-format
 msgid "норма месяца %(norm)s ч"
 msgstr "monthly norm %(norm)s h"
+
+#: новые строки, добавлены tools/apply_translations.py
 msgid ""
 "Все правила лежат в одной таблице с одинаковым устройством. Новое "
 "правило не требует переписывать модули: они спрашивают значение по коду."

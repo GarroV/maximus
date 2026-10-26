@@ -9609,6 +9609,8 @@ msgstr "Zahteva vašu pažnju"
 #, python-format
 msgid "норма месяца %(norm)s ч"
 msgstr "norma meseca %(norm)s h"
+
+#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid ""
 "%(locked)s заданы законом и не редактируются · %(framed)s партнёр может "
