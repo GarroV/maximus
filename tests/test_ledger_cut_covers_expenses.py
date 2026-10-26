@@ -81,7 +81,7 @@ def export_url(sql, tenant) -> str:  # noqa: F811
 
 def offered_cuts(client, sql, tenant) -> set[str]:  # noqa: F811
     """Разрезы, которые продукт предлагает сам, — с его же экрана."""
-    return set(re.findall(r"ledger=([a-z]+)", body(client.get(page_url(sql, tenant)))))
+    return set(re.findall(r"ledger=([a-z]+)", body(client.get(page_url(sql, tenant) + "sheet/"))))
 
 
 def file_rows(client, url, kinds=CUT_KINDS) -> list[tuple]:

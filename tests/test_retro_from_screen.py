@@ -254,7 +254,7 @@ def test_the_difference_from_a_screen_edit_reaches_the_current_period(
     client.post("/logout/")
 
     login_as(client, "director")
-    page = body(client.get(url))
+    page = body(client.get(url + "retro/"))
     assert "Перенести разницу" in page, (
         "страница закрытого месяца не предлагает перенести разницу — "
         "правка задним числом опять недостижима"

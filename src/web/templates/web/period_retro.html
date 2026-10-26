@@ -1,0 +1,94 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Правка задним числом — отдельная страница (D081, T230). Расхождение закрытого
+месяца с сегодняшними данными и перенос разницы вперёд. Раньше этот блок
+появлялся посреди страницы месяца между расчётом и утверждением, и действие
+над деньгами выглядело частью обычного хода месяца.
+
+Две формы для двух способов учёта: при переносе (по умолчанию, D020) закрытый
+месяц остаётся прежним, а разница ложится помеченной строкой в текущий; при
+пересчёте период открывают заново с причиной. Молча менять поведение денег
+настройкой нельзя, поэтому режим назван словами.
+{% endcomment %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+{% translate "Правки задним числом" as heading %}
+{% include "web/components/period_head.html" %}
+
+{% if retro_posted %}{% notice "ok" %}{% translate "Разница перенесена. Закрытый период при этом не изменился." %}{% endnotice %}{% endif %}
+
+
+{% if error %}
+{% notice "alert" title=error_title %}{{ error }}
+  {% if details %}<div class="details">{{ details|join:", " }}</div>
+  {% elif details_denied %}<div class="details note">{{ details_denied }}</div>{% endif %}
+{% endnotice %}
+{% endif %}
+
+{% if retro_error %}
+{% translate "Сверить закрытый месяц с сегодняшними данными не удалось." as retro_error_title %}
+{% notice "alert" title=retro_error_title %}{{ retro_error }}{% endnotice %}
+{% endif %}
+
+{% if retro_drift %}
+<section class="retro">
+  <h2>{% translate "Данные этого месяца изменились после утверждения" %}</h2>
+  {% comment %}
+  Две фразы, а не одна с подставленным куском (T093). Русское «У этого партнёра
+  X» переводится по-английски только целиком: подставленный кусок «the difference
+  is carried over» давал предложение без сказуемого — «This partner the difference
+  is carried over to the current period». Собирать предложение из кусков вправе
+  только тот язык, на котором его написали.
+  {% endcomment %}
+  <p class="note">
+    {% blocktranslate with total=retro_total employees=retro_drift.employees %}Расхождение с тем, что хранит закрытый месяц: <strong>{{ total }}</strong> по {{ employees }} чел.{% endblocktranslate %}
+    {% if retro_mode == "delta" %}{% translate "У этого партнёра разница переносится в текущий период." %}{% else %}{% translate "У этого партнёра период открывается заново и пересчитывается." %}{% endif %}
+  </p>
+  <table class="retro-lines">
+    <thead>
+      <tr><th>{% translate "Сотрудник" %}</th><th>{% translate "Компонент" %}</th><th>{% translate "Регистр" %}</th><th class="num">{% translate "Разница" %}</th></tr>
+    </thead>
+    <tbody>
+      {% for line in retro_lines %}
+      <tr>
+        <td>{{ line.employee }}</td>
+        <td>{{ line.title }}</td>
+        <td>{% ledger line.ledger %}</td>
+        <td class="{{ line.amount|numclass }}">{{ line.amount }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if can_post_retro or retro_denied %}
+  {% url 'period-retro' period.id as retro_url %}
+  {% blocktranslate with target=retro_target asvar retro_action_label %}Перенести разницу в {{ target }}{% endblocktranslate %}
+  {% include "web/components/action.html" with allowed=can_post_retro denied=retro_denied url=retro_url label=retro_action_label primary=True inline=True %}
+  {% if can_post_retro %}
+  <span class="note">
+    {% blocktranslate with target=retro_target %}Закрытый период не изменится: разница ляжет помеченной строкой в
+    {{ target }}, в тот же регистр учёта.{% endblocktranslate %}
+  </span>
+  {% endif %}
+  {% else %}
+  <p class="note">
+    {% blocktranslate %}У этого партнёра правки задним числом ведутся пересчётом: откройте период
+    заново с указанием причины и посчитайте его снова.{% endblocktranslate %}
+  </p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if not retro_drift and not retro_error %}
+{% if frozen %}
+{% translate "Расхождений нет" as retro_none_title %}
+{% notice "empty" title=retro_none_title %}
+  {% blocktranslate %}Данные этого месяца не менялись после утверждения: закрытый расчёт совпадает с сегодняшним.{% endblocktranslate %}
+{% endnotice %}
+{% else %}
+{% translate "Месяц ещё не утверждён" as retro_open_title %}
+{% notice "empty" title=retro_open_title %}
+  {% blocktranslate %}Правка задним числом касается только утверждённого месяца. Пока месяц открыт, изменённые данные просто пересчитываются.{% endblocktranslate %}
+{% endnotice %}
+{% endif %}
+{% endif %}
+{% endblock %}

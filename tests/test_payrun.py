@@ -423,7 +423,7 @@ def test_database_refuses_a_component_of_an_invisible_ledger(clean_payruns):
 def test_sheet_shows_a_row_per_employee_and_ledger(client, clean_payruns):
     login_as(client, "director")
     calculate(client)
-    html = body(client.get(period_url(client)))
+    html = body(client.get(period_url(client) + "sheet/"))
 
     assert "Ведомость" in html
     # Кухня даёт часы в дополнительном регистре и надбавку в официальном:
@@ -441,10 +441,10 @@ def test_totals_match_the_rows_the_role_can_see(client, clean_payruns):
     """
     login_as(client, "director")
     calculate(client)
-    director = body(client.get(period_url(client)))
+    director = body(client.get(period_url(client) + "sheet/"))
 
     login_as(client, "manager")
-    manager = body(client.get(period_url(client)))
+    manager = body(client.get(period_url(client) + "sheet/"))
 
     director_rows, manager_rows = sheet_numbers(director), sheet_numbers(manager)
     assert len(manager_rows) < len(director_rows)
@@ -462,10 +462,10 @@ def test_the_accountant_sees_the_same_sheet_as_the_director(client, clean_payrun
     """
     login_as(client, "director")
     calculate(client)
-    director = body(client.get(period_url(client)))
+    director = body(client.get(period_url(client) + "sheet/"))
 
     login_as(client, "accountant")
-    accountant = body(client.get(period_url(client)))
+    accountant = body(client.get(period_url(client) + "sheet/"))
 
     assert sheet_numbers(accountant) == sheet_numbers(director)
     assert grand_total(accountant) == grand_total(director)
@@ -489,7 +489,7 @@ def test_hidden_ledgers_leave_no_trace_for_a_partial_role(client, clean_payruns)
     login_as(client, "director")
     calculate(client)
 
-    director = body(client.get(period_url(client)))
+    director = body(client.get(period_url(client) + "sheet/"))
     with psycopg.connect(clean_payruns) as conn:
         totals = dict(
             conn.execute(
@@ -510,7 +510,7 @@ def test_hidden_ledgers_leave_no_trace_for_a_partial_role(client, clean_payruns)
     )
 
     login_as(client, "manager")
-    manager = body(client.get(period_url(client)))
+    manager = body(client.get(period_url(client) + "sheet/"))
 
     # Ни одной строки скрытого регистра и ни следа его суммы.
     assert "Внутренний" in director and "Внутренний" not in manager
@@ -534,7 +534,7 @@ def test_period_page_without_calculation_offers_to_run_it(client, clean_payruns)
     буква: в табель на этом экране отправлять уже некуда.
     """
     login_as(client, "director")
-    html = body(client.get(period_url(client)))
+    html = body(client.get(period_url(client) + "sheet/"))
     assert "посчитать" in html.lower()
     assert 'class="empty"' in html, "пустого состояния нет вовсе"
     assert 'class="btn next" href="/timesheets/' not in html, (

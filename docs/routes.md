@@ -106,13 +106,16 @@
 | `/periods/<uuid:period_id>/calculate/` | `period-calculate` | `web.views.period_calculate` |
 | `/periods/<uuid:period_id>/calculate/status/` | `period-calculate-status` | `web.views.period_calculate_status` |
 | `/periods/<uuid:period_id>/export/<slug:kind>/` | `period-export` | `web.reports_views.period_export` |
+| `/periods/<uuid:period_id>/history/` | `period-history` | `web.period_pages.history` |
 | `/periods/<uuid:period_id>/pnl/` | `period-pnl` | `web.reports_views.pnl` |
 | `/periods/<uuid:period_id>/pnl/<slug:code>/` | `period-pnl-line` | `web.reports_views.pnl_line` |
 | `/periods/<uuid:period_id>/postpone/` | `period-postpone` | `web.views.period_postpone` |
 | `/periods/<uuid:period_id>/print/payout/` | `period-print-payout` | `web.printing_views.payout` |
 | `/periods/<uuid:period_id>/reconcile/` | `period-reconcile` | `web.reports_views.period_reconcile` |
+| `/periods/<uuid:period_id>/registers/` | `period-registers` | `web.period_pages.registers` |
 | `/periods/<uuid:period_id>/reopen/` | `period-reopen` | `web.views.period_reopen` |
-| `/periods/<uuid:period_id>/retro/` | `period-retro` | `web.views.period_retro_post` |
+| `/periods/<uuid:period_id>/retro/` | `period-retro` | `web.period_pages.period_retro` |
+| `/periods/<uuid:period_id>/sheet/` | `period-sheet` | `web.period_pages.sheet` |
 | `/periods/<uuid:period_id>/variance/` | `period-variance` | `web.views.period_variance` |
 | `/periods/open/` | `period-open` | `web.views.open_month` |
 | `/platform/` | `platform-index` | `web.platform_views.index` |

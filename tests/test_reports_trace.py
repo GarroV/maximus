@@ -447,7 +447,7 @@ def calculated_june(client, web_env):
 def sheet_rows(client, user: str) -> list[tuple[str, str, Decimal]]:
     """Строки ведомости глазами роли: (адрес следа, регистр, итог строки)."""
     login_as(client, user)
-    html = body(client.get(period_url(client)))
+    html = body(client.get(period_url(client) + "sheet/"))
     found = re.findall(
         r'<td class="num strong"><a class="trace" href="([^"]+)"[^>]*>([^<]+)</a>',
         html, re.S,

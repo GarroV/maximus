@@ -1,0 +1,14 @@
+{% load i18n ui %}{% comment %}
+Шапка подстраницы месяца (T230): путь «Периоды / месяц / страница», название и
+состояние расчёта. Подстраницы месяца — ведомость, итоги по регистрам, история,
+правка задним числом: каждая отвечает на один вопрос, а возврат к сводке месяца
+стоит в пути, а не в отдельной кнопке «назад» (D081).
+
+Параметры: `period`, `month`, `payrun_status`, `heading` — название страницы.
+{% endcomment %}<p class="crumbs"><a href="{% url 'periods' %}">{% translate "Периоды" %}</a> /
+  <a href="{% url 'period' period.id %}">{{ month }}</a></p>
+<div class="pagehead">
+  <h1>{{ heading }} · {{ month }}</h1>
+  {% if payrun_status %}{% state payrun_status %}{% endif %}
+</div>
+<p class="sub">{{ period.tenant.title }}</p>

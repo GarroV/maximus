@@ -481,7 +481,7 @@ def test_the_payslip_is_refused_when_the_totals_are_not_given_to_the_role(
     client.post("/logout/")
     login_as(client, "manager")
     try:
-        seen = body(client.get(period_url(sql)))
+        seen = body(client.get(period_url(sql) + "sheet/"))
         mine = re.search(r"/payslips/([0-9a-f-]{36})/trace/", seen)
         assert mine, "у управляющего нет ни одной своей строки — проверять нечего"
         response = client.get(f"/payslips/{mine.group(1)}/print/")
@@ -528,7 +528,7 @@ def test_both_forms_are_reachable_from_the_screens(client, sql, june_calculated)
     разговора.
     """
     period = period_url(sql)
-    screen = body(client.get(period))
+    screen = body(client.get(period + "sheet/"))
     assert f'href="{period}print/payout/"' in screen, "со страницы периода печать не открыть"
     # Разрез в адрес печати не уезжает: он получил бы отказ с собственного экрана.
     assert f'href="{period}print/payout/?ledger=' not in screen

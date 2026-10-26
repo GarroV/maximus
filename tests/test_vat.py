@@ -276,14 +276,14 @@ def test_the_button_for_the_full_amount_appears_only_when_there_is_vat(
         assert client.post(
             f"/periods/{period_id}/calculate/", {"inline": "1"}, follow=True
         ).status_code == 200
-        page = body(client.get(f"/periods/{period_id}/"))
+        page = body(client.get(f"/periods/{period_id}/sheet/"))
         assert "Строки для P&amp;L" in page or "Строки для P&L" in page, (
             "ряда выгрузок нет вовсе — проверять появление второй кнопки не на чем"
         )
         assert "vat=gross" not in page, "кнопка «с НДС» есть, а НДС нигде нет"
 
         spend(client, item, units, unit=units["NS1"], amount="1200.00", vat_rate="20")
-        page = body(client.get(f"/periods/{period_id}/"))
+        page = body(client.get(f"/periods/{period_id}/sheet/"))
         assert "vat=gross" in page, "НДС появился, а достать полную сумму нечем"
     finally:
         client.post("/logout/")
