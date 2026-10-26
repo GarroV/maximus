@@ -285,7 +285,7 @@ def calculated_june(client, web_env):
 
 def page(client, user: str, query: str = "") -> str:
     login_as(client, user)
-    return body(client.get(period_url(client) + query))
+    return body(client.get(period_url(client) + "sheet/" + query))
 
 
 def test_the_total_equals_the_visible_rows_for_every_role(client, calculated_june):

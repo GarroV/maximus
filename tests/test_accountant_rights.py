@@ -69,9 +69,10 @@ def test_the_accountant_reopens_what_she_approved(client, clean_payruns):
     assert response.status_code == 200
     assert payrun_status(dsn) == "reopened"
     page = body(response)
-    assert REASON in page
+    # Причина откатa — в истории периода, у неё своя страница (T230).
+    assert REASON in body(client.get(url + "history/"))
     # Автор — тот, кто нажал: в сиде имя учётки равно названию роли.
-    assert "Бухгалтер" in page
+    assert "Бухгалтер" in body(client.get(url + "history/"))
 
 
 def test_the_accountant_is_offered_the_reopen_button(client, clean_payruns):

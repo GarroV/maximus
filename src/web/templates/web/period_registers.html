@@ -1,0 +1,35 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Итоги по регистрам учёта — отдельная страница (D081, T230). Три регистра — три
+разные выплаты, в один платёж они не складываются (модуль 9 эталона), поэтому
+итог каждого стоит своей строкой, а не только общей суммой.
+
+Роль видит только свои регистры: чужой не попадает ни строкой, ни в сумму (D023).
+{% endcomment %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+{% translate "Итоги по регистрам" as heading %}
+{% include "web/components/period_head.html" %}
+
+{% if has_rows %}
+<table>
+  <thead><tr><th>{% translate "Регистр" %}</th><th class="num">{% translate "Сумма" %}</th></tr></thead>
+  <tbody>
+    {% for row in ledgers %}
+    <tr><td>{{ row.title }}</td><td class="{{ row.total|numclass }}">{{ row.total }}</td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><td>{% translate "Итого" %}</td><td class="{{ total|numclass }}">{{ total }}</td></tr>
+  </tfoot>
+</table>
+<p class="note">{% translate "Итог посчитан по тому, что видно вашей роли: строки чужих регистров не доезжают до страницы и не входят в сумму." %}</p>
+<p><a class="btn" href="{{ sheet_url }}">{% translate "К ведомости" %}</a></p>
+{% else %}
+{% translate "Итогов пока нет" as no_totals %}
+{% notice "empty" title=no_totals %}
+  {% blocktranslate %}Итоги появятся, когда период будет посчитан.{% endblocktranslate %}
+  <a class="btn next" href="{% url 'period' period.id %}">{% translate "К расчёту месяца" %}</a>
+{% endnotice %}
+{% endif %}
+{% endblock %}

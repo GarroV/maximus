@@ -190,5 +190,5 @@ def test_calculation_applies_the_correction_and_the_cash_payout(client, clean_pa
     assert any("корректировка" in note for note in notes), f"нет пометки в notes: {notes}"
 
     # И то же самое видно на экране — иначе поправить и не заметить проще, чем кажется.
-    assert "Ручная корректировка" in body(client.get(period_url(client)))
+    assert "Ручная корректировка" in body(client.get(period_url(client) + "sheet/"))
     assert external_id  # внешний ключ существует: сид не пустой

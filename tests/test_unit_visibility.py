@@ -265,10 +265,10 @@ def calculated(client, web_env):
 def test_manager_page_shows_only_own_unit(client, calculated):
     """Ведомость управляющего — только его точка, и не пустая."""
     login_as(client, "director")
-    director = body(client.get(period_url(client)))
+    director = body(client.get(period_url(client) + "sheet/"))
 
     login_as(client, "manager")
-    manager = body(client.get(period_url(client)))
+    manager = body(client.get(period_url(client) + "sheet/"))
 
     assert len(units_on_the_page(director)) > 1, "у директора должно быть больше одной точки"
     assert units_on_the_page(manager) == {"NS1"}
@@ -278,12 +278,12 @@ def test_manager_page_shows_only_own_unit(client, calculated):
 def test_header_names_the_unit_it_shows(client, calculated):
     """Обещание в шапке и содержимое страницы — про одно и то же."""
     login_as(client, "manager")
-    manager = body(client.get(period_url(client)))
+    manager = body(client.get(period_url(client) + "sheet/"))
     assert "точка: NS1" in manager
 
     # Директору точку не подписываем: ограничения нет, объяснять нечего.
     login_as(client, "director")
-    assert "точка: " not in body(client.get(period_url(client)))
+    assert "точка: " not in body(client.get(period_url(client) + "sheet/"))
 
 
 def amount(text: str) -> Decimal:
@@ -320,20 +320,29 @@ def grand_total(html: str) -> Decimal:
 
 
 def test_manager_totals_carry_no_trace_of_other_units(client, calculated):
-    """D023 на экране: итог посчитан по видимому срезу, а не по всем точкам."""
+    """D023 на экране: итог посчитан по видимому срезу, а не по всем точкам.
+
+    Строки — на странице ведомости, итоги по регистрам — на своей странице
+    (T230): сходиться между собой они обязаны по-прежнему.
+    """
     login_as(client, "manager")
-    manager = body(client.get(period_url(client)))
+    manager = body(client.get(period_url(client) + "sheet/"))
+    manager_registers = body(client.get(period_url(client) + "registers/"))
     login_as(client, "director")
-    director = body(client.get(period_url(client)))
+    director = body(client.get(period_url(client) + "sheet/"))
+    director_registers = body(client.get(period_url(client) + "registers/"))
 
     # Итог сходится ровно с показанными строками — значит скрытая точка не
     # осталась в нём слагаемым.
-    for html in (manager, director):
-        assert grand_total(html) == sum(row_totals(html)) == sum(ledger_totals(html).values())
+    for html, registers in ((manager, manager_registers), (director, director_registers)):
+        assert (
+            grand_total(registers) == sum(row_totals(html))
+            == sum(ledger_totals(registers).values())
+        )
 
     # Контроль сравнивает **один и тот же регистр**: общий итог у управляющего
     # меньше и без фильтра по точкам — просто потому, что внутренний регистр ему
     # не виден. Официальный виден обоим, и разойтись он может только по точкам.
-    official_manager = ledger_totals(manager)["Официальный"]
-    official_director = ledger_totals(director)["Официальный"]
+    official_manager = ledger_totals(manager_registers)["Официальный"]
+    official_director = ledger_totals(director_registers)["Официальный"]
     assert Decimal(0) < official_manager < official_director

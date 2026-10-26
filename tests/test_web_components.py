@@ -221,13 +221,13 @@ def test_exports_carry_the_cut_the_person_is_looking_at(client):
     url = period_url(client)
     assert client.post(url + "calculate/", follow=True).status_code == 200
 
-    whole = body(client.get(url))
+    whole = body(client.get(url + "sheet/"))
     assert 'href="/periods/' in whole
     assert "/export/payout/?ledger=" not in whole, (
         "разрез «все регистры» не должен подмешивать регистр в адрес выгрузки"
     )
 
-    one = body(client.get(url + "?ledger=official"))
+    one = body(client.get(url + "sheet/?ledger=official"))
     assert "/export/payout/?ledger=official" in one
     assert "/export/pnl/?ledger=official" in one
     assert "/export/partner/?ledger=official" in one

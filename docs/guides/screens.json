@@ -12,7 +12,7 @@
   "10-periods": "/periods/",
   "11-period-open": "{open_period}",
   "12-timesheet": "/timesheets/{period}/",
-  "13-period": "/periods/{period}/",
+  "13-period": "/periods/{period}/", "13b-sheet": "/periods/{period}/sheet/",
   "14-trace": "{trace}",
   "15-reconcile": "/periods/{period}/reconcile/",
   "16-pnl": "/periods/{period}/pnl/",

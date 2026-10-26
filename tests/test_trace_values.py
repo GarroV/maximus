@@ -86,7 +86,7 @@ def calculated_june(client, web_env):
 
 def trace_urls(client, user: str) -> list[str]:
     login_as(client, user)
-    html = body(client.get(period_url(client)))
+    html = body(client.get(period_url(client) + "sheet/"))
     found = re.findall(r'<a class="trace" href="([^"]+)"', html)
     assert found, "в ведомости нет ни одной ссылки на след расчёта"
     return [url.replace("&amp;", "&") for url in found]

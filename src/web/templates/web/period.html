@@ -119,8 +119,6 @@
 {% endif %}
 {% if approved %}{% notice "ok" %}{% translate "Период утверждён. Расчёт и его данные заморожены." %}{% endnotice %}{% endif %}
 {% if reopened %}{% notice "ok" %}{% translate "Период открыт заново. Причина и ваше имя записаны в историю." %}{% endnotice %}{% endif %}
-{% if froze %}{% notice "ok" %}{% translate "Строка заморожена. Пересчёт её обходит, остальные считаются как прежде." %}{% endnotice %}{% endif %}
-{% if released %}{% notice "ok" %}{% translate "Заморозка снята. Человек вернулся в общий расчёт." %}{% endnotice %}{% endif %}
 
 <dl class="facts">
   <dt>{% translate "Состояние" %}</dt><dd>{{ status }}</dd>
@@ -197,14 +195,6 @@
 Форму отката видно сразу с полем причины: причина не «уточнение по желанию», а
 условие действия — база откажет без неё и суперпользователю.
 {% endcomment %}
-{% comment %}
-Правки задним числом (T026). Расхождение показывается только у закрытого
-месяца: у открытого правка входных данных — обычная работа, её пересчитывают.
-Месяц-получатель назван словами: молча выбранный получатель — это сумма,
-появившаяся неизвестно где.
-{% endcomment %}
-{% if retro_posted %}{% notice "ok" %}{% translate "Разница перенесена. Закрытый период при этом не изменился." %}{% endnotice %}{% endif %}
-
 {% if retro_pending %}
 {% translate "Разница за закрытый месяц ещё не в ведомости." as retro_pending_title %}
 {% notice "alert" extra="retro-pending" title=retro_pending_title %}
@@ -230,52 +220,17 @@
 {% notice "alert" title=retro_error_title %}{{ retro_error }}{% endnotice %}
 {% endif %}
 
+{% comment %}
+Правки задним числом (T026, T230) живут на своей странице; здесь только сигнал,
+что они есть. Деньги переносит та страница, а не этот ход месяца: молча
+перенести разницу, нажимая «утвердить», нельзя, а пропустить расхождение — тоже.
+{% endcomment %}
 {% if retro_drift %}
-<section class="retro">
-  <h2>{% translate "Данные этого месяца изменились после утверждения" %}</h2>
-  {% comment %}
-  Две фразы, а не одна с подставленным куском (T093). Русское «У этого партнёра
-  X» переводится по-английски только целиком: подставленный кусок «the difference
-  is carried over» давал предложение без сказуемого — «This partner the difference
-  is carried over to the current period». Собирать предложение из кусков вправе
-  только тот язык, на котором его написали.
-  {% endcomment %}
-  <p class="note">
-    {% blocktranslate with total=retro_total employees=retro_drift.employees %}Расхождение с тем, что хранит закрытый месяц: <strong>{{ total }}</strong> по {{ employees }} чел.{% endblocktranslate %}
-    {% if retro_mode == "delta" %}{% translate "У этого партнёра разница переносится в текущий период." %}{% else %}{% translate "У этого партнёра период открывается заново и пересчитывается." %}{% endif %}
-  </p>
-  <table class="retro-lines">
-    <thead>
-      <tr><th>{% translate "Сотрудник" %}</th><th>{% translate "Компонент" %}</th><th>{% translate "Регистр" %}</th><th class="num">{% translate "Разница" %}</th></tr>
-    </thead>
-    <tbody>
-      {% for line in retro_lines %}
-      <tr>
-        <td>{{ line.employee }}</td>
-        <td>{{ line.title }}</td>
-        <td>{% ledger line.ledger %}</td>
-        <td class="{{ line.amount|numclass }}">{{ line.amount }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% if can_post_retro or retro_denied %}
-  {% url 'period-retro' period.id as retro_url %}
-  {% blocktranslate with target=retro_target asvar retro_action_label %}Перенести разницу в {{ target }}{% endblocktranslate %}
-  {% include "web/components/action.html" with allowed=can_post_retro denied=retro_denied url=retro_url label=retro_action_label primary=True inline=True %}
-  {% if can_post_retro %}
-  <span class="note">
-    {% blocktranslate with target=retro_target %}Закрытый период не изменится: разница ляжет помеченной строкой в
-    {{ target }}, в тот же регистр учёта.{% endblocktranslate %}
-  </span>
-  {% endif %}
-  {% else %}
-  <p class="note">
-    {% blocktranslate %}У этого партнёра правки задним числом ведутся пересчётом: откройте период
-    заново с указанием причины и посчитайте его снова.{% endblocktranslate %}
-  </p>
-  {% endif %}
-</section>
+{% translate "Данные этого месяца изменились после утверждения" as retro_drift_title %}
+{% notice "alert" title=retro_drift_title %}
+  {% blocktranslate with total=retro_total employees=retro_drift.employees %}Расхождение с тем, что хранит закрытый месяц: <strong>{{ total }}</strong> по {{ employees }} чел.{% endblocktranslate %}
+  <a class="btn next" href="{{ retro_url }}">{% translate "Разобрать расхождение" %}</a>
+{% endnotice %}
 {% endif %}
 
 {% if readiness and can_approve %}
@@ -351,200 +306,26 @@
 </div>
 {% endif %}
 
-{% if history %}
 {% comment %}
-Журнал ведёт база триггером (T023) — здесь только показ. Второго журнала рядом
-не заводится: перехода без записи не бывает ни на одном пути записи.
-
-Свёрнут намеренно. История нужна редко — когда спорят о числах или ищут, кто
-откатил месяц, — а места занимала столько, что главная таблица страницы
-начиналась ниже середины экрана. Раскрывается своим `details`, без скриптов:
-свёрнутое состояние читается как «здесь есть ещё», а не как пропажа.
+Что в этом месяце (T230, D081). Сводка отвечает на вопрос «где месяц и что
+делать дальше», а всё, что можно открыть и рассматривать, — ведомость, итоги по
+регистрам, историю, правки задним числом, табель, расхождения, — стоит одним
+списком ссылок с подписью, что за ней лежит. Раньше эти куски были сложены на
+одной странице, и действие шага тонуло в таблице на тридцать пять строк.
 {% endcomment %}
-<details class="history-box">
-  <summary>{% translate "История периода" %}</summary>
-<table class="history">
-  <thead>
-    <tr><th>{% translate "Когда" %}</th><th>{% translate "Что стало" %}</th><th>{% translate "Кто" %}</th><th>{% translate "Причина" %}</th></tr>
-  </thead>
+<h2>{% translate "Что в этом месяце" %}</h2>
+<table class="pages">
   <tbody>
-    {% for row in history %}
-    <tr>
-      <td>{{ row.at }}</td>
-      <td>{% if row.from_title %}{{ row.from_title }} → {% endif %}<strong>{{ row.to_title }}</strong></td>
-      <td>{% if row.actor %}{{ row.actor }}{% else %}<span class="hint">{% translate "мимо приложения" %}</span>{% endif %}</td>
-      <td>{% if row.reason %}{{ row.reason }}{% else %}—{% endif %}</td>
-    </tr>
+    {% for page in pages %}
+    <tr><td><a href="{{ page.url }}">{{ page.title }}</a></td><td class="hint">{{ page.hint }}</td></tr>
     {% endfor %}
   </tbody>
 </table>
-</details>
-{% endif %}
-
-<h2>{% translate "Ведомость" %}{% if cut_title %} · {{ cut_title }}{% endif %}</h2>
-{% if sheet.rows %}
+{% if not has_sheet %}
 {% comment %}
-Одна таблица на все регистры с меткой в строке (D023). Строка — пара
-«сотрудник × регистр»: регистр — свойство компонента выплаты, и у одного
-человека часы и надбавка попадают в разные регистры.
-
-Переключатель разреза (T028) перечисляет только те регистры, которые есть в
-показанных строках. Регистра, которого роль не видит, в списке нет даже пустой
-кнопкой: пустая кнопка с названием — это сообщение о том, что такой регистр
-существует, а D023 требует «ни строк, ни следа». Разрез — обычная ссылка, а не
-кнопка со скриптом: он живёт в адресе, и им можно поделиться.
-{% endcomment %}
-{% translate "Разрез ведомости по регистрам" as cuts_label %}
-{% include "web/components/cuts.html" with cuts=cuts label=cuts_label %}
-{% comment %}
-Выгрузки и сверка (T031, T032).
-
-Разрез уезжает в адрес выгрузки прямо отсюда, из того же переключателя, что
-нарисован выше: файл обязан содержать ровно то, что человек сейчас видит на
-экране. Второго места, где хранился бы выбранный регистр, быть не должно —
-иначе экран и файл разъедутся молча.
-{% endcomment %}
-{% if cut_code %}{% firstof "?ledger="|add:cut_code as ledger_query %}{% else %}{% firstof "" as ledger_query %}{% endif %}
-{% url 'period-export' period.id 'payout' as payout_url %}
-{% url 'period-export' period.id 'pnl' as pnl_url %}
-{% url 'period-export' period.id 'partner' as partner_url %}
-{% url 'period-reconcile' period.id as reconcile_url %}
-{% url 'period-pnl' period.id as report_url %}
-{% comment %}
-Печатная ведомость (T187) уезжает БЕЗ разреза намеренно: «к выплате» считается
-по строке ведомости целиком и регистру не принадлежит. Подставить сюда
-`ledger_query` значило бы отправить человека на отказ с его же экрана.
-{% endcomment %}
-{% url 'period-print-payout' period.id as print_payout_url %}
-{% include "web/components/exports.html" %}
-{% scroll %}
-<table class="sheet">
-  {% comment %}
-  Шапка в два яруса (issue #163, модуль 9 эталона): сверху группы колонок, под
-  ними сами колонки. Имя, точка, регистр, спор и «Итого» проходят через оба
-  яруса — иначе они окажутся под какой-нибудь группой и прочитаются как её
-  часть, ровно наоборот тому, ради чего ярус заведён.
-
-  Группы приходят готовыми из `payrun/sheet.py`: что чем считается — устройство
-  ведомости, а не решение разметки.
-  {% endcomment %}
-  <thead>
-    <tr>
-      <th rowspan="2">{% translate "Сотрудник" %}</th><th rowspan="2">{% translate "Точка" %}</th><th rowspan="2">{% translate "Регистр" %}</th><th rowspan="2">{% translate "Спор" %}</th>
-      {% for group in sheet.groups %}<th class="grouphead" colspan="{{ group.span }}">{{ group.title }}</th>{% endfor %}
-      <th rowspan="2" class="num">{% translate "Итого" %}</th>
-    </tr>
-    <tr>
-      {% for column in sheet.columns %}<th class="num">{{ column }}</th>{% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for row in sheet.rows %}
-    {% comment %}
-    Метка у строки одна, и полоска слева тоже одна: заморозка важнее
-    перерасчёта — она объясняет, почему строка не изменилась после пересчёта.
-    Класс не ставится вовсе, когда метки нет: пустой class="" в каждой из 35
-    строк — мусор в разметке, и он же ломает разбор таблицы в проверках.
-    {% endcomment %}
-    <tr{% if row.frozen %} class="is-frozen"{% elif row.is_retro %} class="retro"{% endif %}>
-      {% comment %}
-      Разница за закрытый месяц (T026) — отдельная строка, а не слитая с
-      обычной: у неё те же колонки компонентов, поэтому без пометки она стала бы
-      невидимой прибавкой к сумме этого месяца.
-      {% endcomment %}
-      <td>{{ row.employee }}{% if row.is_retro %}
-        <span class="badge-retro">{% blocktranslate with title=row.retro_title %}Перерасчёт за {{ title }}{% endblocktranslate %}</span>{% endif %}</td>
-      {% comment %}
-      Куда идут деньги этого человека (D055, T221): колонка точки говорит, где
-      стоит строка ведомости, подпись — между какими точками сумма делится и что
-      сетевой человек не «без точки», а на всю сеть.
-      {% endcomment %}
-      <td>{{ row.unit }}{% if row.units_note %} <span class="hint">{{ row.units_note }}</span>{% endif %}</td>
-      <td>{% ledger row.ledger %}</td>
-      {% comment %}
-      Заморозка спорной строки (T027). Метка стоит у каждой строки человека —
-      их бывает две, по одной на регистр, и живая половина ведомости вводила бы
-      в заблуждение. Действие предлагается один раз: заморожена строка
-      ведомости целиком, а не её половина.
-      {% endcomment %}
-      <td class="freeze">
-        {% if row.frozen %}
-          <span class="frozen">{% translate "Заморожена" %}</span>
-          {% if row.show_action %}
-            <span class="hint">{{ row.freeze_reason }}</span>
-            {% if can_freeze %}
-            {% url 'payslip-release' row.payslip_id as release_url %}
-            {% translate "Снять заморозку" as release_label %}
-            {% include "web/components/action.html" with allowed=True url=release_url label=release_label primary=False note="" denied="" reason_name="" hidden_name="" %}
-            {% endif %}
-          {% endif %}
-        {% elif row.show_action and can_freeze %}
-          {% url 'payslip-freeze' row.payslip_id as freeze_url %}
-          {% translate "Заморозить" as freeze_label %}
-          {% translate "из-за чего спор" as freeze_reason_placeholder %}
-          {% include "web/components/action.html" with allowed=True url=freeze_url label=freeze_label reason_name="reason" reason_id="" reason_label="" reason_placeholder=freeze_reason_placeholder primary=False note="" denied="" %}
-        {% endif %}
-      </td>
-      {% for cell in row.cells %}<td class="{{ cell|numclass }}">{{ cell }}</td>{% endfor %}
-      {% comment %}
-      Итог строки — ссылка на след расчёта (T029): «откуда это число» спрашивают
-      именно про него. Отдельной колонкой ссылку не ставим — ведомость едва
-      уместилась в 1440 (см. журнал блока), и ещё одна колонка вернула бы тот
-      самый перелив, который там лечили.
-      {% endcomment %}
-      <td class="{{ row.total|numclass }} strong">{% if row.trace_url %}<a class="trace" href="{{ row.trace_url }}"
-        title="{% translate "Как получилась эта сумма" %}">{{ row.total }}</a>{% else %}{{ row.total }}{% endif %}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-  <tfoot>
-    <tr class="grand">
-      <td colspan="4">{% blocktranslate with employees=sheet.employees %}Итого · {{ employees }} чел.{% endblocktranslate %}</td>
-      {% for cell in sheet.column_totals %}<td class="{{ cell|numclass }} num--total">{{ cell }}</td>{% endfor %}
-      <td class="{{ total|numclass }} num--total">{{ total }}</td>
-    </tr>
-  </tfoot>
-</table>
-{% endscroll %}
-
-{% comment %}
-Разбивка по регистрам показывается, только когда регистров больше одного: в
-разрезе по одному она слово в слово повторяла бы подвал ведомости.
-{% endcomment %}
-{% if show_ledger_totals %}
-<h2>{% translate "Итоги по регистрам" %}</h2>
-<table>
-  <thead><tr><th>{% translate "Регистр" %}</th><th class="num">{% translate "Сумма" %}</th></tr></thead>
-  <tbody>
-    {% for row in ledgers %}
-    <tr><td>{{ row.title }}</td><td class="{{ row.total|numclass }}">{{ row.total }}</td></tr>
-    {% endfor %}
-  </tbody>
-  <tfoot>
-    <tr><td>{% translate "Итого" %}</td><td class="{{ total|numclass }}">{{ total }}</td></tr>
-  </tfoot>
-</table>
-{% endif %}
-<p class="note">
-  {% translate "Итог посчитан по тому, что видно вашей роли: строки чужих регистров не доезжают до страницы и не входят в сумму." %}
-  {% if cut_title %}{% blocktranslate with title=cut_title %}Сейчас показан один регистр — {{ title }};
-  итог посчитан по нему.{% endblocktranslate %}{% endif %}
-</p>
-{% comment %}
-Кнопки заморозки нет по двум разным причинам, и они не смешиваются: права нет
-(тогда на её месте тот же текст, которым ответит отказ) или период утверждён
-(тогда заморожен весь расчёт, и об этом уже сказано выше).
-{% endcomment %}
-{% if freeze_denied %}
-<p class="note">{{ freeze_denied }}</p>
-{% endif %}
-{% else %}
-{% comment %}
-Пустое состояние ведомости объясняет следующий шаг, а не сообщает о пустоте
-(T077). Причин пустоты две, и делать они требуют разного: часов ещё нет —
-идти в табель; часы есть, а расчёта не было — нажать кнопку выше. Свалить их
-в одно «расчёта не было» значило бы отправить человека нажимать кнопку, после
-которой он получит отказ «считать нечего».
+Пока ведомости нет, следующий шаг называется словами, а не пустотой (T077).
+Причин пустоты две и требуют разного: часов ещё нет — идти в табель; часы
+есть, а расчёта не было — нажать «Посчитать период» выше.
 {% endcomment %}
 {% translate "Ведомости пока нет" as no_sheet %}
 {% notice "empty" title=no_sheet %}
@@ -555,7 +336,7 @@
     <a class="btn next" href="{% url 'timesheets' period.id %}">{% translate "Перейти к табелю" %}</a>
   {% else %}
     {% blocktranslate %}Часы за месяц уже внесены — осталось посчитать период. Ведомость появится
-    здесь же: строка на каждого сотрудника в каждом регистре, который видно
+    на своей странице: строка на каждого сотрудника в каждом регистре, который видно
     вашей роли.{% endblocktranslate %}
     {% if calculate_denied %}<span class="note">{{ calculate_denied }}</span>{% endif %}
   {% endif %}

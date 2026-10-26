@@ -235,14 +235,14 @@ def test_accountant_does_not_see_other_ledgers(client, ledger_rows):
     from web.format import money
 
     login_as(client, "director")
-    director = body(client.get(period_url(client)))
+    director = body(client.get(period_url(client) + "sheet/"))
     assert money(AMOUNT_OFFICIAL) in director
     assert money(AMOUNT_SUPPLEMENTARY) in director
     assert money(AMOUNT_INTERNAL) in director
     assert money(AMOUNT_OFFICIAL + AMOUNT_SUPPLEMENTARY + AMOUNT_INTERNAL) in director
 
     login_as(client, "manager")
-    manager = body(client.get(period_url(client)))
+    manager = body(client.get(period_url(client) + "sheet/"))
     assert money(AMOUNT_OFFICIAL) in manager, "официальный регистр управляющему открыт"
     assert money(AMOUNT_SUPPLEMENTARY) in manager, "дополнительный регистр управляющему открыт"
     assert money(AMOUNT_INTERNAL) not in manager

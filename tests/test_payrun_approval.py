@@ -219,10 +219,12 @@ def history_block(page: str) -> str:
     автора не показывает вовсе. Найдено порчей: обнуление имени автора в
     `lifecycle.history` не покраснило ни одного теста.
     """
-    assert HISTORY_HEADING in page, f"на странице нет истории:\n{page}"
-    start = page.index(HISTORY_HEADING)
-    end = page.find("<h2>", start)
-    return page[start : end if end != -1 else len(page)]
+    # История — своя страница (T230): берётся её таблица, а не вся страница,
+    # потому что заголовок и имя вошедшего стоят в шапке любой страницы.
+    start = page.find('<table class="history">')
+    assert start != -1, f"на странице нет истории:\n{page}"
+    end = page.index("</table>", start)
+    return page[start:end]
 
 
 def payrun_status(dsn: str) -> str:
@@ -296,7 +298,7 @@ def test_reopening_shows_the_reason_and_the_author_in_the_history(client, clean_
     assert response.status_code == 200
     assert payrun_status(clean_payruns) == "reopened"
 
-    shown = history_block(body(response))
+    shown = history_block(body(client.get(url + "history/")))
     assert REASON in shown
     # Автор — тот, кто нажал: в сиде имя учётки равно названию роли.
     assert "Оперативный директор" in shown
@@ -345,7 +347,7 @@ def test_the_history_shows_every_step(client, clean_payruns):
     url = calculated_period(client, clean_payruns)
     client.post(url + "approve/", follow=True)
 
-    shown = history_block(body(client.get(url)))
+    shown = history_block(body(client.get(url + "history/")))
     # Именно в истории: «Утверждён» стоит и в сводке состояния, поэтому проверка
     # по всей странице прошла бы и с пустой таблицей.
     assert "Посчитан" in shown and "Утверждён" in shown
