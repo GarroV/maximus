@@ -494,5 +494,61 @@
   "Счёт в банке": {
     "en": "Bank account",
     "sr": "Račun u banci"
+  },
+  "В книге Excel часть %(part)s объявляет тип документа или сущности — такая книга не принимается.": {
+    "en": "Part %(part)s of the Excel workbook declares a document type or entities — such a workbook is not accepted.",
+    "sr": "Deo %(part)s Excel radne sveske deklariše tip dokumenta ili entitete — takva sveska se ne prihvata."
+  },
+  "Таблица не читается: %(why)s.": {
+    "en": "The table cannot be read: %(why)s.",
+    "sr": "Tabela se ne može pročitati: %(why)s."
+  },
+  "Лист книги Excel не читается: первым должен быть лист с таблицей выписки.": {
+    "en": "The Excel sheet cannot be read: the first sheet must hold the statement table.",
+    "sr": "List Excel sveske se ne može pročitati: prvi list mora sadržati tabelu izvoda."
+  },
+  "больше двух знаков после запятой: %(value)s": {
+    "en": "more than two decimal places: %(value)s",
+    "sr": "više od dve decimale: %(value)s"
+  },
+  "дата вне %(first)s–%(last)s годов: %(value)s": {
+    "en": "date outside the years %(first)s–%(last)s: %(value)s",
+    "sr": "datum van godina %(first)s–%(last)s: %(value)s"
+  },
+  "В файле нет номера счёта. Укажите счёт, по которому эта выписка: без него операции двух счетов не отличить друг от друга.": {
+    "en": "The file has no account number. Enter the account this statement belongs to: without it, transactions of two accounts cannot be told apart.",
+    "sr": "U fajlu nema broja računa. Unesite račun na koji se ovaj izvod odnosi: bez njega se transakcije dva računa ne mogu razlikovati."
+  },
+  "Выписку по этому счёту сейчас загружают ещё раз — повторите через минуту.": {
+    "en": "A statement for this account is being uploaded right now — try again in a minute.",
+    "sr": "Izvod za ovaj račun se upravo otprema — pokušajte ponovo za minut."
+  },
+  "Файл не загружен: операции банка с теми же номерами уже загружены с другой суммой, датой или направлением. Проверьте, та ли это выписка и тот ли счёт. %(lines)s": {
+    "en": "The file was not uploaded: bank transactions with the same references are already uploaded with a different amount, date or direction. Check that this is the right statement and the right account. %(lines)s",
+    "sr": "Fajl nije otpremljen: bankovne transakcije sa istim referencama već su otpremljene sa drugim iznosom, datumom ili smerom. Proverite da li je to pravi izvod i pravi račun. %(lines)s"
+  },
+  "Строка %(n)s: было %(was)s, в файле %(now)s.": {
+    "en": "Line %(n)s: was %(was)s, in the file %(now)s.",
+    "sr": "Red %(n)s: bilo je %(was)s, u fajlu %(now)s."
+  },
+  "Валюта счёта (%(invoice)s) и платежа (%(line)s) разная — такой платёж этот счёт не оплачивает. Отправьте строку в инбокс или выберите счёт в той же валюте.": {
+    "en": "The invoice currency (%(invoice)s) differs from the payment currency (%(line)s) — this payment does not pay this invoice. Send the line to the inbox or choose an invoice in the same currency.",
+    "sr": "Valuta fakture (%(invoice)s) razlikuje se od valute plaćanja (%(line)s) — ovo plaćanje ne izmiruje ovu fakturu. Pošaljite red u inboks ili izaberite fakturu u istoj valuti."
+  },
+  "Сопоставлено правилом": {
+    "en": "Matched by the rule",
+    "sr": "Upareno pravilom"
+  },
+  "Номер счёта, если его нет в файле": {
+    "en": "Account number, if the file does not carry it",
+    "sr": "Broj računa, ako ga nema u fajlu"
+  },
+  "Валюта": {
+    "en": "Currency",
+    "sr": "Valuta"
+  },
+  "Счёт и валюта берутся из файла; поля нужны, если таблица банка их не несёт. Без счёта выписка не загружается: операции двух счетов иначе не отличить.": {
+    "en": "The account and currency are taken from the file; these fields are needed when the bank's table does not carry them. Without an account the statement is not uploaded: otherwise transactions of two accounts cannot be told apart.",
+    "sr": "Račun i valuta se uzimaju iz fajla; polja su potrebna ako ih bankina tabela ne sadrži. Bez računa izvod se ne otprema: inače se transakcije dva računa ne mogu razlikovati."
   }
 }

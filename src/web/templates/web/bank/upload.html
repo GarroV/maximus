@@ -47,6 +47,11 @@
   <p class="upload__lead">{% translate "Форматы: ISO 20022 camt.053, izvod (XML iBank и Raiffeisen), CSV и xlsx. Колонки таблицы узнаются по заголовкам, а не по номеру." %}</p>
   <p class="field"><label for="statement-file">{% translate "Файл выписки" %}</label>
   <input type="file" id="statement-file" name="file" accept=".xml,.csv,.xlsx,.txt" required></p>
+  <p class="field"><label for="statement-account">{% translate "Счёт в банке" %}</label>
+  <input type="text" id="statement-account" name="account" maxlength="64" value="{{ form.account }}" placeholder="{% translate "Номер счёта, если его нет в файле" %}"></p>
+  <p class="field"><label for="statement-currency">{% translate "Валюта" %}</label>
+  <input type="text" id="statement-currency" name="currency" maxlength="3" value="{{ form.currency }}"></p>
+  <p class="hint">{% translate "Счёт и валюта берутся из файла; поля нужны, если таблица банка их не несёт. Без счёта выписка не загружается: операции двух счетов иначе не отличить." %}</p>
   <button class="primary" type="submit">{% translate "Загрузить" %}</button>
 </form>
 

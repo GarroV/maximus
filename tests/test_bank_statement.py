@@ -45,8 +45,13 @@ def csv_file(*rows: str, name: str = "izvod.csv"):
     return SimpleUploadedFile(name, (HEADER + "".join(rows)).encode("utf-8"), "text/csv")
 
 
-def upload(client, *rows, name="izvod.csv"):
-    return client.post(UPLOAD, {"file": csv_file(*rows, name=name)})
+ACCOUNT = "265-0000000001-11"
+
+
+def upload(client, *rows, name="izvod.csv", account=ACCOUNT, currency="RSD"):
+    """Таблица банка счёта не несёт — счёт и валюта приходят из формы."""
+    return client.post(UPLOAD, {"file": csv_file(*rows, name=name),
+                                "account": account, "currency": currency})
 
 
 @pytest.fixture
@@ -164,14 +169,23 @@ def test_an_entered_payment_is_matched_by_itself(
     assert len(facts_like(sql, "manual:payment:%")) == 1
 
 
-def test_the_only_unpaid_invoice_of_a_known_payee_is_paid_with_the_bank_date(
+def test_a_payee_known_by_name_gets_the_invoice_offered_not_paid(
     counterparty, item, units, accountant, sql,  # noqa: F811
 ):
-    an_invoice(accountant, sql, counterparty, units, item=item)
+    """Название в выписке пишет плательщик: по нему счёт предлагается, но сам
+    не оплачивается — оплату делает человек одной кнопкой."""
+    document = an_invoice(accountant, sql, counterparty, units, item=item)
     upload(accountant, "12.07.2026;24.000,00;;EPS ELEKTRO;struja 06\n")
     ((line_id, _a, _d, _n, links),) = lines(sql)
-    assert links == f"auto:manual:payment:bank-{line_id}"
-    ((dedup, amount, on, active, _source),) = facts_like(sql, "manual:payment:%")
+    assert links is None
+    assert facts_like(sql, "manual:payment:%") == []
+    card = body(accountant.get(MATCH + f"?line={line_id}"))
+    assert f'value="{document}"' in card
+
+    done = accountant.post(f"/statement/lines/{line_id}/",
+                           {"action": "pay", "invoice": document})
+    assert "done=paid" in done["Location"], done["Location"]
+    ((_k, amount, on, active, _s),) = facts_like(sql, "manual:payment:%")
     assert (amount, on.isoformat(), active) == (Decimal("24000.00"), "2026-07-12", True)
 
     # Тот же платёж в пересекающейся выписке второй оплаты не заводит.
@@ -412,3 +426,157 @@ def test_a_duplicate_does_not_count_in_the_turnover():
         SimpleNamespace(amount=Decimal("1200.00"), duplicate_of_id=None),
     ]
     assert bank.turnover(rows) == Decimal("25200.00")
+
+
+# --- валюта, счёт, повторное решение -----------------------------------------------
+
+
+def test_a_line_in_another_currency_neither_matches_nor_pays(
+    counterparty, item, units, accountant, sql,  # noqa: F811
+):
+    """24 000 евро — не 24 000 динаров: ни сами, ни кнопкой — ни с внесённым
+    платежом, ни со счётом."""
+    paid_one = an_invoice(accountant, sql, counterparty, units, item=item)
+    paid = accountant.post(f"/invoices/{paid_one}/pay/", {
+        "date": "2026-07-10", "amount": "24000.00", "entry_key": key(),
+    })
+    assert paid.status_code == 302, body(paid)[:300]
+    payment_key = facts_like(sql, "manual:payment:%")[0][0]
+    open_one = an_invoice(accountant, sql, counterparty, units, item=item, number="EPS-78")
+
+    upload(accountant, "11.07.2026;24.000,00;;EPS ELEKTRO;struja\n", currency="EUR")
+    ((line_id, _a, _d, _n, links),) = lines(sql)
+    assert links is None                                   # само не свелось
+    card = body(accountant.get(MATCH + f"?line={line_id}"))
+    assert f'value="{payment_key}"' not in card           # платёж не предложен
+    assert f'value="{open_one}"' not in card              # счёт не предложен
+
+    linked = accountant.post(f"/statement/lines/{line_id}/",
+                             {"action": "link", "fact": payment_key})
+    assert linked.status_code == 400
+    refused = accountant.post(f"/statement/lines/{line_id}/",
+                              {"action": "pay", "invoice": open_one})
+    assert refused.status_code == 400
+    assert lines(sql)[0][4] is None
+    assert len(facts_like(sql, "manual:payment:%")) == 1
+
+
+def test_a_table_without_an_account_is_refused_in_words(accountant, sql):  # noqa: F811
+    answer = upload(accountant, "05.07.2026;1.840,00;;Banca Test;naknada\n", account="")
+    assert answer.status_code == 400 and 'data-error="1"' in body(answer)
+    assert lines(sql) == []
+
+
+def test_two_accounts_with_the_same_operations_both_load_fully(accountant, sql):  # noqa: F811
+    """Одинаковые операции на двух счетах партнёра — разные деньги, не дубли."""
+    rows = ("05.07.2026;1.840,00;;Banca Test;naknada\n",
+            "06.07.2026;500,00;;Banca Test;naknada\n")
+    upload(accountant, *rows, name="a.csv", account="265-0000000001-11")
+    # Файл другого счёта — другой файл (здесь — другой порядок строк), а
+    # операции в нём те же: ни одна не должна стать дублем первого.
+    second = upload(accountant, *reversed(rows), name="b.csv", account="160-0000000002-22")
+    assert second.status_code == 302, body(second)[:300]
+    loaded = lines(sql)
+    assert len(loaded) == 4
+    assert [dup for _i, _a, dup, _n, _l in loaded] == [False] * 4
+
+
+def test_the_same_bank_reference_with_another_sum_is_refused_not_hidden(
+    accountant, sql,  # noqa: F811
+):
+    """Ссылка банка та же, сумма другая — это расхождение, а не дубль."""
+    header = "Datum valute;Iznos na teret;Iznos u korist;Naziv primaoca;Svrha plaćanja;Referenca\n"
+
+    def file(sum_, name):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        text = header + f"05.07.2026;{sum_};;Banca Test;naknada;REF-1\n"
+        return SimpleUploadedFile(name, text.encode("utf-8"), "text/csv")
+
+    first = accountant.post(UPLOAD, {"file": file("1.840,00", "a.csv"), "account": ACCOUNT,
+                                     "currency": "RSD"})
+    assert first.status_code == 302, body(first)[:300]
+    second = accountant.post(UPLOAD, {"file": file("1.940,00", "b.csv"), "account": ACCOUNT,
+                                      "currency": "RSD"})
+    assert second.status_code == 400 and 'data-error="1"' in body(second)
+    assert len(lines(sql)) == 1
+
+
+def test_a_line_whose_payment_was_deleted_can_be_decided_again(
+    counterparty, item, units, accountant, sql,  # noqa: F811
+):
+    document = an_invoice(accountant, sql, counterparty, units, item=item)
+    upload(accountant, "12.07.2026;24.000,00;;EPS ELEKTRO;struja\n")
+    line_id = lines(sql)[0][0]
+    accountant.post(f"/statement/lines/{line_id}/", {"action": "pay", "invoice": document})
+    ((payment_key, *_rest),) = facts_like(sql, "manual:payment:%")
+    # Оплату удаляют на её экране — строка выписки снова ждёт решения.
+    sql.execute("update facts set superseded_at = now() where dedup_key = %s", (payment_key,))
+    assert 'data-state="decide"' in body(accountant.get(MATCH + f"?line={line_id}"))
+
+    again = accountant.post(f"/statement/lines/{line_id}/", {"action": "inbox"})
+    assert again.status_code == 302, body(again)[:300]
+    assert lines(sql)[0][4].startswith("inbox:bank:line:")
+
+    sql.execute("update facts set superseded_at = now() where dedup_key like 'bank:line:%%'")
+    third = accountant.post(f"/statement/lines/{line_id}/", {"action": "inbox"})
+    assert third.status_code == 302, body(third)[:300]
+    assert len(facts_like(sql, "bank:line:%")) == 2
+
+
+def test_another_partners_payment_is_not_linked(accountant, sql, foreign):  # noqa: F811
+    upload(accountant, "12.07.2026;1.000,00;;Neko;x\n")
+    line_id = lines(sql)[0][0]
+    answer = accountant.post(f"/statement/lines/{line_id}/",
+                             {"action": "link", "fact": "manual:payment:foreign"})
+    assert answer.status_code == 400
+    assert lines(sql)[0][4] is None
+
+
+def test_a_malformed_invoice_number_is_refused_in_words(accountant, sql):  # noqa: F811
+    upload(accountant, "12.07.2026;1.000,00;;Neko;x\n")
+    line_id = lines(sql)[0][0]
+    answer = accountant.post(f"/statement/lines/{line_id}/",
+                             {"action": "pay", "invoice": "not-a-number"})
+    assert answer.status_code == 400 and 'data-error="1"' in body(answer)
+
+
+def test_a_line_matched_by_the_rule_says_so_in_the_list(
+    counterparty, item, units, accountant, sql,  # noqa: F811
+):
+    document = an_invoice(accountant, sql, counterparty, units, item=item)
+    accountant.post(f"/invoices/{document}/pay/", {
+        "date": "2026-07-10", "amount": "24000.00", "entry_key": key(),
+    })
+    upload(accountant, "11.07.2026;24.000,00;;Someone;struja\n")
+    assert 'data-by-rule="1"' in body(accountant.get(MATCH))
+
+
+def test_the_same_file_loaded_at_the_same_moment_is_refused_in_words(
+    accountant, sql, monkeypatch,  # noqa: F811
+):
+    """Два одновременных запроса с одним файлом: проверку «уже загружен» оба
+    прошли, ограничение базы пустило одного — второму отвечают словами."""
+    from web import bank
+
+    row = "05.07.2026;1.840,00;;Banca Test;naknada\n"
+    assert upload(accountant, row).status_code == 302
+    real, calls = bank._earlier, []
+
+    def late(who, content_hash):
+        calls.append(content_hash)
+        return None if len(calls) == 1 else real(who, content_hash)
+
+    monkeypatch.setattr(bank, "_earlier", late)
+    again = upload(accountant, row, name="copy.csv")
+    assert again.status_code == 409 and "уже загружен" in body(again)
+    assert len(lines(sql)) == 1
+
+
+def test_a_file_over_the_ceiling_is_refused_before_reading(accountant, sql, monkeypatch):  # noqa: F811
+    from web import bank_views
+
+    monkeypatch.setattr(bank_views, "MAX_BYTES", 10)
+    answer = upload(accountant, "05.07.2026;1.840,00;;Banca Test;naknada\n")
+    assert answer.status_code == 400 and 'data-error="1"' in body(answer)
+    assert lines(sql) == []

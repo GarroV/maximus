@@ -10148,3 +10148,83 @@ msgstr[2] "Bankovni izvod: %(counter)s redova čeka odluku"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Счёт в банке"
 msgstr "Račun u banci"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В книге Excel часть %(part)s объявляет тип документа или сущности — "
+"такая книга не принимается."
+msgstr "Deo %(part)s Excel radne sveske deklariše tip dokumenta ili entitete — takva sveska se ne prihvata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет номера счёта. Укажите счёт, по которому эта выписка: без "
+"него операции двух счетов не отличить друг от друга."
+msgstr "U fajlu nema broja računa. Unesite račun na koji se ovaj izvod odnosi: bez njega se transakcije dva računa ne mogu razlikovati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта"
+msgstr "Valuta"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта счёта (%(invoice)s) и платежа (%(line)s) разная — такой платёж "
+"этот счёт не оплачивает. Отправьте строку в инбокс или выберите счёт в "
+"той же валюте."
+msgstr "Valuta fakture (%(invoice)s) razlikuje se od valute plaćanja (%(line)s) — ovo plaćanje ne izmiruje ovu fakturu. Pošaljite red u inboks ili izaberite fakturu u istoj valuti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выписку по этому счёту сейчас загружают ещё раз — повторите через "
+"минуту."
+msgstr "Izvod za ovaj račun se upravo otprema — pokušajte ponovo za minut."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Лист книги Excel не читается: первым должен быть лист с таблицей "
+"выписки."
+msgstr "List Excel sveske se ne može pročitati: prvi list mora sadržati tabelu izvoda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Номер счёта, если его нет в файле"
+msgstr "Broj računa, ako ga nema u fajlu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено правилом"
+msgstr "Upareno pravilom"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: было %(was)s, в файле %(now)s."
+msgstr "Red %(n)s: bilo je %(was)s, u fajlu %(now)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
+"несёт. Без счёта выписка не загружается: операции двух счетов иначе не "
+"отличить."
+msgstr "Račun i valuta se uzimaju iz fajla; polja su potrebna ako ih bankina tabela ne sadrži. Bez računa izvod se ne otprema: inače se transakcije dva računa ne mogu razlikovati."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Таблица не читается: %(why)s."
+msgstr "Tabela se ne može pročitati: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Файл не загружен: операции банка с теми же номерами уже загружены с "
+"другой суммой, датой или направлением. Проверьте, та ли это выписка и "
+"тот ли счёт. %(lines)s"
+msgstr "Fajl nije otpremljen: bankovne transakcije sa istim referencama već su otpremljene sa drugim iznosom, datumom ili smerom. Proverite da li je to pravi izvod i pravi račun. %(lines)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "больше двух знаков после запятой: %(value)s"
+msgstr "više od dve decimale: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "дата вне %(first)s–%(last)s годов: %(value)s"
+msgstr "datum van godina %(first)s–%(last)s: %(value)s"

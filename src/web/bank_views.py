@@ -24,7 +24,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from bankstatement.model import OUT
-from bankstatement.reader import Unreadable
+from bankstatement.reader import MAX_BYTES, Unreadable
 from core.models import BankLine, BankStatement
 
 from . import bank, cash, filter_links, permissions, suppliers
@@ -197,7 +197,10 @@ def _row(row, state: str, selected, base: str, query: dict) -> dict:
         "sum": _signed(row),
         "incoming": row.direction != OUT,
         "state": state,
-        "state_title": _state_titles()[state],
+        "state_title": (_("Сопоставлено правилом")
+                        if state == bank.MATCHED and getattr(row, "by_rule", False)
+                        else _state_titles()[state]),
+        "by_rule": state == bank.MATCHED and getattr(row, "by_rule", False),
         "selected": selected is not None and selected.id == row.id,
         "url": filter_links.url(base, query, line=str(row.id)),
     }
@@ -242,7 +245,7 @@ def _card(who, row) -> dict:
 
 def _closed_by(row) -> list[dict]:
     links = bank.links_of(row)
-    facts = bank.facts_by_key(link.fact_key for link in links)
+    facts = bank.facts_by_key(row.tenant_id, (link.fact_key for link in links))
     hows = _how_titles()
     closed = []
     for link in links:
@@ -274,7 +277,8 @@ def _payments(row) -> list[dict]:
         {"key": candidate.ref, "title": fact.title,
          "who": fact.counterparty.title if fact.counterparty_id else EMPTY,
          "date": day(fact.doc_date), "sum": money(fact.amount)}
-        for candidate, fact in bank.payment_candidates(row, days=bank.SHOWN_WINDOW_DAYS)
+        for candidate, fact in bank.payment_candidates(
+            row, days=bank.SHOWN_WINDOW_DAYS, home=bank.home_currency(row.tenant_id))
     ]
 
 
@@ -282,7 +286,9 @@ def _invoices(who, row) -> list[dict]:
     """Счета к оплате: опознанного получателя — все с остатком не меньше суммы;
     неопознанного — только с остатком ровно на сумму строки."""
     shown = []
-    for candidate, item in bank.open_invoices(who):
+    for candidate, item in bank.open_invoices(who, bank.home_currency(who.tenant_id)):
+        if candidate.currency != row.currency:
+            continue  # счёт в другой валюте этой строкой не оплачивается
         if row.counterparty_id is not None:
             fits = candidate.party == str(row.counterparty_id) and candidate.amount >= row.amount
         else:
@@ -320,7 +326,7 @@ def statement_line(request, line_id):
     who, refused = _who(request)
     if refused:
         return refused
-    row = bank.line_or_none(who, line_id)
+    row = bank.line_for_decision(who, line_id)
     if row is None:
         raise Http404("строка не найдена")
     action = request.POST.get("action", "")
@@ -365,13 +371,20 @@ def statement_upload(request):
     if refused:
         return refused
     error, status = "", 200
+    form = {"account": (request.POST.get("account") or "").strip()[:bank.MAX_ACCOUNT],
+            "currency": (request.POST.get("currency") or "").strip().upper()[:3]
+            or bank.home_currency(who.tenant_id)}
     if request.method == "POST":
         upload = request.FILES.get("file")
         if upload is None:
             error, status = _("Выберите файл выписки."), 400
+        elif upload.size > MAX_BYTES:
+            # Размер — до чтения: файл больше потолка в память не поднимается.
+            error, status = _("Файл больше 5 МБ — это не выписка за месяц."), 400
         else:
             try:
-                loaded = bank.upload(who, upload.read(), upload.name or "")
+                loaded = bank.upload(who, upload.read(), upload.name or "",
+                                     account=form["account"], currency=form["currency"])
                 return redirect(reverse("statement-upload") + f"?loaded={loaded.statement.id}")
             except Unreadable as bad:
                 error, status = _("Файл не разобран: %(why)s") % {"why": str(bad)}, 400
@@ -387,6 +400,7 @@ def statement_upload(request):
     return render(request, "web/bank/upload.html", {
         "tabs": _tabs("upload"),
         "error": error,
+        "form": form,
         "loaded": _loaded(loaded) if loaded else None,
         "statements": [_listed(s) for s in statements],
         "match_url": reverse("statement"),
