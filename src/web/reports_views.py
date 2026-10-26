@@ -297,6 +297,11 @@ def pnl_line(request, period_id, code):
         # Выдуманная строка и строка без фактов отвечают одинаково: по ответу
         # нельзя понять, какие строки P&L существуют у партнёра (D023).
         raise Http404("строка отчёта не найдена")
+    # Кто разнёс и кто подтвердил (T206, модуль 15): «почему столько» включает
+    # и «кто так решил».
+    from . import two_hands
+
+    hands = two_hands.hands_of([row[6] for row in rows])
 
     return render(request, "web/reports/pnl_line.html", {
         "period": {"id": str(period.id), "title": month_title(period.period)},
@@ -309,8 +314,10 @@ def pnl_line(request, period_id, code):
                 "title": title or EMPTY,
                 "amount": money(amount),
                 "source": source,
+                "allocated_by": hands.get(fact_id, ("", ""))[0] or EMPTY,
+                "confirmed_by": hands.get(fact_id, ("", ""))[1] or EMPTY,
             }
-            for doc_date, unit, counterparty, title, amount, source in rows
+            for doc_date, unit, counterparty, title, amount, source, fact_id in rows
         ],
         "total": money(sum((row[4] for row in rows), Decimal("0"))),
         "back_url": reverse("period-pnl", args=[period.id]),

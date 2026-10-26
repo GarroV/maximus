@@ -1194,6 +1194,7 @@ def inbox(request):
         "counted": len(rows),
         **_papers_link(who),
         **_statement_link(who),
+        **_two_hands(who),
         "notice": _inbox_notice(request),
         "failed": "",
         **_batch_fields(who),
@@ -1231,6 +1232,23 @@ def _statement_link(who) -> dict:
     return {
         "statement_waiting": bank.waiting_count(who),
         "statement_url": reverse("statement"),
+    }
+
+
+def _two_hands(who) -> dict:
+    """Чьего решения ждут строки инбокса и сколько ждёт следующей руки (T206).
+
+    Разбор — первая рука из двух (модуль 15): строка без статьи ждёт того, кто
+    скажет, чья она и за что. Кто это — роли с правом шага, из базы, а не имя
+    роли в шаблоне (D060). Сверка идёт своей страницей (D081), здесь — ссылка
+    с числом, как у бумаг.
+    """
+    from . import two_hands
+
+    return {
+        "waits_for": two_hands.deciders(who.tenant_id, permissions.SUPPLIERS_CLASSIFY),
+        "check_waiting": two_hands.check_count(who),
+        "check_url": reverse("inbox-check"),
     }
 
 
@@ -1472,6 +1490,7 @@ def _inbox_refused(request, who, message: str, *, status: int = 400):
         "total_raw": f"{total}", "total_text": money(total),
         "counted": len(rows),
         **_papers_link(who),
+        **_two_hands(who),
         "notice": "",
         "failed": message,
         **_batch_fields(who),

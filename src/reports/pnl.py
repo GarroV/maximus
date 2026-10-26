@@ -134,6 +134,9 @@ def facts_of(tenant_id, period: date, code: str) -> list:
     Отчёт, которому нельзя задать вопрос «почему столько», проверяют пересчётом
     в Excel — то есть не пользуются им. Тот же приём, что у следа расчёта
     зарплаты (D025), только источник другой.
+
+    Номер строки — последним полем: по нему раскрытие находит, кто строку
+    разнёс и кто сверил (T206).
     """
     from django.db import connection
 
@@ -141,7 +144,7 @@ def facts_of(tenant_id, period: date, code: str) -> list:
         cursor.execute(
             """
             select l.doc_date, coalesce(l.unit_code, ''), coalesce(c.title, ''),
-                   coalesce(l.title, ''), l.amount, l.source::text
+                   coalesce(l.title, ''), l.amount, l.source::text, l.fact_id::text
               from pnl_lines l
               join pnl_items i on i.id = l.pnl_item_id
               left join counterparties c on c.id = l.counterparty_id
