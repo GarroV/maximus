@@ -145,8 +145,6 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
     )
 
 
-@login_required
-@require_POST
 def _row_of(request, period, who):
     """Строка табеля, в которую пишет ячейка. Заводит её, если ещё нет.
 
