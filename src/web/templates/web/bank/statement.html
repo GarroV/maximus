@@ -54,7 +54,7 @@
       <td><a href="{{ row.url }}"{% if row.selected %} aria-current="true"{% endif %}>{{ row.date }}</a></td>
       <td>{{ row.who }}</td>
       <td class="purpose" title="{{ row.purpose }}">{{ row.purpose }}</td>
-      <td class="num">{{ row.sum }}</td>
+      <td class="num{% if row.incoming %} num--up{% endif %}">{{ row.sum }}</td>
       <td><span class="tag {% if row.state == "matched" %}tag--ok{% elif row.state == "decide" %}tag--accent{% else %}tag--neutral tag--dashed{% endif %}">{{ row.state_title }}</span></td>
     </tr>
     {% endfor %}
@@ -176,10 +176,10 @@
     </div>
 
     <div>
-      <form method="post" action="{{ card.act_url }}">{% csrf_token %}
+      <form class="search row" method="post" action="{{ card.act_url }}">{% csrf_token %}
         <input type="hidden" name="action" value="not_ours">
         <p class="field"><label for="why-{{ card.id }}">{% translate "Не наш платёж — почему" %}</label>
-        <input id="why-{{ card.id }}" name="why" maxlength="500" required placeholder="{% translate "Например: личная трата партнёра с расчётного счёта" %}"></p>
+        <input type="text" id="why-{{ card.id }}" name="why" maxlength="500" required placeholder="{% translate "Например: личная трата партнёра с расчётного счёта" %}"></p>
         <button type="submit">{% translate "Не наш платёж" %}</button>
       </form>
     </div>

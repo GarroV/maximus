@@ -474,4 +474,6 @@ def facts_by_key(keys) -> dict[str, Fact]:
 
 
 def turnover(rows) -> Decimal:
-    return sum((row.amount for row in rows), Decimal("0"))
+    """Оборот показанных строк. Дубль — та же операция банка, пришедшая второй
+    раз, — не считается: иначе одна оплата дала бы двойной оборот."""
+    return sum((row.amount for row in rows if row.duplicate_of_id is None), Decimal("0"))

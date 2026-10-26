@@ -51,12 +51,28 @@ def upload(client, *rows, name="izvod.csv"):
 
 @pytest.fixture
 def statements_removed(sql, tenant):  # noqa: F811
-    """Выписки теста не переживают его — и строки, заведённые из них."""
+    """Выписки теста не переживают его — и строки, заведённые из них.
+
+    И месяцы тоже: запись строки в учёт заводит её месяц, а соседние тесты
+    берут «первый период в списке» и упёрлись бы в пустой июль вместо июня.
+    """
+    periods = {row[0] for row in sql.execute(
+        "select id from periods where tenant_id = %s", (tenant,)).fetchall()}
     yield
     sql.execute("delete from bank_line_links where tenant_id = %s", (tenant,))
     sql.execute("delete from bank_lines where tenant_id = %s", (tenant,))
     sql.execute("delete from bank_statements where tenant_id = %s", (tenant,))
     sql.execute("delete from facts where dedup_key like 'bank:line:%%'")
+    for (period,) in sql.execute(
+        "select id from periods where tenant_id = %s", (tenant,)
+    ).fetchall():
+        if period in periods:
+            continue
+        sql.execute(
+            "delete from periods p where p.id = %s "
+            "and not exists (select 1 from facts f where f.tenant_id = p.tenant_id "
+            "and f.period = p.period)", (period,),
+        )
 
 
 @pytest.fixture
@@ -382,3 +398,17 @@ def test_a_message_in_the_address_is_not_shown(accountant):
     text = re.sub(r'="[^"]*"', '=""', shown)
     assert "Позвоните" not in text
     assert "hacked" not in text
+
+
+def test_a_duplicate_does_not_count_in_the_turnover():
+    """Дубль — та же операция банка второй раз: в оборот она не входит."""
+    from types import SimpleNamespace
+
+    from web import bank
+
+    rows = [
+        SimpleNamespace(amount=Decimal("24000.00"), duplicate_of_id=None),
+        SimpleNamespace(amount=Decimal("24000.00"), duplicate_of_id="first"),
+        SimpleNamespace(amount=Decimal("1200.00"), duplicate_of_id=None),
+    ]
+    assert bank.turnover(rows) == Decimal("25200.00")
