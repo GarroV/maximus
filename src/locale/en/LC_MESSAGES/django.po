@@ -8423,20 +8423,12 @@ msgid "Именованные надбавки и вилка ставки дол
 msgstr "Named allowances and a rate range for the position"
 
 #: web/stages.py
-msgid "Шестая очередь продуктовой карты"
-msgstr "Sixth stage of the product map"
-
-#: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Once payroll is complete"
 
 #: web/stages.py
 msgid "Седьмая очередь; ждёт доступа к API Dodo IS"
 msgstr "Seventh stage; waiting for Dodo IS API access"
-
-#: web/stages.py
-msgid "Загрузка выписки банка и сопоставление платежей со счетами поставщиков: что оплачено, что ждёт, что пришло без счёта."
-msgstr "Uploading the bank statement and matching payments to supplier invoices: what is paid, what is waiting, what arrived without an invoice."
 
 #: web/stages.py
 msgid "Что и когда ушло людям: ведомость к выплате, отметки о переводе, остаток задолженности по каждому человеку."
@@ -10707,13 +10699,6 @@ msgid "Счёт в банке"
 msgstr "Bank account"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
-"несёт. Без счёта выписка не загружается: операции двух счетов иначе не "
-"отличить."
-msgstr "The account and currency are taken from the file; these fields are needed when the bank's table does not carry them. Without an account the statement is not uploaded: otherwise transactions of two accounts cannot be told apart."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Счёт контрагента"
 msgstr "Counterparty account"
 
@@ -10898,3 +10883,64 @@ msgstr "already in an earlier statement"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "человек не нужен"
 msgstr "no person needed"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В книге Excel больше %(n)s частей — это не выписка за месяц."
+msgstr "The Excel workbook has more than %(n)s parts — this is not a monthly statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет валюты. Укажите валюту счёта — трёхбуквенный код, например "
+"RSD или EUR."
+msgstr "The file has no currency. Enter the account currency as a three-letter code, e.g. RSD or EUR."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта — трёхбуквенный латинский код, например RSD или EUR, а не "
+"«%(value)s»."
+msgstr "The currency must be a three-letter Latin code such as RSD or EUR, not “%(value)s”."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код валюты, если его нет в файле"
+msgstr "Currency code, if the file has none"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
+"несёт. Без счёта и валюты выписка не загружается: операции двух счетов "
+"иначе не отличить, а валюта учёта за выписку не подставляется."
+msgstr "Account and currency are taken from the file; fill these fields in if the bank's table does not carry them. A statement without an account and currency is not loaded: otherwise operations of two accounts cannot be told apart, and the accounting currency is not assumed for the statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот платёж только что сведён с другой строкой. Обновите страницу и "
+"выберите другой."
+msgstr "This payment has just been matched to another line. Reload the page and choose another one."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "слишком большая сумма: %(value)s"
+msgstr "amount too large: %(value)s"
+
+#: web/templates/web/bank/statement.html:29
+#, python-format
+msgid "ждёт решения %(counter)s строка за месяц — в учёт она не идёт"
+msgid_plural "ждут решения %(counter)s строк за месяц — в учёт они не идут"
+msgstr[0] "%(counter)s line this month awaits a decision — it is not in the books"
+msgstr[1] "%(counter)s lines this month await a decision — they are not in the books"
+
+#: web/templates/web/bank/statement.html:40
+#, python-format
+msgid "%(counter)s строка"
+msgid_plural "%(counter)s строк"
+msgstr[0] "%(counter)s line"
+msgstr[1] "%(counter)s lines"
+
+#: web/templates/web/suppliers/inbox.html:39
+#, python-format
+msgid "Банковская выписка: ждёт решения %(counter)s строка"
+msgid_plural "Банковская выписка: ждут решения %(counter)s строк"
+msgstr[0] "Bank statement: %(counter)s line awaits a decision"
+msgstr[1] "Bank statement: %(counter)s lines await a decision"
