@@ -100,7 +100,7 @@ def _grid_url(client) -> str:
 
 
 def _closable_unit(html: str) -> str:
-    match = re.search(r'name="unit" value="([0-9a-f-]{36})"', html)
+    match = re.search(r'close/\?unit=([0-9a-f-]{36})', html)
     assert match, f"на табеле нет формы закрытия точки:\n{html[:2000]}"
     return match.group(1)
 
