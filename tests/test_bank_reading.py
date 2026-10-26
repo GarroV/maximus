@@ -497,3 +497,21 @@ def test_an_archive_that_breaks_while_unpacking_is_refused_in_words(monkeypatch,
     monkeypatch.setattr(zipfile.ZipFile, "read", broken)
     with pytest.raises(Unreadable):
         read(_book_bytes(), "izvod.xlsx")
+
+
+def test_a_zero_amount_line_is_left_out_while_reading():
+    statement = read((CSV + "provizija;0,00;;18.06.2026;Banka\n").encode("utf-8"), "izvod.csv")
+    assert [line.amount for line in statement.lines] == [Decimal("240000.00"), Decimal("12000.00")]
+
+
+@pytest.mark.parametrize("raw", ["10.000.000.000.000.000,00", 1e300, Decimal("1e40")])
+def test_an_absurd_amount_is_refused_in_words(raw):
+    from bankstatement.values import amount
+
+    with pytest.raises(ValueError):
+        amount(raw)
+
+
+def test_an_absurd_amount_in_a_file_is_refused_in_words():
+    with pytest.raises(Unreadable):
+        read((CSV + "x;10.000.000.000.000.000,00;;18.06.2026;Neko\n").encode("utf-8"), "izvod.csv")

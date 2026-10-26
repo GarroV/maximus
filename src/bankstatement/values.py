@@ -11,6 +11,9 @@ CENT = Decimal("0.01")
 # Выписка живёт в этих годах. Дата вне них — ошибка файла, а не операция:
 # год 9999 завёл бы учётный месяц через восемь тысяч лет.
 FIRST_YEAR, LAST_YEAR = 2000, 2100
+# Потолок суммы: 10^16 больше любого оборота партнёра на порядки, а колонка
+# суммы в базе дальше не вмещает. Сумма выше — ошибка файла.
+MAX_AMOUNT = Decimal("1e16")
 
 # Слэшей нет намеренно: `01/06/2026` — и 1 июня, и 6 января, а угаданная не
 # туда дата выглядит прочитанной из файла (то же правило у справочника статей).
@@ -28,7 +31,10 @@ def amount(raw) -> Decimal | None:
     if raw is None:
         return None
     if isinstance(raw, (int, float, Decimal)) and not isinstance(raw, bool):
-        return _cents(Decimal(str(raw)), raw)
+        try:
+            return _cents(Decimal(str(raw)), raw)
+        except InvalidOperation as error:
+            raise ValueError(_("не число: %(value)s") % {"value": repr(raw)}) from error
     text = re.sub(r"[\s ']", "", str(raw))
     if not text:
         return None
@@ -62,6 +68,8 @@ def _cents(value: Decimal, raw) -> Decimal:
     ошибка разбора, и молча округлённая она стала бы суммой платежа."""
     if not value.is_finite():
         raise ValueError(_("не число: %(value)s") % {"value": repr(raw)})
+    if abs(value) >= MAX_AMOUNT:
+        raise ValueError(_("слишком большая сумма: %(value)s") % {"value": repr(raw)})
     cents = value.quantize(CENT)
     if cents != value:
         raise ValueError(_("больше двух знаков после запятой: %(value)s") % {"value": repr(raw)})
