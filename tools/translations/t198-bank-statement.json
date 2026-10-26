@@ -1,0 +1,494 @@
+{
+  "В camt.053 нет выписки (Stmt).": {
+    "en": "The camt.053 file contains no statement (Stmt).",
+    "sr": "camt.053 fajl ne sadrži izvod (Stmt)."
+  },
+  "Операция %(n)s: %(why)s.": {
+    "en": "Transaction %(n)s: %(why)s.",
+    "sr": "Transakcija %(n)s: %(why)s."
+  },
+  "непонятное направление %(value)s": {
+    "en": "unclear direction %(value)s",
+    "sr": "nejasan smer %(value)s"
+  },
+  "нет даты": {
+    "en": "no date",
+    "sr": "nema datuma"
+  },
+  "нет суммы": {
+    "en": "no amount",
+    "sr": "nema iznosa"
+  },
+  "Файл пустой.": {
+    "en": "The file is empty.",
+    "sr": "Fajl je prazan."
+  },
+  "Файл больше 5 МБ — это не выписка за месяц.": {
+    "en": "The file is larger than 5 MB — that is not a monthly statement.",
+    "sr": "Fajl je veći od 5 MB — to nije mesečni izvod."
+  },
+  "В файле нет ни одной операции.": {
+    "en": "The file contains no transactions.",
+    "sr": "Fajl ne sadrži nijednu transakciju."
+  },
+  "В файле больше %(n)s операций — это не выписка за месяц.": {
+    "en": "The file has more than %(n)s transactions — that is not a monthly statement.",
+    "sr": "Fajl ima više od %(n)s transakcija — to nije mesečni izvod."
+  },
+  "XML с объявлением типа документа или сущностей не принимается.": {
+    "en": "XML with a document type or entity declaration is not accepted.",
+    "sr": "XML sa deklaracijom tipa dokumenta ili entiteta se ne prihvata."
+  },
+  "XML не читается: %(why)s.": {
+    "en": "The XML cannot be read: %(why)s.",
+    "sr": "XML se ne može pročitati: %(why)s."
+  },
+  "XML этого банка пока не знаком: знаем camt.053 и izvod iBank и Raiffeisen. Пришлите образец — формат заводится профилем.": {
+    "en": "This bank's XML is not known yet: we read camt.053 and the iBank and Raiffeisen izvod. Send a sample — a format is added as a profile.",
+    "sr": "XML ove banke još nije poznat: čitamo camt.053 i izvod iBank i Raiffeisen. Pošaljite primer — format se dodaje profilom."
+  },
+  "Операция %(n)s: нет даты, суммы или направления.": {
+    "en": "Transaction %(n)s: no date, amount or direction.",
+    "sr": "Transakcija %(n)s: nema datuma, iznosa ili smera."
+  },
+  "заполнены обе колонки — и расход, и приход": {
+    "en": "both columns are filled — debit and credit",
+    "sr": "popunjene su obe kolone — i na teret i u korist"
+  },
+  "Кодировка файла не распознана: ждём UTF-8 или Windows-1250/1251.": {
+    "en": "The file encoding was not recognised: expected UTF-8 or Windows-1250/1251.",
+    "sr": "Kodiranje fajla nije prepoznato: očekuje se UTF-8 ili Windows-1250/1251."
+  },
+  "В файле больше %(n)s строк — это не выписка за месяц. Выгрузите выписку за более короткий период.": {
+    "en": "The file has more than %(n)s rows — that is not a monthly statement. Export a statement for a shorter period.",
+    "sr": "Fajl ima više od %(n)s redova — to nije mesečni izvod. Preuzmite izvod za kraći period."
+  },
+  "В файле больше %(n)s заполненных ячеек — это не выписка за месяц.": {
+    "en": "The file has more than %(n)s filled cells — that is not a monthly statement.",
+    "sr": "Fajl ima više od %(n)s popunjenih ćelija — to nije mesečni izvod."
+  },
+  "Книга Excel не открывается.": {
+    "en": "The Excel workbook cannot be opened.",
+    "sr": "Excel radna sveska se ne može otvoriti."
+  },
+  "Книга Excel разворачивается в слишком большой объём — это не выписка за месяц.": {
+    "en": "The Excel workbook unpacks into too much data — that is not a monthly statement.",
+    "sr": "Excel radna sveska se raspakuje u previše podataka — to nije mesečni izvod."
+  },
+  "Не нашли колонки даты и суммы. Узнаём заголовки вроде «Datum valute», «Iznos na teret», «Iznos u korist» — проверьте, что в файле есть строка заголовков.": {
+    "en": "No date and amount columns were found. We recognise headers such as “Datum valute”, “Iznos na teret”, “Iznos u korist” — check that the file has a header row.",
+    "sr": "Kolone datuma i iznosa nisu pronađene. Prepoznajemo zaglavlja kao „Datum valute“, „Iznos na teret“, „Iznos u korist“ — proverite da fajl ima red zaglavlja."
+  },
+  "Строка %(n)s: %(why)s.": {
+    "en": "Row %(n)s: %(why)s.",
+    "sr": "Red %(n)s: %(why)s."
+  },
+  "Строка %(n)s: нет даты или суммы.": {
+    "en": "Row %(n)s: no date or amount.",
+    "sr": "Red %(n)s: nema datuma ili iznosa."
+  },
+  "не число: %(value)s": {
+    "en": "not a number: %(value)s",
+    "sr": "nije broj: %(value)s"
+  },
+  "не дата: %(value)s": {
+    "en": "not a date: %(value)s",
+    "sr": "nije datum: %(value)s"
+  },
+  "Этот файл уже загружен %(when)s — второй раз он ничего не добавит.": {
+    "en": "This file was already uploaded on %(when)s — uploading it again adds nothing.",
+    "sr": "Ovaj fajl je već otpremljen %(when)s — ponovno otpremanje ne dodaje ništa."
+  },
+  "Это дубль уже загруженной строки — в учёт он не идёт.": {
+    "en": "This is a duplicate of an already uploaded line — it does not go into the books.",
+    "sr": "Ovo je duplikat već otpremljene stavke — ne ide u knjige."
+  },
+  "Строка помечена как не наш платёж. Сначала верните её в работу.": {
+    "en": "The line is marked as not our payment. Return it to work first.",
+    "sr": "Stavka je označena kao tuđe plaćanje. Prvo je vratite u rad."
+  },
+  "Строка уже сопоставлена.": {
+    "en": "The line is already matched.",
+    "sr": "Stavka je već uparena."
+  },
+  "Этот платёж не подходит: сумма другая, он уже сведён с другой строкой или вам не виден.": {
+    "en": "This payment does not fit: the amount differs, it is already matched with another line, or you cannot see it.",
+    "sr": "Ovo plaćanje ne odgovara: iznos je drugačiji, već je upareno sa drugom stavkom ili vam nije vidljivo."
+  },
+  "Поступление не оплачивает счёт поставщика.": {
+    "en": "An incoming payment does not pay a supplier invoice.",
+    "sr": "Priliv ne plaća fakturu dobavljača."
+  },
+  "Платёж больше остатка по счёту (%(left)s). Разложить один платёж на несколько счетов или провести остаток авансом пока нельзя — отправьте строку в инбокс или выберите другой счёт.": {
+    "en": "The payment is larger than the invoice balance (%(left)s). Splitting one payment across several invoices or booking the rest as an advance is not available yet — send the line to the inbox or pick another invoice.",
+    "sr": "Plaćanje je veće od ostatka po fakturi (%(left)s). Raspodela jednog plaćanja na više faktura ili knjiženje ostatka kao avansa još nije moguće — pošaljite stavku u inbox ili izaberite drugu fakturu."
+  },
+  "Платёж по выписке": {
+    "en": "Bank statement payment",
+    "sr": "Plaćanje po izvodu"
+  },
+  "Напишите, почему платёж не наш: через полгода иначе не вспомнить.": {
+    "en": "Write why the payment is not ours: in six months nobody will remember otherwise.",
+    "sr": "Napišite zašto plaćanje nije naše: za pola godine niko se inače neće setiti."
+  },
+  "Строка и так в работе.": {
+    "en": "The line is already in work.",
+    "sr": "Stavka je već u radu."
+  },
+  "Отвязать нечего: платёж заведён из выписки — исправьте его в счёте или инбоксе.": {
+    "en": "Nothing to unlink: the payment was created from the statement — correct it in the invoice or the inbox.",
+    "sr": "Nema šta da se odveže: plaćanje je kreirano iz izvoda — ispravite ga u fakturi ili inboxu."
+  },
+  "Сопоставлено": {
+    "en": "Matched",
+    "sr": "Upareno"
+  },
+  "Нужно решить": {
+    "en": "Needs a decision",
+    "sr": "Treba odlučiti"
+  },
+  "Дубль": {
+    "en": "Duplicate",
+    "sr": "Duplikat"
+  },
+  "Не наш": {
+    "en": "Not ours",
+    "sr": "Nije naše"
+  },
+  "свело правило": {
+    "en": "matched by the rule",
+    "sr": "uparilo pravilo"
+  },
+  "выбрано вручную": {
+    "en": "chosen by hand",
+    "sr": "izabrano ručno"
+  },
+  "оплата счёта из выписки": {
+    "en": "invoice payment from the statement",
+    "sr": "plaćanje fakture iz izvoda"
+  },
+  "отправлено в инбокс": {
+    "en": "sent to the inbox",
+    "sr": "poslato u inbox"
+  },
+  "Вас ещё не завели ни к одному партнёру, поэтому выписки у вас нет.": {
+    "en": "You have not been added to any partner yet, so you have no bank statement.",
+    "sr": "Još niste dodati nijednom partneru, pa nemate izvod."
+  },
+  "Сопоставление": {
+    "en": "Matching",
+    "sr": "Uparivanje"
+  },
+  "Загрузка": {
+    "en": "Upload",
+    "sr": "Otpremanje"
+  },
+  "Дубли и чужое": {
+    "en": "Duplicates and not ours",
+    "sr": "Duplikati i tuđe"
+  },
+  "Все": {
+    "en": "All",
+    "sr": "Sve"
+  },
+  "без номера": {
+    "en": "no number",
+    "sr": "bez broja"
+  },
+  "Строка сопоставлена с внесённым платежом.": {
+    "en": "The line is matched with an entered payment.",
+    "sr": "Stavka je uparena sa unetim plaćanjem."
+  },
+  "Оплата счёта заведена с датой из выписки.": {
+    "en": "The invoice payment was recorded with the statement date.",
+    "sr": "Plaćanje fakture je evidentirano sa datumom iz izvoda."
+  },
+  "Строка ушла в инбокс: сумма в P&L строкой «Не разобрано», статью дайте там.": {
+    "en": "The line went to the inbox: the amount is in the P&L as “Unclassified” — assign the category there.",
+    "sr": "Stavka je otišla u inbox: iznos je u P&L kao „Nerazvrstano“ — dodelite stavku troška tamo."
+  },
+  "Строка помечена как не наш платёж и в учёт не идёт.": {
+    "en": "The line is marked as not our payment and does not go into the books.",
+    "sr": "Stavka je označena kao tuđe plaćanje i ne ide u knjige."
+  },
+  "Строка снова ждёт решения.": {
+    "en": "The line is waiting for a decision again.",
+    "sr": "Stavka ponovo čeka odluku."
+  },
+  "Сопоставление снято, строка снова ждёт решения.": {
+    "en": "The match was removed; the line is waiting for a decision again.",
+    "sr": "Uparivanje je uklonjeno, stavka ponovo čeka odluku."
+  },
+  "Непонятное действие.": {
+    "en": "Unknown action.",
+    "sr": "Nepoznata radnja."
+  },
+  "Выберите файл выписки.": {
+    "en": "Choose a statement file.",
+    "sr": "Izaberite fajl izvoda."
+  },
+  "Файл не разобран: %(why)s": {
+    "en": "The file was not read: %(why)s",
+    "sr": "Fajl nije pročitan: %(why)s"
+  },
+  "izvod iBank (Banca Intesa)": {
+    "en": "iBank izvod (Banca Intesa)",
+    "sr": "izvod iBank (Banca Intesa)"
+  },
+  "izvod Raiffeisen": {
+    "en": "Raiffeisen izvod",
+    "sr": "izvod Raiffeisen"
+  },
+  "таблица по заголовкам": {
+    "en": "table by headers",
+    "sr": "tabela po zaglavljima"
+  },
+  "Сумма, расход": {
+    "en": "Amount, debit",
+    "sr": "Iznos, na teret"
+  },
+  "Сумма, приход": {
+    "en": "Amount, credit",
+    "sr": "Iznos, u korist"
+  },
+  "Сумма со знаком": {
+    "en": "Signed amount",
+    "sr": "Iznos sa znakom"
+  },
+  "Счёт контрагента": {
+    "en": "Counterparty account",
+    "sr": "Račun druge strane"
+  },
+  "Назначение": {
+    "en": "Purpose",
+    "sr": "Svrha"
+  },
+  "Идентификатор операции": {
+    "en": "Transaction ID",
+    "sr": "Identifikator transakcije"
+  },
+  "Правила сопоставления, порог и платёж на несколько счетов с авансом": {
+    "en": "Matching rules, the threshold and one payment across several invoices with an advance",
+    "sr": "Pravila uparivanja, prag i jedno plaćanje na više faktura sa avansom"
+  },
+  "Платёж и документ — не одно и то же: строка банка сводится с внесённым платежом или счётом, а без решения в учёт не идёт.": {
+    "en": "A payment and a document are not the same thing: a bank line is matched with an entered payment or an invoice, and without a decision it does not go into the books.",
+    "sr": "Plaćanje i dokument nisu isto: stavka banke se uparuje sa unetim plaćanjem ili fakturom, a bez odluke ne ide u knjige."
+  },
+  "Выписку ещё не загружали.": {
+    "en": "No statement has been uploaded yet.",
+    "sr": "Izvod još nije otpremljen."
+  },
+  "Загрузите файл выписки из банка — строки сведутся с внесёнными платежами и счетами, остальное встанет сюда на решение.": {
+    "en": "Upload the bank statement file — lines will be matched with entered payments and invoices, the rest will wait here for a decision.",
+    "sr": "Otpremite fajl izvoda iz banke — stavke će se upariti sa unetim plaćanjima i fakturama, ostalo će ovde čekati odluku."
+  },
+  "Загрузить выписку": {
+    "en": "Upload a statement",
+    "sr": "Otpremi izvod"
+  },
+  "Месяц сведён.": {
+    "en": "The month is reconciled.",
+    "sr": "Mesec je usaglašen."
+  },
+  "Каждая строка выписки за месяц сопоставлена, отмечена дублем или как не наш платёж.": {
+    "en": "Every statement line of the month is matched, marked as a duplicate or as not our payment.",
+    "sr": "Svaka stavka izvoda za mesec je uparena, označena kao duplikat ili kao tuđe plaćanje."
+  },
+  "оборот": {
+    "en": "turnover",
+    "sr": "promet"
+  },
+  "В этом месяце строк нет.": {
+    "en": "There are no lines in this month.",
+    "sr": "U ovom mesecu nema stavki."
+  },
+  "Выберите другой месяц или состояние — или загрузите выписку за этот.": {
+    "en": "Choose another month or state — or upload the statement for this one.",
+    "sr": "Izaberite drugi mesec ili stanje — ili otpremite izvod za ovaj."
+  },
+  "Из банка · не редактируется": {
+    "en": "From the bank · not editable",
+    "sr": "Iz banke · ne menja se"
+  },
+  "В справочнике": {
+    "en": "In the directory",
+    "sr": "U šifarniku"
+  },
+  "не опознан — по названию из банка такого контрагента нет": {
+    "en": "not recognised — no counterparty with the bank's name",
+    "sr": "nije prepoznat — nema druge strane sa nazivom iz banke"
+  },
+  "Эта операция уже загружена": {
+    "en": "This transaction is already uploaded",
+    "sr": "Ova transakcija je već otpremljena"
+  },
+  "Тот же банковский идентификатор операции — в выписке «%(file)s», загруженной %(loaded)s, строка %(line)s. Второй раз в учёт она не пойдёт. Строку не удаляем: иначе при следующей загрузке она вернулась бы новой.": {
+    "en": "The same bank transaction ID is in the statement “%(file)s” uploaded on %(loaded)s, line %(line)s. It will not go into the books a second time. The line is not deleted: otherwise the next upload would bring it back as new.",
+    "sr": "Isti bankarski identifikator transakcije je u izvodu „%(file)s“ otpremljenom %(loaded)s, stavka %(line)s. Drugi put neće ići u knjige. Stavku ne brišemo: inače bi se pri sledećem otpremanju vratila kao nova."
+  },
+  "Показать исходную строку": {
+    "en": "Show the original line",
+    "sr": "Prikaži izvornu stavku"
+  },
+  "Не наш платёж": {
+    "en": "Not our payment",
+    "sr": "Nije naše plaćanje"
+  },
+  "Отмечено %(on)s. В P&L не идёт, но остаётся в выписке: остаток по счёту должен сходиться с банком до копейки.": {
+    "en": "Marked on %(on)s. It does not go into the P&L but stays in the statement: the account balance must agree with the bank to the cent.",
+    "sr": "Označeno %(on)s. Ne ide u P&L, ali ostaje u izvodu: stanje računa mora da se slaže sa bankom do pare."
+  },
+  "Вернуть в работу": {
+    "en": "Return to work",
+    "sr": "Vrati u rad"
+  },
+  "Чем закрыто": {
+    "en": "Closed by",
+    "sr": "Čime je zatvoreno"
+  },
+  "Отвязать": {
+    "en": "Unlink",
+    "sr": "Odveži"
+  },
+  "Закрывающая строка вам не видна.": {
+    "en": "You cannot see the closing entry.",
+    "sr": "Stavka koja zatvara vam nije vidljiva."
+  },
+  "Внесённые платежи на эту сумму": {
+    "en": "Entered payments for this amount",
+    "sr": "Uneta plaćanja na ovaj iznos"
+  },
+  "Это он": {
+    "en": "This one",
+    "sr": "To je to"
+  },
+  "Свободного внесённого платежа на эту сумму в пределах месяца нет.": {
+    "en": "There is no unmatched entered payment for this amount within a month.",
+    "sr": "Nema neuparenog unetog plaćanja na ovaj iznos u roku od mesec dana."
+  },
+  "Неоплаченные счета": {
+    "en": "Unpaid invoices",
+    "sr": "Neplaćene fakture"
+  },
+  "оплатится частично": {
+    "en": "will be paid partially",
+    "sr": "biće plaćena delimično"
+  },
+  "остаток": {
+    "en": "balance",
+    "sr": "ostatak"
+  },
+  "Оплатить этот счёт": {
+    "en": "Pay this invoice",
+    "sr": "Plati ovu fakturu"
+  },
+  "Ни одного неоплаченного счёта от этого контрагента на такую сумму. Либо документ ещё не пришёл, либо платёж — без счёта.": {
+    "en": "No unpaid invoice from this counterparty for such an amount. Either the document has not arrived yet, or the payment has no invoice.",
+    "sr": "Nema neplaćene fakture ove druge strane na taj iznos. Ili dokument još nije stigao, ili je plaćanje bez fakture."
+  },
+  "Счёта с остатком ровно на эту сумму нет.": {
+    "en": "There is no invoice with a balance of exactly this amount.",
+    "sr": "Nema fakture sa ostatkom tačno na ovaj iznos."
+  },
+  "Без документа": {
+    "en": "Without a document",
+    "sr": "Bez dokumenta"
+  },
+  "Сумма войдёт в P&L строкой «Не разобрано» и встанет в инбокс — статью и точку дадите там.": {
+    "en": "The amount goes into the P&L as “Unclassified” and into the inbox — assign the category and the unit there.",
+    "sr": "Iznos ulazi u P&L kao „Nerazvrstano“ i u inbox — stavku troška i objekat dodelite tamo."
+  },
+  "Отправить в инбокс": {
+    "en": "Send to the inbox",
+    "sr": "Pošalji u inbox"
+  },
+  "Не наш платёж — почему": {
+    "en": "Not our payment — why",
+    "sr": "Nije naše plaćanje — zašto"
+  },
+  "Например: личная трата партнёра с расчётного счёта": {
+    "en": "For example: the partner's personal spending from the business account",
+    "sr": "Na primer: lični trošak partnera sa tekućeg računa"
+  },
+  "Загрузка выписки": {
+    "en": "Statement upload",
+    "sr": "Otpremanje izvoda"
+  },
+  "Повторная загрузка не удваивает платежи: тот же файл второй раз не ложится, а строка, уже бывшая в прошлой выписке, становится дублем.": {
+    "en": "Uploading again does not double payments: the same file is not accepted twice, and a line already present in an earlier statement becomes a duplicate.",
+    "sr": "Ponovno otpremanje ne udvostručuje plaćanja: isti fajl se ne prihvata dvaput, a stavka koja je već bila u ranijem izvodu postaje duplikat."
+  },
+  "Файл принят": {
+    "en": "File accepted",
+    "sr": "Fajl je prihvaćen"
+  },
+  "счёт": {
+    "en": "account",
+    "sr": "račun"
+  },
+  "Сопоставлено само": {
+    "en": "Matched automatically",
+    "sr": "Upareno automatski"
+  },
+  "человек не нужен": {
+    "en": "no person needed",
+    "sr": "čovek nije potreban"
+  },
+  "нет однозначной пары": {
+    "en": "no unambiguous match",
+    "sr": "nema jednoznačnog para"
+  },
+  "уже был в прошлой выписке": {
+    "en": "already in an earlier statement",
+    "sr": "već je bio u ranijem izvodu"
+  },
+  "Как разобраны колонки": {
+    "en": "How the columns were read",
+    "sr": "Kako su kolone pročitane"
+  },
+  "В файле": {
+    "en": "In the file",
+    "sr": "U fajlu"
+  },
+  "Поле": {
+    "en": "Field",
+    "sr": "Polje"
+  },
+  "Перейти к сопоставлению": {
+    "en": "Go to matching",
+    "sr": "Idi na uparivanje"
+  },
+  "Форматы: ISO 20022 camt.053, izvod (XML iBank и Raiffeisen), CSV и xlsx. Колонки таблицы узнаются по заголовкам, а не по номеру.": {
+    "en": "Formats: ISO 20022 camt.053, izvod (iBank and Raiffeisen XML), CSV and xlsx. Table columns are recognised by their headers, not by position.",
+    "sr": "Formati: ISO 20022 camt.053, izvod (XML iBank i Raiffeisen), CSV i xlsx. Kolone tabele se prepoznaju po zaglavljima, a ne po redosledu."
+  },
+  "Файл выписки": {
+    "en": "Statement file",
+    "sr": "Fajl izvoda"
+  },
+  "Загруженные выписки": {
+    "en": "Uploaded statements",
+    "sr": "Otpremljeni izvodi"
+  },
+  "Загружена": {
+    "en": "Uploaded",
+    "sr": "Otpremljen"
+  },
+  "Период": {
+    "en": "Period",
+    "sr": "Period"
+  },
+  "Формат": {
+    "en": "Format",
+    "sr": "Format"
+  },
+  "Из них дублей": {
+    "en": "Of them duplicates",
+    "sr": "Od toga duplikata"
+  },
+  "без решения их в P&L нет, решаются на сопоставлении": {
+    "en": "without a decision they are not in the P&L; they are decided on the matching page",
+    "sr": "bez odluke nisu u P&L, odlučuje se na uparivanju"
+  }
+}

@@ -11,6 +11,8 @@
 """
 from __future__ import annotations
 
+from django.utils.translation import gettext as _
+
 from .model import IN, OUT, Line, Statement
 from .values import amount, day
 
@@ -42,7 +44,7 @@ def read(root) -> Statement:
 
     statement = next((n for n in root.iter() if _local(n.tag) == "Stmt"), None)
     if statement is None:
-        raise Unreadable("В camt.053 нет выписки (Stmt).")
+        raise Unreadable(_("В camt.053 нет выписки (Stmt)."))
     acct = _child(statement, "Acct")
     lines = []
     entries = [n for n in statement if _local(n.tag) == "Ntry"]
@@ -50,7 +52,7 @@ def read(root) -> Statement:
         try:
             lines.append(_line(entry))
         except ValueError as error:
-            raise Unreadable(f"Операция {number}: {error}.") from error
+            raise Unreadable(_("Операция %(n)s: %(why)s.") % {"n": number, "why": error}) from error
     period = _child(statement, "FrToDt")
     return Statement(
         format="camt053",
@@ -66,16 +68,16 @@ def read(root) -> Statement:
 def _line(entry) -> Line:
     indicator = _text(entry, "CdtDbtInd")
     if indicator not in ("DBIT", "CRDT"):
-        raise ValueError(f"непонятное направление {indicator!r}")
+        raise ValueError(_("непонятное направление %(value)s") % {"value": repr(indicator)})
     direction = OUT if indicator == "DBIT" else IN
     # Дата валюты — день, когда деньги реально ушли; дата проводки — запасная.
     on = day(_text(entry, "ValDt", "Dt") or _text(entry, "BookgDt", "Dt")
              or _text(entry, "BookgDt", "DtTm"))
     if on is None:
-        raise ValueError("нет даты")
+        raise ValueError(_("нет даты"))
     sum_ = amount(_text(entry, "Amt"))
     if sum_ is None:
-        raise ValueError("нет суммы")
+        raise ValueError(_("нет суммы"))
     details = _child(entry, "NtryDtls", "TxDtls")
     party, party_acct = ("Cdtr", "CdtrAcct") if direction == OUT else ("Dbtr", "DbtrAcct")
     parties = _child(details, "RltdPties")

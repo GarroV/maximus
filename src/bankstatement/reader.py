@@ -20,6 +20,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import yaml
+from django.utils.translation import gettext as _
 
 from . import camt
 from .model import IN, OUT, Line, Statement
@@ -61,9 +62,9 @@ def formats() -> dict:
 
 def read(content: bytes, file_name: str = "") -> Statement:
     if not content:
-        raise Unreadable("Файл пустой.")
+        raise Unreadable(_("Файл пустой."))
     if len(content) > MAX_BYTES:
-        raise Unreadable("Файл больше 5 МБ — это не выписка за месяц.")
+        raise Unreadable(_("Файл больше 5 МБ — это не выписка за месяц."))
     if content.startswith(XLSX_SIGNATURE):
         statement = _table(_xlsx_rows(content))
     elif _looks_like_xml(content):
@@ -71,9 +72,11 @@ def read(content: bytes, file_name: str = "") -> Statement:
     else:
         statement = _table(_csv_rows(content))
     if not statement.lines:
-        raise Unreadable("В файле нет ни одной операции.")
+        raise Unreadable(_("В файле нет ни одной операции."))
     if len(statement.lines) > MAX_ROWS:
-        raise Unreadable(f"В файле больше {MAX_ROWS} операций — это не выписка за месяц.")
+        raise Unreadable(
+            _("В файле больше %(n)s операций — это не выписка за месяц.") % {"n": MAX_ROWS}
+        )
     return statement
 
 
@@ -100,7 +103,7 @@ def _refuse_declarations(content: bytes) -> None:
     одной строкой, но в зависимостях её нет.
     """
     def refuse(*_args):
-        raise Unreadable("XML с объявлением типа документа или сущностей не принимается.")
+        raise Unreadable(_("XML с объявлением типа документа или сущностей не принимается."))
 
     probe = xml.parsers.expat.ParserCreate()
     probe.StartDoctypeDeclHandler = refuse
@@ -110,7 +113,7 @@ def _refuse_declarations(content: bytes) -> None:
     try:
         probe.Parse(content, True)
     except xml.parsers.expat.ExpatError as error:
-        raise Unreadable(f"XML не читается: {error}.") from error
+        raise Unreadable(_("XML не читается: %(why)s.") % {"why": error}) from error
 
 
 def _xml(content: bytes) -> Statement:
@@ -118,17 +121,17 @@ def _xml(content: bytes) -> Statement:
     try:
         root = ElementTree.fromstring(content)
     except ElementTree.ParseError as error:
-        raise Unreadable(f"XML не читается: {error}.") from error
+        raise Unreadable(_("XML не читается: %(why)s.") % {"why": error}) from error
     if _local(root.tag) == "Document" and "camt.053" in root.tag:
         return camt.read(root)
     for profile in formats()["xml"]:
         found = root if _local(root.tag) == profile["root"] else _first(root, profile["root"])
         if found is not None:
             return _profiled(found, profile)
-    raise Unreadable(
+    raise Unreadable(_(
         "XML этого банка пока не знаком: знаем camt.053 и izvod iBank и Raiffeisen. "
         "Пришлите образец — формат заводится профилем."
-    )
+    ))
 
 
 def _local(tag: str) -> str:
@@ -186,9 +189,9 @@ def _profiled(root, profile: dict) -> Statement:
                     amount(value(record, fields["credit"])),
                 )
         except ValueError as error:
-            raise Unreadable(f"Операция {number}: {error}.") from error
+            raise Unreadable(_("Операция %(n)s: %(why)s.") % {"n": number, "why": error}) from error
         if on is None or sum_ is None or direction is None:
-            raise Unreadable(f"Операция {number}: нет даты, суммы или направления.")
+            raise Unreadable(_("Операция %(n)s: нет даты, суммы или направления.") % {"n": number})
         def optional(name: str, record=record) -> str:
             return value(record, fields[name]) if fields.get(name) else ""
 
@@ -234,7 +237,7 @@ def _two_columns(debit, credit):
     if credit and not debit:
         return credit, IN
     if debit and credit:
-        raise ValueError("заполнены обе колонки — и расход, и приход")
+        raise ValueError(_("заполнены обе колонки — и расход, и приход"))
     return None, None
 
 
@@ -250,7 +253,7 @@ def _csv_rows(content: bytes) -> list[list]:
         except UnicodeDecodeError:
             continue
     else:
-        raise Unreadable("Кодировка файла не распознана: ждём UTF-8 или Windows-1250/1251.")
+        raise Unreadable(_("Кодировка файла не распознана: ждём UTF-8 или Windows-1250/1251."))
     sample = text[:4096]
     try:
         dialect = csv.Sniffer().sniff(sample, delimiters=";,\t")
@@ -269,17 +272,17 @@ def _capped(rows) -> list[list]:
     cells = 0
     for row in rows:
         if len(taken) >= MAX_ROWS:
-            raise Unreadable(
-                f"В файле больше {MAX_ROWS} строк — это не выписка за месяц. "
+            raise Unreadable(_(
+                "В файле больше %(n)s строк — это не выписка за месяц. "
                 "Выгрузите выписку за более короткий период."
-            )
+            ) % {"n": MAX_ROWS})
         kept = list(row[:MAX_COLS]) if isinstance(row, (list, tuple)) else list(row)[:MAX_COLS]
         while kept and (kept[-1] is None or kept[-1] == ""):
             kept.pop()
         cells += sum(1 for cell in kept if cell is not None and cell != "")
         if cells > MAX_CELLS:
-            raise Unreadable(f"В файле больше {MAX_CELLS} заполненных ячеек — "
-                             "это не выписка за месяц.")
+            raise Unreadable(_("В файле больше %(n)s заполненных ячеек — "
+                               "это не выписка за месяц.") % {"n": MAX_CELLS})
         taken.append(kept)
     return taken
 
@@ -294,12 +297,12 @@ def _refuse_bombs(content: bytes) -> None:
         with zipfile.ZipFile(io.BytesIO(content)) as archive:
             members = archive.infolist()
     except zipfile.BadZipFile as error:
-        raise Unreadable("Книга Excel не открывается.") from error
+        raise Unreadable(_("Книга Excel не открывается.")) from error
     unpacked = sum(m.file_size for m in members)
     packed = sum(m.compress_size for m in members) or 1
     if unpacked > MAX_UNPACKED_BYTES or unpacked / packed > MAX_COMPRESSION_RATIO:
-        raise Unreadable("Книга Excel разворачивается в слишком большой объём — "
-                         "это не выписка за месяц.")
+        raise Unreadable(_("Книга Excel разворачивается в слишком большой объём — "
+                           "это не выписка за месяц."))
 
 
 def _xlsx_rows(content: bytes) -> list[list]:
@@ -309,7 +312,7 @@ def _xlsx_rows(content: bytes) -> list[list]:
     try:
         book = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
     except Exception as error:  # openpyxl бросает что угодно на битом архиве
-        raise Unreadable("Книга Excel не открывается.") from error
+        raise Unreadable(_("Книга Excel не открывается.")) from error
     sheet = book.worksheets[0]
     # Границы — свои, а не объявленные листом: размер листа (dimension) пишет
     # тот, кто сделал файл.
@@ -349,10 +352,10 @@ def _find_header(rows: list[list]) -> tuple[int, dict[str, int], list[tuple[str,
         has_sum = "amount" in columns or "debit" in columns or "credit" in columns
         if "date" in columns and has_sum:
             return index, columns, mapping
-    raise Unreadable(
+    raise Unreadable(_(
         "Не нашли колонки даты и суммы. Узнаём заголовки вроде «Datum valute», "
         "«Iznos na teret», «Iznos u korist» — проверьте, что в файле есть строка заголовков."
-    )
+    ))
 
 
 def _table(rows: list[list]) -> Statement:
@@ -378,11 +381,11 @@ def _table(rows: list[list]) -> Statement:
                 sum_, direction = _two_columns(amount(cell(row, "debit")),
                                                amount(cell(row, "credit")))
         except ValueError as error:
-            raise Unreadable(f"Строка {number}: {error}.") from error
+            raise Unreadable(_("Строка %(n)s: %(why)s.") % {"n": number, "why": error}) from error
         if on is None and sum_ is None:
             continue  # строка итога или подписи под таблицей
         if on is None or sum_ is None:
-            raise Unreadable(f"Строка {number}: нет даты или суммы.")
+            raise Unreadable(_("Строка %(n)s: нет даты или суммы.") % {"n": number})
 
         def text(field, row=row):
             raw = cell(row, field)
