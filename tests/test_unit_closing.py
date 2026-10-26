@@ -451,7 +451,8 @@ def close_page(client, url: str) -> str:
 
 def closable_unit(html: str) -> str:
     """Точка, которую экран предлагает закрыть — так же, как её берёт человек."""
-    match = re.search(r'name="unit" value="([0-9a-f-]{36})"', html)
+    # Закрытие стало шагом подтверждения (T239): точка идёт ссылкой `?unit=`.
+    match = re.search(r'(?:name="unit" value="|close/\?unit=)([0-9a-f-]{36})', html)
     assert match, f"на табеле нет формы закрытия точки:\n{html[:2000]}"
     return match.group(1)
 
@@ -551,7 +552,7 @@ def test_manager_is_offered_only_his_own_unit(client, clean_closures):
 
     login_as(client, "manager")
     html = close_page(client, grid_url(client))
-    offered = re.findall(r'name="unit" value="([0-9a-f-]{36})"', html)
+    offered = re.findall(r'close/\?unit=([0-9a-f-]{36})', html)
 
     own = Membership.objects.get(
         user_id=User.objects.get(username="manager").pk
@@ -573,7 +574,7 @@ def test_director_closes_and_reopens_any_unit_from_the_screen(client, clean_clos
     login_as(client, "director")
     url = grid_url(client)
     html = close_page(client, url)
-    offered = re.findall(r'name="unit" value="([0-9a-f-]{36})"', html)
+    offered = re.findall(r'close/\?unit=([0-9a-f-]{36})', html)
     assert len(offered) > 1, f"директору предложена не вся сеть: {offered}"
 
     managers_unit = str(

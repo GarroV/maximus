@@ -744,10 +744,6 @@ msgstr "%(who)s: %(total)s h against a standard of %(norm)s h"
 msgid "%(who)s: уволен %(date)s, а часов за этот месяц %(total)s"
 msgstr "%(who)s: dismissed on %(date)s, yet has %(total)s hours this month"
 
-#: timesheets/templates/timesheets/_hints.html:17
-msgid "Стоит посмотреть до расчёта"
-msgstr "Worth a look before the calculation"
-
 #: timesheets/templates/timesheets/_hints.html:24
 msgid ""
 "Ни одно из этих чисел не ошибка само по себе — но незамеченными они и "
@@ -837,14 +833,6 @@ msgstr "Reopen"
 #: timesheets/templates/timesheets/grid.html:97
 msgid "часы открыты"
 msgstr "hours open"
-
-#: timesheets/templates/timesheets/grid.html:98
-msgid "Закрыть часы точки"
-msgstr "Close unit hours"
-
-#: timesheets/templates/timesheets/grid.html:123
-msgid "Загрузить таблицу партнёра (.xlsx)"
-msgstr "Upload the partner's table (.xlsx)"
 
 #: timesheets/templates/timesheets/grid.html:125
 msgid "Загрузить"
@@ -9737,3 +9725,67 @@ msgstr "Payroll lines are closed in this report; the total is calculated without
 #: новые строки, добавлены tools/apply_translations.py
 msgid "закрыто: нет права видеть суммы расчёта"
 msgstr "closed: no right to see calculated amounts"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Все"
+msgstr "All"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Всего часов"
+msgstr "Total hours"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Закрыть часы по %(unit)s?"
+msgstr "Close hours for %(unit)s?"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Закрыть часы по точке"
+msgstr "Close hours for this location"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Замечания не мешают закрыть: система предупреждает, но не запрещает. "
+"Открыть часы обратно можно на этой же странице."
+msgstr "Remarks do not block closing: the system warns but does not forbid. Hours can be reopened on this same page."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Колонки подбираются сами: имя, точка, типы часов. Если колонка не "
+"распознана — спросим, но файл не отклоним."
+msgstr "Columns are matched automatically: name, location, hour types. If a column is not recognised we will ask, but we will not reject the file."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Незакрытых замечаний"
+msgstr "Open remarks"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отмена"
+msgstr "Cancel"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Перетащите свой xlsx сюда или выберите файл"
+msgstr "Drag your xlsx here or choose a file"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"После закрытия часы этой точки не меняются, и расчёт можно запускать. "
+"Другие точки остаются открытыми — закрытие идёт по каждой независимо."
+msgstr "Once closed, this location's hours no longer change and the payroll can be run. Other locations stay open — each one is closed independently."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Скачать xlsx"
+msgstr "Download xlsx"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сотрудников"
+msgstr "Headcount"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Требует вашего взгляда"
+msgstr "Needs your attention"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "норма месяца %(norm)s ч"
+msgstr "monthly norm %(norm)s h"

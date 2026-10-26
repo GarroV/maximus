@@ -47,6 +47,23 @@
   {% if details %}<div class="details">{{ details|join:", " }}</div>{% endif %}
 {% endnotice %}
 {% else %}
+{% comment %}
+Шапка сетки по эталону модуля 1 (T239): плашка состояния, норма месяца, файл и
+фильтр точек. Строки «Dodo IS: синхронизировано» нет намеренно — коннектора
+ещё нет, и строка, которой нечем питаться, была бы выдумкой (#294).
+Состояние — сводка по точкам: «Закрыт» только когда закрыты все; закрытие идёт
+по точкам, и «часть закрыта» плашкой не выразить, это говорит сводка ниже.
+{% endcomment %}
+<div class="sheet-head">
+  {% if units %}
+    {% if all_closed %}<span class="status status--approved"><i></i>{% translate "Закрыт" %}</span>
+    {% else %}<span class="status status--draft"><i></i>{% translate "Открыт" %}</span>{% endif %}
+  {% endif %}
+  {% if norm_hours is not None %}<span class="hint">{% blocktranslate with norm=norm_hours|hours %}норма месяца {{ norm }} ч{% endblocktranslate %}</span>{% endif %}
+  <a class="btn btn--sm" download href="{{ export_url }}">{% translate "Скачать xlsx" %}</a>
+</div>
+{% if unit_filter %}{% include "web/components/filters.html" with filters=unit_filter %}{% endif %}
+
 <p class="sub">
   {% blocktranslate with people_count=grid.rows|length %}{{ people_count }} чел.{% endblocktranslate %}
   {% if limited_to_units %}· {% translate "только ваши точки" %}{% endif %}
