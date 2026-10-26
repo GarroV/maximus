@@ -134,13 +134,17 @@ def test_partners_rules_of_one_line_still_live_side_by_side(db):
 
 
 def manager_may_manage_directory(db) -> None:
-    """Урезанной роли дать право вести справочник — случай, который ловим.
+    """Урезанной роли дать право вести справочник и людей — случай, который ловим.
+
+    Привязку человека к точке с T236 сторожит `staff.manage`, а не
+    `directory.manage`, поэтому нужны оба.
 
     Без права запись отвергла бы политика права, и проверка зеленела бы по
     чужой причине.
     """
     db.execute(
-        """update roles set permissions = permissions || '["directory.manage"]'::jsonb
+        """update roles
+              set permissions = permissions || '["directory.manage", "staff.manage"]'::jsonb
             where id = %s""",
         (R_MANAGER,),
     )

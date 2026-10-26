@@ -18,8 +18,9 @@ D081 требует «одна страница — одна функция», �
 **Права на каждой странице те же, что были у карточки, и на `GET`, и на
 `POST`.** Человек ищется до проверки права: скрытый (чужой, несуществующий,
 чужого регистра) отвечает 404 всем одинаково (D023, T173). Читать может любой,
-кого завели к партнёру, — строки режет база. Записать — только с
-`directory.manage`; без него `POST` получает 403 словами, а на месте формы стоят
+кого завели к партнёру, — строки режет база. Записать — только со своим правом
+страницы: карточка и точки — `staff.manage`, условия найма — `terms.manage`
+(T236); без него `POST` получает 403 словами, а на месте формы стоят
 те же слова (`permissions.explain`), а не пустота (T072). Отказ управляющему по
 скрытой строке «вся сеть» — нейтральный 409, как сделано в T221
 (`directory.save_units`).
@@ -80,7 +81,7 @@ def _page_titles() -> dict:
 def employee(request, employee_id):
     """Карточка: имя, внешний ключ, даты приёма и увольнения; предпросчёт месяца."""
     return _page(
-        request, employee_id, here=CARD, save=_save_card,
+        request, employee_id, here=CARD, save=_save_card, right=permissions.STAFF_MANAGE,
         template="web/directory/employee.html", context=_card_context,
     )
 
@@ -90,7 +91,7 @@ def employee(request, employee_id):
 def employee_terms(request, employee_id):
     """Условия найма: история версий, надбавки и новая версия с даты."""
     return _page(
-        request, employee_id, here=TERMS, save=_save_terms,
+        request, employee_id, here=TERMS, save=_save_terms, right=permissions.TERMS_MANAGE,
         template="web/directory/employee_terms.html", context=_terms_context,
     )
 
@@ -100,7 +101,7 @@ def employee_terms(request, employee_id):
 def employee_units(request, employee_id):
     """Точки, между которыми делятся затраты на человека, и набор с даты."""
     return _page(
-        request, employee_id, here=UNITS, save=_save_units,
+        request, employee_id, here=UNITS, save=_save_units, right=permissions.STAFF_MANAGE,
         template="web/directory/employee_units.html", context=_units_context,
     )
 
@@ -110,13 +111,17 @@ def _save_card(request, who, person: Employee) -> tuple[str, str]:
     return "person", ""
 
 
-def _page(request, employee_id, *, here: str, save, template: str, context):
+def _page(request, employee_id, *, here: str, save, right: str, template: str, context):
     """Общий ход трёх страниц: найти человека, принять форму, нарисовать страницу.
 
     Один на всех, а не три копии: в нём живут правила, которые обязаны быть
     одинаковыми на каждой странице человека, — 404 до проверки права, 403 словами
     на запись без права, коды отказа формы и перенаправление после записи.
     Разъехавшись, они открыли бы на одной из страниц то, что закрыто на соседней.
+
+    Право у каждой страницы своё (T236, эталон «Роли и права»): карточка и точки
+    затрат — `staff.manage` («заводить и увольнять людей»), условия найма —
+    `terms.manage` («менять ставки и условия найма»).
     """
     who, denied = _reader(request)
     if denied is not None:
@@ -126,14 +131,14 @@ def _page(request, employee_id, *, here: str, save, template: str, context):
     # на своего человека 200, а на чужого — 403, то есть узнавал бы о его
     # существовании ровно по коду ответа (D023).
     person = _employee_or_404(who, employee_id)
-    may_manage = permissions.has(who, permissions.DIRECTORY_MANAGE)
+    may_manage = permissions.has(who, right)
 
     error, status = "", 200
     if request.method == "POST":
         # Правка — по праву, и отказ здесь громкий: 403 словами. База отвергла
         # бы запись и сама (`0130`), но человеку из её ошибки не понятно ничего.
         try:
-            permissions.check(who, permissions.DIRECTORY_MANAGE)
+            permissions.check(who, right)
         except permissions.PermissionRefused as refusal:
             return _refusal(request, refusal)
         try:
@@ -158,13 +163,15 @@ def _page(request, employee_id, *, here: str, save, template: str, context):
             error, status = refusal.message, refusal.http_status
 
     shown = {
-        **_header(request, who, person, here=here, error=error, may_manage=may_manage),
+        **_header(request, who, person, here=here, error=error, may_manage=may_manage, right=right),
         **context(who, person, may_manage),
     }
     return render(request, template, shown, status=status)
 
 
-def _header(request, who, person: Employee, *, here: str, error: str, may_manage: bool) -> dict:
+def _header(
+    request, who, person: Employee, *, here: str, error: str, may_manage: bool, right: str,
+) -> dict:
     """Шапка страницы человека: имя, ряд его страниц, итог записи или отказ."""
     titles = _page_titles()
     pages = [CARD, TERMS, UNITS]
@@ -189,7 +196,7 @@ def _header(request, who, person: Employee, *, here: str, error: str, may_manage
         # форма читается как поломка продукта, а не как запрет (T072). Те же,
         # которыми ответит сам отказ на `POST`.
         "denied": (
-            "" if may_manage else permissions.explain(who, permissions.DIRECTORY_MANAGE)
+            "" if may_manage else permissions.explain(who, right)
         ),
     }
 

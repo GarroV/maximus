@@ -459,7 +459,6 @@ def closable_unit(html: str) -> str:
 def test_manager_closes_own_unit_from_the_screen(client, clean_closures):
     login_as(client, "manager")
     url = grid_url(client)
-    html = close_page(client, url)
     unit = closable_unit(close_page(client, url))
 
     response = client.post(f"{url}close/", {"unit": unit})
@@ -498,7 +497,6 @@ def test_closing_one_unit_does_not_block_the_others_on_screen(
 
     login_as(client, "manager")
     url = grid_url(client)
-    manager_html = body(client.get(url))
     client.post(f"{url}close/", {"unit": closable_unit(close_page(client, url))})
 
     own = set(

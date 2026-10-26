@@ -50,7 +50,7 @@
 from __future__ import annotations
 
 from datetime import date
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
@@ -62,7 +62,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from core.models import AccessLogEntry, Membership, Role, Unit, User
-from core.roles import ALL_PERMISSIONS, NEVER, OPTIONAL, leads_one_unit
+from core.roles import ALL_PERMISSIONS, ALL_UNITS, NEVER, ONE_UNIT, OPTIONAL, unit_scope
 
 from . import permissions
 from .principal import get_current_principal
@@ -198,48 +198,60 @@ def _history(tenant_id):
 
 
 
-def membership_units(chosen: str, tenant_id, role):
+def membership_units(chosen, tenant_id, role):
     """Точки членства и отказ словами, если выбор не сходится с ролью.
 
+    `chosen` — выбранные точки списком (`request.POST.getlist("unit")`).
     Возвращает `(unit_ids, отказ)`. `unit_ids is None` — все точки партнёра, и
     это законно ровно для тех ролей, которые его целиком и ведут
-    (`core.roles.leads_one_unit`). Общая для страницы партнёра и платформы:
+    (`core.roles.unit_scope`). Общая для страницы партнёра и платформы:
     правило, написанное дважды, однажды разошлось бы, и платформа выдавала бы
     управляющему все точки, как это и было до разбора прав T225.
 
     Молчаливого умолчания здесь нет намеренно: и «забыл выбрать точку», и
-    «выбрал точку роли, которая ведёт всё» — это расхождение между тем, что
-    человек имел в виду, и тем, что получит. Оба случая называются словами, а
-    не разрешаются за него в ту или другую сторону.
+    «выбрал точку роли, которая ведёт всё», и «две точки роли, которая ведёт
+    одну» — это расхождение между тем, что человек имел в виду, и тем, что
+    получит. Все случаи называются словами, а не разрешаются за него.
     """
-    chosen = (chosen or "").strip()
+    picked = list(dict.fromkeys(
+        value.strip() for value in (chosen or []) if value and value.strip()
+    ))
+    scope = unit_scope(role.code)
 
-    if not leads_one_unit(role.code):
-        if chosen:
+    if scope == ALL_UNITS:
+        if picked:
             return None, _(
                 "Роль «%(role)s» ведёт всего партнёра — точка для неё не выбирается."
             ) % {"role": _title(role)}
         return None, ""
 
-    if not chosen:
+    if not picked:
         return None, _(
-            "Роль «%(role)s» ведёт одну точку — выберите её. "
+            "Роль «%(role)s» ведёт выбранные точки — отметьте их. "
             "Без точки человек получил бы все точки партнёра."
+        ) % {"role": _title(role)}
+    if scope == ONE_UNIT and len(picked) > 1:
+        return None, _(
+            "Роль «%(role)s» ведёт одну точку — отметьте одну. Нескольким точкам "
+            "соответствует роль регионального управляющего."
         ) % {"role": _title(role)}
 
     try:
-        unit = Unit.objects.filter(pk=chosen, tenant_id=tenant_id).first()
+        found = {
+            str(pk) for pk in
+            Unit.objects.filter(pk__in=picked, tenant_id=tenant_id).values_list("pk", flat=True)
+        }
     except (DjangoValidationError, ValueError):
-        unit = None
-    if unit is None:
+        found = set()
+    if found != set(picked):
         # Теми же словами, что у чужой строки: по ответу нельзя понять, есть ли
         # такая точка у другого партнёра (D023).
         return None, _("Такой точки у этого партнёра нет.")
-    return [unit.pk], ""
+    return [UUID(value) for value in picked], ""
 
 
 def _membership_units(request, who, role):
-    return membership_units(request.POST.get("unit"), who.tenant_id, role)
+    return membership_units(request.POST.getlist("unit"), who.tenant_id, role)
 
 
 # Ряд ссылок раздела (D081): страницы раздела — шаги внутри одного пункта левой
@@ -337,6 +349,9 @@ def _person_page(request, who, person, *, error: str = "", status: int = 200):
     return _show(request, "web/roles/person.html", "",
                  {"person": shown, "now": effects["now"], "cannot": effects["cannot"],
                   "offers": effects["offers"],
+                  "picked_units": (
+                      request.POST.getlist("unit") if request.method == "POST" else []
+                  ),
                   **_choices(who)}, error=error, status=status)
 
 
@@ -345,8 +360,10 @@ def _invite_page(request, who, *, error: str = "", status: int = 200):
     # должен стоить ему повторного ввода остальных пяти.
     filled = {
         key: (request.POST.get(key) or "").strip()
-        for key in ("full_name", "email", "role", "unit", "until", "reason")
+        for key in ("full_name", "email", "role", "until", "reason")
     } if request.method == "POST" else {}
+    if filled:
+        filled["units"] = request.POST.getlist("unit")
     return _show(request, "web/roles/invite.html", "roles-invite",
                  {"filled": filled, **_choices(who)}, error=error, status=status)
 

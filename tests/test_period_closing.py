@@ -335,6 +335,8 @@ def test_the_month_list_says_closed_after_approval(client, web_env):
     assert "Открыт" not in row
 
     # И обратно: откат возвращает месяц в работу, список говорит и это.
+    # Откатывает администратор (T236, эталон «Роли и права»).
+    login_as(client, "admin")
     assert client.post(
         url + "reopen/", {"reason": REASON}, follow=True
     ).status_code == 200

@@ -191,11 +191,17 @@ def _refusal(request, refusal, *, status=None):
     )
 
 
-def _guard(request):
-    """Пропустить того, у кого есть право вести справочники; иначе — отказ страницей."""
+def _guard(request, *rights: str):
+    """Пропустить того, у кого есть все названные права; иначе — отказ страницей.
+
+    Без аргументов — право вести справочники. Люди и условия найма спрашивают
+    свои (`staff.manage`, `terms.manage`, T236): заведение сотрудника пишет и
+    человека, и первую версию условий, поэтому ему нужны оба.
+    """
     who = _who(request)
     try:
-        permissions.check(who, permissions.DIRECTORY_MANAGE)
+        for right in rights or (permissions.DIRECTORY_MANAGE,):
+            permissions.check(who, right)
     except permissions.PermissionRefused as refusal:
         return who, _refusal(request, refusal)
     return who, None
@@ -553,7 +559,7 @@ def employees(request):
     who, denied = _reader(request)
     if denied is not None:
         return denied
-    may_manage = permissions.has(who, permissions.DIRECTORY_MANAGE)
+    may_manage = permissions.has(who, permissions.STAFF_MANAGE)
 
     query = (request.GET.get("q") or "").strip()
     rows = _employee_rows(who, query, with_key=may_manage)
@@ -764,7 +770,7 @@ def employee_new(request):
     (`0130_directory_permissions`), то есть запись мимо интерфейса тоже не
     пройдёт.
     """
-    who, denied = _guard(request)
+    who, denied = _guard(request, permissions.STAFF_MANAGE, permissions.TERMS_MANAGE)
     if denied is not None:
         return denied
 

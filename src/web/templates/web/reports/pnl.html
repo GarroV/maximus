@@ -27,6 +27,11 @@
   <a href="{% url 'inbox' %}">{% translate "Разобрать" %}</a>{% endnotice %}
 {% endif %}
 
+{% if payroll_denied %}
+{% translate "Без зарплаты" as no_payroll %}
+{% notice "alert" title=no_payroll %}{{ payroll_denied }} {% translate "Строки зарплаты в отчёте закрыты, итог посчитан без них." %}{% endnotice %}
+{% endif %}
+
 {% scroll %}<table class="report">
   <thead>
     <tr>
@@ -47,10 +52,16 @@
       <td><a href="{{ line.url }}">{% blocktranslate with counter=line.facts %}записей: {{ counter }}{% endblocktranslate %}</a></td>
     </tr>
     {% endfor %}
+    {% for line in payroll_hidden %}
+    <tr data-line="{{ line.code }}" data-hidden="payroll">
+      <td>{{ line.title }}</td>
+      <td colspan="4" class="hint">{% translate "закрыто: нет права видеть суммы расчёта" %}</td>
+    </tr>
+    {% endfor %}
   </tbody>
   <tfoot>
     <tr class="grand">
-      <th>{% translate "Итог отчёта" %}</th>
+      <th>{% if payroll_denied %}{% translate "Итог без зарплаты" %}{% else %}{% translate "Итог отчёта" %}{% endif %}</th>
       <th class="{{ total|numclass }}">{{ total }}</th>
       <th class="{{ previous_total|numclass }}">{{ previous_total }}</th>
       <th colspan="2"></th>

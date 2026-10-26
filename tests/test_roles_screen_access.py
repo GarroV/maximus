@@ -41,8 +41,15 @@ def role_option(html: str, title: str) -> str:
 
 
 def unit_option(html: str, code: str) -> str:
-    """Идентификатор точки из выпадающего списка — по коду, а не по месту."""
-    found = re.findall(r'<option value="([0-9a-f-]+)">([^<]+)</option>', html)
+    """Идентификатор точки из галок формы выдачи — по коду, а не по месту.
+
+    Галки, а не выпадающий список, с T236: региональному управляющему точек
+    нужно несколько.
+    """
+    found = re.findall(
+        r'name="unit" value="([0-9a-f-]+)"[^>]*>\s*<label for="unit_[0-9a-f-]+">([^<]+)</label>',
+        html,
+    )
     for unit_id, label in found:
         if label.strip().split(" — ")[0] == code:
             return unit_id
@@ -414,3 +421,61 @@ def test_granting_a_unit_role_to_a_person_also_names_the_unit(client, web_env):
         user_id=person.pk, role__code="manager",
     )
     assert granted.unit_ids == [bg1.id], granted.unit_ids
+
+
+# --- региональный управляющий: набор точек (T236) ------------------------------
+
+
+def test_a_regional_manager_is_invited_with_several_units(client, web_env):
+    """Роль «Управляющий региона» эталона: несколько точек, и в базе ровно они."""
+    from core.models import Unit
+
+    login_as(client, "admin")
+    html = roles_pages(client)
+    chosen = {Unit.objects.get(code=code).id for code in ("NS1", "NS2")}
+
+    response = client.post("/roles/invite/", {
+        "full_name": "Aleksandra Đurić", "email": "aleksandra@example.test",
+        "role": role_option(html, "Региональный управляющий"),
+        "unit": [unit_option(html, "NS1"), unit_option(html, "NS2")],
+        "reason": "регион Нови-Сад",
+    })
+    assert response.status_code == 302, body(response)[:400]
+
+    held = invited_membership("Aleksandra Đurić")
+    assert set(held.unit_ids or []) == chosen, (
+        f"членство региона не названо его точками: {held.unit_ids} — "
+        "пустой список означает ВСЕ точки партнёра"
+    )
+
+
+def test_a_regional_manager_without_units_is_refused(client, web_env):
+    """Без точек регион получил бы всего партнёра — отказ словами."""
+    from core.models import User
+
+    login_as(client, "admin")
+    response = client.post("/roles/invite/", {
+        "full_name": "Region Bez", "email": "region-bez@example.test",
+        "role": role_option(roles_pages(client), "Региональный управляющий"),
+        "reason": "проверка",
+    })
+    assert response.status_code == 400
+    assert "отметьте" in body(response), "отказ не называет, что сделать"
+    assert not User.objects.filter(full_name="Region Bez").exists()
+
+
+def test_a_unit_manager_is_not_given_two_units(client, web_env):
+    """Две точки управляющему точки — не молчаливое «возьмём первую», а отказ."""
+    from core.models import User
+
+    login_as(client, "admin")
+    html = roles_pages(client)
+    response = client.post("/roles/invite/", {
+        "full_name": "Dve Tačke", "email": "dve@example.test",
+        "role": role_option(html, "Управляющий точки"),
+        "unit": [unit_option(html, "NS1"), unit_option(html, "NS2")],
+        "reason": "проверка",
+    })
+    assert response.status_code == 400
+    assert "регионального управляющего" in body(response), "отказ не подсказывает роль"
+    assert not User.objects.filter(full_name="Dve Tačke").exists()

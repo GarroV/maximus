@@ -64,13 +64,7 @@ norma, 30.09.2026). Карточка складывается в столбец 
       {% for role in roles %}<option value="{{ role.id }}">{{ role.title }}</option>{% endfor %}
     </select>
   </label>
-  <label>{% translate "Точка" %}
-    <select name="unit">
-      <option value="">{% translate "не выбрана" %}</option>
-      {% for unit in units %}<option value="{{ unit.id }}">{{ unit.code }} — {{ unit.title }}</option>{% endfor %}
-    </select>
-    <span class="note">{% translate "Нужна ролям, которые ведут одну точку: без неё человек получил бы все точки партнёра." %}</span>
-  </label>
+  {% include "web/roles/unit_picks.html" with picked=picked_units %}
   <label>{% translate "До какого числа" %}
     <input type="date" name="until" min="{{ today }}">
     <span class="note">{% translate "Пусто — без срока." %}</span>

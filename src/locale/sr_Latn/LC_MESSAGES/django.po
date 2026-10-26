@@ -3597,6 +3597,14 @@ msgstr "Zamrzavanje reda obračunske liste"
 msgid "Перенос разницы за закрытый месяц"
 msgstr "Prenos razlike za zatvoreni mesec"
 
+#: web/permissions.py
+msgid "Ведение сотрудников"
+msgstr "Upravljanje zaposlenima"
+
+#: web/permissions.py
+msgid "Ведение ставок и условий найма"
+msgstr "Upravljanje stopama i uslovima zaposlenja"
+
 #: web/permissions.py:99
 msgid "Ведение справочников"
 msgstr "Upravljanje imenicima"
@@ -8340,31 +8348,14 @@ msgstr ""
 "panelu i kao traka na vrhu samog ekrana. Odeljak bez oznake je gotov."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid ""
-"Нужна ролям, которые ведут одну точку: без неё человек получил бы все "
-"точки партнёра."
-msgstr "Potrebna je ulogama koje vode jednu lokaciju: bez nje bi čovek dobio sve lokacije partnera."
-
-#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid ""
 "Роль «%(role)s» ведёт всего партнёра — точка для неё не выбирается."
 msgstr "Uloga „%(role)s“ vodi celog partnera — lokacija se za nju ne bira."
 
 #: новые строки, добавлены tools/apply_translations.py
-#, python-format
-msgid ""
-"Роль «%(role)s» ведёт одну точку — выберите её. Без точки человек "
-"получил бы все точки партнёра."
-msgstr "Uloga „%(role)s“ vodi jednu lokaciju — izaberite je. Bez lokacije čovek bi dobio sve lokacije partnera."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Такой точки у этого партнёра нет."
 msgstr "Ovaj partner nema takvu lokaciju."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "не выбрана"
-msgstr "nije izabrana"
 
 #: новые строки, добавлены tools/apply_translations.py
 #, python-format
@@ -9022,13 +9013,6 @@ msgid "Такого человека в этом пространстве нет
 msgstr "U ovom prostoru nema takve osobe."
 
 #: новые строки, добавлены tools/apply_translations.py
-#, python-format
-msgid ""
-"Роль «%(role)s» ведёт одну точку, а точек у нового пространства ещё нет. "
-"Первым заведите того, кто ведёт партнёра целиком."
-msgstr "Uloga „%(role)s“ vodi jedan objekat, a novi prostor još nema objekata. Prvo dodajte osobu koja vodi celog partnera."
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid ""
 "Эту почту пригласить нельзя. Если человек уже работает у вас, он есть в "
 "списке людей; если нет — проверьте адрес."
@@ -9375,6 +9359,57 @@ msgid ""
 "пачки не записано — откройте инбокс заново."
 msgstr "Red „%(what)s“ nije raspoređen: već je raspoređen ili razvrstan. Ništa iz grupe nije sačuvano — ponovo otvorite prijemno sanduče."
 
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Просмотр ведомости и сумм расчёта"
+msgstr "Pregled platnog spiska i obračunatih iznosa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "РЕГ"
+msgstr "REG"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Роль «%(role)s» ведёт выбранные точки — отметьте их. Без точки человек "
+"получил бы все точки партнёра."
+msgstr "Uloga „%(role)s“ vodi izabrane objekte — označite ih. Bez objekta osoba bi dobila sve objekte partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Роль «%(role)s» ведёт выбранные точки, а точек у нового пространства ещё "
+"нет. Первым заведите того, кто ведёт партнёра целиком."
+msgstr "Uloga „%(role)s“ vodi izabrane objekte, a novi prostor još nema objekata. Prvo dodajte nekoga ko vodi celog partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Роль «%(role)s» ведёт одну точку — отметьте одну. Нескольким точкам "
+"соответствует роль регионального управляющего."
+msgstr "Uloga „%(role)s“ vodi jedan objekat — označite samo jedan. Za više objekata postoji uloga regionalnog menadžera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точек у партнёра пока нет."
+msgstr "Partner još nema objekata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Управляющему точки — одна, управляющему региона — его точки. Ролям, "
+"которые ведут всего партнёра, точки не отмечаются."
+msgstr "Menadžeru objekta — jedan objekat, regionalnom menadžeru — njegovi objekti. Ulogama koje vode celog partnera objekti se ne označavaju."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "регион"
+msgstr "region"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "свои, несколько"
+msgstr "svoji, nekoliko"
+
+#: web/templates/web/guide.html
+msgid "Отвечает за несколько точек и ездит между ними. Делает то же, что\n        управляющий точки, только по всем своим точкам сразу: проверяет и правит\n        часы, закрывает их по точке. Ведомости и сумм расчёта не видит: больше\n        точек — не значит больше денег."
+msgstr "Odgovoran je za nekoliko objekata i obilazi ih. Radi isto što i\n        menadžer objekta, samo za sve svoje objekte odjednom: proverava i ispravlja\n        sate i zatvara ih po objektu. Platni spisak i obračunate iznose ne vidi:\n        više objekata ne znači više novca."
+
 #: timesheets/templates/timesheets/grid.html
 msgid "Что ещё можно сделать с часами"
 msgstr "Šta još možete uraditi sa satima"
@@ -9515,3 +9550,28 @@ msgstr "rezultat meseca po stavkama"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "сравнить расчёт с таблицей бухгалтера"
 msgstr "uporedi obračun sa tabelom knjigovođe"
+
+msgid "Без зарплаты"
+msgstr "Bez zarada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итог без зарплаты"
+msgstr "Ukupno bez zarada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отклонения от прошлого месяца не проверены"
+msgstr "Odstupanja u odnosu na prethodni mesec nisu provereni"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сравнение идёт по суммам расчёта, а права видеть их у вашей роли нет. "
+"Проверит тот, у кого это право есть."
+msgstr "Poređenje se radi po obračunatim iznosima, a vaša uloga nema pravo da ih vidi. Proveriće onaj ko ima to pravo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строки зарплаты в отчёте закрыты, итог посчитан без них."
+msgstr "Redovi zarada su u izveštaju zatvoreni, ukupan iznos je obračunat bez njih."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "закрыто: нет права видеть суммы расчёта"
+msgstr "zatvoreno: nema prava da se vide obračunati iznosi"

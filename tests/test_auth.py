@@ -46,6 +46,8 @@ ROLE_LEDGERS = {
     # периода.
     "accountant": {"official", "supplementary", "internal"},
     "manager": {"official", "supplementary"},
+    # Региональный управляющий (T236): те же два, что у управляющего точки.
+    "regional_manager": {"official", "supplementary"},
     # Все три, а не один официальный (T089). Справочники и правила ведёт
     # администратор и только он, и с одним регистром это давало не
     # разграничение, а тупик: карточек курьеров и кухни он не видел вовсе, то
@@ -276,7 +278,7 @@ def test_user_sees_only_his_own_row(web_env):
 # --- четыре роли спеки -------------------------------------------------------
 
 
-def test_all_four_roles_are_seeded(web_env):
+def test_every_product_role_is_seeded(web_env):
     import psycopg
 
     with psycopg.connect(web_env) as conn:
@@ -299,6 +301,11 @@ def test_role_decides_what_the_database_returns(code, three_ledgers):
 
     with db_context(user_id_of(code)):
         ledgers = set(PayComponent.objects.values_list("ledger", flat=True))
+    if code == "regional_manager":
+        # Регистры у роли есть, а права видеть суммы расчёта нет (T236,
+        # `payroll.view`): политика чтения не отдаёт ей ни одной строки.
+        assert ledgers == set(), "региональному управляющему видны суммы расчёта"
+        return
     assert ledgers == ROLE_LEDGERS[code]
 
 
@@ -313,8 +320,9 @@ def test_principal_carries_role_units_and_ledgers(client, seed_password, code):
     assert set(who.visible_ledgers) == ROLE_LEDGERS[code]
     assert who.tenant_id is not None
     assert who.permissions, "роль без единого права — значит право не заведено"
-    # Управляющий привязан к одной точке, остальные роли — ко всем.
-    assert bool(who.unit_ids) is (code == "manager")
+    # Управляющие привязаны к своим точкам (регион — к нескольким), остальные
+    # роли — ко всем.
+    assert bool(who.unit_ids) is (code in ("manager", "regional_manager"))
 
 
 def test_a_role_without_the_right_does_not_write_payroll_data(

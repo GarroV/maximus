@@ -47,8 +47,10 @@ RIGHT_GROUPS = (
     (gettext_noop("Табель и операционка"),
      ("timesheet.edit", "unit.close", "suppliers.classify")),
     (gettext_noop("Зарплата и деньги"),
-     ("payrun.calculate", "period.approve", "period.reopen", "payslip.freeze", "retro.post")),
-    (gettext_noop("Правила и справочники"), ("rules.manage", "directory.manage")),
+     ("payroll.view", "payrun.calculate", "period.approve", "period.reopen", "payslip.freeze",
+      "retro.post")),
+    (gettext_noop("Правила и справочники"),
+     ("rules.manage", "terms.manage", "staff.manage", "directory.manage")),
     (gettext_noop("Доступ и история"), ("roles.manage",)),
 )
 LEDGER_GROUP = gettext_noop("Срезы по регистрам учёта")
@@ -69,6 +71,7 @@ if sorted(_GROUPED) != sorted(ALL_PERMISSIONS):
 _SHORT = {
     "director": gettext_noop("ДИР"),
     "accountant": gettext_noop("БУХ"),
+    "regional_manager": gettext_noop("РЕГ"),
     "manager": gettext_noop("УПР"),
     "admin": gettext_noop("АДМ"),
 }
@@ -81,6 +84,7 @@ _NOTE = {
     "admin": gettext_noop("партнёр"),
     "director": gettext_noop("директор"),
     "accountant": gettext_noop("бухгалтер"),
+    "regional_manager": gettext_noop("регион"),
     "manager": gettext_noop("точка"),
 }
 
@@ -126,7 +130,7 @@ def _ledger_row(ledger: str, columns: list[dict], roles: list) -> dict:
 # Столбцы — от самой широкой роли к самой узкой, как в эталоне (АДМ первым):
 # так столбец администратора, заполненный целиком, читается как точка отсчёта.
 # Роли, заведённые партнёром, идут следом по названию.
-_COLUMN_ORDER = ("admin", "director", "accountant", "manager")
+_COLUMN_ORDER = ("admin", "director", "accountant", "regional_manager", "manager")
 
 
 def _column_key(role) -> tuple:

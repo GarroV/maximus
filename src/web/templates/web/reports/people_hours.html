@@ -28,6 +28,7 @@
 </section>
 
 <h2>{% translate "Кто вышел за норму" %}</h2>
+{% if payroll_denied %}<p class="note">{{ payroll_denied }}</p>{% endif %}
 {% if over_rows %}
 {% scroll %}<table class="report">
   <thead>
@@ -37,7 +38,7 @@
       <th class="num">{% translate "Часы" %}</th>
       <th class="num">{% translate "Норма" %}</th>
       <th class="num">{% translate "Сверх нормы" %}</th>
-      <th class="num">{% translate "Начислено за месяц" %}</th>
+      {% if not payroll_denied %}<th class="num">{% translate "Начислено за месяц" %}</th>{% endif %}
     </tr>
   </thead>
   <tbody>
@@ -48,7 +49,7 @@
       <td class="num">{{ row.hours }}</td>
       <td class="num num--muted">{{ row.norm }}</td>
       <td class="num">{{ row.over }}</td>
-      <td class="num">{{ row.payroll }}</td>
+      {% if not payroll_denied %}<td class="num">{{ row.payroll }}</td>{% endif %}
     </tr>
     {% endfor %}
   </tbody>

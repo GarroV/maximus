@@ -272,7 +272,7 @@ def test_the_reader_gets_facts_instead_of_forms_and_is_told_why(client, web_env,
     page = body(client.get(mine))
     assert '<form class="card"' not in page, "читателю отдали форму правки"
     assert "Новая версия условий" not in page, "читателю предложено завести версию"
-    assert "Ведение справочников" in page, (
+    assert "Ведение сотрудников" in page, (
         "форма пропала молча — это читается как поломка продукта, а не как запрет"
     )
     # Факты, ради которых экран и открыли: группа, точка, ставка.
@@ -280,10 +280,12 @@ def test_the_reader_gets_facts_instead_of_forms_and_is_told_why(client, web_env,
         assert expected in page, f"на карточке нет главного: {expected}"
     # Условия найма и точки — свои страницы (T229), и правило у них то же: вместо
     # формы слова, а не пустота.
-    for other in ("terms/", "units/"):
+    # У каждой страницы своё право (T236): условия найма — ставки, точки — люди.
+    pages = (("terms/", "Ведение ставок и условий найма"), ("units/", "Ведение сотрудников"))
+    for other, right in pages:
         shown = body(client.get(mine + other))
         assert '<form class="card"' not in shown, f"читателю отдали форму на {other}"
-        assert "Ведение справочников" in shown, f"форма на {other} пропала молча"
+        assert right in shown, f"форма на {other} пропала молча"
     client.post("/logout/")
 
 
@@ -420,7 +422,7 @@ def test_a_post_from_the_reader_is_refused_and_changes_nothing(client, web_env, 
         "what": "person", "last_name": "ПОДМЕНА", "first_name": "X", "external_id": "x",
     })
     assert answer.status_code == 403, body(answer)
-    assert "Ведение справочников" in body(answer)
+    assert "Ведение сотрудников" in body(answer)
 
     versions = client.post(f"{LIST}{person}/terms/", {
         "what": "terms", "valid_from": "2026-09-01", "base_rate": "999", "coefficient": "1",
@@ -443,7 +445,8 @@ def test_the_one_who_manages_the_directory_still_edits(client, web_env, sql):
                         ("units/", "Набор точек с даты")):
         page = body(client.get(card(sql, MINE) + other))
         assert '<form class="card"' in page and form in page, f"формы нет на {other or 'карточке'}"
-        assert "Ведение справочников" not in page, "тому, у кого право есть, объясняют запрет"
+        for right in ("Ведение сотрудников", "Ведение ставок и условий найма"):
+            assert right not in page, "тому, у кого право есть, объясняют запрет"
     client.post("/logout/")
 
 

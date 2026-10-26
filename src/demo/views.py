@@ -77,7 +77,7 @@ def _guard(request) -> None:
 def landing(request):
     """Титульная страница демо. Единственный экран со своими словами."""
     _guard(request)
-    # Роли — все четыре, включая администратора сети (T163). Раньше он не
+    # Роли — все, включая администратора сети (T163). Раньше он не
     # показывался вовсе: «посетитель, зашедший им первым, решил бы, что продукт
     # пуст». Довод был про пустой экран, а цена оказалась выше — справочники и
     # правила ведёт только он, и до них в демо нельзя было добраться ни одной
@@ -91,11 +91,11 @@ def landing(request):
             "code": code,
             "title": title,
             "ledgers": ledgers,
-            "unit": unit,
+            "units": unit_codes,
             "keeps_directories": DIRECTORY_MANAGE in permissions,
             "runs_month": PAYRUN_CALCULATE in permissions,
         }
-        for code, title, ledgers, unit, permissions in ROLES
+        for code, title, ledgers, unit_codes, permissions in ROLES
     ]
     return render(
         request,

@@ -87,26 +87,27 @@ def test_the_administrator_grants_the_right_to_calculate(client, web_env):
     следующий тест считал бы, что управляющий умеет считать всегда.
     """
     login_as(client, "admin")
-    manager = role_id(body(client.get("/roles/")), "manager")
+    roles_html = body(client.get("/roles/"))
+    manager = role_id(roles_html, "manager")
+    # Что было у роли — снимком, а не списком в тесте: набор управляющего
+    # меняется вместе с эталоном (T236), а возврат «как было по памяти»
+    # оставлял бы роль урезанной для соседних проверок.
+    rights_before = granted_rights(roles_html, "manager")
 
     login_as(client, "manager")
     before = body(client.get(period_url(client)))
-    assert "не входит в права вашей роли" in before
+    assert "Расчёт периода не входит в права вашей роли" in before
 
     login_as(client, "admin")
     saved = client.post(
         f"/roles/{manager}/rights/",
-        {
-            "right:timesheet.edit": "on",
-            "right:unit.close": "on",
-            "right:payrun.calculate": "on",
-        },
+        {f"right:{code}": "on" for code in rights_before | {"payrun.calculate"}},
         follow=True,
     )
     assert "сохранены" in body(saved).lower()
-    assert granted_rights(body(client.get("/roles/")), "manager") == {
-        "timesheet.edit", "unit.close", "payrun.calculate",
-    }
+    assert granted_rights(body(client.get("/roles/")), "manager") == (
+        rights_before | {"payrun.calculate"}
+    )
 
     login_as(client, "manager")
     after = body(client.get(period_url(client)))
@@ -117,7 +118,7 @@ def test_the_administrator_grants_the_right_to_calculate(client, web_env):
     login_as(client, "admin")
     client.post(
         f"/roles/{manager}/rights/",
-        {"right:timesheet.edit": "on", "right:unit.close": "on"},
+        {f"right:{code}": "on" for code in rights_before},
         follow=True,
     )
 

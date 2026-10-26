@@ -31,7 +31,7 @@ from django.views.decorators.http import require_http_methods
 
 from core.models import EmploymentTerm
 
-from . import directory
+from . import directory, permissions
 from .dbrefusal import BadInput, ConstraintRefused, saving
 from .directory_views import _date, _guard, _number, _visible_groups
 from .format import day, exact
@@ -53,7 +53,7 @@ def _new_rate(current: Decimal, percent: Decimal | None, amount: Decimal | None)
 @login_required
 @require_http_methods(["GET", "POST"])
 def raise_rates(request):
-    who, denied = _guard(request)
+    who, denied = _guard(request, permissions.TERMS_MANAGE)
     if denied is not None:
         return denied
     if request.method == "GET":
