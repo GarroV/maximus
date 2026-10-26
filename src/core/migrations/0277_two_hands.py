@@ -163,6 +163,43 @@ grant select on fact_reviews to app_user;
 grant insert (tenant_id, fact_id, fact_key, step) on fact_reviews to app_user;
 """
 
+# Автор версии факта — тот, кто сейчас вошёл, а не тот, кого назвал ввод.
+# `upsert_fact` берёт `created_by` из payload и лишь подставляет текущего
+# пользователя вместо пустоты, а на авторе версии держится правило «сверяет не
+# автор». Триггером, а не правкой `upsert_fact`: пишут факты несколько функций,
+# и правка одной оставила бы остальные. Без пользователя в контексте (сид,
+# импорт, миграции) автор остаётся тем, что передали. Правка автора
+# существующей строки пользователем тоже не проходит: значение возвращается.
+AUTHOR = """
+create or replace function facts_author_is_the_user()
+returns trigger
+language plpgsql
+as $$
+begin
+    if app_user_id() is not null then
+        if tg_op = 'INSERT' then
+            new.created_by := app_user_id();
+        else
+            new.created_by := old.created_by;
+        end if;
+    end if;
+    return new;
+end
+$$;
+
+comment on function facts_author_is_the_user() is
+    'Автор версии факта — вошедший пользователь, а не значение из ввода (правило двух рук)';
+
+create trigger facts_author_trg
+    before insert or update of created_by on facts
+    for each row execute function facts_author_is_the_user();
+"""
+
+DROP_AUTHOR = """
+drop trigger if exists facts_author_trg on facts;
+drop function if exists facts_author_is_the_user();
+"""
+
 # Никто ничего не теряет и никто не получает лишнего: право сверки — тем же
 # ролям, у которых есть разбор. Снимок формы (`shipped_shape`) правится вместе с
 # набором тем же доводом, что в `0274`: иначе доставка форм приняла бы роль за
@@ -217,6 +254,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(TABLE, DROP_TABLE),
         migrations.RunSQL(FUNCTION, DROP_FUNCTION),
+        migrations.RunSQL(AUTHOR, DROP_AUTHOR),
         migrations.RunSQL(POLICIES, DROP_POLICIES),
         migrations.RunSQL(PRIVILEGES, "revoke all on fact_reviews from app_user;"),
         migrations.RunSQL(GRANT, REVOKE),

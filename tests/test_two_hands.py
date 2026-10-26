@@ -330,3 +330,28 @@ def test_a_line_with_a_trail_cannot_be_deleted(web_env, sql, sorted_line):  # no
             sql.execute("delete from facts where id = %s", (sorted_line,))
     assert sql.execute("select count(*) from fact_reviews where fact_id = %s",
                        (sorted_line,)).fetchone()[0] == 1
+
+
+def test_a_foreign_author_in_the_input_becomes_the_user(
+    web_env, sql, tenant, sorted_line,  # noqa: F811
+):
+    """Автор новой версии — вошедший, даже если ввод назвал другого.
+
+    Иначе бухгалтер записал бы версию «от имени директора» и сверил её сам.
+    """
+    from psycopg.types.json import Jsonb
+
+    row = sql.execute(
+        """select to_jsonb(f) - 'id' - 'revision' - 'superseded_at' - 'superseded_by'
+                  - 'created_at'
+             from facts f where id = %s""", (sorted_line,),
+    ).fetchone()[0]
+    payload = {**row, "amount": "25000.00", "created_by": person(sql, "director")}
+    accountant = person(sql, "accountant")
+    with app_conn(web_env, accountant) as conn:
+        with conn.transaction():
+            fact_id = conn.execute("select fact_id from upsert_fact(%s)",
+                                   (Jsonb(payload),)).fetchone()[0]
+        author = conn.execute("select created_by::text from facts where id = %s",
+                              (fact_id,)).fetchone()[0]
+    assert author == accountant, f"автором стал {author}, а писал бухгалтер"
