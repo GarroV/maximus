@@ -2671,6 +2671,9 @@ class BankLineLink(models.Model):
             models.UniqueConstraint(
                 fields=["tenant", "fact_key"], name="bank_line_links_fact_once"
             ),
+            # Одна связь на строку: два решения по одной строке не ложатся оба.
+            # Мёртвая связь (факт удалён) снимается перед новым решением.
+            models.UniqueConstraint(fields=["line"], name="bank_line_links_one_per_line"),
             models.CheckConstraint(
                 condition=models.Q(how__in=["auto", "manual", "paid", "inbox"]),
                 name="bank_line_links_known_how",

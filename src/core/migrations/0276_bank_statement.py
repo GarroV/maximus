@@ -94,9 +94,29 @@ grant select, insert on bank_statements to app_user;
 -- Итог загрузки дописывается в ту же транзакцию после сопоставления; кроме
 -- него у файла не меняется ничего.
 grant update (stats) on bank_statements to app_user;
-grant select, insert, update on bank_lines to app_user;
+-- У строки меняется только пометка «не наш платёж»: сумма, дата, ключ и всё,
+-- что дал банк, после загрузки неизменны.
+grant select, insert on bank_lines to app_user;
+grant update (not_ours_at, not_ours_by, not_ours_why) on bank_lines to app_user;
 grant select, insert, delete on bank_line_links to app_user;
 """
+# Строка и её выписка, связь и её строка — одного партнёра, и это держит сама
+# база, а не только код загрузки: ключ ссылки включает партнёра.
+SAME_TENANT = """
+alter table bank_statements add constraint bank_statements_tenant_id_unique unique (tenant_id, id);
+alter table bank_lines add constraint bank_lines_tenant_id_unique unique (tenant_id, id);
+alter table bank_lines add constraint bank_lines_statement_same_tenant
+    foreign key (tenant_id, statement_id) references bank_statements (tenant_id, id);
+alter table bank_line_links add constraint bank_line_links_line_same_tenant
+    foreign key (tenant_id, line_id) references bank_lines (tenant_id, id) on delete cascade;
+"""
+DROP_SAME_TENANT = """
+alter table bank_line_links drop constraint if exists bank_line_links_line_same_tenant;
+alter table bank_lines drop constraint if exists bank_lines_statement_same_tenant;
+alter table bank_lines drop constraint if exists bank_lines_tenant_id_unique;
+alter table bank_statements drop constraint if exists bank_statements_tenant_id_unique;
+"""
+
 DROP_PRIVILEGES = """
 revoke all on bank_line_links from app_user;
 revoke all on bank_lines from app_user;
@@ -172,7 +192,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'bank_line_links',
-                'constraints': [models.UniqueConstraint(fields=('tenant', 'fact_key'), name='bank_line_links_fact_once'), models.CheckConstraint(condition=models.Q(('how__in', ['auto', 'manual', 'paid', 'inbox'])), name='bank_line_links_known_how')],
+                'constraints': [models.UniqueConstraint(fields=('tenant', 'fact_key'), name='bank_line_links_fact_once'), models.UniqueConstraint(fields=('line',), name='bank_line_links_one_per_line'), models.CheckConstraint(condition=models.Q(('how__in', ['auto', 'manual', 'paid', 'inbox'])), name='bank_line_links_known_how')],
             },
         ),
         migrations.AddConstraint(
@@ -202,4 +222,5 @@ class Migration(migrations.Migration):
         migrations.RunSQL(COMMENTS, migrations.RunSQL.noop),
         migrations.RunSQL(POLICIES, DROP_POLICIES),
         migrations.RunSQL(PRIVILEGES, DROP_PRIVILEGES),
+        migrations.RunSQL(SAME_TENANT, DROP_SAME_TENANT),
     ]

@@ -150,3 +150,33 @@ def test_not_ours_needs_a_reason(db, lines):
     with as_app_user(db, USER_ACCOUNTANT), refused(db, psycopg.errors.CheckViolation):
         db.execute("update bank_lines set not_ours_at = now(), not_ours_why = '' "
                    "where id = %s", (lines["own"],))
+
+
+def test_one_bank_line_has_one_decision(db, lines):
+    """Два решения по одной строке не ложатся оба — даже одновременно."""
+    with as_app_user(db, USER_ACCOUNTANT):
+        link = ("insert into bank_line_links (tenant_id, line_id, fact_key, how) "
+                "values (%s, %s, %s, 'manual')")
+        db.execute(link, (T1, lines["own"], "manual:payment:a"))
+        with refused(db, psycopg.errors.UniqueViolation):
+            db.execute(link, (T1, lines["own"], "manual:payment:b"))
+
+
+def test_what_the_bank_gave_is_not_rewritten(db, lines):
+    """Сумма, дата и ключ строки после загрузки неизменны — меняется только
+    пометка «не наш платёж»."""
+    with as_app_user(db, USER_ACCOUNTANT):
+        for column, value in (("amount", "1.00"), ("op_date", "2026-01-01"),
+                              ("dedup_key", "other"), ("duplicate_of", None)):
+            with refused(db, psycopg.errors.InsufficientPrivilege):
+                db.execute(f"update bank_lines set {column} = %s where id = %s",
+                           (value, lines["own"]))
+        db.execute("update bank_lines set not_ours_at = now(), not_ours_why = 'x' "
+                   "where id = %s", (lines["own"],))
+
+
+def test_a_link_belongs_to_the_partner_of_its_line(db, lines):
+    """Связь и её строка — одного партнёра: это держит сама база."""
+    with refused(db, psycopg.errors.ForeignKeyViolation):
+        db.execute("insert into bank_line_links (tenant_id, line_id, fact_key, how) "
+                   "values (%s, %s, 'manual:payment:z', 'manual')", (T2, lines["own"]))

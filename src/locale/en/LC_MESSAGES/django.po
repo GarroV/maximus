@@ -10307,3 +10307,83 @@ msgstr[1] "Bank statement: %(counter)s lines await a decision"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Счёт в банке"
 msgstr "Bank account"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В книге Excel часть %(part)s объявляет тип документа или сущности — "
+"такая книга не принимается."
+msgstr "Part %(part)s of the Excel workbook declares a document type or entities — such a workbook is not accepted."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет номера счёта. Укажите счёт, по которому эта выписка: без "
+"него операции двух счетов не отличить друг от друга."
+msgstr "The file has no account number. Enter the account this statement belongs to: without it, transactions of two accounts cannot be told apart."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта"
+msgstr "Currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта счёта (%(invoice)s) и платежа (%(line)s) разная — такой платёж "
+"этот счёт не оплачивает. Отправьте строку в инбокс или выберите счёт в "
+"той же валюте."
+msgstr "The invoice currency (%(invoice)s) differs from the payment currency (%(line)s) — this payment does not pay this invoice. Send the line to the inbox or choose an invoice in the same currency."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выписку по этому счёту сейчас загружают ещё раз — повторите через "
+"минуту."
+msgstr "A statement for this account is being uploaded right now — try again in a minute."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Лист книги Excel не читается: первым должен быть лист с таблицей "
+"выписки."
+msgstr "The Excel sheet cannot be read: the first sheet must hold the statement table."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Номер счёта, если его нет в файле"
+msgstr "Account number, if the file does not carry it"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено правилом"
+msgstr "Matched by the rule"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: было %(was)s, в файле %(now)s."
+msgstr "Line %(n)s: was %(was)s, in the file %(now)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
+"несёт. Без счёта выписка не загружается: операции двух счетов иначе не "
+"отличить."
+msgstr "The account and currency are taken from the file; these fields are needed when the bank's table does not carry them. Without an account the statement is not uploaded: otherwise transactions of two accounts cannot be told apart."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Таблица не читается: %(why)s."
+msgstr "The table cannot be read: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Файл не загружен: операции банка с теми же номерами уже загружены с "
+"другой суммой, датой или направлением. Проверьте, та ли это выписка и "
+"тот ли счёт. %(lines)s"
+msgstr "The file was not uploaded: bank transactions with the same references are already uploaded with a different amount, date or direction. Check that this is the right statement and the right account. %(lines)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "больше двух знаков после запятой: %(value)s"
+msgstr "more than two decimal places: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "дата вне %(first)s–%(last)s годов: %(value)s"
+msgstr "date outside the years %(first)s–%(last)s: %(value)s"

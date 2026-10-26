@@ -55,7 +55,7 @@
       <td>{{ row.who }}</td>
       <td class="purpose" title="{{ row.purpose }}">{{ row.purpose }}</td>
       <td class="num{% if row.incoming %} num--up{% endif %}">{{ row.sum }}</td>
-      <td><span class="tag {% if row.state == "matched" %}tag--ok{% elif row.state == "decide" %}tag--accent{% else %}tag--neutral tag--dashed{% endif %}">{{ row.state_title }}</span></td>
+      <td><span{% if row.by_rule %} data-by-rule="1"{% endif %} class="tag {% if row.state == "matched" %}tag--ok{% elif row.state == "decide" %}tag--accent{% else %}tag--neutral tag--dashed{% endif %}">{{ row.state_title }}</span></td>
     </tr>
     {% endfor %}
   </tbody>

@@ -8,9 +8,14 @@
 
 1. Тот же файл второй раз — отказ с отсылкой к первой загрузке: не заводится
    ни выписка, ни строки (`bank_statements_same_file_once`).
-2. Строка, чей ключ уже есть у партнёра, ложится **дублем** со ссылкой на
-   исходную: в учёт не идёт, остаётся видимой (эталон, модуль 7).
-3. Новые строки сводятся с внесённым по `bankstatement.matching`: однозначная
+2. Счёт выписки обязателен: из файла, а если файл его не несёт (таблица) —
+   из формы. Ключ строки всегда включает счёт, иначе одинаковые операции
+   двух счетов партнёра сливались бы в дубль.
+3. Строка, чей ключ уже есть у партнёра, ложится **дублем** со ссылкой на
+   исходную: в учёт не идёт, остаётся видимой (эталон, модуль 7). Ключ тот
+   же, а сумма, дата или направление другие — это не дубль, а расхождение:
+   файл не загружается, и человеку называется строка.
+4. Новые строки сводятся с внесённым по `bankstatement.matching`: однозначная
    пара — сама, остальное ждёт человека.
 
 ## Чего здесь нет и почему
@@ -34,7 +39,7 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from decimal import Decimal
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Exists, OuterRef, Q, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
@@ -42,11 +47,18 @@ from django.utils.translation import gettext as _
 
 from bankstatement.keys import line_keys
 from bankstatement.matching import DATE_WINDOW_DAYS, FACT, INVOICE, Candidate, choose
-from bankstatement.matching import DECIDE as DECIDE_KIND
 from bankstatement.model import OUT
 from bankstatement.reader import read
 from bankstatement.values import norm
-from core.models import BankLine, BankLineLink, BankStatement, Counterparty, Fact
+from core.models import (
+    BankLine,
+    BankLineLink,
+    BankStatement,
+    Counterparty,
+    Fact,
+    SourceDocument,
+    Tenant,
+)
 
 from . import cash, suppliers
 
@@ -63,10 +75,23 @@ INBOX_PREFIX = "bank:line:"
 # автосопоставления: сам выбор делает человек, и платёж, внесённый задним
 # числом через две недели, он узнает, а правило — не должно.
 SHOWN_WINDOW_DAYS = 31
+# Длины текстов строки при приёме. Назначение платежа в банках — до 140
+# знаков (SEPA) и до нескольких сотен в выгрузках; дальше — не назначение, а
+# мусор, который потом поедет в отчёты и выгрузки.
+MAX_PARTY_NAME = 200
+MAX_PURPOSE = 500
+MAX_ACCOUNT = 64
+MAX_BANK_REF = 100
 
 
 class BankRefused(cash.CashRefused):
     """Решение по строке не принято. Текст показывается человеку как есть."""
+
+
+def home_currency(tenant_id) -> str:
+    """Валюта учёта партнёра — в ней счёт может оплатиться сам."""
+    return (Tenant.objects.filter(pk=tenant_id)
+            .values_list("base_currency", flat=True).first() or "").upper()
 
 
 class AlreadyLoaded(BankRefused):
@@ -86,47 +111,103 @@ class Loaded:
 # --- загрузка -----------------------------------------------------------------
 
 
-def upload(who, content: bytes, file_name: str) -> Loaded:
-    """Загрузить файл выписки. Отказ разбора — `bankstatement.reader.Unreadable`."""
+def upload(who, content: bytes, file_name: str, *, account: str = "",
+           currency: str = "") -> Loaded:
+    """Загрузить файл выписки. Отказ разбора — `bankstatement.reader.Unreadable`.
+
+    `account` и `currency` — из формы: берутся, только если файл их не несёт.
+    """
     parsed = read(content, file_name)
+    account = (parsed.account or account or "").strip()[:MAX_ACCOUNT]
+    if not account:
+        raise BankRefused(_(
+            "В файле нет номера счёта. Укажите счёт, по которому эта выписка: "
+            "без него операции двух счетов не отличить друг от друга."
+        ))
+    currency = (parsed.currency or currency or "").strip().upper()[:3]
     content_hash = hashlib.sha256(content).hexdigest()
-    earlier = BankStatement.objects.filter(
-        tenant_id=who.tenant_id, content_hash=content_hash,
-    ).first()
+    earlier = _earlier(who, content_hash)
     if earlier is not None:
         raise AlreadyLoaded(earlier)
-    keys = line_keys(parsed.account, parsed.lines)
+    try:
+        return _store(who, parsed, account, currency, file_name, content_hash)
+    except IntegrityError as error:
+        # Тот же файл или те же строки загружают в этот же момент ещё раз:
+        # проверка выше прошла у обоих, ограничение базы пустило одного.
+        earlier = _earlier(who, content_hash)
+        if earlier is not None:
+            raise AlreadyLoaded(earlier) from error
+        raise BankRefused(_(
+            "Выписку по этому счёту сейчас загружают ещё раз — повторите через минуту."
+        )) from error
+
+
+def _earlier(who, content_hash: str):
+    return BankStatement.objects.filter(
+        tenant_id=who.tenant_id, content_hash=content_hash,
+    ).first()
+
+
+def _store(who, parsed, account: str, currency: str, file_name: str,
+           content_hash: str) -> Loaded:
+    keys = line_keys(account, parsed.lines)
     with transaction.atomic():
         statement = BankStatement.objects.create(
-            tenant_id=who.tenant_id, account=parsed.account, bank=parsed.bank,
-            currency=parsed.currency, file_name=file_name[:200], format=parsed.format,
+            tenant_id=who.tenant_id, account=account, bank=parsed.bank,
+            currency=currency, file_name=file_name[:200], format=parsed.format,
             content_hash=content_hash, period_from=parsed.period_from,
             period_to=parsed.period_to, uploaded_by=who.user_id,
             stats={"mapping": parsed.mapping},
         )
-        originals = dict(
-            BankLine.objects.filter(tenant_id=who.tenant_id, dedup_key__in=keys,
-                                    duplicate_of__isnull=True)
-            .values_list("dedup_key", "id")
-        )
+        known = {
+            key: (pk, amount, direction, on)
+            for key, pk, amount, direction, on in BankLine.objects.filter(
+                tenant_id=who.tenant_id, dedup_key__in=keys, duplicate_of__isnull=True,
+            ).values_list("dedup_key", "id", "amount", "direction", "op_date")
+        }
         parties = PartyIndex(who.tenant_id)
-        created = []
+        created, conflicts = [], []
         for number, (line, key) in enumerate(zip(parsed.lines, keys, strict=True), start=1):
-            created.append(BankLine.objects.create(
+            first = known.get(key)
+            if first is not None and first[1:] != (line.amount, line.direction, line.op_date):
+                conflicts.append(_conflict(number, line, first))
+                continue
+            row = BankLine.objects.create(
                 tenant_id=who.tenant_id, statement=statement, line_no=number,
                 op_date=line.op_date, direction=line.direction, amount=line.amount,
-                currency=line.currency or parsed.currency, party_name=line.party_name,
-                party_account=line.party_account, purpose=line.purpose,
-                bank_ref=line.bank_ref, dedup_key=key,
-                duplicate_of_id=originals.get(key),
+                currency=(line.currency or currency).upper()[:3],
+                party_name=line.party_name[:MAX_PARTY_NAME],
+                party_account=line.party_account[:MAX_ACCOUNT],
+                purpose=line.purpose[:MAX_PURPOSE], bank_ref=line.bank_ref[:MAX_BANK_REF],
+                dedup_key=key, duplicate_of_id=first[0] if first else None,
                 counterparty_id=parties.find(line.party_name),
-            ))
+            )
+            created.append(row)
+            if first is None:
+                known[key] = (row.id, row.amount, row.direction, row.op_date)
+        if conflicts:
+            # Исключение откатывает всю загрузку: половина файла хуже, чем ничего.
+            raise BankRefused(_(
+                "Файл не загружен: операции банка с теми же номерами уже загружены с "
+                "другой суммой, датой или направлением. Проверьте, та ли это выписка "
+                "и тот ли счёт. %(lines)s"
+            ) % {"lines": " ".join(conflicts[:5])})
         fresh = [row for row in created if row.duplicate_of_id is None]
         auto_match(who, fresh)
         counts = count_states(statement_lines(statement))
         statement.stats = {"mapping": parsed.mapping, "counts": counts}
         statement.save(update_fields=["stats"])
     return Loaded(statement=statement, counts=counts)
+
+
+def _conflict(number: int, line, first) -> str:
+    _pk, amount, direction, on = first
+    sign = {OUT: "−", "in": "+"}
+    return _("Строка %(n)s: было %(was)s, в файле %(now)s.") % {
+        "n": number,
+        "was": f"{on:%d.%m.%Y} {sign.get(direction, '')}{amount:.2f}",
+        "now": f"{line.op_date:%d.%m.%Y} {sign.get(line.direction, '')}{line.amount:.2f}",
+    }
 
 
 class PartyIndex:
@@ -173,7 +254,10 @@ def _alive_links():
 
 
 def with_state(rows):
-    return rows.annotate(matched=Exists(_alive_links()))
+    """Состояние строки и пометка «свело правило»: автоматическое решение
+    видно в самом списке, а не только в карточке строки."""
+    return rows.annotate(matched=Exists(_alive_links()),
+                         by_rule=Exists(_alive_links().filter(how=AUTO)))
 
 
 def state_of(row) -> str:
@@ -204,6 +288,20 @@ def waiting_count(who) -> int:
     return with_state(BankLine.objects.filter(
         tenant_id=who.tenant_id, duplicate_of__isnull=True, not_ours_at__isnull=True,
     )).filter(matched=False).count()
+
+
+def line_for_decision(who, line_id):
+    """Строка под решение — с блокировкой: два решения по одной строке
+    одновременно не должны лечь оба. Блокируется только сама строка (`of`),
+    состояние считается отдельным запросом: агрегат рядом с `for update`
+    база не допускает."""
+    row = (BankLine.objects.select_for_update(of=("self",))
+           .select_related("counterparty", "statement")
+           .filter(tenant_id=who.tenant_id, pk=line_id).first())
+    if row is not None:
+        row.matched = with_state(BankLine.objects.filter(pk=row.pk)).values_list(
+            "matched", flat=True).first()
+    return row
 
 
 def line_or_none(who, line_id):
@@ -249,12 +347,15 @@ def _taken(tenant_id) -> set[str]:
                .values_list("fact_key", flat=True))
 
 
-def payment_candidates(row, *, days: int) -> list[tuple[Candidate, Fact]]:
-    """Свободные внесённые платежи той же суммы в окне дат.
+def payment_candidates(row, *, days: int, home: str) -> list[tuple[Candidate, Fact]]:
+    """Свободные внесённые платежи той же суммы и валюты в окне дат.
 
     Приход сводится с отрицательным платежом (возврат поставщика): знак у
-    строки выписки в направлении, у факта — в сумме.
+    строки выписки в направлении, у факта — в сумме. Факт без валюты — в
+    валюте учёта партнёра (`home`). Строка без валюты не сводится ни с чем.
     """
+    if not row.currency:
+        return []
     signed = row.amount if row.direction == OUT else -row.amount
     taken = _taken(row.tenant_id)
     found = _payment_facts().filter(
@@ -262,24 +363,32 @@ def payment_candidates(row, *, days: int) -> list[tuple[Candidate, Fact]]:
         doc_date__gte=row.op_date - timedelta(days=days),
         doc_date__lte=row.op_date + timedelta(days=days),
     ).order_by("doc_date", "created_at")
-    return [
-        (Candidate(kind=FACT, ref=base_key(fact.dedup_key), amount=row.amount,
-                   on=fact.doc_date, party=_id(fact.counterparty_id)), fact)
-        for fact in found if base_key(fact.dedup_key) not in taken
-    ]
+    candidates = []
+    for fact in found:
+        currency = (fact.currency or home).upper()
+        if base_key(fact.dedup_key) in taken or currency != row.currency:
+            continue
+        candidates.append((Candidate(
+            kind=FACT, ref=base_key(fact.dedup_key), amount=row.amount, on=fact.doc_date,
+            party=_id(fact.counterparty_id), currency=currency,
+        ), fact))
+    return candidates
 
 
-def open_invoices(who) -> list[tuple[Candidate, object]]:
-    """Счета с остатком к оплате: остаток = сумма счёта минус платежи."""
+def open_invoices(who, home: str) -> list[tuple[Candidate, object]]:
+    """Счета с остатком к оплате: остаток = сумма счёта минус платежи.
+    Валюта счёта — его собственная, а без неё — валюта учёта партнёра."""
     listed = suppliers.invoices(who, {})
     paid = suppliers.paid_by_document([item.document.id for item in listed])
     found = []
     for item in listed:
         left = suppliers.outstanding(item.amount, paid.get(str(item.document.id)))
         if left > 0:
-            found.append((Candidate(kind=INVOICE, ref=str(item.document.id), amount=left,
-                                    on=item.document.doc_date,
-                                    party=_id(item.document.counterparty_id)), item))
+            found.append((Candidate(
+                kind=INVOICE, ref=str(item.document.id), amount=left,
+                on=item.document.doc_date, party=_id(item.document.counterparty_id),
+                currency=(item.document.currency or home).upper(),
+            ), item))
     return found
 
 
@@ -291,31 +400,30 @@ def _id(value) -> str | None:
 
 
 def auto_match(who, rows) -> int:
-    """Свести то, что сводится однозначно. Возвращает, сколько свело."""
+    """Свести то, что сводится однозначно. Возвращает, сколько свело.
+
+    Счёт сам не оплачивается: оплата по счёту без человека допустима только
+    при совпадении счёта получателя, а счетов контрагентов в справочнике пока
+    нет. По одному названию из выписки счёт только предлагается в карточке.
+    Сводятся сами лишь уже внесённые платежи.
+    """
     if not rows:
         return 0
-    invoices = [c for c, _item in open_invoices(who)]
+    home = home_currency(who.tenant_id)
     matched = 0
     for row in rows:
-        facts = [c for c, _f in payment_candidates(row, days=DATE_WINDOW_DAYS)]
-        payable = invoices if row.direction == OUT else []
-        chosen = choose(row.amount, row.op_date, _id(row.counterparty_id), facts, payable)
-        if chosen.kind == DECIDE_KIND:
+        facts = [c for c, _f in payment_candidates(row, days=DATE_WINDOW_DAYS, home=home)]
+        chosen = choose(row.amount, row.op_date, _id(row.counterparty_id), facts, [],
+                        currency=row.currency, party_by_account=False, home_currency=home)
+        if chosen.kind != FACT:
             continue
-        # Каждая попытка — своей точкой сохранения: отказ (месяц закрылся,
-        # политика не пустила) оставляет строку ждать человека, а не роняет
-        # всю загрузку.
+        # Каждая попытка — своей точкой сохранения: отказ (политика не пустила)
+        # оставляет строку ждать человека, а не роняет всю загрузку.
         try:
             with transaction.atomic():
-                if chosen.kind == FACT:
-                    _link(who, row, chosen.ref, AUTO)
-                else:
-                    _pay(who, row, chosen.ref, how=AUTO)
-        except cash.CashRefused:
+                _link(who, row, chosen.ref, AUTO)
+        except (cash.CashRefused, IntegrityError):
             continue
-        if chosen.kind == INVOICE:
-            # Оплаченный счёт больше не кандидат: второй строкой его не оплатить.
-            invoices = [c for c in invoices if c.ref != chosen.ref]
         matched += 1
     return matched
 
@@ -337,16 +445,42 @@ def _open(row) -> None:
         raise BankRefused(_("Строка уже сопоставлена."))
 
 
+def _drop_dead_links(row) -> None:
+    """Связи строки, которая ждёт решения, — мёртвые: их факт удалён или
+    сторнирован. Перед новым решением они убираются, иначе новая связь
+    упёрлась бы в «одна связь на строку», а ключ — в «один факт на строку»."""
+    BankLineLink.objects.filter(tenant_id=row.tenant_id, line=row).delete()
+
+
+def _free_key(tenant_id, base: str) -> str:
+    """Ключ записи, который ещё не занят ни одной версией факта.
+
+    Строку решают заново, когда прежняя запись удалена; повторить её ключ
+    значило бы попасть в «уже удалено» вместо новой записи.
+    """
+    taken = set(Fact.objects.filter(tenant_id=tenant_id, dedup_key__startswith=base)
+                .values_list("dedup_key", flat=True))
+    if not any(key == base or key.startswith(base + "#") for key in taken):
+        return base
+    number = 2
+    while any(key == f"{base}-{number}" or key.startswith(f"{base}-{number}#")
+              for key in taken):
+        number += 1
+    return f"{base}-{number}"
+
+
 def link(who, row, fact_key: str) -> None:
     """Человек выбрал внесённый платёж: та же сумма, свободный, в окне показа."""
     _open(row)
-    offered = {c.ref for c, _f in payment_candidates(row, days=SHOWN_WINDOW_DAYS)}
+    home = home_currency(who.tenant_id)
+    offered = {c.ref for c, _f in payment_candidates(row, days=SHOWN_WINDOW_DAYS, home=home)}
     if fact_key not in offered:
         raise BankRefused(_(
             "Этот платёж не подходит: сумма другая, он уже сведён с другой строкой "
             "или вам не виден."
         ))
     with transaction.atomic():
+        _drop_dead_links(row)
         _link(who, row, fact_key, MANUAL)
 
 
@@ -356,15 +490,25 @@ def pay(who, row, document_id: str) -> None:
     if row.direction != OUT:
         raise BankRefused(_("Поступление не оплачивает счёт поставщика."))
     with transaction.atomic():
-        _pay(who, row, document_id, how=MANUAL)
+        _drop_dead_links(row)
+        _pay(who, row, document_id)
 
 
-def _pay(who, row, document_id: str, *, how: str) -> None:
+def _pay(who, row, document_id: str) -> None:
     document = suppliers.document_or_none(document_id)
     # Счёт — того же партнёра, что строка и человек: явным условием, не только
     # политикой (см. `line_or_none`).
     if document is None or document.tenant_id != who.tenant_id:
         raise BankRefused(_("Счёт не найден."))
+    # Счёт блокируется до расчёта остатка: два платежа по нему одновременно
+    # иначе оба увидели бы остаток целиком.
+    SourceDocument.objects.select_for_update().filter(pk=document.pk).first()
+    currency = (document.currency or home_currency(who.tenant_id)).upper()
+    if not row.currency or currency != row.currency:
+        raise BankRefused(_(
+            "Валюта счёта (%(invoice)s) и платежа (%(line)s) разная — такой платёж этот "
+            "счёт не оплачивает. Отправьте строку в инбокс или выберите счёт в той же валюте."
+        ) % {"invoice": currency or "—", "line": row.currency or "—"})
     left = suppliers.outstanding(
         suppliers.invoice_amount(document),
         suppliers.paid_by_document([document.id]).get(str(document.id)),
@@ -376,13 +520,15 @@ def _pay(who, row, document_id: str, *, how: str) -> None:
             "строку в инбокс или выберите другой счёт."
         ) % {"left": f"{left:.2f}"})
     primary = suppliers.invoice_fact(document)
-    entry_key = f"bank-{row.id}"
+    entry_key = _free_key(
+        who.tenant_id, suppliers.PAYMENT_PREFIX + f"bank-{row.id}",
+    ).removeprefix(suppliers.PAYMENT_PREFIX)
     suppliers.pay(
         who, document, entry_key=entry_key, on=row.op_date, amount=row.amount,
         till_id=None, ledger=primary.ledger if primary else "official",
         note=row.purpose[:500],
     )
-    _link(who, row, suppliers.PAYMENT_PREFIX + entry_key, PAID if how == MANUAL else AUTO)
+    _link(who, row, suppliers.PAYMENT_PREFIX + entry_key, PAID)
 
 
 def to_inbox(who, row) -> str:
@@ -394,7 +540,7 @@ def to_inbox(who, row) -> str:
     """
     _open(row)
     landing = cash.landing_for(who.tenant_id, row.op_date)
-    key = INBOX_PREFIX + str(row.id)
+    key = _free_key(who.tenant_id, INBOX_PREFIX + str(row.id))
     payload = {
         "tenant_id": str(who.tenant_id),
         "period": landing.period.isoformat(),
@@ -413,6 +559,7 @@ def to_inbox(who, row) -> str:
         "allocation": "pending",
     }
     with transaction.atomic():
+        _drop_dead_links(row)
         fact_id, _action = cash.write_fact({k: v for k, v in payload.items() if v is not None})
         _link(who, row, key, INBOX)
     return str(fact_id)
@@ -461,12 +608,13 @@ def links_of(row) -> list[BankLineLink]:
     return list(BankLineLink.objects.filter(line=row).order_by("linked_at"))
 
 
-def facts_by_key(keys) -> dict[str, Fact]:
+def facts_by_key(tenant_id, keys) -> dict[str, Fact]:
     """Действующая учётная строка по ключу связи — для показа «чем закрыто»."""
     keys = list(keys)
     wanted = keys + [k + cash.FIX_SUFFIX for k in keys]
     found = {}
-    for fact in (Fact.objects.filter(dedup_key__in=wanted, superseded_at__isnull=True)
+    for fact in (Fact.objects.filter(tenant_id=tenant_id, dedup_key__in=wanted,
+                                     superseded_at__isnull=True)
                  .exclude(allocation="allocated").select_related("counterparty", "document",
                                                                  "pnl_item", "expense_item")):
         found[base_key(fact.dedup_key)] = fact
