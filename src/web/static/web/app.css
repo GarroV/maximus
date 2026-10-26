@@ -1963,3 +1963,9 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
      Перенесённый ряд — прямоугольник со скруглением поля ввода. */
   .filters .seg { border-radius: var(--r-control); }
 }
+
+/* «Что в этом месяце» на сводке периода (T230): ссылка и подпись, что за ней
+   лежит. Не таблица данных — без сетки и шапки, подпись тише ссылки. */
+table.pages { border-collapse: collapse; margin: 0 0 var(--space-4); }
+table.pages td { padding: var(--space-2) var(--space-4) var(--space-2) 0; vertical-align: baseline; }
+table.pages td.hint { color: var(--ink-2); font-size: var(--fs-meta); }
