@@ -314,22 +314,26 @@ def _network_row(partner, currency) -> dict:
         reasons.append(_("нет курса для сумм: %(count)s") % {"count": partner.unrated})
     if partner.payroll_hidden:
         reasons.append(_("нет права видеть суммы расчёта"))
+    if partner.narrowed:
+        reasons.append(_("видна не вся сеть партнёра: часть регистров или точек закрыта"))
     if partner.report_currency != currency:
         reasons.append(
             _("валюта консолидации %(currency)s") % {"currency": partner.report_currency}
         )
     rate = partner.rate
-    hidden = partner.payroll_hidden or bool(partner.unrated)
+    # Сумма, которой нельзя верить целиком, — прочерк, а не число: и без курса,
+    # и без ФОТ (прибыль завышена), и по срезу роли.
+    unknown = bool(partner.unrated) or partner.payroll_hidden or partner.narrowed
     return {
         "title": partner.title,
         "country": partner.country_code,
         "currency": partner.currency,
         "units": partner.units,
         # Без курса суммы нет вовсе: 0,00 читался бы как посчитанный месяц.
-        "revenue": EMPTY if partner.unrated else money(partner.revenue),
-        "payroll": EMPTY if hidden else money(partner.payroll),
-        "share": EMPTY if hidden else _share(partner.payroll, partner.revenue),
-        "profit": EMPTY if partner.unrated else money(partner.profit),
+        "revenue": EMPTY if unknown else money(partner.revenue),
+        "payroll": EMPTY if unknown else money(partner.payroll),
+        "share": EMPTY if unknown else _share(partner.payroll, partner.revenue),
+        "profit": EMPTY if unknown else money(partner.profit),
         # Цвет плашки — цвет состояния расчёта, которым месяц закрывается
         # (`0190`): закрыт = утверждён, открыт = в работе.
         "state": CodedTitle(

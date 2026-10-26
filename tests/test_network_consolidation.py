@@ -18,12 +18,16 @@ from conftest import (
     I_TAXES,
     I_TRANSFER,
     JUNE,
+    R_ACCOUNTANT,
+    R_MANAGER,
     R_OTHER,
     T1,
     T2,
     U_BG1,
     U_OTHER,
+    USER_ACCOUNTANT,
     USER_DIRECTOR,
+    USER_MANAGER,
     USER_OTHER,
     as_app_user,
 )
@@ -144,3 +148,41 @@ def test_each_partner_sees_only_itself(db):
     second_partner(db)
 
     assert [p.title for p in network(db, USER_OTHER).partners] == ["Другой партнёр"]
+
+
+def test_accountant_without_a_ledger_sees_a_slice_that_is_not_summed(db):
+    """Роль без регистра видит урезанную прибыль — партнёр не входит в итог."""
+    serbia(db)
+    db.execute(
+        "update roles set visible_ledgers = '{official,supplementary}' where id = %s",
+        (R_ACCOUNTANT,),
+    )
+
+    net = network(db, USER_ACCOUNTANT)
+
+    row = by_title(net)["Dodo Serbia"]
+    assert row.narrowed and not row.complete
+    assert net.summed == []
+
+
+def test_unit_manager_sees_a_slice_that_is_not_summed(db):
+    """Управляющий одной точки видит её, а не партнёра целиком.
+
+    Регистры ему открываются все — чтобы пометку давала именно точка.
+    """
+    serbia(db)
+    db.execute(
+        "update roles set visible_ledgers = '{official,supplementary,internal}' where id = %s",
+        (R_MANAGER,),
+    )
+
+    net = network(db, USER_MANAGER)
+
+    assert by_title(net)["Dodo Serbia"].narrowed
+    assert net.summed == []
+
+
+def test_director_with_every_ledger_and_unit_is_not_narrowed(db):
+    serbia(db)
+
+    assert not by_title(network(db))["Dodo Serbia"].narrowed
