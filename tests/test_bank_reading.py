@@ -427,3 +427,73 @@ def test_a_sheet_under_another_name_is_checked_too(name):
     assert doctype in zipfile.ZipFile(io.BytesIO(book)).read(name)
     with pytest.raises(Unreadable):
         read(book, "izvod.xlsx")
+
+
+def _with_extra_part(content: bytes, info, data: bytes) -> bytes:
+    """Та же книга плюс ещё одна часть архива."""
+    import zipfile
+
+    source = zipfile.ZipFile(io.BytesIO(content))
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as target:
+        for item in source.infolist():
+            target.writestr(item.filename, source.read(item.filename))
+        target.writestr(info, data)
+    return out.getvalue()
+
+
+HOSTILE_PART = '<!DOCTYPE x [<!ENTITY a "b">]><x>&a;</x>'
+
+
+def test_a_utf16_part_without_bom_is_checked():
+    data = HOSTILE_PART.encode("utf-16-be")
+    assert not data.startswith((b"\xff\xfe", b"\xfe\xff"))
+    book = _with_extra_part(_book_bytes(), "xl/custom.bin", data)
+    with pytest.raises(Unreadable):
+        read(book, "izvod.xlsx")
+
+
+def test_a_part_marked_as_folder_is_checked_when_it_has_content():
+    import zipfile
+
+    book = _with_extra_part(_book_bytes(), zipfile.ZipInfo("xl/odd/"), HOSTILE_PART.encode())
+    assert zipfile.ZipFile(io.BytesIO(book)).getinfo("xl/odd/").is_dir()
+    with pytest.raises(Unreadable):
+        read(book, "izvod.xlsx")
+
+
+def test_a_part_that_is_neither_xml_nor_known_binary_is_refused():
+    book = _with_extra_part(_book_bytes(), "xl/blob.bin", b"\x00\x13garbage")
+    with pytest.raises(Unreadable):
+        read(book, "izvod.xlsx")
+
+
+def test_known_binary_parts_do_not_stop_a_book():
+    png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
+    book = _with_extra_part(_book_bytes(), "xl/media/image1.png", png)
+    book = _with_extra_part(book, "xl/vbaProject.bin", b"\xd0\xcf\x11\xe0" + b"\x00" * 64)
+    assert read(book, "izvod.xlsx").lines
+
+
+def test_a_book_with_too_many_parts_is_refused():
+    import zipfile
+
+    from bankstatement.reader import MAX_PARTS
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w") as target:
+        for number in range(MAX_PARTS + 1):
+            target.writestr(f"p{number}.xml", "<x/>")
+    with pytest.raises(Unreadable, match=str(MAX_PARTS)):
+        read(out.getvalue(), "izvod.xlsx")
+
+
+@pytest.mark.parametrize("error", [EOFError, NotImplementedError, __import__("zlib").error])
+def test_an_archive_that_breaks_while_unpacking_is_refused_in_words(monkeypatch, error):
+    import zipfile
+
+    def broken(self, name, *args, **kwargs):
+        raise error("broken")
+
+    monkeypatch.setattr(zipfile.ZipFile, "read", broken)
+    with pytest.raises(Unreadable):
+        read(_book_bytes(), "izvod.xlsx")
