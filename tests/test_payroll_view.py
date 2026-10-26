@@ -5,6 +5,10 @@
 на `pay_components` и `payslip_totals`, поэтому проверяется ролью `app_user`:
 владелец схемы обходит RLS, и запрет, проверенный им, зелен всегда.
 
+Те же суммы лежат ещё в двух местах, и стена стоит и там: след расчёта
+(`payslip_steps`) и проведённый при утверждении ФОТ в фактах (`source =
+'payroll'`), из которых собирается P&L.
+
 Сумм не видит только тот, у кого нет ни права смотреть, ни права, которое без
 чтения сумм не исполнить (расчёт, утверждение, перенос разницы).
 """
@@ -14,7 +18,8 @@ import json
 
 import pytest
 
-from conftest import R_DIRECTOR, USER_DIRECTOR, as_app_user
+from conftest import R_DIRECTOR, T1, USER_DIRECTOR, as_app_user
+from facts_helpers import fact_payload, upsert_fact
 from test_payslip_visibility import make_payslip
 
 pytestmark = pytest.mark.usefixtures("db")
@@ -68,3 +73,70 @@ def test_the_protection_is_the_policy_and_not_luck(db):
     with as_app_user(db, USER_DIRECTOR) as conn:
         assert _seen(conn) == (0, 0)
 
+
+
+# --- след расчёта и проведённый ФОТ: те же суммы, другие таблицы ----------------
+
+
+def _step(db, payslip) -> None:
+    db.execute(
+        """insert into payslip_steps (tenant_id, payslip_id, position, code, title,
+                                      applied_value)
+           values (%s, %s, 1, 'hours.regular', 'Часы', 100.00)""",
+        (T1, payslip),
+    )
+
+
+def _posted(db) -> None:
+    """ФОТ, проведённый в факты при утверждении, — и рядом обычный расход."""
+    upsert_fact(db, fact_payload(key="pv-payroll", source="payroll", amount="-100.00"))
+    upsert_fact(db, fact_payload(key="pv-manual", source="manual"))
+
+
+def _facts_seen(conn) -> list[str]:
+    return sorted(row[0] for row in conn.execute("select dedup_key from facts").fetchall())
+
+
+def test_the_calculation_trace_is_behind_the_same_wall(db):
+    """`payslip_steps` хранит применённые значения и входы: это те же суммы."""
+    _step(db, make_payslip(db, "pv-4", [("official", "100.00")]))
+    _give(db, ["timesheet.edit", "unit.close"])
+    with as_app_user(db, USER_DIRECTOR) as conn:
+        assert conn.execute("select count(*) from payslip_steps").fetchone()[0] == 0, (
+            "след расчёта виден роли без права видеть суммы"
+        )
+    _give(db, ["payroll.view"])
+    with as_app_user(db, USER_DIRECTOR) as conn:
+        assert conn.execute("select count(*) from payslip_steps").fetchone()[0] == 1
+
+
+def test_posted_payroll_in_facts_is_hidden_and_the_rest_is_not(db):
+    """P&L читает факты: без стены там ФОТ по точкам, мимо стены расчёта."""
+    _posted(db)
+    _give(db, ["timesheet.edit", "unit.close"])
+    with as_app_user(db, USER_DIRECTOR) as conn:
+        assert _facts_seen(conn) == ["pv-manual"], "проведённый ФОТ виден без права"
+    _give(db, ["payroll.view"])
+    with as_app_user(db, USER_DIRECTOR) as conn:
+        assert _facts_seen(conn) == ["pv-manual", "pv-payroll"]
+
+
+@pytest.mark.parametrize("table", ["payslip_steps", "facts"])
+def test_the_new_walls_are_the_policies_and_not_luck(db, table):
+    """Сняли политику — та же роль видит строки. Иначе «не видно» ничего не доказывает."""
+    _step(db, make_payslip(db, "pv-5", [("official", "100.00")]))
+    _posted(db)
+    _give(db, ["timesheet.edit"])
+    query = {
+        "payslip_steps": "select count(*) from payslip_steps",
+        "facts": "select count(*) from facts where source = 'payroll'",
+    }[table]
+    db.execute("savepoint before_damage")
+    db.execute(f"drop policy payroll_view on {table}")
+    try:
+        with as_app_user(db, USER_DIRECTOR) as conn:
+            assert conn.execute(query).fetchone()[0] == 1, "без политики видно — тест не о том"
+    finally:
+        db.execute("rollback to savepoint before_damage")
+    with as_app_user(db, USER_DIRECTOR) as conn:
+        assert conn.execute(query).fetchone()[0] == 0
