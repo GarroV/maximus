@@ -372,8 +372,7 @@ def statement_upload(request):
         return refused
     error, status = "", 200
     form = {"account": (request.POST.get("account") or "").strip()[:bank.MAX_ACCOUNT],
-            "currency": (request.POST.get("currency") or "").strip().upper()[:3]
-            or bank.home_currency(who.tenant_id)}
+            "currency": (request.POST.get("currency") or "").strip().upper()[:8]}
     if request.method == "POST":
         upload = request.FILES.get("file")
         if upload is None:
