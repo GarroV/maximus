@@ -51,7 +51,7 @@ export const send = (method, params = {}) => new Promise((ok, fail) => {
 /** Выполнить выражение JS на странице и вернуть его значение. */
 export const evalIn = async (expr) => {
   const r = await send("Runtime.evaluate", { expression: expr, returnByValue: true, awaitPromise: true });
-  if (r.exceptionDetails) throw new Error(r.exceptionDetails.text);
+  if (r.exceptionDetails) throw new Error(r.exceptionDetails.exception?.description || r.exceptionDetails.text);
   return r.result.value;
 };
 

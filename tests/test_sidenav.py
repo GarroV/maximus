@@ -133,11 +133,11 @@ def test_the_current_section_is_not_a_link(client, web_env):
 
 
 def test_a_nested_screen_keeps_its_section_highlighted(client, web_env):
-    """Карточка платежа лежит под своим корнем адреса, а раздел — инбокс."""
+    """Карточка платежа лежит под своим корнем адреса, а раздел — счета."""
     login_as(client, "accountant")
     nav = sections_of(body(client.get("/payments/new/")))
 
-    assert 'class="sidenav__item" href="/inbox/"' not in nav, (
+    assert 'class="sidenav__item" href="/invoices/"' not in nav, (
         "на вложенном экране раздел снова стал ссылкой"
     )
     assert '<span class="sidenav__current" aria-current="page"' in nav
@@ -162,12 +162,15 @@ def test_the_section_of_another_root_is_not_highlighted(client, web_env):
     [
         ("/periods/", "/periods/", True),
         # Вложенные экраны остаются в своём разделе: след расчёта и табель
-        # открываются из ведомости, карточка платежа и инбокс — из счетов.
+        # открываются из ведомости, карточка платежа — из счетов. У инбокса и
+        # счетов с 30.09.2026 по пункту в панели (issue #268), и инбокс уже
+        # не выделяет счета.
         ("/periods/1234/", "/periods/", True),
         ("/payslips/1234/trace/", "/periods/", True),
         ("/timesheets/1234/", "/periods/", True),
         ("/payments/new/", "/invoices/", True),
-        ("/inbox/", "/invoices/", True),
+        ("/inbox/", "/invoices/", False),
+        ("/papers/1234/", "/inbox/", True),
         # Чужой раздел — не выделяется. `/expenses/` и `/invoices/` близкие по
         # смыслу, но это два разных экрана и два разных корня.
         ("/expenses/", "/invoices/", False),
@@ -253,8 +256,11 @@ def test_language_and_logout_live_in_the_foot_of_the_panel(client, web_env):
     assert logout, "выход не формой: его запустила бы картинка на чужой странице"
     # Выход — значком, поэтому название обязано быть у самой кнопки.
     assert 'aria-label="Выйти"' in logout.group(0), "у кнопки выхода нет названия"
-    # Выбранное не нажимается — тот же инвариант, что у текущего раздела.
-    assert re.search(r'<span class="sidenav__choice" aria-current="true"[^>]*lang="ru"', foot)
+    # Разметка — как у ядра: капсула темы radiogroup, язык — langpill; выбранный
+    # — кнопка без отправки формы (type=button), а не ещё одна цель нажатия.
+    assert 'role="radiogroup"' in foot and 'class="langpill"' in foot
+    assert re.search(r'<button type="button" class="langpill__item"[^>]*aria-pressed="true"[^>]*lang="ru"', foot)
+    assert re.search(r'<button type="button" name="theme"[^>]*role="radio" aria-checked="true"', foot)
 
 
 def test_password_and_guide_live_behind_one_service_item(client, web_env):
@@ -510,7 +516,7 @@ def test_the_tap_targets_of_the_unit_manager_are_finger_sized():
         ".sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,\n"
         "  .sidenav__logout .sidenav__item",
     ), "учётная запись и выход на телефоне меньше пальца"
-    assert "var(--tap-min)" in block(phone, ".sidenav__theme button, .sidenav__choice"), (
+    assert "var(--tap-min)" in block(phone, ".sidenav__theme button"), (
         "язык и тема на телефоне меньше пальца"
     )
 

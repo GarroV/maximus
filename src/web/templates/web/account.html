@@ -22,6 +22,12 @@
   <dd>{% if principal.units_title %}{{ principal.units_title }}{% else %}{% translate "все точки партнёра" %}{% endif %}</dd>
 </dl>
 
+{% comment %}
+Тема и язык — здесь только на телефоне (issue #268). На широком экране они в
+подвале панели, а на телефоне шесть кнопок по 44 заняли бы целую строку
+шапки над содержимым. Шапка ведёт сюда пунктом «Учётная запись».
+{% endcomment %}
+<div class="account__prefs sidenav__prefs">{% include "web/components/prefs.html" with prefs_id="account" %}</div>
 <ul class="account__links">
   <li><a href="{% url 'password-change' %}">{% translate "Сменить пароль" %}</a></li>
   <li><a href="{% url 'guide' %}">{% translate "Как это работает" %}</a></li>

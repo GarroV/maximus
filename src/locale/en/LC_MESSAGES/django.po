@@ -872,11 +872,11 @@ msgstr ""
 #: timesheets/templates/timesheets/grid.html:153
 msgid ""
 "Строки табеля появляются вместе с сотрудниками месяца. Заведите их в\n"
-"      справочнике или загрузите таблицу партнёра формой выше — она заводит\n"
+"      справочнике или загрузите таблицу партнёра (ссылка над сеткой) — она заводит\n"
 "      строки табеля сама."
 msgstr ""
 "Timesheet rows appear together with the month's employees. Add them in\n"
-"      the directory, or upload the partner's table using the form above — "
+"      the directory, or upload the partner's table (the link above the grid) — "
 "it\n"
 "      creates the timesheet rows itself."
 
@@ -9571,3 +9571,47 @@ msgstr "their own, several"
 #: web/templates/web/guide.html
 msgid "Отвечает за несколько точек и ездит между ними. Делает то же, что\n        управляющий точки, только по всем своим точкам сразу: проверяет и правит\n        часы, закрывает их по точке. Ведомости и сумм расчёта не видит: больше\n        точек — не значит больше денег."
 msgstr "Responsible for several units and travels between them. Does the same as\n        a unit manager, only across all of his units at once: checks and corrects\n        hours and closes them per unit. Does not see the payout sheet or calculated\n        amounts: more units does not mean more money."
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Что ещё можно сделать с часами"
+msgstr "What else you can do with the hours"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Загрузить таблицу (.xlsx)"
+msgstr "Upload a table (.xlsx)"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Закрытие часов по точкам"
+msgstr "Closing hours by unit"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "часы открыты на %(open_count)s из %(total_count)s точек"
+msgstr "hours are open on %(open_count)s of %(total_count)s units"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Закрытие часов · %(title)s"
+msgstr "Closing hours · %(title)s"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "← К табелю"
+msgstr "← Back to the timesheet"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Точка закрывается отдельно от соседних: управляющий не ждёт всю сеть, а спорная точка не держит остальные."
+msgstr "A unit is closed separately from its neighbours: a manager does not wait for the whole network, and a disputed unit does not hold the others up."
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Точек в табеле нет"
+msgstr "No units in the timesheet"
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Закрывать нечего: за этот месяц в табеле нет ни одной строки на вашей точке."
+msgstr "Nothing to close: this month the timesheet has no rows on your unit."
+
+#: timesheets/templates/timesheets/grid.html
+msgid "Привычная таблица партнёра — второй путь ввода часов рядом с сеткой. Колонки подбираются сами; что не распознано, попадёт в отчёт."
+msgstr "The partner's familiar table is the second way to enter hours next to the grid. Columns are matched automatically; anything not recognised goes into the report."
+
+#: timesheets/templates/timesheets/close.html
+msgid "Показаны только ваши точки."
+msgstr "Only your units are shown."
