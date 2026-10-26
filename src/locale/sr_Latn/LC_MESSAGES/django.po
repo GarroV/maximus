@@ -9453,3 +9453,29 @@ msgstr "Partnerova uobičajena tabela je drugi način unosa sati pored mreže. K
 #: timesheets/templates/timesheets/close.html
 msgid "Показаны только ваши точки."
 msgstr "Prikazani su samo vaši objekti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без зарплаты"
+msgstr "Bez zarada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итог без зарплаты"
+msgstr "Ukupno bez zarada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отклонения от прошлого месяца не проверены"
+msgstr "Odstupanja u odnosu na prethodni mesec nisu provereni"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сравнение идёт по суммам расчёта, а права видеть их у вашей роли нет. "
+"Проверит тот, у кого это право есть."
+msgstr "Poređenje se radi po obračunatim iznosima, a vaša uloga nema pravo da ih vidi. Proveriće onaj ko ima to pravo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строки зарплаты в отчёте закрыты, итог посчитан без них."
+msgstr "Redovi zarada su u izveštaju zatvoreni, ukupan iznos je obračunat bez njih."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "закрыто: нет права видеть суммы расчёта"
+msgstr "zatvoreno: nema prava da se vide obračunati iznosi"

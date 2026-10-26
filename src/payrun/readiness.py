@@ -262,6 +262,19 @@ def _suspicious(tenant_id: UUID, period: date) -> list[Finding]:
     """
     from reports.variance import ThresholdsMissing, build_variance
 
+    from .retro import sums_visible
+
+    if not sums_visible(tenant_id):
+        # Отклонения считаются по суммам расчёта. Без права их видеть политика
+        # отдаёт ноль строк, и проверка «прошла» бы молча — говорим, что она
+        # не сделана, а не что отклонений нет.
+        return [Finding(
+            code="variance",
+            kind=SUSPICIOUS,
+            title=_("Отклонения от прошлого месяца не проверены"),
+            detail=_("Сравнение идёт по суммам расчёта, а права видеть их у вашей "
+                     "роли нет. Проверит тот, у кого это право есть."),
+        )]
     try:
         report = build_variance(tenant_id, period)
     except (ThresholdsMissing, Exception):  # noqa: BLE001
