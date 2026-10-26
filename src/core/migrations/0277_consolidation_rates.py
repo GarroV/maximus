@@ -244,6 +244,17 @@ declare
     v_end    date := (p_period + interval '1 month - 1 day')::date;
     v_count  int;
 begin
+    -- Закрепляется только закрытый месяц и только у своего партнёра; без
+    -- контекста пользователя — обслуживание (накат миграции).
+    if not exists (select 1 from periods
+                    where tenant_id = p_tenant and period = p_period and status = 'closed') then
+        raise exception 'курс закрепляется только за закрытым месяцем';
+    end if;
+    if app_user_id() is not null
+       and p_tenant not in (select app_tenant_ids()) then
+        raise exception 'месяц не найден';
+    end if;
+
     select report_currency into v_report from tenants where id = p_tenant;
 
     insert into period_fx_rates (tenant_id, period, currency, report_currency, fx_rate_id)
@@ -271,6 +282,10 @@ $$;
 
 comment on function fix_period_rates(uuid, date) is
     'Закрепить за закрытым месяцем курсы его валют на конец месяца';
+
+-- Зовёт её только триггер ниже (владельцем); приложению напрямую она не нужна.
+revoke execute on function fix_period_rates(uuid, date) from public;
+revoke execute on function fix_period_rates(uuid, date) from app_user;
 
 create or replace function periods_fix_rates()
 returns trigger
