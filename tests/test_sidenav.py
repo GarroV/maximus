@@ -259,8 +259,12 @@ def test_language_and_logout_live_in_the_foot_of_the_panel(client, web_env):
     # Разметка — как у ядра: капсула темы radiogroup, язык — langpill; выбранный
     # — кнопка без отправки формы (type=button), а не ещё одна цель нажатия.
     assert 'role="radiogroup"' in foot and 'class="langpill"' in foot
-    assert re.search(r'<button type="button" class="langpill__item"[^>]*aria-pressed="true"[^>]*lang="ru"', foot)
-    assert re.search(r'<button type="button" name="theme"[^>]*role="radio" aria-checked="true"', foot)
+    assert re.search(
+        r'<button type="button" class="langpill__item"[^>]*aria-pressed="true"[^>]*lang="ru"', foot
+    )
+    assert re.search(
+        r'<button type="button" name="theme"[^>]*role="radio" aria-checked="true"', foot
+    )
 
 
 def test_password_and_guide_live_behind_one_service_item(client, web_env):
@@ -305,7 +309,8 @@ def test_a_guest_sees_no_sections_before_the_login(client, web_env):
     nav = nav_of(body(client.get("/login/")))
 
     assert "sidenav__group" not in nav, "гостю показаны области учёта"
-    assert 'href="/periods/"' not in nav.split("sidenav__list", 1)[1].split("sidenav__foot", 1)[0], (
+    listed = nav.split("sidenav__list", 1)[1].split("sidenav__foot", 1)[0]
+    assert 'href="/periods/"' not in listed, (
         "гостю показаны разделы продукта"
     )
     assert 'href="/guide/"' in nav and 'aria-current="page"' in nav, "до входа нет гайда или входа"
