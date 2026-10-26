@@ -21,6 +21,7 @@ from conftest import (
     JULY,
     JUNE,
     T1,
+    T2,
     U_BG1,
     USER_ADMIN,
     USER_DIRECTOR,
@@ -238,3 +239,21 @@ def test_fixed_rates_are_seen_only_by_their_partner_and_written_by_nobody(db):
             with pytest.raises(psycopg.errors.InsufficientPrivilege):
                 with app.transaction():
                     app.execute(statement)
+
+
+def test_application_cannot_fix_rates_of_another_partner_directly(db):
+    """Закрепление пишет только триггер закрытия; прямой вызов приложению закрыт."""
+    db.execute(
+        "insert into periods (tenant_id, period, status) values (%s, %s, 'closed')",
+        (T2, JUNE),
+    )
+    db.execute("delete from period_fx_rates where tenant_id = %s", (T2,))
+
+    with as_app_user(db, USER_DIRECTOR) as app:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            with app.transaction():
+                app.execute("select fix_period_rates(%s, %s)", (T2, JUNE))
+
+    assert db.execute(
+        "select count(*) from period_fx_rates where tenant_id = %s", (T2,)
+    ).fetchone()[0] == 0
