@@ -301,6 +301,44 @@ def test_a_manual_link_can_be_undone_but_not_taken_twice(
     assert lines(sql)[0][4] is None
 
 
+def test_a_payment_taken_at_the_same_moment_is_refused_in_words(
+    counterparty, item, units, accountant, sql, monkeypatch,  # noqa: F811
+):
+    """Две строки сводят с одним платежом одновременно: проверку «свободен»
+    прошли обе, ограничение базы пустило одну — второй отвечают словами."""
+    from web import bank
+
+    document = an_invoice(accountant, sql, counterparty, units, item=item)
+    accountant.post(f"/invoices/{document}/pay/",
+                    {"date": "2026-07-10", "amount": "12000.00", "entry_key": key()})
+    upload(accountant, "12.07.2026;12.000,00;;Neko;x\n", "12.07.2026;12.000,00;;Neko;y\n")
+    first, second = (row[0] for row in lines(sql))
+    ((payment, *_rest),) = facts_like(sql, "manual:payment:%")
+    if lines(sql)[0][4] is None:
+        accountant.post(f"/statement/lines/{first}/", {"action": "link", "fact": payment})
+    monkeypatch.setattr(bank, "_taken", lambda tenant_id: set())
+    taken = accountant.post(f"/statement/lines/{second}/", {"action": "link", "fact": payment})
+    assert taken.status_code == 400 and 'data-error="1"' in body(taken)
+    assert [row[4] is not None for row in lines(sql)] == [True, False]
+
+
+def test_a_dead_link_does_not_hold_its_payment(
+    counterparty, item, units, accountant, sql,  # noqa: F811
+):
+    """Платёж удалён — связь с ним мёртвая и платёж за строкой не держит."""
+    from web import bank
+
+    document = an_invoice(accountant, sql, counterparty, units, item=item)
+    upload(accountant, "12.07.2026;24.000,00;;EPS ELEKTRO;struja\n")
+    line_id = lines(sql)[0][0]
+    accountant.post(f"/statement/lines/{line_id}/", {"action": "pay", "invoice": document})
+    ((payment, *_rest),) = facts_like(sql, "manual:payment:%")
+    owner = sql.execute("select id from tenants where code = 'rs-dev'").fetchone()[0]
+    assert payment in bank._taken(owner)
+    sql.execute("update facts set superseded_at = now() where dedup_key = %s", (payment,))
+    assert payment not in bank._taken(owner)
+
+
 # --- кто видит ----------------------------------------------------------------------
 
 

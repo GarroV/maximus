@@ -254,8 +254,9 @@ class PartyIndex:
 # --- состояние строк ------------------------------------------------------------
 
 
-def _alive_links():
-    """Связи, за которыми стоит живой факт: исходный без сторно или исправление.
+def _alive() -> Q:
+    """Условие на связь: за ней стоит живой факт — исходный без сторно или
+    исправление.
 
     Разбор и правка заменяют версию факта с тем же ключом, правка закрытого
     месяца кладёт сторно и `#fix` рядом (D020). Связь жива, пока по ключу
@@ -268,10 +269,12 @@ def _alive_links():
             tenant_id=OuterRef("tenant_id"), dedup_key=key, superseded_at__isnull=True,
         )
 
-    return BankLineLink.objects.filter(line_id=OuterRef("pk")).filter(
-        Q(Exists(active(cash.FIX_SUFFIX)))
-        | (Q(Exists(active())) & ~Q(Exists(active(cash.STORNO_SUFFIX))))
-    )
+    return (Q(Exists(active(cash.FIX_SUFFIX)))
+            | (Q(Exists(active())) & ~Q(Exists(active(cash.STORNO_SUFFIX)))))
+
+
+def _alive_links():
+    return BankLineLink.objects.filter(line_id=OuterRef("pk")).filter(_alive())
 
 
 def with_state(rows):
@@ -364,7 +367,9 @@ def base_key(dedup_key: str) -> str:
 
 
 def _taken(tenant_id) -> set[str]:
-    return set(BankLineLink.objects.filter(tenant_id=tenant_id)
+    """Платежи, уже сведённые с какой-то строкой. Мёртвая связь (её факт
+    удалён) платёж не держит: иначе он не предлагался бы никому."""
+    return set(BankLineLink.objects.filter(tenant_id=tenant_id).filter(_alive())
                .values_list("fact_key", flat=True))
 
 
@@ -450,6 +455,10 @@ def auto_match(who, rows) -> int:
 
 
 def _link(who, row, fact_key: str, how: str) -> None:
+    # Мёртвая связь другой строки с тем же ключом уступает место живой:
+    # ограничение «один факт — одна строка» иначе держало бы платёж за ней.
+    BankLineLink.objects.filter(tenant_id=who.tenant_id, fact_key=fact_key).exclude(
+        _alive()).delete()
     BankLineLink.objects.create(
         tenant_id=who.tenant_id, line=row, fact_key=fact_key, how=how,
         linked_by=who.user_id,
@@ -500,9 +509,16 @@ def link(who, row, fact_key: str) -> None:
             "Этот платёж не подходит: сумма другая, он уже сведён с другой строкой "
             "или вам не виден."
         ))
-    with transaction.atomic():
-        _drop_dead_links(row)
-        _link(who, row, fact_key, MANUAL)
+    try:
+        with transaction.atomic():
+            _drop_dead_links(row)
+            _link(who, row, fact_key, MANUAL)
+    except IntegrityError as error:
+        # Тот же платёж в этот же момент свели с другой строкой.
+        raise BankRefused(_(
+            "Этот платёж только что сведён с другой строкой. Обновите страницу и "
+            "выберите другой."
+        )) from error
 
 
 def pay(who, row, document_id: str) -> None:
