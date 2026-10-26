@@ -321,8 +321,12 @@ def test_without_the_confirm_right_the_queue_explains_instead_of_crashing(
 
 def test_a_line_with_a_trail_cannot_be_deleted(web_env, sql, sorted_line):  # noqa: F811
     """След не стирается вместе со строкой: удаление факта со следом — отказ."""
-    with pytest.raises(psycopg.Error):
+    # Прежняя версия ссылается на эту (`superseded_by`) — её ссылка снимается,
+    # иначе отказ пришёл бы от неё, а не от следа.
+    with pytest.raises(psycopg.errors.ForeignKeyViolation, match="fact_reviews"):
         with sql.transaction():
+            sql.execute("update facts set superseded_by = null where superseded_by = %s",
+                        (sorted_line,))
             sql.execute("delete from facts where id = %s", (sorted_line,))
     assert sql.execute("select count(*) from fact_reviews where fact_id = %s",
                        (sorted_line,)).fetchone()[0] == 1
