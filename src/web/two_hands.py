@@ -23,6 +23,7 @@ from django.db.models import BooleanField, Exists, OuterRef, Value
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Concat
 from django.utils.translation import gettext as _
+from psycopg import errors as psycopg_errors
 
 from core.models import Fact, Role
 
@@ -46,8 +47,17 @@ class ReviewRefused(Exception):
 # --- запись шагов -------------------------------------------------------------
 
 
-def _insert(fact_id, step: str) -> bool:
-    """Записать шаг. `False` — база отказала: права, версия или чужая рука.
+WRITTEN = "written"    # шаг записан сейчас
+EXISTS = "exists"      # тот же шаг у этой версии уже был — второй не пишется
+REFUSED = "refused"    # база отказала по праву или строка роли не видна
+
+
+def _insert(fact_id, step: str) -> str:
+    """Записать шаг и сказать честно, что вышло.
+
+    Ловится только отказ по праву (`InsufficientPrivilege`: так база отвечает
+    и на политику `with check`, и на право колонки). Любой другой сбой — не
+    бизнес-отказ, и выдать его за «нет права» значило бы спрятать поломку.
 
     Точка сохранения обязательна: запрос идёт одной транзакцией
     (`ATOMIC_REQUESTS`), и отказ политики без неё оборвал бы её целиком.
@@ -60,9 +70,19 @@ def _insert(fact_id, step: str) -> bool:
                    on conflict (fact_id, step) do nothing""",
                 [step, str(fact_id)],
             )
-            return True
-    except DatabaseError:
-        return False
+            if cursor.rowcount == 1:
+                return WRITTEN
+            # Ноль строк — либо шаг уже был, либо строка роли не видна:
+            # `insert … select` невидимую строку пропускает молча.
+            cursor.execute(
+                "select exists (select 1 from fact_reviews where fact_id = %s and step = %s)",
+                [str(fact_id), step],
+            )
+            return EXISTS if cursor.fetchone()[0] else REFUSED
+    except DatabaseError as error:
+        if isinstance(error.__cause__, psycopg_errors.InsufficientPrivilege):
+            return REFUSED
+        raise
 
 
 def record_allocation(who, fact_id) -> None:
@@ -72,7 +92,7 @@ def record_allocation(who, fact_id) -> None:
     попадёт к сверке, и вторая рука пропадёт молча. Поэтому он роняет разбор
     целиком (разбор и след — одна транзакция).
     """
-    if not _insert(fact_id, ALLOCATED):
+    if _insert(fact_id, ALLOCATED) == REFUSED:
         raise cash.CashRefused(_(
             "Разбор не записан: разносить первичку — право роли «%(right)s», "
             "а у вашей роли его нет."
@@ -102,7 +122,10 @@ def confirm(who, fact) -> None:
             "Эту строку разнесли вы. Сверяет сумму и НДС другой человек — "
             "в этом смысл двух рук."
         ))
-    if not _insert(fact.id, CONFIRMED):
+    outcome = _insert(fact.id, CONFIRMED)
+    if outcome == EXISTS:
+        raise ReviewRefused(_("Эта строка уже сверена. Обновите очередь."))
+    if outcome == REFUSED:
         raise ReviewRefused(_(
             "Сверка не записана: строка изменилась или ещё не разнесена. "
             "Обновите очередь."

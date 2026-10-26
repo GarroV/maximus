@@ -355,3 +355,16 @@ def test_a_foreign_author_in_the_input_becomes_the_user(
         author = conn.execute("select created_by::text from facts where id = %s",
                               (fact_id,)).fetchone()[0]
     assert author == accountant, f"автором стал {author}, а писал бухгалтер"
+
+
+def test_a_database_failure_is_not_passed_off_as_a_refusal(web_env):
+    """Сбой базы, не связанный с правом, падает, а не выдаётся за «нет права».
+
+    Иначе поломка читалась бы человеком как отказ, и её бы никто не искал.
+    """
+    from django.db import DataError
+
+    from web import two_hands
+
+    with pytest.raises(DataError):
+        two_hands._insert("не-номер-строки", two_hands.ALLOCATED)
