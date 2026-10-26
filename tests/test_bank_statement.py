@@ -502,6 +502,33 @@ def test_the_same_bank_reference_with_another_sum_is_refused_not_hidden(
     assert len(lines(sql)) == 1
 
 
+def test_lines_of_one_batch_payment_with_a_shared_bank_reference_all_load(
+    accountant, sql,  # noqa: F811
+):
+    """Пакетный платёж: у строк общая ссылка банка — это разные операции,
+    а та же пачка в следующем файле — дубли, а не новые деньги."""
+    header = "Datum valute;Iznos na teret;Iznos u korist;Naziv primaoca;Svrha plaćanja;Referenca\n"
+    batch = ("05.07.2026;1.840,00;;Banca Test;naknada;REF-B\n"
+             "05.07.2026;2.100,00;;Drugi Test;naknada;REF-B\n")
+
+    def file(text, name):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        return SimpleUploadedFile(name, (header + text).encode("utf-8"), "text/csv")
+
+    first = accountant.post(UPLOAD, {"file": file(batch, "a.csv"), "account": ACCOUNT,
+                                     "currency": "RSD"})
+    assert first.status_code == 302, body(first)[:300]
+    assert [(amount, dup) for _i, amount, dup, _n, _l in lines(sql)] == [
+        (Decimal("1840.00"), False), (Decimal("2100.00"), False)]
+
+    later = batch + "06.07.2026;500,00;;Treci Test;naknada;REF-C\n"
+    second = accountant.post(UPLOAD, {"file": file(later, "b.csv"), "account": ACCOUNT,
+                                      "currency": "RSD"})
+    assert second.status_code == 302, body(second)[:300]
+    assert [dup for _i, _a, dup, _n, _l in lines(sql)] == [False, False, True, True, False]
+
+
 def test_a_line_whose_payment_was_deleted_can_be_decided_again(
     counterparty, item, units, accountant, sql,  # noqa: F811
 ):
