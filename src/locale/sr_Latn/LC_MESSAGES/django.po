@@ -6920,10 +6920,6 @@ msgstr "Na dan"
 msgid "Правило"
 msgstr "Pravilo"
 
-#: web/templates/web/rules/index.html:35
-msgid "Часть кода правила: night, sick, net_factor"
-msgstr "Deo koda pravila: night, sick, net_factor"
-
 #: web/templates/web/rules/index.html:46
 #, python-format
 msgid "Набор правил: %(code)s (%(country)s)"
@@ -6941,16 +6937,6 @@ msgstr "Zadato posebno"
 #: web/templates/web/rules/index.html:87
 msgid "По этому запросу правил нет."
 msgstr "Za ovaj upit nema pravila."
-
-#: web/templates/web/rules/index.html:88
-msgid ""
-"Поиск идёт по коду правила — той самой строке, которой правило адресуется "
-"расчёту: hour_types.night.pay_percent. Очистите поле, чтобы увидеть весь "
-"набор."
-msgstr ""
-"Pretraga ide po kodu pravila — onom istom nizu znakova kojim se pravilo "
-"obraća obračunu: hour_types.night.pay_percent. Ispraznite polje da vidite "
-"ceo skup."
 
 #: web/templates/web/rules/index.html:90
 msgid "Правил расчёта для этой страны на эту дату в базе нет."
@@ -9575,3 +9561,501 @@ msgstr "Redovi zarada su u izveštaju zatvoreni, ukupan iznos je obračunat bez 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "закрыто: нет права видеть суммы расчёта"
 msgstr "zatvoreno: nema prava da se vide obračunati iznosi"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"%(locked)s заданы законом и не редактируются · %(framed)s партнёр может "
+"только ужесточить"
+msgstr "%(locked)s određeno zakonom i ne može da se menja · %(framed)s partner može samo da pooštri"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Анатомия правила"
+msgstr "Anatomija pravila"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Все"
+msgstr "Sva"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Все правила лежат в одной таблице с одинаковым устройством. Новое "
+"правило не требует переписывать модули: они спрашивают значение по коду."
+msgstr "Sva pravila stoje u jednoj tabeli sa istom strukturom. Novo pravilo ne traži prepravku modula: oni traže vrednost po šifri."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Все правила наследуются из страны. Первое переопределение появится "
+"здесь, как только его заведут с карточки правила."
+msgstr "Sva pravila se nasleđuju iz zemlje. Prvo preinačenje pojaviće se ovde čim se unese sa kartice pravila."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выбор из списка"
+msgstr "Izbor sa liste"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Готовность периода"
+msgstr "Spremnost perioda"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Группы правил"
+msgstr "Grupe pravila"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Если поменять"
+msgstr "Ako se promeni"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Завести новое правило — значит описать эти поля, а не трогать код "
+"расчёта."
+msgstr "Dodati novo pravilo znači opisati ova polja, a ne dirati kod obračuna."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Задано партнёром"
+msgstr "Podesio partner"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Закон, рамка страны или партнёр. Закон не меняется вовсе, рамка "
+"допускает только более строгое значение."
+msgstr "Zakon, okvir zemlje ili partner. Zakon se ne menja nikako, okvir dozvoljava samo strožu vrednost."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Значение всегда с датой"
+msgstr "Vrednost uvek ima datum"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Значение страны задаёт администратор платформы"
+msgstr "Vrednost zemlje određuje administrator platforme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Значения по датам. Закрытый месяц считается по версии, действовавшей в "
+"нём."
+msgstr "Vrednosti po datumima. Zatvoren mesec se obračunava po verziji koja je u njemu važila."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "История"
+msgstr "Istorija"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как правило попадает в продукт"
+msgstr "Kako pravilo dospeva u proizvod"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как устроено"
+msgstr "Kako je uređeno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код или название: night, ночные, net_factor"
+msgstr "Šifra ili naziv: night, noćni, net_factor"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Код, тип и список читателей — часть кода, потому что от них зависит "
+"расчёт. Это единственный шаг, где нужен релиз."
+msgstr "Šifra, tip i spisak čitalaca deo su koda, jer od njih zavisi obračun. To je jedini korak za koji je potrebno izdanje."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Коэффициент пересчёта нето в бруто"
+msgstr "Koeficijent preračuna neto u bruto"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет доплату до минимума в незакрытых месяцах."
+msgstr "Menja doplatu do minimuma u nezatvorenim mesecima."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет надбавку у всех, кому она положена, в незакрытых месяцах."
+msgstr "Menja dodatak svima kojima pripada u nezatvorenim mesecima."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет налог и взносы в каждой ведомости незакрытых месяцев."
+msgstr "Menja porez i doprinose u svakom platnom spisku nezatvorenih meseci."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет налог, взносы и доплаты у всех, кого они касаются, в незакрытых "
+"месяцах."
+msgstr "Menja porez, doprinose i doplate svima koje se tiču u nezatvorenim mesecima."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет начисление за эти часы в незакрытых месяцах. Закрытые не "
+"двигаются."
+msgstr "Menja obračun ovih sati u nezatvorenim mesecima. Zatvoreni se ne pomeraju."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет оплату работы, которая меряется этой мерой, в незакрытых месяцах."
+msgstr "Menja platu za rad koji se meri ovom merom u nezatvorenim mesecima."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет расчёт у всех сотрудников на этой схеме в незакрытых месяцах."
+msgstr "Menja obračun svim zaposlenima na ovoj šemi u nezatvorenim mesecima."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет расчёт часов этого вида в незакрытых месяцах."
+msgstr "Menja obračun sati ove vrste u nezatvorenim mesecima."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет только подпись строки ручной корректировки."
+msgstr "Menja samo naziv reda ručne korekcije."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет только подпись. Сумма расчёта не меняется."
+msgstr "Menja samo naziv. Obračunati iznos se ne menja."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет, входят ли эти часы в базу взносов."
+msgstr "Menja da li ovi sati ulaze u osnovicu za doprinose."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет, как считаются сотрудники этой группы и куда падают их расходы в "
+"P&L."
+msgstr "Menja kako se obračunavaju zaposleni ove grupe i gde im troškovi padaju u P&L."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет, при каком расхождении с прошлым месяцем отчёт поднимет "
+"замечание. На суммы расчёта не влияет."
+msgstr "Menja pri kom odstupanju od prethodnog meseca izveštaj podiže primedbu. Ne utiče na obračunate iznose."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет, считаются ли эти часы отработанными, когда месяц сверяется с "
+"нормой."
+msgstr "Menja da li se ovi sati računaju kao odrađeni kada se mesec poredi sa normom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Минимальная месячная база взносов"
+msgstr "Minimalna mesečna osnovica doprinosa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Минимальная цена часа, нето"
+msgstr "Minimalna cena sata, neto"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Модули продукта, которые берут это значение. Список привязан к "
+"исходникам и проверяется тестом."
+msgstr "Moduli proizvoda koji uzimaju ovu vrednost. Spisak je vezan za izvorni kod i proverava se testom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не меняется никогда. По нему правило находит расчёт."
+msgstr "Nikada se ne menja. Obračun po njoj pronalazi pravilo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Необлагаемый минимум в месяц"
+msgstr "Neoporezivi minimum mesečno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Никто не пробовал поставить правилу значение за рамкой страны."
+msgstr "Niko nije pokušao da pravilu postavi vrednost van okvira zemlje."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Опорная норма часов в месяц"
+msgstr "Referentna norma sati mesečno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отчёт расхождений"
+msgstr "Izveštaj o odstupanjima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Партнёр пока ничего не менял."
+msgstr "Partner još ništa nije menjao."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Партнёр становится строже рамки, но никогда мягче. Попытка выйти за "
+"рамку записывается в журнал с автором и временем — это след для аудита, "
+"а не защита от ошибки."
+msgstr "Partner može biti stroži od okvira, ali nikad blaži. Pokušaj izlaska iz okvira beleži se u dnevnik sa autorom i vremenom — to je trag za reviziju, a ne zaštita od greške."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Партнёр уточняет внутри рамки"
+msgstr "Partner precizira unutar okvira"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Партнёр, группа или человек задают своё значение с даты. Закрытые месяцы "
+"от этого не двигаются."
+msgstr "Partner, grupa ili osoba zadaju svoju vrednost od datuma. Zatvoreni meseci se zbog toga ne pomeraju."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Первичная загрузка из файла страны или новая версия правил страны с "
+"экрана правила — только у того, кто ведёт правила страны."
+msgstr "Početno učitavanje iz fajla zemlje ili nova verzija pravila zemlje sa ekrana pravila — samo za onoga ko vodi pravila zemlje."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Переключатель"
+msgstr "Prekidač"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Подпись для человека на трёх языках. Выводится из словаря продукта, а не "
+"хранится в базе."
+msgstr "Naziv za čoveka na tri jezika. Izvodi se iz rečnika proizvoda, a ne čuva se u bazi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Поиск идёт по коду правила — той самой строке, которой правило "
+"адресуется расчёту: hour_types.night.pay_percent, — и по его названию. "
+"Очистите поле и выберите «Все», чтобы увидеть весь набор."
+msgstr "Pretraga ide po šifri pravila — baš onom nizu kojim obračun adresira pravilo: hour_types.night.pay_percent — i po njegovom nazivu. Očistite polje i izaberite „Sva“ da vidite ceo skup."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Порог расхождения по умолчанию, %"
+msgstr "Podrazumevani prag odstupanja, %"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Порог расхождения по умолчанию, сумма"
+msgstr "Podrazumevani prag odstupanja, iznos"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правило заводит разработка"
+msgstr "Pravilo uvodi razvoj"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правило — строка, а не поле"
+msgstr "Pravilo je red, a ne polje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Праздничные дни"
+msgstr "Praznični dani"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Профиль страны"
+msgstr "Profil zemlje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разделы справочника правил"
+msgstr "Odeljci pregleda pravila"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Рамку двигает закон, не администратор"
+msgstr "Okvir pomera zakon, a ne administrator"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Расчёт ведомости"
+msgstr "Obračun platnog spiska"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Расчёт это правило сегодня не читает."
+msgstr "Obračun ovo pravilo danas ne čita."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Румыния"
+msgstr "Rumunija"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Своё у каждой страны. Партнёр, группа и человек могут задать своё поверх "
+"— с датой."
+msgstr "Svaka zemlja ima svoju. Partner, grupa i osoba mogu zadati svoju povrh — sa datumom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сербия"
+msgstr "Srbija"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Список"
+msgstr "Lista"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка взносов по договору о временных работах"
+msgstr "Stopa doprinosa po ugovoru o privremenim poslovima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка взносов с работника"
+msgstr "Stopa doprinosa zaposlenog"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка взносов с работодателя"
+msgstr "Stopa doprinosa poslodavca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка налога на доходы"
+msgstr "Stopa poreza na dohodak"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Суммарная ставка взносов"
+msgstr "Ukupna stopa doprinosa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Текст"
+msgstr "Tekst"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Тип"
+msgstr "Tip"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Три закона справочника"
+msgstr "Tri zakona pregleda"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У правила нет «текущего значения» — есть значение на дату. Поэтому "
+"закрытый месяц считается по правилам своего времени, даже если страна "
+"уже сменила ставку."
+msgstr "Pravilo nema „trenutnu vrednost“ — ima vrednost na datum. Zato se zatvoren mesec obračunava po pravilima svog vremena, čak i ako je zemlja već promenila stopu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Хорватия"
+msgstr "Hrvatska"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часов в полном рабочем дне"
+msgstr "Sati u punom radnom danu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Черногория"
+msgstr "Crna Gora"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Число"
+msgstr "Numerička vrednost"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Число, переключатель, список, выбор из списка или текст. Тип берётся у "
+"действующего значения и задаёт поле ввода."
+msgstr "Broj, prekidač, lista, izbor sa liste ili tekst. Tip se uzima iz važeće vrednosti i određuje polje unosa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что изменено поверх страны"
+msgstr "Šta je izmenjeno povrh zemlje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что читает"
+msgstr "Ko ga čita"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что читает это правило"
+msgstr "Šta čita ovo pravilo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Это календарь месяца для первичной загрузки: расчёт по нему сегодня не "
+"идёт."
+msgstr "Ovo je kalendar meseca za početno učitavanje: obračun ga danas ne koristi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Это пометка, а не параметр расчёта: движок её не читает."
+msgstr "Ovo je oznaka, a ne parametar obračuna: mehanizam je ne čita."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "включена"
+msgstr "uključena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "входит в базу взносов"
+msgstr "ulazi u osnovicu doprinosa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "делитель часов при пересчёте"
+msgstr "delilac sati pri preračunu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "какая ставка взносов"
+msgstr "koja stopa doprinosa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "какие часы вызывают доплату"
+msgstr "koji sati izazivaju doplatu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "коэффициент оплаты"
+msgstr "koeficijent plate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "месячная оплата"
+msgstr "mesečna plata"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "надбавки"
+msgstr "dodaci"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "название"
+msgstr "naziv"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "облагается налогом"
+msgstr "oporezuje se"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "откуда берутся отработанные часы"
+msgstr "odakle se uzimaju odrađeni sati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "платится за единицу"
+msgstr "plaća se po jedinici"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "пометка о проверке"
+msgstr "oznaka provere"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "порог, %"
+msgstr "prag, %"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "порог, сумма"
+msgstr "prag, iznos"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "пропорция надбавки"
+msgstr "srazmera dodatka"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "регистр учёта"
+msgstr "knjigovodstveni registar"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "способ пересчёта нето в бруто"
+msgstr "način preračuna neto u bruto"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "способ расчёта взносов"
+msgstr "način obračuna doprinosa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "способ расчёта налога"
+msgstr "način obračuna poreza"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "строка P&L"
+msgstr "stavka u P&L-u"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сумма за норму"
+msgstr "iznos po normi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "схема расчёта"
+msgstr "šema obračuna"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "считается отработанным"
+msgstr "računa se kao odrađeno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "чем меряется работа"
+msgstr "čime se meri rad"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "чем пропорционально"
+msgstr "srazmerno čemu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Мера работы"
+msgstr "Mera posla"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Схема"
+msgstr "Šema"

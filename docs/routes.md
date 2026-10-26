@@ -136,6 +136,8 @@
 | `/rules/<str:path>/` | `rule` | `web.rules_views.rule` |
 | `/rules/<str:path>/attempts/` | `rule-attempts` | `web.rules_views.rule_attempts` |
 | `/rules/<str:path>/new/` | `rule-new` | `web.rules_views.rule_new` |
+| `/rules/about/` | `rules-about` | `web.rules_pages.about` |
+| `/rules/partner/` | `rules-partner` | `web.rules_pages.partner` |
 | `/settings/dodo-is/` | `planned-dodo-is` | `web.planned_views.planned` |
 | `/statement/` | `planned-statement` | `web.planned_views.planned` |
 | `/theme/` | `set-theme` | `web.theme.set_theme` |

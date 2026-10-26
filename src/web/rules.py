@@ -61,7 +61,7 @@ issue #99). Расчёт берёт правила на месяц целико�
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from decimal import Decimal
 from typing import Any
@@ -71,6 +71,8 @@ from django.utils.translation import gettext as _
 
 from core.models import RuleFrameAttempt, RuleOverride
 from payroll import frames
+
+from . import rule_names
 
 # Ключи, которыми пресет называет сам себя. Не настройки расчёта, а его имя,
 # страна, валюта и дата начала действия — переопределять их поверх самих себя
@@ -400,7 +402,11 @@ def value_at(preset: dict, path: str) -> Any:
 
 @dataclass(frozen=True)
 class Leaf:
-    """Одно правило: путь, значение и кто его задал."""
+    """Одно правило: путь, читаемое название, значение и кто его задал.
+
+    Название пустое, если словарь `rule_names` правила не знает: выдуманное
+    название хуже отсутствующего, и экран тогда показывает один код.
+    """
 
     path: str
     title: str
@@ -434,7 +440,7 @@ def leaves(preset, *, hidden: tuple[str, ...] = ()) -> list[Leaf]:
             rows.append(
                 Leaf(
                     path=path,
-                    title=path.split(".")[-1],
+                    title="",
                     value=show(value),
                     level=where.level if where else "country",
                     valid_from=where.valid_from if where else None,
@@ -442,26 +448,32 @@ def leaves(preset, *, hidden: tuple[str, ...] = ()) -> list[Leaf]:
                 )
             )
 
-    walk(dict(preset), "")
-    return rows
+    root = dict(preset)
+    walk(root, "")
+    return [replace(row, title=rule_names.name_of(root, row.path)) for row in rows]
 
 
 def matching(rows: list[Leaf], query: str) -> list[Leaf]:
-    """Правила, чей код содержит искомое. Пустой запрос — все.
+    """Правила, чей код или название содержат искомое. Пустой запрос — все.
 
-    Ищется по **коду** правила, а не по подписи, и это не экономия. Код — то,
-    чем правило адресуется расчёту (`hour_types.night.pay_percent`), он один на
-    все языки и он же написан в строке таблицы. Поиск по подписи нашёл бы
-    «Ночные» по-русски и не нашёл бы то же правило на сербском экране — то есть
-    работал бы по-разному в зависимости от языка страницы.
+    Ищется по **коду** — то, чем правило адресуется расчёту
+    (`hour_types.night.pay_percent`), один на все языки и написанный в строке
+    таблицы — и по **названию** на языке страницы (эталон модуля 17: «ищет по
+    коду и по названию», issue #256). Код остаётся рабочим на любом языке; название
+    — удобство того, кто кодов не знает, и найдёт «ночные» на русском экране, но
+    не найдёт на сербском: там то же правило зовётся по-своему.
     """
     wanted = (query or "").strip().lower()
     if not wanted:
         return rows
-    return [leaf for leaf in rows if wanted in leaf.path.lower()]
+    return [
+        leaf for leaf in rows
+        if wanted in leaf.path.lower() or wanted in leaf.title.lower()
+    ]
 
 
-def sections(preset, *, hidden: tuple[str, ...] = (), query: str = "") -> list[dict]:
+def sections(preset, *, hidden: tuple[str, ...] = (), query: str = "",
+             group: str = "") -> list[dict]:
     """Правила, разложенные по разделам: так их и читают.
 
     Порядок разделов задан здесь (`SECTION_TITLES`), а не приходит из данных, по
@@ -472,7 +484,10 @@ def sections(preset, *, hidden: tuple[str, ...] = (), query: str = "") -> list[d
     known = list(SECTION_TITLES)
     grouped: dict[str, list[Leaf]] = {}
     for leaf in matching(leaves(preset, hidden=hidden), query):
-        grouped.setdefault(leaf.path.split(".")[0], []).append(leaf)
+        name = leaf.path.split(".")[0]
+        if group and name != group:
+            continue
+        grouped.setdefault(name, []).append(leaf)
     order = [name for name in known if name in grouped]
     order += sorted(name for name in grouped if name not in known)
     return [
