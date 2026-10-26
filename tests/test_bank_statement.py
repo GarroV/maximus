@@ -16,6 +16,7 @@
 """
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 
 import pytest
@@ -69,7 +70,9 @@ def lines(sql):  # noqa: F811
         """select l.id::text, l.amount, l.duplicate_of is not null, l.not_ours_at is not null,
                   (select string_agg(k.how || ':' || k.fact_key, ',') from bank_line_links k
                     where k.line_id = l.id)
-             from bank_lines l order by l.created_at, l.line_no"""
+             from bank_lines l
+            where l.tenant_id = (select id from tenants where code = 'rs-dev')
+            order by l.created_at, l.line_no"""
     ).fetchall()
 
 
@@ -123,7 +126,7 @@ def test_a_duplicate_never_reaches_the_books(accountant, sql):  # noqa: F811
     upload(accountant, row, "08.07.2026;1,00;;X;y\n", name="later.csv")
     duplicate = lines(sql)[1][0]
     refused = accountant.post(f"/statement/lines/{duplicate}/", {"action": "inbox"})
-    assert "error=" in refused["Location"]
+    assert refused.status_code == 400 and 'data-error="1"' in body(refused)
     assert len(facts_like(sql, "bank:line:%")) == 1
 
 
@@ -197,7 +200,7 @@ def test_a_payment_larger_than_the_invoice_is_refused_in_words(
     line_id = lines(sql)[0][0]
     refused = accountant.post(f"/statement/lines/{line_id}/",
                               {"action": "pay", "invoice": document})
-    assert "error=" in refused["Location"]
+    assert refused.status_code == 400 and 'data-error="1"' in body(refused)
     assert facts_like(sql, "manual:payment:%") == []
 
 
@@ -237,7 +240,7 @@ def test_not_ours_needs_a_reason_and_can_be_taken_back(accountant, sql):  # noqa
     upload(accountant, "15.07.2026;68.400,00;;AIR TEST;avio karta\n")
     line_id = lines(sql)[0][0]
     empty = accountant.post(f"/statement/lines/{line_id}/", {"action": "not_ours", "why": " "})
-    assert "error=" in empty["Location"]
+    assert empty.status_code == 400 and 'data-error="1"' in body(empty)
     accountant.post(f"/statement/lines/{line_id}/",
                     {"action": "not_ours", "why": "личная трата партнёра"})
     assert lines(sql)[0][3] is True
@@ -263,7 +266,7 @@ def test_a_manual_link_can_be_undone_but_not_taken_twice(
     ).fetchone()[0]
     accountant.post(f"/statement/lines/{first}/", {"action": "link", "fact": payment})
     taken = accountant.post(f"/statement/lines/{second}/", {"action": "link", "fact": payment})
-    assert "error=" in taken["Location"]
+    assert taken.status_code == 400 and 'data-error="1"' in body(taken)
     accountant.post(f"/statement/lines/{first}/", {"action": "unlink"})
     assert lines(sql)[0][4] is None
 
@@ -289,3 +292,93 @@ def test_an_unreadable_file_is_refused_with_the_reason(accountant):
     answer = accountant.post(UPLOAD, {"file": SimpleUploadedFile("x.csv", b"a;b\n1;2\n")})
     assert answer.status_code == 400
     assert "Не нашли колонки" in body(answer)
+
+
+# --- чужое и подделанное -------------------------------------------------------------
+
+
+@pytest.fixture
+def foreign(sql):  # noqa: F811
+    """Строка выписки и счёт другого партнёра — заводит владелец схемы."""
+    other = sql.execute(
+        """insert into tenants (code, title, country_code, base_currency, report_currency)
+           values ('bank-foreign', 'Другой партнёр', 'RS', 'RSD', 'EUR') returning id"""
+    ).fetchone()[0]
+    statement = sql.execute(
+        "insert into bank_statements (tenant_id, format, content_hash) "
+        "values (%s, 'table', 'foreign') returning id", (other,),
+    ).fetchone()[0]
+    line = sql.execute(
+        """insert into bank_lines (tenant_id, statement_id, line_no, op_date, direction,
+                                   amount, dedup_key)
+           values (%s, %s, 1, '2026-07-12', 'out', 1000.00, 'foreign-1') returning id""",
+        (other, statement),
+    ).fetchone()[0]
+    document = sql.execute(
+        """insert into source_documents (tenant_id, kind, source, external_id, doc_date)
+           values (%s, 'invoice', 'manual', 'foreign-doc', '2026-07-01') returning id""",
+        (other,),
+    ).fetchone()[0]
+    # Бухгалтер состоит и у этого партнёра: политика базы пустит его к строке,
+    # и не пускает её в контекст rs-dev только явное условие в коде.
+    role = sql.execute(
+        """insert into roles (tenant_id, code, title, permissions, visible_ledgers)
+           select %s, code, title, permissions, visible_ledgers from roles
+            where code = 'accountant'
+              and tenant_id = (select id from tenants where code = 'rs-dev')
+           returning id""",
+        (other,),
+    ).fetchone()[0]
+    sql.execute(
+        """insert into memberships (tenant_id, user_id, role_id)
+           select %s, m.user_id, %s from memberships m
+            join roles r on r.id = m.role_id
+           where r.code = 'accountant'
+             and m.tenant_id = (select id from tenants where code = 'rs-dev')""",
+        (other, role),
+    )
+    yield {"line": str(line), "document": str(document)}
+    sql.execute("delete from memberships where tenant_id = %s", (other,))
+    sql.execute("delete from roles where tenant_id = %s", (other,))
+    # По строке, а не по партнёру: ошибка, которую ловят тесты ниже, завела бы
+    # связь под чужим партнёром — уборка не должна от неё споткнуться.
+    sql.execute(
+        "delete from bank_line_links where line_id in "
+        "(select id from bank_lines where tenant_id = %s)", (other,),
+    )
+    sql.execute("delete from facts where dedup_key = %s", (f"bank:line:{line}",))
+    sql.execute("delete from bank_lines where tenant_id = %s", (other,))
+    sql.execute("delete from bank_statements where tenant_id = %s", (other,))
+    sql.execute("delete from source_documents where tenant_id = %s", (other,))
+    sql.execute("delete from periods where tenant_id = %s", (other,))
+    sql.execute("delete from tenants where id = %s", (other,))
+
+
+def test_a_line_of_another_partner_is_not_found(accountant, foreign):
+    answer = accountant.post(f"/statement/lines/{foreign['line']}/", {"action": "inbox"})
+    assert answer.status_code == 404
+    assert accountant.get(MATCH + f"?line={foreign['line']}").status_code == 404
+
+
+def test_an_invoice_of_another_partner_is_not_paid(accountant, sql, foreign):  # noqa: F811
+    upload(accountant, "12.07.2026;1.000,00;;Neko;x\n")
+    line_id = lines(sql)[0][0]
+    answer = accountant.post(f"/statement/lines/{line_id}/",
+                             {"action": "pay", "invoice": foreign["document"]})
+    assert answer.status_code == 400
+    # Отказ — «не найден», как на выдуманный номер (D023), а не какой-то
+    # другой: у пустого чужого счёта нашлась бы и своя причина отказать.
+    assert re.findall(r'data-error="1">([^<]*)', body(answer)) == ["Счёт не найден."]
+    assert lines(sql)[0][4] is None
+    assert facts_like(sql, "manual:payment:%") == []
+
+
+def test_a_message_in_the_address_is_not_shown(accountant):
+    """Сообщение продукта не подделывается ссылкой."""
+    shown = body(accountant.get(MATCH + "?error=Позвоните+по+номеру&done=hacked"))
+    # Ссылки и переключатель языка честно несут адрес дальше — экранированным
+    # атрибутом. Проверяется текст страницы: в нём ни чужой фразы, ни чужого кода.
+    assert 'data-error="1"' not in shown
+    text = re.sub(r'="[^"]*"', '=""', shown)
+    assert "Позвоните" not in text
+    assert "hacked" not in text

@@ -82,7 +82,7 @@ def _tabs(current: str) -> list[dict]:
 # --- сопоставление ---------------------------------------------------------------
 
 
-def _period(request, who) -> dict:
+def _period(params, who) -> dict:
     """Месяц экрана. Умолчание — месяц последней загруженной операции.
 
     Не текущий месяц, как у кассы: выписку за июнь грузят в июле, и экран,
@@ -90,8 +90,8 @@ def _period(request, who) -> dict:
     не загрузилось».
     """
     try:
-        start = date.fromisoformat(request.GET.get("from", ""))
-        end = date.fromisoformat(request.GET.get("to", ""))
+        start = date.fromisoformat(params.get("from", ""))
+        end = date.fromisoformat(params.get("to", ""))
         if start <= end:
             return {"from": start, "to": end}
     except ValueError:
@@ -107,9 +107,18 @@ def statement(request):
     who, refused = _who(request)
     if refused:
         return refused
-    chosen = _period(request, who)
+    return _statement_page(request, who, request.GET)
+
+
+def _statement_page(request, who, params, *, error: str = "", status: int = 200):
+    """Страница сопоставления. Отказ решения рисуется ею же, а не адресом.
+
+    Текст отказа не ездит в адресе: сообщение, взятое из адреса, подделывается
+    ссылкой — страница показала бы продуктовым голосом что угодно.
+    """
+    chosen = _period(params, who)
     default = {"from": None, "to": None, "state": ""}
-    shown_state = request.GET.get("state", "")
+    shown_state = params.get("state", "")
     if shown_state not in ("", bank.DECIDE, bank.MATCHED, ASIDE):
         shown_state = ""
     query = filter_links.query_of({**chosen, "state": shown_state}, default)
@@ -140,10 +149,10 @@ def statement(request):
             (ASIDE, _("Дубли и чужое") + f" · {counts[bank.DUPLICATE] + counts[bank.NOT_OURS]}"),
         ], shown_state, base=base, query=query, everything=_("Все") + f" · {len(rows)}"),
     ]
-    selected_id = request.GET.get("line", "")
-    selected = bank.line_or_none(selected_id) if _is_uuid(selected_id) else None
+    selected_id = params.get("line", "")
+    selected = bank.line_or_none(who, selected_id) if _is_uuid(selected_id) else None
     if selected is None and waiting and not selected_id:
-        selected = bank.line_or_none(waiting[0].id)
+        selected = bank.line_or_none(who, waiting[0].id)
     if selected_id and selected is None:
         raise Http404("строка не найдена")
 
@@ -158,11 +167,11 @@ def statement(request):
         "shown_turnover": money(bank.turnover(shown)),
         "rows": [_row(row, states[row.id], selected, base, query) for row in shown],
         "card": _card(who, selected) if selected is not None else None,
-        "notice": _notice(request),
-        "error": request.GET.get("error", "")[:300],
+        "notice": _notice(params),
+        "error": error,
         "upload_url": reverse("statement-upload"),
         "has_any": BankStatement.objects.filter(tenant_id=who.tenant_id).exists(),
-    })
+    }, status=status)
 
 
 def _is_uuid(value: str) -> bool:
@@ -292,7 +301,7 @@ def _invoices(who, row) -> list[dict]:
     return shown
 
 
-def _notice(request) -> str:
+def _notice(params) -> str:
     return {
         "linked": _("Строка сопоставлена с внесённым платежом."),
         "paid": _("Оплата счёта заведена с датой из выписки."),
@@ -300,7 +309,7 @@ def _notice(request) -> str:
         "not_ours": _("Строка помечена как не наш платёж и в учёт не идёт."),
         "back": _("Строка снова ждёт решения."),
         "unlinked": _("Сопоставление снято, строка снова ждёт решения."),
-    }.get(request.GET.get("done", ""), "")
+    }.get(params.get("done", ""), "")
 
 
 @login_required
@@ -311,7 +320,7 @@ def statement_line(request, line_id):
     who, refused = _who(request)
     if refused:
         return refused
-    row = bank.line_or_none(line_id)
+    row = bank.line_or_none(who, line_id)
     if row is None:
         raise Http404("строка не найдена")
     action = request.POST.get("action", "")
@@ -337,15 +346,14 @@ def statement_line(request, line_id):
         else:
             raise bank.BankRefused(_("Непонятное действие."))
     except cash.CashRefused as refusal:
-        return redirect(_back(row, error=refusal.message))
-    return redirect(_back(row, done=done))
+        return _statement_page(request, who, _around(row), error=refusal.message, status=400)
+    return redirect(filter_links.url(reverse("statement"), _around(row), done=done))
 
 
-def _back(row, **extra) -> str:
+def _around(row) -> dict:
+    """Месяц и строка, к которым вернуться после решения."""
     first, last = filter_links.month_bounds(row.op_date)
-    return filter_links.url(reverse("statement"), {
-        "from": first.isoformat(), "to": last.isoformat(), "line": str(row.id),
-    }, **extra)
+    return {"from": first.isoformat(), "to": last.isoformat(), "line": str(row.id)}
 
 
 # --- загрузка -----------------------------------------------------------------------
