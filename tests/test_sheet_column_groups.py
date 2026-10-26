@@ -33,7 +33,7 @@ def head_rows(html: str) -> list[str]:
 def test_the_head_has_two_tiers(client, calculated):  # noqa: F811
     """Шапка ведомости — два яруса: группы сверху, колонки под ними."""
     login_as(client, "director")
-    rows = head_rows(body(client.get(calculated)))
+    rows = head_rows(body(client.get(calculated + "sheet/")))
 
     assert len(rows) == 2, f"ярусов не два, а {len(rows)}"
 
@@ -41,7 +41,7 @@ def test_the_head_has_two_tiers(client, calculated):  # noqa: F811
 def test_the_groups_name_what_is_under_them(client, calculated):  # noqa: F811
     """Группа названа словами и накрывает свои колонки, а не одну."""
     login_as(client, "director")
-    top = head_rows(body(client.get(calculated)))[0]
+    top = head_rows(body(client.get(calculated + "sheet/")))[0]
 
     groups = re.findall(r'<th[^>]*colspan="(\d+)"[^>]*>(.*?)</th>', top, re.S)
     assert groups, "в верхнем ярусе нет ни одной группы"
@@ -57,7 +57,7 @@ def test_the_name_and_the_total_cross_both_tiers(client, calculated):  # noqa: F
     ровно наоборот тому, ради чего ярус и заведён.
     """
     login_as(client, "director")
-    top = head_rows(body(client.get(calculated)))[0]
+    top = head_rows(body(client.get(calculated + "sheet/")))[0]
 
     crossing = re.findall(r'<th[^>]*rowspan="2"[^>]*>(.*?)</th>', top, re.S)
     plain = [re.sub(r"<[^>]+>", "", cell).strip() for cell in crossing]
@@ -73,7 +73,7 @@ def test_every_column_is_covered_by_a_group(client, calculated):  # noqa: F811
     замечая этого.
     """
     login_as(client, "director")
-    top, bottom = head_rows(body(client.get(calculated)))
+    top, bottom = head_rows(body(client.get(calculated + "sheet/")))
 
     covered = sum(int(span) for span in re.findall(r'colspan="(\d+)"', top))
     crossing = len(re.findall(r'rowspan="2"', top))

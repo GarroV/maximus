@@ -25,7 +25,33 @@
 
 {% if notice %}{% notice "alert" %}{{ notice }}{% endnotice %}{% endif %}
 
-{% if units %}
+{% if confirm %}
+{% comment %}
+Шаг подтверждения (T239, эталон «Закрыть часы по X?»). Отдельная страница, а не
+окно: без скриптов работает так же, а «Отмена» — обычная ссылка назад. Закрытие
+по-прежнему POST на этот же адрес с полем unit — правила закрытия те же.
+{% endcomment %}
+<section class="confirm" aria-labelledby="confirm-title">
+  <h2 id="confirm-title">{% blocktranslate with unit=confirm.unit.code %}Закрыть часы по {{ unit }}?{% endblocktranslate %}</h2>
+  <p>{% translate "После закрытия часы этой точки не меняются, и расчёт можно запускать. Другие точки остаются открытыми — закрытие идёт по каждой независимо." %}</p>
+  <dl class="facts">
+    <div><dt>{% translate "Сотрудников" %}</dt><dd>{{ confirm.people }}</dd></div>
+    <div><dt>{% translate "Всего часов" %}</dt><dd>{{ confirm.hours|hours }}</dd></div>
+    <div><dt>{% translate "Незакрытых замечаний" %}</dt><dd>{{ confirm.hints|length }}</dd></div>
+  </dl>
+  {% if confirm.hints %}
+  <ul class="remarks">
+    {% for hint in confirm.hints %}<li>{{ hint.text }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  <p class="note">{% translate "Замечания не мешают закрыть: система предупреждает, но не запрещает. Открыть часы обратно можно на этой же странице." %}</p>
+  <form class="action" method="post" action="{% url 'timesheet-close' period.id %}">{% csrf_token %}
+    <input type="hidden" name="unit" value="{{ confirm.unit.unit_id }}">
+    <a class="btn" href="{% url 'timesheet-close' period.id %}">{% translate "Отмена" %}</a>
+    <button type="submit" class="primary">{% translate "Закрыть часы по точке" %}</button>
+  </form>
+</section>
+{% elif units %}
 <section class="units">
   {% for unit in units %}
     <div class="unit {% if unit.closed %}is-closed{% endif %}">
@@ -47,9 +73,8 @@
         {% include "web/components/action.html" with allowed=can_close url=reopen_unit_url label=reopen_label button_class="secondary" hidden_name="unit" hidden_value=unit.unit_id denied="" note="" inline=True reason_name="" primary=False %}
       {% else %}
         <span class="unit-state">{% translate "часы открыты" %}</span>
-        {% translate "Закрыть часы точки" as close_label %}
-        {% url 'timesheet-close' period.id as close_unit_url %}
-        {% include "web/components/action.html" with allowed=can_close url=close_unit_url label=close_label hidden_name="unit" hidden_value=unit.unit_id denied="" note="" inline=True reason_name="" primary=False button_class="" %}
+        {% comment %}Закрытие — через шаг подтверждения: ссылка, а не сразу POST (T239).{% endcomment %}
+        {% if can_close %}<a class="btn btn--sm" href="{% url 'timesheet-close' period.id %}?unit={{ unit.unit_id }}">{% translate "Закрыть часы по точке" %}</a>{% endif %}
       {% endif %}
     </div>
   {% endfor %}
@@ -60,7 +85,7 @@
   {% if not can_close %}<p class="note">{{ close_denied }}</p>{% endif %}
 </section>
 {% endif %}
-{% if not units %}
+{% if not units and not confirm %}
   {% translate "Точек в табеле нет" as no_units %}
   {% notice "empty" title=no_units %}{% translate "Закрывать нечего: за этот месяц в табеле нет ни одной строки на вашей точке." %}{% endnotice %}
 {% endif %}

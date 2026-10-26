@@ -24,6 +24,7 @@ from . import (
     printing_views,
     reports_views,
     roles_views,
+    rules_pages,
     rules_views,
     stages,
     suppliers_api,
@@ -484,6 +485,10 @@ urlpatterns = [
     # видит `groups.couriers.work_measure`, и по этой строке он должен попадать
     # на страницу правила, а не искать её глазами.
     path("rules/", rules_views.index, name="rules"),
+    # Две страницы справочника — до адреса правила: `<str:path>` взял бы их за
+    # код правила и ответил 404. У настоящего кода всегда есть точка.
+    path("rules/partner/", rules_pages.partner, name="rules-partner"),
+    path("rules/about/", rules_pages.about, name="rules-about"),
     path("rules/<str:path>/", rules_views.rule, name="rule"),
     # Шаги внутри правила, а не разделы (T227, D081): новая версия и журнал
     # отвергнутых рамкой попыток — своими страницами, с карточки правила

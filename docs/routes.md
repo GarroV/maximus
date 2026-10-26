@@ -136,6 +136,8 @@
 | `/rules/<str:path>/` | `rule` | `web.rules_views.rule` |
 | `/rules/<str:path>/attempts/` | `rule-attempts` | `web.rules_views.rule_attempts` |
 | `/rules/<str:path>/new/` | `rule-new` | `web.rules_views.rule_new` |
+| `/rules/about/` | `rules-about` | `web.rules_pages.about` |
+| `/rules/partner/` | `rules-partner` | `web.rules_pages.partner` |
 | `/settings/dodo-is/` | `planned-dodo-is` | `web.planned_views.planned` |
 | `/statement/` | `statement` | `web.bank_views.statement` |
 | `/statement/lines/<uuid:line_id>/` | `statement-line` | `web.bank_views.statement_line` |
@@ -144,6 +146,7 @@
 | `/timesheets/<uuid:period_id>/` | `timesheets` | `timesheets.views.grid` |
 | `/timesheets/<uuid:period_id>/cell/` | `timesheet-cell` | `timesheets.views.cell` |
 | `/timesheets/<uuid:period_id>/close/` | `timesheet-close` | `timesheets.views.close` |
+| `/timesheets/<uuid:period_id>/export/` | `timesheet-export` | `timesheets.views.export` |
 | `/timesheets/<uuid:period_id>/import/` | `timesheet-import` | `timesheets.views.import_table` |
 | `/timesheets/<uuid:period_id>/insured/` | `timesheet-insured` | `timesheets.views.insured` |
 | `/timesheets/<uuid:period_id>/piece/` | `timesheet-piece` | `timesheets.views.piece` |
