@@ -49,6 +49,8 @@ MAX_CELLS = 400_000
 MAX_UNPACKED_BYTES = 50 * 1024 * 1024
 MAX_COMPRESSION_RATIO = 200
 UTF16_BOMS = (b"\xff\xfe", b"\xfe\xff")
+# Части книги, которые по имени — XML. Сравнение без учёта регистра.
+XML_PART_SUFFIXES = (".xml", ".rels", ".vml")
 
 
 class Unreadable(Exception):
@@ -312,9 +314,16 @@ def _refuse_bombs(content: bytes) -> None:
             # Части книги — тот же XML, и правило у них то же, что у выписки
             # XML: объявлений типа документа и сущностей не бывает. Проверка —
             # после потолка объёма, поэтому читает не больше разрешённого.
+            # Смотрим на содержимое, а не на имя: какую часть разборщик возьмёт
+            # как XML, решает [Content_Types] книги, а не расширение, и регистр
+            # имени ему тоже безразличен.
             for member in members:
-                if member.filename.endswith((".xml", ".rels")):
-                    _refuse_declarations(archive.read(member), part=member.filename)
+                if member.is_dir():
+                    continue
+                body = archive.read(member)
+                named_xml = member.filename.lower().endswith(XML_PART_SUFFIXES)
+                if named_xml or _looks_like_xml(body):
+                    _refuse_declarations(body, part=member.filename)
     except (zipfile.BadZipFile, OSError, RuntimeError) as error:
         raise Unreadable(_("Книга Excel не открывается.")) from error
 
