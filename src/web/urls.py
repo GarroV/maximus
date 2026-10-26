@@ -414,6 +414,13 @@ urlpatterns = [
         reports_views.pnl,
         name="period-pnl",
     ),
+    # Консолидация сети (T209): тот же месяц у всех видимых партнёров в одной
+    # валюте. Выше раскрытия строки — иначе `network` читался бы кодом строки.
+    path(
+        "periods/<uuid:period_id>/pnl/network/",
+        reports_views.pnl_network,
+        name="period-pnl-network",
+    ),
     path(
         "periods/<uuid:period_id>/pnl/<slug:code>/",
         reports_views.pnl_line,

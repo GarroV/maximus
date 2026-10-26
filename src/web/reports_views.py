@@ -23,15 +23,17 @@ from django.utils.translation import gettext_noop
 from django.views.decorators.http import require_POST
 
 from reports import export as exports
+from reports import network as network_report
 from reports import pnl as pnl_report
 from reports.reconcile import reconcile
 from reports.sheet import build_slice
 
 from . import permissions, reconciliation_log, runslice
 from .cash import item_title
-from .format import EMPTY, day, ledger_title, money
+from .format import EMPTY, day, exact, ledger_title, money
 from .labels import labeller
 from .principal import get_current_principal
+from .views import STATUS_TITLES as STATE_TITLES
 from .views import find_period, month_title
 
 __all__ = ["period_export", "period_reconcile"]
@@ -256,7 +258,87 @@ def pnl(request, period_id):
         "back_url": reverse("period", args=[period.id]),
         "payroll_denied": payroll_denied,
         "payroll_hidden": _payroll_lines() if payroll_denied else [],
+        "tabs": _pnl_tabs(period, "report"),
     })
+
+
+def _pnl_tabs(period, selected: str) -> list[dict]:
+    """«Отчёт / Консолидация по сети» — две вкладки одного месяца, как в эталоне."""
+    return [
+        {"title": _("Отчёт"), "url": reverse("period-pnl", args=[period.id]),
+         "selected": selected == "report"},
+        {"title": _("Консолидация по сети"),
+         "url": reverse("period-pnl-network", args=[period.id]),
+         "selected": selected == "network"},
+    ]
+
+
+@login_required
+def pnl_network(request, period_id):
+    """Консолидация сети: тот же месяц у всех видимых партнёров (T209, модуль 5).
+
+    Сборка — `reports/network.py`, пересчёт в валюту — база (`0277`). Здесь
+    только показ: что не вошло в итог, называется словами рядом с итогом.
+    """
+    period = find_period(period_id)
+    net = network_report.build(period.period)
+    return render(request, "web/reports/pnl_network.html", {
+        "period": {"id": str(period.id), "title": month_title(period.period)},
+        "currency": net.currency or "",
+        "partners": [_network_row(p, net.currency) for p in net.partners],
+        "total": {
+            "units": net.units,
+            "revenue": money(net.revenue),
+            "payroll": money(net.payroll),
+            "share": _share(net.payroll, net.revenue),
+            "profit": money(net.profit),
+        },
+        "summed": len(net.summed),
+        "count": len(net.partners),
+        "not_closed": net.not_closed,
+        "left_out": len(net.left_out),
+        "back_url": reverse("period", args=[period.id]),
+        "tabs": _pnl_tabs(period, "network"),
+    })
+
+
+def _share(part, whole) -> str:
+    value = network_report.share(part, whole)
+    return EMPTY if value is None else f"{money(value)} %"
+
+
+def _network_row(partner, currency) -> dict:
+    """Строка партнёра. Почему не вошёл в итог — словами, а не пустой ячейкой."""
+    reasons = []
+    if partner.unrated:
+        reasons.append(_("нет курса для сумм: %(count)s") % {"count": partner.unrated})
+    if partner.payroll_hidden:
+        reasons.append(_("нет права видеть суммы расчёта"))
+    if partner.report_currency != currency:
+        reasons.append(
+            _("валюта консолидации %(currency)s") % {"currency": partner.report_currency}
+        )
+    rate = partner.rate
+    return {
+        "title": partner.title,
+        "country": partner.country_code,
+        "currency": partner.currency,
+        "units": partner.units,
+        "revenue": money(partner.revenue),
+        "payroll": EMPTY if partner.payroll_hidden else money(partner.payroll),
+        "share": EMPTY if partner.payroll_hidden else _share(partner.payroll, partner.revenue),
+        "profit": money(partner.profit),
+        "state": STATE_TITLES.get(partner.status or "", _("Месяц не заведён")),
+        "closed": partner.closed,
+        "rate": {
+            "text": f"1 {rate.base} = {exact(rate.value)} {rate.quote}",
+            "on": day(rate.on),
+            "note": rate.note,
+            "fixed": rate.fixed,
+        } if rate else None,
+        "same_currency": partner.currency == partner.report_currency,
+        "left_out": "; ".join(str(reason) for reason in reasons),
+    }
 
 
 def _payroll_lines() -> list[dict]:

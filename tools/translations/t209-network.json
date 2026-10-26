@@ -1,0 +1,114 @@
+{
+  "%(month)s · партнёров: %(counter)s · единая валюта %(currency)s по курсу на последний день периода": {
+    "en": "%(month)s · partners: %(counter)s · single currency %(currency)s at the rate on the last day of the period",
+    "sr": "%(month)s · partnera: %(counter)s · jedinstvena valuta %(currency)s po kursu na poslednji dan perioda"
+  },
+  "месяц не закрыт у партнёров: %(counter)s из %(summed)s": {
+    "en": "month not closed for partners: %(counter)s of %(summed)s",
+    "sr": "mesec nije zatvoren kod partnera: %(counter)s od %(summed)s"
+  },
+  "не в итоге, партнёров: %(counter)s": {
+    "en": "left out of the total, partners: %(counter)s",
+    "sr": "van zbira, partnera: %(counter)s"
+  },
+  "Выручка, %(currency)s": {
+    "en": "Revenue, %(currency)s",
+    "sr": "Prihod, %(currency)s"
+  },
+  "ФОТ, %(currency)s": {
+    "en": "Payroll, %(currency)s",
+    "sr": "Fond zarada, %(currency)s"
+  },
+  "Прибыль, %(currency)s": {
+    "en": "Profit, %(currency)s",
+    "sr": "Dobit, %(currency)s"
+  },
+  "Доля ФОТ": {
+    "en": "Payroll share",
+    "sr": "Udeo fonda zarada"
+  },
+  "Доля строки в выручке и пометка отклонения выше порога": {
+    "en": "Line share of revenue and a mark for deviation above the threshold",
+    "sr": "Udeo stavke u prihodu i oznaka odstupanja iznad praga"
+  },
+  "Консолидация по сети": {
+    "en": "Network consolidation",
+    "sr": "Konsolidacija mreže"
+  },
+  "Курс": {
+    "en": "Exchange rate",
+    "sr": "Kurs"
+  },
+  "Курс фиксируется на последний день периода.": {
+    "en": "The rate is fixed on the last day of the period.",
+    "sr": "Kurs se fiksira na poslednji dan perioda."
+  },
+  "При закрытии месяца курс закрепляется за ним. Новый курс задним числом не меняет закрытый месяц — иначе июньская цифра менялась бы каждый день вслед за курсом.": {
+    "en": "When a month is closed, the rate is pinned to it. A new backdated rate does not change a closed month — otherwise the June figure would change every day following the rate.",
+    "sr": "Pri zatvaranju meseca kurs se vezuje za njega. Novi kurs unazad ne menja zatvoren mesec — inače bi se junska cifra menjala svakog dana za kursom."
+  },
+  "Месяц не заведён": {
+    "en": "Month not set up",
+    "sr": "Mesec nije otvoren"
+  },
+  "Отчёт": {
+    "en": "Report",
+    "sr": "Izveštaj"
+  },
+  "Партнёров нет.": {
+    "en": "No partners.",
+    "sr": "Mreža nema partnera."
+  },
+  "Партнёр": {
+    "en": "Partner",
+    "sr": "Partner"
+  },
+  "Сеть, %(month)s": {
+    "en": "Network, %(month)s",
+    "sr": "Mreža, %(month)s"
+  },
+  "Состояние периода": {
+    "en": "Period state",
+    "sr": "Stanje perioda"
+  },
+  "Точек": {
+    "en": "Stores",
+    "sr": "Objekata"
+  },
+  "валюта консолидации %(currency)s": {
+    "en": "consolidation currency %(currency)s",
+    "sr": "valuta konsolidacije %(currency)s"
+  },
+  "все месяцы закрыты": {
+    "en": "all months closed",
+    "sr": "svi meseci zatvoreni"
+  },
+  "курса нет": {
+    "en": "no rate",
+    "sr": "nema kursa"
+  },
+  "на %(on)s": {
+    "en": "as of %(on)s",
+    "sr": "na dan %(on)s"
+  },
+  "на %(on)s, закреплён при закрытии": {
+    "en": "as of %(on)s, pinned at closing",
+    "sr": "na dan %(on)s, vezan pri zatvaranju"
+  },
+  "не в итоге: %(why)s": {
+    "en": "left out of the total: %(why)s",
+    "sr": "van zbira: %(why)s"
+  },
+  "нет курса для сумм: %(count)s": {
+    "en": "no rate for amounts: %(count)s",
+    "sr": "nema kursa za iznose: %(count)s"
+  },
+  "нет права видеть суммы расчёта": {
+    "en": "no right to see payroll amounts",
+    "sr": "nema prava da vidi iznose obračuna"
+  },
+  "та же валюта": {
+    "en": "same currency",
+    "sr": "ista valuta"
+  }
+}

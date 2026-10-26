@@ -109,6 +109,7 @@
 | `/periods/<uuid:period_id>/history/` | `period-history` | `web.period_pages.history` |
 | `/periods/<uuid:period_id>/pnl/` | `period-pnl` | `web.reports_views.pnl` |
 | `/periods/<uuid:period_id>/pnl/<slug:code>/` | `period-pnl-line` | `web.reports_views.pnl_line` |
+| `/periods/<uuid:period_id>/pnl/network/` | `period-pnl-network` | `web.reports_views.pnl_network` |
 | `/periods/<uuid:period_id>/postpone/` | `period-postpone` | `web.views.period_postpone` |
 | `/periods/<uuid:period_id>/print/payout/` | `period-print-payout` | `web.printing_views.payout` |
 | `/periods/<uuid:period_id>/reconcile/` | `period-reconcile` | `web.reports_views.period_reconcile` |

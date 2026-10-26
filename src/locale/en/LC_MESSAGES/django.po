@@ -8411,10 +8411,6 @@ msgid "Карточки находок, готовность в процента
 msgstr "Finding cards, readiness in percent, closing confirmation"
 
 #: web/stages.py
-msgid "Консолидация сети в EUR по курсу на конец периода"
-msgstr "Network consolidation in EUR at the period-end rate"
-
-#: web/stages.py
 msgid "Приглашение человека, история доступов, настраиваемые наборы прав"
 msgstr "Inviting a person, access history, configurable permission sets"
 
@@ -10944,3 +10940,128 @@ msgid "Банковская выписка: ждёт решения %(counter)s 
 msgid_plural "Банковская выписка: ждут решения %(counter)s строк"
 msgstr[0] "Bank statement: %(counter)s line awaits a decision"
 msgstr[1] "Bank statement: %(counter)s lines await a decision"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"%(month)s · партнёров: %(counter)s · единая валюта %(currency)s по курсу "
+"на последний день периода"
+msgstr "%(month)s · partners: %(counter)s · single currency %(currency)s at the rate on the last day of the period"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Выручка, %(currency)s"
+msgstr "Revenue, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля ФОТ"
+msgstr "Payroll share"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля строки в выручке и пометка отклонения выше порога"
+msgstr "Line share of revenue and a mark for deviation above the threshold"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Консолидация по сети"
+msgstr "Network consolidation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс"
+msgstr "Exchange rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс фиксируется на последний день периода."
+msgstr "The rate is fixed on the last day of the period."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц не заведён"
+msgstr "Month not set up"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отчёт"
+msgstr "Report"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Партнёров нет."
+msgstr "No partners."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"При закрытии месяца курс закрепляется за ним. Новый курс задним числом "
+"не меняет закрытый месяц — иначе июньская цифра менялась бы каждый день "
+"вслед за курсом."
+msgstr "When a month is closed, the rate is pinned to it. A new backdated rate does not change a closed month — otherwise the June figure would change every day following the rate."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Прибыль, %(currency)s"
+msgstr "Profit, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сеть, %(month)s"
+msgstr "Network, %(month)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Состояние периода"
+msgstr "Period state"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точек"
+msgstr "Stores"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "ФОТ, %(currency)s"
+msgstr "Payroll, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "валюта консолидации %(currency)s"
+msgstr "consolidation currency %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все месяцы закрыты"
+msgstr "all months closed"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "курса нет"
+msgstr "no rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "месяц не закрыт у партнёров: %(counter)s из %(summed)s"
+msgstr "month not closed for partners: %(counter)s of %(summed)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "на %(on)s"
+msgstr "as of %(on)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "на %(on)s, закреплён при закрытии"
+msgstr "as of %(on)s, pinned at closing"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не в итоге, партнёров: %(counter)s"
+msgstr "left out of the total, partners: %(counter)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не в итоге: %(why)s"
+msgstr "left out of the total: %(why)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "нет курса для сумм: %(count)s"
+msgstr "no rate for amounts: %(count)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет права видеть суммы расчёта"
+msgstr "no right to see payroll amounts"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "та же валюта"
+msgstr "same currency"
