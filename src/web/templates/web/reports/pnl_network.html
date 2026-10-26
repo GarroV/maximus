@@ -1,0 +1,69 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Консолидация сети (T209, модуль 5 эталона, вкладка «Консолидация по сети»).
+
+Месяц всех партнёров, которых видит смотрящий, в одной валюте. Три обещания
+эталона, и каждое здесь видно, а не подразумевается:
+
+1. **курс рядом с числом и с датой** — строка партнёра называет курс, его дату
+   и закреплён ли он за закрытым месяцем;
+2. **незакрытые месяцы названы в подвале** — складывать закрытое с незакрытым
+   молча значит получить цифру, которой никто не поверит;
+3. **закрытый месяц не едет** — курс закреплён при закрытии (`0277`).
+
+Партнёр без курса или в другой валюте показан строкой, но в итог не входит, и
+причина написана в его строке.
+{% endcomment %}
+{% block title %}{% translate "Консолидация по сети" %}{% endblock %}
+{% block content %}
+<p class="note"><a href="{{ back_url }}">{% translate "← К месяцу" %}</a></p>
+<h1>{% translate "P&L" %} · {{ period.title }}</h1>
+{% include "web/reports/pnl_tabs.html" %}
+
+<h2>{% translate "Консолидация по сети" %}</h2>
+<p class="note">{% blocktranslate with month=period.title counter=count currency=currency %}{{ month }} · партнёров: {{ counter }} · единая валюта {{ currency }} по курсу на последний день периода{% endblocktranslate %}</p>
+
+{% scroll %}<table class="report" data-network>
+  <thead>
+    <tr>
+      <th>{% translate "Партнёр" %}</th>
+      <th class="num">{% translate "Точек" %}</th>
+      <th class="num">{% blocktranslate %}Выручка, {{ currency }}{% endblocktranslate %}</th>
+      <th class="num">{% blocktranslate %}ФОТ, {{ currency }}{% endblocktranslate %}</th>
+      <th class="num">{% translate "Доля ФОТ" %}</th>
+      <th class="num">{% blocktranslate %}Прибыль, {{ currency }}{% endblocktranslate %}</th>
+      <th>{% translate "Курс" %}</th>
+      <th>{% translate "Состояние периода" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in partners %}
+    <tr data-partner="{{ p.title }}"{% if p.left_out %} data-left-out{% endif %}>
+      <th scope="row">{{ p.title }}<br><span class="hint">{{ p.country }} · {{ p.currency }}</span></th>
+      <td class="num">{{ p.units }}</td>
+      <td class="num">{{ p.revenue }}</td>
+      <td class="num">{{ p.payroll }}</td>
+      <td class="num">{{ p.share }}</td>
+      <td class="{{ p.profit|numclass }}">{{ p.profit }}</td>
+      <td>{% if p.same_currency %}{% translate "та же валюта" %}{% elif p.rate %}<span data-rate>{{ p.rate.text }}</span><br><span class="hint">{% if p.rate.fixed %}{% blocktranslate with on=p.rate.on %}на {{ on }}, закреплён при закрытии{% endblocktranslate %}{% else %}{% blocktranslate with on=p.rate.on %}на {{ on }}{% endblocktranslate %}{% endif %}{% if p.rate.note %} · {{ p.rate.note }}{% endif %}</span>{% else %}<span class="hint">{% translate "курса нет" %}</span>{% endif %}</td>
+      <td>{{ p.state }}{% if p.left_out %}<br><span class="hint">{% blocktranslate with why=p.left_out %}не в итоге: {{ why }}{% endblocktranslate %}</span>{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" class="hint">{% translate "Партнёров нет." %}</td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="grand">
+      <th>{% blocktranslate with month=period.title %}Сеть, {{ month }}{% endblocktranslate %}</th>
+      <th class="num">{{ total.units }}</th>
+      <th class="num">{{ total.revenue }}</th>
+      <th class="num">{{ total.payroll }}</th>
+      <th class="num">{{ total.share }}</th>
+      <th class="{{ total.profit|numclass }}">{{ total.profit }}</th>
+      <th colspan="2">{% if not_closed %}{% blocktranslate with counter=not_closed summed=summed %}месяц не закрыт у партнёров: {{ counter }} из {{ summed }}{% endblocktranslate %}{% else %}{% translate "все месяцы закрыты" %}{% endif %}{% if left_out %}<br>{% blocktranslate with counter=left_out %}не в итоге, партнёров: {{ counter }}{% endblocktranslate %}{% endif %}</th>
+    </tr>
+  </tfoot>
+</table>{% endscroll %}
+
+<p class="note"><strong>{% translate "Курс фиксируется на последний день периода." %}</strong> {% translate "При закрытии месяца курс закрепляется за ним. Новый курс задним числом не меняет закрытый месяц — иначе июньская цифра менялась бы каждый день вслед за курсом." %}</p>
+{% endblock %}

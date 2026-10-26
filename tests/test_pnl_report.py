@@ -156,7 +156,7 @@ def test_a_line_opens_up_to_the_facts_it_came_from(client, sql, with_expenses, c
     login_as(client, "director")
     html = body(client.get(pnl_url(calculated)))
 
-    opened = re.search(r'href="([^"]*pnl/[a-z_]+/)"', html)
+    opened = re.search(r'href="([^"]*pnl/(?!network/)[a-z_]+/)"', html)
     assert opened, "ни одна строка отчёта не раскрывается"
 
     detail = body(client.get(opened.group(1)))
@@ -204,3 +204,28 @@ def test_the_month_leads_to_the_report(client, with_expenses, calculated):  # no
     assert "Отчёт P&L" in page, "с месяца нет пути в отчёт"
     assert f'href="{pnl_url(calculated)}"' in page
 
+
+
+# --- консолидация сети (T209) --------------------------------------------------
+
+
+def test_network_tab_opens_from_the_report(client, with_expenses, calculated):  # noqa: F811
+    """Вкладка «Консолидация по сети» — рядом с отчётом, на тот же месяц."""
+    login_as(client, "director")
+    report = body(client.get(pnl_url(calculated)))
+    assert pnl_url(calculated) + "network/" in report, "из отчёта не попасть в консолидацию"
+
+    html = body(client.get(pnl_url(calculated) + "network/"))
+
+    assert "data-network" in html
+    assert re.search(r"<tr data-partner=", html), "строки партнёра нет"
+    assert "aria-current=\"page\">Консолидация по сети" in html
+
+
+def test_partner_without_a_rate_says_so_instead_of_a_sum(client, with_expenses, calculated):  # noqa: F811
+    """Курса нет — строка говорит об этом и в итог сети не входит."""
+    login_as(client, "director")
+    html = body(client.get(pnl_url(calculated) + "network/"))
+
+    assert "курса нет" in html
+    assert "не в итоге" in html
