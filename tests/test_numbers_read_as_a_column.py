@@ -284,7 +284,8 @@ def test_the_dash_is_read_from_the_product_not_written_twice():
 def test_the_stylesheet_makes_a_column_out_of_marked_cells():
     """Правый край, моноширинное и табличные цифры — в листе, а не на словах."""
     css = APP_CSS.read_text(encoding="utf-8")
-    rule = css.split(".num {", 1)
+    # Само правило `.num` с начала строки: уточнения вида `table.x td.num {}` его не заменяют.
+    rule = css.split("\n.num {", 1)
     assert len(rule) == 2, "правила `.num` в листе нет"
     body_of_rule = rule[1].split("}", 1)[0]
     assert "text-align: right" in body_of_rule, "числа не по правому краю"
