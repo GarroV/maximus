@@ -10906,3 +10906,7 @@ msgid_plural "ждут сверки %(counter)s строк"
 msgstr[0] "%(counter)s red čeka proveru"
 msgstr[1] "%(counter)s reda čekaju proveru"
 msgstr[2] "%(counter)s redova čeka proveru"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта строка уже сверена. Обновите очередь."
+msgstr "Ovaj red je već proveren. Osvežite red čekanja."

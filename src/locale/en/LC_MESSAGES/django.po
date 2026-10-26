@@ -11063,3 +11063,7 @@ msgid "ждёт сверки %(counter)s строка"
 msgid_plural "ждут сверки %(counter)s строк"
 msgstr[0] "%(counter)s line waiting for check"
 msgstr[1] "%(counter)s lines waiting for check"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта строка уже сверена. Обновите очередь."
+msgstr "This line is already checked. Refresh the queue."

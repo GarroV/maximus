@@ -90,5 +90,9 @@
   "разнесены, ждут второй руки": {
     "en": "allocated, waiting for the second hand",
     "sr": "raspoređeni, čekaju drugu ruku"
+  },
+  "Эта строка уже сверена. Обновите очередь.": {
+    "en": "This line is already checked. Refresh the queue.",
+    "sr": "Ovaj red je već proveren. Osvežite red čekanja."
   }
 }
