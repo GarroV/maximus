@@ -61,6 +61,7 @@ def papers_removed(sql, tenant):  # noqa: F811
         ).fetchall()
     ]
     yield
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute(
         "delete from facts where document_id in "
         "(select id from source_documents where external_id like 'paper:%%')"
@@ -607,4 +608,5 @@ def test_the_manager_still_records_a_cash_expense_of_his_unit(
         # соседние проверки, которые сверяют итоги периода со своими строками.
         # Поймано прогоном — в одиночку тест зелёный, в наборе валил четыре
         # чужих.
+        sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
         sql.execute("delete from facts where note = %s", [note])
