@@ -35,6 +35,9 @@
 {% if papers_waiting %}
 <p class="note" data-papers="{{ papers_waiting }}"><a href="{{ papers_url }}">{% blocktranslate count counter=papers_waiting %}Бумаги с точек: ждёт разбора {{ counter }}{% plural %}Бумаги с точек: ждут разбора {{ counter }}{% endblocktranslate %}</a> — {% translate "их в P&L ещё нет, разбираются на своей странице" %}</p>
 {% endif %}
+{% if statement_waiting %}
+<p class="note" data-statement="{{ statement_waiting }}"><a href="{{ statement_url }}">{% blocktranslate count counter=statement_waiting %}Банковская выписка: ждёт решения {{ counter }} строка{% plural %}Банковская выписка: ждут решения {{ counter }} строк{% endblocktranslate %}</a> — {% translate "без решения их в P&L нет, решаются на сопоставлении" %}</p>
+{% endif %}
 
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 {% if failed %}{% notice "alert" %}{{ failed }}{% endnotice %}{% endif %}

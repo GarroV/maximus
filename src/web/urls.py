@@ -4,6 +4,7 @@ from django.urls import path
 from . import (
     account,
     api,
+    bank_views,
     bulk_raise_views,
     cash_views,
     counterparties_views,
@@ -347,6 +348,12 @@ urlpatterns = [
     # счетами, а внесение это действие на нём. Постоянные адреса (`new/`) идут
     # раньше адреса по номеру записи, иначе `new` разбирался бы как номер.
     path("invoices/", suppliers_views.invoices, name="invoices"),
+    # Банковская выписка (T198, модуль 7). Две страницы (D081): сопоставление —
+    # главная, загрузка — своя. Решение по строке — одним адресом с действием.
+    path("statement/", bank_views.statement, name="statement"),
+    path("statement/upload/", bank_views.statement_upload, name="statement-upload"),
+    path("statement/lines/<uuid:line_id>/", bank_views.statement_line,
+         name="statement-line"),
     path("invoices/new/", suppliers_views.invoice, name="invoice-new"),
     # Выбор контрагента для отбора списка (T224): страница вместо выпадающего списка.
     path(
