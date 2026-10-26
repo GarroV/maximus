@@ -11141,3 +11141,15 @@ msgstr "These rates consolidate the network into one currency, at the rate on th
 #: новые строки, добавлены tools/apply_translations.py
 msgid "в итог не вошёл ни один партнёр"
 msgstr "no partner made it into the total"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Консолидация показывает незакрытые периоды честно."
+msgstr "The consolidation shows unclosed periods honestly."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Месяц ещё не закрыт у партнёров: %(counter)s из %(summed)s. Их суммы в "
+"итоге могут измениться — складывать закрытое с незакрытым молча значило "
+"бы получить цифру, которой никто не поверит."
+msgstr "The month is not closed yet for partners: %(counter)s of %(summed)s. Their amounts in the total may still change — adding closed and unclosed months silently would give a figure nobody trusts."
