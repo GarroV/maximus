@@ -37,7 +37,7 @@ const ROLES = (process.env.ROLES || "accountant,manager").split(",");
 const WIDTHS = { wide: [1440, 900], tablet: [1024, 1000], narrow: [768, 1000], phone: [375, 812] };
 // Шапка телефона до содержимого — требование сверки по T222 (issue #268).
 const PHONE_HEAD_MAX = 120;
-const SHOTS = new Set(["/timesheets/", "/payroll/sheet/", "/analytics/people/", "/periods/"]);
+const SHOTS = new Set(["/timesheets/", "/payroll/sheet/", "/analytics/people/", "/periods/", "/periods/sheet/"]);
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function size(w, h) {
@@ -67,6 +67,9 @@ const pages = () => evalIn(`(async () => {
     .filter((h) => /^\\/periods\\/[0-9a-f-]{36}\\/$/.test(h)))].slice(0, 3);
   for (const period of periods) {
     out.add(period);
+    // Страницы месяца, разобранные по функциям (T230): ведомость с шапкой в
+    // два яруса живёт на своей странице, а не на сводке.
+    for (const tail of ['sheet/', 'registers/', 'history/', 'retro/']) out.add(period + tail);
     out.add('/timesheets/' + period.split('/')[2] + '/');
   }
   out.add('/payroll/sheet/');
