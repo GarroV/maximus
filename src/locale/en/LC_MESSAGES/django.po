@@ -10408,7 +10408,7 @@ msgstr "Upload a statement"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Загрузка"
-msgstr "Upload"
+msgstr "File upload"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Загрузка выписки"
@@ -10621,7 +10621,7 @@ msgstr "The match was removed; the line is waiting for a decision again."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Сопоставлено"
-msgstr "Matched"
+msgstr "Linked"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Сопоставлено правилом"

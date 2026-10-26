@@ -140,7 +140,7 @@
     "sr": "Nema šta da se odveže: plaćanje je kreirano iz izvoda — ispravite ga u fakturi ili inboxu."
   },
   "Сопоставлено": {
-    "en": "Matched",
+    "en": "Linked",
     "sr": "Upareno"
   },
   "Нужно решить": {
@@ -180,7 +180,7 @@
     "sr": "Uparivanje"
   },
   "Загрузка": {
-    "en": "Upload",
+    "en": "File upload",
     "sr": "Otpremanje"
   },
   "Дубли и чужое": {
