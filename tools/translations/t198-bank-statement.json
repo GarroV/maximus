@@ -490,5 +490,9 @@
   "без решения их в P&L нет, решаются на сопоставлении": {
     "en": "without a decision they are not in the P&L; they are decided on the matching page",
     "sr": "bez odluke nisu u P&L, odlučuje se na uparivanju"
+  },
+  "Счёт в банке": {
+    "en": "Bank account",
+    "sr": "Račun u banci"
   }
 }
