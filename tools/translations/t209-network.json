@@ -110,5 +110,9 @@
   "та же валюта": {
     "en": "same currency",
     "sr": "ista valuta"
+  },
+  "в итог не вошёл ни один партнёр": {
+    "en": "no partner made it into the total",
+    "sr": "nijedan partner nije ušao u zbir"
   }
 }

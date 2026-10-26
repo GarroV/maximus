@@ -319,15 +319,17 @@ def _network_row(partner, currency) -> dict:
             _("валюта консолидации %(currency)s") % {"currency": partner.report_currency}
         )
     rate = partner.rate
+    hidden = partner.payroll_hidden or bool(partner.unrated)
     return {
         "title": partner.title,
         "country": partner.country_code,
         "currency": partner.currency,
         "units": partner.units,
-        "revenue": money(partner.revenue),
-        "payroll": EMPTY if partner.payroll_hidden else money(partner.payroll),
-        "share": EMPTY if partner.payroll_hidden else _share(partner.payroll, partner.revenue),
-        "profit": money(partner.profit),
+        # Без курса суммы нет вовсе: 0,00 читался бы как посчитанный месяц.
+        "revenue": EMPTY if partner.unrated else money(partner.revenue),
+        "payroll": EMPTY if hidden else money(partner.payroll),
+        "share": EMPTY if hidden else _share(partner.payroll, partner.revenue),
+        "profit": EMPTY if partner.unrated else money(partner.profit),
         "state": STATE_TITLES.get(partner.status or "", _("Месяц не заведён")),
         "closed": partner.closed,
         "rate": {

@@ -60,7 +60,7 @@
       <th class="num">{{ total.payroll }}</th>
       <th class="num">{{ total.share }}</th>
       <th class="{{ total.profit|numclass }}">{{ total.profit }}</th>
-      <th colspan="2">{% if not_closed %}{% blocktranslate with counter=not_closed summed=summed %}месяц не закрыт у партнёров: {{ counter }} из {{ summed }}{% endblocktranslate %}{% else %}{% translate "все месяцы закрыты" %}{% endif %}{% if left_out %}<br>{% blocktranslate with counter=left_out %}не в итоге, партнёров: {{ counter }}{% endblocktranslate %}{% endif %}</th>
+      <th colspan="2">{% if not summed %}{% translate "в итог не вошёл ни один партнёр" %}{% elif not_closed %}{% blocktranslate with counter=not_closed summed=summed %}месяц не закрыт у партнёров: {{ counter }} из {{ summed }}{% endblocktranslate %}{% else %}{% translate "все месяцы закрыты" %}{% endif %}{% if left_out %}<br>{% blocktranslate with counter=left_out %}не в итоге, партнёров: {{ counter }}{% endblocktranslate %}{% endif %}</th>
     </tr>
   </tfoot>
 </table>{% endscroll %}
