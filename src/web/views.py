@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import update_session_auth_hash
@@ -369,7 +370,7 @@ def cut_url(period: Period, code: str) -> str:
     Не `?ledger=`, а чистый адрес: пустой параметр в ссылке выглядит как
     четвёртый, безымянный регистр.
     """
-    base = reverse("period", args=[period.id])
+    base = reverse("period-sheet", args=[period.id])
     return base if not code else f"{base}?ledger={code}"
 
 
@@ -417,29 +418,32 @@ def period_page(
     status=200,
     reason_value="",
 ):
-    """Страница периода: сводка, ведомость и запуск расчёта.
+    """Страница месяца: сводка и действие текущего шага (D081, T230).
 
-    Ведомость собирается **только из компонентов выплаты** — суммарные поля
-    ведомости не имеют политики видимости регистров и выдали бы скрытое
-    вычитанием. Поэтому и итог здесь равен сумме показанных строк (D023).
+    Здесь живёт только то, что относится к ходу месяца: где период сейчас,
+    «посчитать», «прежде чем закрыть», «утвердить» и «открыть заново». Ведомость,
+    история, итоги по регистрам и правка задним числом — свои страницы
+    (`period_pages`): одна страница — одна функция. Отсюда на них ведёт таблица
+    «Что в этом месяце», а не раскрытые куски.
 
-    Разрез по регистру приезжает из адреса и разбирается блоком `reports`
-    (T028): страница только показывает то, что он отдал. Собирать срез здесь
-    значило бы собирать его второй раз в выгрузке — и разъехаться с экраном.
+    Ведомость для сводки берётся тем же `build_slice`, что и на странице
+    ведомости, и только за итоги и число людей: суммарные поля ведомости не
+    имеют политики регистров, и итог здесь, как и там, равен сумме показанных
+    компонентов (D023).
     """
-    # Разрез живёт в адресе, а не в сессии: ссылку на «официальный срез июня»
-    # можно отправить коллеге, и он увидит то же самое — в пределах того, что
-    # видно ему. После действия (расчёт, заморозка) страница возвращается к
-    # полной ведомости: адрес перехода собирается заново.
-    view = build_slice(
-        period.tenant_id, period.period, request.GET.get("ledger", "")
-    )
+    from . import period_pages  # импорт здесь: страницы сами берут помощников отсюда
+
+    who = get_current_principal(request)
+    # Суммы расчёта в контексте сводки — только у того, кому их показывает
+    # страница ведомости (`period_pages.sees_payroll`, единый вход). Иначе
+    # итог и расхождение приезжали бы на сводку мимо закрытой страницы.
+    show_money = period_pages.sees_payroll(who)
+    # Сводке нужен весь видимый срез, без разреза: разрезы — свойство страницы
+    # ведомости.
+    view = build_slice(period.tenant_id, period.period, "")
     sheet = view.sheet
-    # Подпись компонента заморожена в момент расчёта и говорит на языке правил.
-    # Чтобы колонка говорила на языке читателя, она берётся заново по коду — из
-    # правил ТОГО ЖЕ периода (T092, разбор в `web/labels.py`).
-    label = labeller(period.tenant_id, period.tenant.country_code, period.period)
-    seen_payslips: set = set()
+    if not show_money:
+        sheet = _EmptySheet()
     timesheets = Timesheet.objects.filter(tenant=period.tenant, period=period.period)
     payrun = Payrun.objects.filter(tenant=period.tenant, period=period.period).first()
     norm_hours = calendar_norm_hours(period)
@@ -449,7 +453,6 @@ def period_page(
     # (T072). Проверку в `period_calculate` это не заменяет: интерфейс — не
     # контур доступа, а способ не предлагать человеку того, что ему всё равно
     # ответят отказом. Адрес расчёта остаётся рабочим, и он остаётся закрытым.
-    who = get_current_principal(request)
     calculate_denied = permissions.explain(who, permissions.PAYRUN_CALCULATE)
 
     # Что цикл позволяет сделать с расчётом дальше — спрашивается у базы, а не
@@ -492,38 +495,18 @@ def period_page(
         else ""
     )
 
-    # Заморозка спорной строки (T027). В утверждённом периоде её не предлагают:
-    # там заморожен весь расчёт, и база новую заморозку отвергнет — предлагать
-    # кнопку значило бы обещать невозможное. Право проверяется отдельно от
-    # состояния, как и у остальных действий: две разные причины «кнопки нет» не
-    # смешиваются.
-    freeze_denied = permissions.explain(who, permissions.PAYSLIP_FREEZE) if not frozen else ""
-    # Третье условие, независимое от права и от состояния периода (T101):
-    # заморозка относится к строке **целиком**, поэтому ставит её тот, кому база
-    # отдаёт весь её расчёт — все регистры учёта. Роли с одним официальным
-    # регистром кнопку не предлагают: она распоряжалась бы числами, которых ей
-    # не показывают. Причина называется словами, а не оставляется молчанием —
-    # исчезнувшая без объяснения кнопка читается как поломка.
-    if not freeze_denied and not frozen and not freezing.rows_are_freezable(period.tenant_id):
-        freeze_denied = _(FREEZE_NEEDS_WHOLE_RUN)
-    can_freeze = not freeze_denied and not frozen
-
-    # Правки задним числом (T026). Расхождение ищется только у утверждённого
-    # месяца: у открытого правка входных данных — это обычная работа, её
-    # пересчитывают, а не переносят. Считать теневой расчёт на каждой странице
-    # подряд было бы и дорого, и бессмысленно.
-    retro_mode = retro.mode(period.tenant_id)
-    # Расхождение спрашивается **в срезе роли** (T085): свежий расчёт движок
-    # считает целиком, и разница «свежее минус хранимое» без этого равнялась бы
-    # ровно тому, чего человеку не видно.
+    # Правки задним числом (T026): на этой странице о них только строка-указатель
+    # на отдельную страницу. Расхождение ищется только у утверждённого месяца:
+    # у открытого правка входных данных — обычная работа, её пересчитывают, а не
+    # переносят. Спрашивается в срезе роли (T085): свежий расчёт движок считает
+    # целиком, и разница без среза равнялась бы тому, чего человеку не видно.
     found = (
         retro.drift(
             period.tenant_id, period.period,
             visible_ledgers=who.visible_ledgers if who else [],
         )
-        if frozen else retro.Drift()
+        if frozen and show_money else retro.Drift()
     )
-    retro_denied = permissions.explain(who, permissions.RETRO_POST) if found else ""
     # Разница за этот месяц уже лежит в утверждённом периоде — откат отсюда
     # означал бы заплатить дважды, и база его отвергнет (T026). Кнопки поэтому
     # нет, а на её месте — тот же текст, которым ответит отказ.
@@ -533,6 +516,12 @@ def period_page(
         # `gettext_noop`, чтобы попасть в каталог, но остаться обычной строкой
         # для очереди и для журнала (T017).
         reopen_denied = reopen_denied or gettext(retro.LOCKED_REFUSAL)
+
+    history = lifecycle.history(payrun)
+    pages = _period_pages(
+        period, sheet=sheet, history_count=len(history), frozen=frozen,
+        drift=found, show_money=show_money,
+    )
 
     return render(
         request,
@@ -547,100 +536,7 @@ def period_page(
             # экран показывает то, что человек открыл, а утверждение приходит
             # запросом.
             "readiness": _readiness_of(period),
-            "sheet": {
-                "columns": [label(column.code, column.title) for column in sheet.columns],
-                # Ярус групп над колонками (issue #163). Названия переводятся
-                # здесь, а не в сборке ведомости: `payrun/sheet.py` — чистый
-                # Python без Django, и обращаться из него к каталогу переводов
-                # значило бы втащить туда веб.
-                "groups": [
-                    {"title": GROUP_TITLES.get(group.code, group.code),
-                     "span": group.span}
-                    for group in sheet.groups
-                ],
-                "rows": [
-                    {
-                        "employee": row.employee,
-                        "unit": row.unit,
-                        # Куда идут деньги этого человека (D055, T221): колонка
-                        # называет точку строки, подпись — что сумма делится
-                        # между несколькими точками или уходит на всю сеть.
-                        # Слова берутся здесь по тому же доводу, что и названия
-                        # групп колонок выше.
-                        "units_note": units_note(row.cost_units, row.unit),
-                        "ledger": ledger_title(row.ledger),
-                        "cells": [
-                            money(row.amounts.get(column.code)) for column in sheet.columns
-                        ],
-                        "total": money(row.total),
-                        # Заморозка у человека одна на все его регистры, а строк
-                        # у него может быть две. Метка стоит у каждой (иначе
-                        # половина ведомости выглядела бы живой), а действие —
-                        # один раз: две одинаковые кнопки об одном и том же
-                        # читаются как разные.
-                        "payslip_id": row.payslip_id,
-                        "frozen": row.frozen,
-                        "freeze_reason": row.freeze_reason,
-                        "show_action": first_of_payslip(row.payslip_id, seen_payslips),
-                        # След расчёта строки (T029). Разрез в ссылке — регистр
-                        # самой строки: строка ведомости это пара «сотрудник ×
-                        # регистр», и объяснять её итог надо тем же срезом,
-                        # иначе след не сойдётся с числом, по которому кликнули.
-                        "trace_url": trace_url(row),
-                        # Строка разницы обязана объяснить себя словами: без
-                        # месяца-источника это непонятная сумма в чужом месяце.
-                        "is_retro": row.is_retro,
-                        "retro_title": (
-                            retro.month_title(row.retro_source) if row.is_retro else ""
-                        ),
-                    }
-                    for row in sheet.rows
-                ],
-                "column_totals": [
-                    money(sheet.column_totals.get(column.code)) for column in sheet.columns
-                ],
-                "employees": sheet.employees,
-            },
-            # Переключатель разреза (T028). Кнопок либо нет вовсе, либо их
-            # больше одной: ряд из единственной кнопки намекал бы роли с одним
-            # регистром, что где-то есть и другие.
-            "cuts": [
-                {
-                    "code": cut.code,
-                    "title": cut_title(cut.code),
-                    "selected": cut.selected,
-                    "url": cut_url(period, cut.code),
-                }
-                for cut in view.cuts
-            ],
-            "cut_title": cut_title(view.cut) if view.cut else "",
-            # Код выбранного разреза отдельно от списка кнопок: его берут
-            # адреса выгрузок. Второго места, где хранился бы выбранный разрез,
-            # быть не должно — иначе экран и файл разъедутся молча.
-            "cut_code": view.cut or "",
-            "ledgers": [
-                {"title": ledger_title(name), "total": money(amount)}
-                for name, amount in sheet.ledger_totals
-            ],
-            # Разбивка по регистрам показывается, только когда регистров больше
-            # одного: иначе она слово в слово повторяет подвал ведомости.
-            "show_ledger_totals": len(sheet.ledger_totals) > 1,
-            # Чего не будет в файле «Строки для P&L» и почему (T141). Сказано
-            # рядом с кнопкой, а не только внутри файла: узнать об этом, уже
-            # собрав P&L, — поздно. Причина и слова к ней живут в `reports`
-            # вместе с самим файлом: две формулировки одного и того же —
-            # экранная и файловая — разъехались бы молча.
-            # Есть ли в периоде НДС (T146). От этого зависит вторая кнопка
-            # «Строки для P&L с НДС»: пока налога нет ни у одной строки, она
-            # отдавала бы ровно тот же файл — то есть обещала бы разницу,
-            # которой нет.
-            "has_vat": exports.vat_exists(period.tenant_id, period.period),
-            "exports_note": exports.taxes_note(exports.taxes_missing(
-                has_taxes=exports.taxes_exist(period.tenant_id, period.period),
-                has_rows=bool(sheet.rows),
-                cut=view.cut,
-                whole_run=whole_run,
-            )),
+            "pages": pages,
             "total": money(sheet.total) if sheet else money(None),
             "calculated_at": payrun.calculated_at if payrun else None,
             "employees": timesheets.count(),
@@ -665,6 +561,7 @@ def period_page(
                 calculated=payrun is not None,
                 approved=frozen,
             ),
+            "has_sheet": bool(sheet.rows),
             "error": error,
             "error_title": error_title or _("Расчёт не выполнен."),
             "details": list(details),
@@ -704,46 +601,15 @@ def period_page(
             "can_reopen": lifecycle.REOPENED in allowed and not reopen_denied,
             "reopen_denied": reopen_denied,
             "reason_value": reason_value,
-            "history": lifecycle.history(payrun),
             "approved": request.GET.get("approved") == "1",
             "reopened": request.GET.get("reopened") == "1",
-            # --- заморозка строк (T027) ---
-            "can_freeze": can_freeze,
-            "freeze_denied": freeze_denied,
-            "froze": request.GET.get("froze") == "1",
-            "released": request.GET.get("released") == "1",
-            # --- правки задним числом (T026) ---
-            # Что партнёр делает при расхождении, сказано словами: настройка,
-            # молча меняющая поведение денег, — худший вид настройки.
-            # Способ правок задним числом уходит на страницу кодом, а не
-            # готовой подписью: фразу про него страница собирает целиком, а не
-            # вставкой куска в чужое предложение (T093).
-            "retro_mode": retro_mode,
+            # --- правки задним числом (T026): только указатель и «не в ведомости» ---
             "retro_drift": found,
             "retro_error": found.error,
             "retro_total": money(found.total) if found else "",
-            "retro_target": (
-                retro.month_title(retro.next_open_period(period.tenant_id, period.period))
-                if found and retro_mode == retro.DELTA else ""
-            ),
-            "retro_lines": [
-                {
-                    "employee": line.employee,
-                    "title": label(line.code, line.title),
-                    "ledger": ledger_title(line.ledger),
-                    "amount": money(line.amount),
-                }
-                for line in found.lines
-            ],
-            # Кнопки нет по двум разным причинам, и они не смешиваются: партнёр
-            # ведёт учёт пересчётом (тогда о праве говорить нечего) или права
-            # нет (тогда на месте кнопки тот же текст, которым ответит отказ).
-            "can_post_retro": bool(found) and retro_mode == retro.DELTA and not retro_denied,
-            "retro_denied": retro_denied if retro_mode == retro.DELTA else "",
-            # Разница уже перенесена в утверждённый период: откат отсюда
-            # означал бы заплатить дважды, и кнопки отката не будет.
-            "retro_locked": retro_locked,
-            # Перенос сюда есть, а в ведомости его ещё (или уже) нет.
+            "retro_url": reverse("period-retro", args=[period.id]),
+            # Перенос сюда есть, а в ведомости его ещё (или уже) нет — это про
+            # «пересчитайте период», то есть про действие этой страницы.
             "retro_pending": [
                 {
                     "title": item.title,
@@ -751,21 +617,97 @@ def period_page(
                     "shown": money(item.shown),
                     "cancelled": item.cancelled,
                 }
-                for item in retro.pending(period.tenant_id, period.period)
+                for item in (
+                    retro.pending(period.tenant_id, period.period) if show_money else []
+                )
             ],
-            "retro_carried": [
-                retro.month_title(source)
-                for source in retro.carried_in(period.tenant_id, period.period)
-            ],
-            "retro_posted": request.GET.get("retro") == "1",
         },
         status=status,
     )
 
 
+class _EmptySheet:
+    """Ведомость для роли без права на суммы: ни строк, ни итогов, ни регистров."""
+
+    rows: list = []
+    ledger_totals: list = []
+    employees = 0
+    total = None
+
+    def __bool__(self):
+        return False
+
+
+def _period_pages(
+    period, *, sheet, history_count, frozen, drift, show_money=True
+) -> list[dict]:
+    """Таблица «Что в этом месяце»: куда ведёт каждая страница и что на ней.
+
+    Строки собираются здесь, а не руками в шаблоне, потому что часть из них
+    появляется по условию, и условие — свойство данных. Итоги по регистрам
+    предлагаются, только когда регистров больше одного: в разрезе одного они
+    слово в слово повторяли бы подвал ведомости. Правки задним числом — только у
+    утверждённого месяца: у открытого их пересчитывают.
+    """
+    pid = period.id
+    rows = []
+    if show_money:
+        rows.append({
+            "title": _("Ведомость"),
+            "url": reverse("period-sheet", args=[pid]),
+            "hint": (
+                _("%(count)s чел., итого %(total)s")
+                % {"count": sheet.employees, "total": money(sheet.total)}
+                if sheet.rows
+                else _("ещё не посчитана")
+            ),
+        })
+    if show_money and len(sheet.ledger_totals) > 1:
+        rows.append({
+            "title": _("Итоги по регистрам"),
+            "url": reverse("period-registers", args=[pid]),
+            "hint": _("сколько в каждом регистре учёта"),
+        })
+    if history_count:
+        rows.append({
+            "title": _("История периода"),
+            "url": reverse("period-history", args=[pid]),
+            "hint": _("переходов: %(count)s") % {"count": history_count},
+        })
+    if show_money:
+        rows.append({
+            "title": _("Отчёт P&L"),
+            "url": reverse("period-pnl", args=[pid]),
+            "hint": _("итог месяца по статьям"),
+        })
+        rows.append({
+            "title": _("Сверка с таблицей"),
+            "url": reverse("period-reconcile", args=[pid]),
+            "hint": _("сравнить расчёт с таблицей бухгалтера"),
+        })
+    if frozen and show_money:
+        rows.append({
+            "title": _("Правки задним числом"),
+            "url": reverse("period-retro", args=[pid]),
+            "hint": (
+                _("данные изменились после утверждения")
+                if drift else _("расхождений с утверждённым расчётом нет")
+            ),
+        })
+    return rows
+
+
 @login_required
 def period_detail(request, period_id):
-    return period_page(request, find_period(period_id))
+    period = find_period(period_id)
+    # Разрез ведомости раньше жил на адресе периода (`?ledger=official`), и
+    # ссылки на «официальный срез июня» лежат у людей в закладках и письмах.
+    # Ведомость переехала на свою страницу (T230) — старая ссылка ведёт туда же,
+    # с тем же разрезом, а не на сводку, где разреза нет.
+    if "ledger" in request.GET:
+        base = reverse("period-sheet", args=[period.id])
+        return redirect(f"{base}?{urlencode({'ledger': request.GET['ledger']})}")
+    return period_page(request, period)
 
 
 @login_required
@@ -960,56 +902,6 @@ def period_reopen(request, period_id):
     )
 
 
-@login_required
-@require_POST
-def period_retro_post(request, period_id):
-    """«Перенести разницу»: закрытый месяц остаётся прежним, разница едет вперёд.
-
-    Порядок проверок тот же, что у расчёта и у цикла (T064): право → всё
-    остальное. Человек без права не должен сначала узнавать, есть ли вообще
-    расхождение, — до него ему нет дела.
-
-    В сам закрытый период не пишется ничего, и это видно по коду: перенос —
-    вставка в свою таблицу. Гарантией это, однако, не является — её держит
-    сторож `payrun_frozen_guard` (T023), отвергающий любую запись в утверждённый
-    расчёт на любом пути.
-    """
-    period = find_period(period_id)
-    who = get_current_principal(request)
-    if who is None or who.tenant_id is None:
-        # Вошёл, но ни к какому партнёру не приписан: периода для него нет.
-        raise Http404("период не найден")
-
-    try:
-        permissions.check(who, permissions.RETRO_POST)
-        target, moved = retro.post(
-            tenant_id=period.tenant_id,
-            source=period.period,
-            actor_id=who.user_id,
-            visible_ledgers=who.visible_ledgers,
-        )
-    except permissions.PermissionRefused as refusal:
-        return period_page(
-            request, period, error=refusal.message,
-            error_title=_("Разница не перенесена."), status=refusal.http_status,
-        )
-    except PayrunRefused as refusal:
-        # Регистры отказ называет кодами; человеку показываем их названия.
-        details = refusal.details or [ledger_title(name) for name in refusal.ledgers]
-        return period_page(
-            request, period, error=refusal.message, details=details,
-            run_refusal=True,
-            error_title=_("Разница не перенесена."), status=refusal.http_status,
-        )
-
-    # Перенаправление после записи: обновление страницы не переносит второй раз.
-    # Второй перенос и так не нашёл бы расхождения (оно уже вычтено), но
-    # надеяться на это вместо перенаправления значило бы обещать, что арифметика
-    # заменяет защиту от повторной отправки формы.
-    del target, moved
-    return redirect(reverse("period", args=[period.id]) + "?retro=1")
-
-
 def find_payslip(request, payslip_id) -> tuple[Payslip, Period]:
     """Строка ведомости и её учётный месяц — или 404.
 
@@ -1042,6 +934,9 @@ def payslip_action(request, payslip_id, *, run, done_flag, error_title):
     маршрута рассказывает о строке до того, как выяснено, есть ли у
     спрашивающего право о ней спрашивать.
     """
+    # Импорт здесь, а не наверху: страницы периода сами берут помощников отсюда.
+    from . import period_pages
+
     who = get_current_principal(request)
     if who is None or who.tenant_id is None:
         raise Http404("строка ведомости не найдена")
@@ -1064,7 +959,8 @@ def payslip_action(request, payslip_id, *, run, done_flag, error_title):
     try:
         permissions.check(who, permissions.PAYSLIP_FREEZE)
     except permissions.PermissionRefused as refusal:
-        return period_page(
+        # Отказ показывается там, где была кнопка, — на странице ведомости (T230).
+        return period_pages.sheet_page(
             request, period,
             error=refusal.message, error_title=error_title,
             status=refusal.http_status,
@@ -1073,14 +969,14 @@ def payslip_action(request, payslip_id, *, run, done_flag, error_title):
     try:
         run(payslip, who)
     except PayrunRefused as refusal:
-        return period_page(
+        return period_pages.sheet_page(
             request, period,
             error=refusal.message, error_title=error_title,
             status=refusal.http_status,
         )
 
     # Перенаправление после записи: обновление страницы не повторяет действие.
-    return redirect(reverse("period", args=[period.id]) + f"?{done_flag}=1")
+    return redirect(reverse("period-sheet", args=[period.id]) + f"?{done_flag}=1")
 
 
 @login_required
@@ -1401,7 +1297,7 @@ def period_url_for(period, tenant_id, cut: str) -> str:
     row = Period.objects.filter(tenant_id=tenant_id, period=period).first() if period else None
     if row is None:
         return reverse("periods")
-    base = reverse("period", args=[row.id])
+    base = reverse("period-sheet", args=[row.id])
     return base if not cut else f"{base}?ledger={cut}"
 
 

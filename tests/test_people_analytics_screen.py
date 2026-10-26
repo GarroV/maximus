@@ -85,7 +85,7 @@ def test_фот_месяца_сходится_с_итогом_ведомости
     Разойтись эти два числа могут только молча: у них разные пути от базы до
     экрана, и второй путь появился именно в этой задаче.
     """
-    sheet = body(client.get(calculated))
+    sheet = body(client.get(calculated + "sheet/"))
     totals = SHEET_TOTAL.findall(sheet)
     assert totals, "в подвале ведомости не нашлось итога — сравнивать не с чем"
     payroll = money_of(totals[-1])

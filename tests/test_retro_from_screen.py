@@ -254,7 +254,7 @@ def test_the_difference_from_a_screen_edit_reaches_the_current_period(
     client.post("/logout/")
 
     login_as(client, "director")
-    page = body(client.get(url))
+    page = body(client.get(url + "retro/"))
     assert "Перенести разницу" in page, (
         "страница закрытого месяца не предлагает перенести разницу — "
         "правка задним числом опять недостижима"
@@ -273,7 +273,7 @@ def test_the_difference_from_a_screen_edit_reaches_the_current_period(
         link for link in _period_links(client) if "юль" in body(client.get(link))
     )
     assert client.post(july + "calculate/", {"inline": "1"}, follow=True).status_code == 200
-    sheet = body(client.get(july))
+    sheet = body(client.get(july + "sheet/"))
     client.post("/logout/")
 
     assert "Перерасчёт за" in sheet, "в июльской ведомости нет помеченной строки"

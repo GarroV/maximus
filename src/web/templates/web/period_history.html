@@ -1,0 +1,36 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+История переходов периода — отдельная страница (D081, T230). Нужна редко — когда
+спорят о числах или ищут, кто откатил месяц, — и раньше складывалась под
+спойлер на странице месяца, чтобы не отодвигать главное. Теперь у неё своя
+страница, и прятать нечего.
+
+Журнал ведёт база триггером (T023) — здесь только показ. Второго журнала рядом
+не заводится: перехода без записи не бывает ни на одном пути записи.
+{% endcomment %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+{% translate "История периода" as heading %}
+{% include "web/components/period_head.html" %}
+
+{% if history %}
+<table class="history">
+  <thead>
+    <tr><th>{% translate "Когда" %}</th><th>{% translate "Что стало" %}</th><th>{% translate "Кто" %}</th><th>{% translate "Причина" %}</th></tr>
+  </thead>
+  <tbody>
+    {% for row in history %}
+    <tr>
+      <td>{{ row.at }}</td>
+      <td>{% if row.from_title %}{{ row.from_title }} → {% endif %}<strong>{{ row.to_title }}</strong></td>
+      <td>{% if row.actor %}{{ row.actor }}{% else %}<span class="hint">{% translate "мимо приложения" %}</span>{% endif %}</td>
+      <td>{% if row.reason %}{{ row.reason }}{% else %}—{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+{% translate "Переходов пока нет" as no_history %}
+{% notice "empty" title=no_history %}{% translate "Период ещё не считали: история начинается с первого расчёта." %}{% endnotice %}
+{% endif %}
+{% endblock %}

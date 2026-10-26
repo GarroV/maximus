@@ -76,7 +76,7 @@ def test_the_payroll_sheet_names_its_columns_in_the_page_language(
     колонки — «Отработанные», «Праздничные», «Больничный».
     """
     login_as(client, "director")
-    shown = headers(screen(client, period_url(client), language))
+    shown = headers(screen(client, period_url(client) + "sheet/", language))
     assert named(shown, EXPECTED[language]), (
         f"на языке {language} колонки ведомости: {shown}"
     )
@@ -91,7 +91,7 @@ def test_no_column_of_the_payroll_sheet_stays_russian(client, calculated_june, l
     ровно так же, как забытый перевод.
     """
     login_as(client, "director")
-    left = [name for name in headers(screen(client, period_url(client), language))
+    left = [name for name in headers(screen(client, period_url(client) + "sheet/", language))
             if CYRILLIC.search(name)]
     assert not left, f"на языке {language} колонки остались русскими: {left}"
 

@@ -165,7 +165,7 @@ def test_next_user_on_the_same_connection_sees_only_his_own(
 
     director = Client()
     login_real(director, "director", seed_password)
-    url = period_url(director)
+    url = period_url(director) + "sheet/"
     seen = body(director.get(url))
     pid_first = backend_pid()
     assert money(AMOUNT_INTERNAL) in seen, "директору внутренний регистр должен быть виден"
@@ -189,7 +189,7 @@ def test_anonymous_after_a_logged_in_user_gets_nothing(
 
     director = Client()
     login_real(director, "director", seed_password)
-    url = period_url(director)
+    url = period_url(director) + "sheet/"
     assert money(AMOUNT_INTERNAL) in body(director.get(url))
     pid_first = backend_pid()
 

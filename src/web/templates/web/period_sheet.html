@@ -1,0 +1,182 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Ведомость периода — отдельная страница (D081, T230): раньше она стояла на одной
+странице с ходом расчёта, утверждением и историей, и человек, пришедший за
+таблицей, листал мимо всего остального. Здесь только таблица, её разрез,
+выгрузки и заморозка спорной строки. Расчёт и утверждение — на странице месяца.
+{% endcomment %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+{% translate "Ведомость" as heading %}
+{% include "web/components/period_head.html" %}
+
+{% if error %}{% notice "alert" title=error_title %}{{ error }}{% endnotice %}{% endif %}
+{% if froze %}{% notice "ok" %}{% translate "Строка заморожена. Пересчёт её обходит, остальные считаются как прежде." %}{% endnotice %}{% endif %}
+{% if released %}{% notice "ok" %}{% translate "Заморозка снята. Человек вернулся в общий расчёт." %}{% endnotice %}{% endif %}
+
+{% if sheet.rows %}
+{% comment %}
+Одна таблица на все регистры с меткой в строке (D023). Строка — пара
+«сотрудник × регистр»: регистр — свойство компонента выплаты, и у одного
+человека часы и надбавка попадают в разные регистры.
+
+Переключатель разреза (T028) перечисляет только те регистры, которые есть в
+показанных строках. Регистра, которого роль не видит, в списке нет даже пустой
+кнопкой: пустая кнопка с названием — это сообщение о том, что такой регистр
+существует, а D023 требует «ни строк, ни следа». Разрез — обычная ссылка, а не
+кнопка со скриптом: он живёт в адресе, и им можно поделиться.
+{% endcomment %}
+{% translate "Разрез ведомости по регистрам" as cuts_label %}
+{% include "web/components/cuts.html" with cuts=cuts label=cuts_label %}
+{% comment %}
+Выгрузки и сверка (T031, T032).
+
+Разрез уезжает в адрес выгрузки прямо отсюда, из того же переключателя, что
+нарисован выше: файл обязан содержать ровно то, что человек сейчас видит на
+экране. Второго места, где хранился бы выбранный регистр, быть не должно —
+иначе экран и файл разъедутся молча.
+{% endcomment %}
+{% if cut_code %}{% firstof "?ledger="|add:cut_code as ledger_query %}{% else %}{% firstof "" as ledger_query %}{% endif %}
+{% url 'period-export' period.id 'payout' as payout_url %}
+{% url 'period-export' period.id 'pnl' as pnl_url %}
+{% url 'period-export' period.id 'partner' as partner_url %}
+{% url 'period-reconcile' period.id as reconcile_url %}
+{% url 'period-pnl' period.id as report_url %}
+{% comment %}
+Печатная ведомость (T187) уезжает БЕЗ разреза намеренно: «к выплате» считается
+по строке ведомости целиком и регистру не принадлежит. Подставить сюда
+`ledger_query` значило бы отправить человека на отказ с его же экрана.
+{% endcomment %}
+{% url 'period-print-payout' period.id as print_payout_url %}
+{% include "web/components/exports.html" %}
+{% scroll %}
+<table class="sheet">
+  {% comment %}
+  Шапка в два яруса (issue #163, модуль 9 эталона): сверху группы колонок, под
+  ними сами колонки. Имя, точка, регистр, спор и «Итого» проходят через оба
+  яруса — иначе они окажутся под какой-нибудь группой и прочитаются как её
+  часть, ровно наоборот тому, ради чего ярус заведён.
+
+  Группы приходят готовыми из `payrun/sheet.py`: что чем считается — устройство
+  ведомости, а не решение разметки.
+  {% endcomment %}
+  <thead>
+    <tr>
+      <th rowspan="2">{% translate "Сотрудник" %}</th><th rowspan="2">{% translate "Точка" %}</th><th rowspan="2">{% translate "Регистр" %}</th><th rowspan="2">{% translate "Спор" %}</th>
+      {% for group in sheet.groups %}<th class="grouphead" colspan="{{ group.span }}">{{ group.title }}</th>{% endfor %}
+      <th rowspan="2" class="num">{% translate "Итого" %}</th>
+    </tr>
+    <tr>
+      {% for column in sheet.columns %}<th class="num">{{ column }}</th>{% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in sheet.rows %}
+    {% comment %}
+    Метка у строки одна, и полоска слева тоже одна: заморозка важнее
+    перерасчёта — она объясняет, почему строка не изменилась после пересчёта.
+    Класс не ставится вовсе, когда метки нет: пустой class="" в каждой из 35
+    строк — мусор в разметке, и он же ломает разбор таблицы в проверках.
+    {% endcomment %}
+    <tr{% if row.frozen %} class="is-frozen"{% elif row.is_retro %} class="retro"{% endif %}>
+      {% comment %}
+      Разница за закрытый месяц (T026) — отдельная строка, а не слитая с
+      обычной: у неё те же колонки компонентов, поэтому без пометки она стала бы
+      невидимой прибавкой к сумме этого месяца.
+      {% endcomment %}
+      <td>{{ row.employee }}{% if row.is_retro %}
+        <span class="badge-retro">{% blocktranslate with title=row.retro_title %}Перерасчёт за {{ title }}{% endblocktranslate %}</span>{% endif %}</td>
+      {% comment %}
+      Куда идут деньги этого человека (D055, T221): колонка точки говорит, где
+      стоит строка ведомости, подпись — между какими точками сумма делится и что
+      сетевой человек не «без точки», а на всю сеть.
+      {% endcomment %}
+      <td>{{ row.unit }}{% if row.units_note %} <span class="hint">{{ row.units_note }}</span>{% endif %}</td>
+      <td>{% ledger row.ledger %}</td>
+      {% comment %}
+      Заморозка спорной строки (T027). Метка стоит у каждой строки человека —
+      их бывает две, по одной на регистр, и живая половина ведомости вводила бы
+      в заблуждение. Действие предлагается один раз: заморожена строка
+      ведомости целиком, а не её половина.
+      {% endcomment %}
+      <td class="freeze">
+        {% if row.frozen %}
+          <span class="frozen">{% translate "Заморожена" %}</span>
+          {% if row.show_action %}
+            <span class="hint">{{ row.freeze_reason }}</span>
+            {% if can_freeze %}
+            {% url 'payslip-release' row.payslip_id as release_url %}
+            {% translate "Снять заморозку" as release_label %}
+            {% include "web/components/action.html" with allowed=True url=release_url label=release_label primary=False note="" denied="" reason_name="" hidden_name="" %}
+            {% endif %}
+          {% endif %}
+        {% elif row.show_action and can_freeze %}
+          {% url 'payslip-freeze' row.payslip_id as freeze_url %}
+          {% translate "Заморозить" as freeze_label %}
+          {% translate "из-за чего спор" as freeze_reason_placeholder %}
+          {% include "web/components/action.html" with allowed=True url=freeze_url label=freeze_label reason_name="reason" reason_id="" reason_label="" reason_placeholder=freeze_reason_placeholder primary=False note="" denied="" %}
+        {% endif %}
+      </td>
+      {% for cell in row.cells %}<td class="{{ cell|numclass }}">{{ cell }}</td>{% endfor %}
+      {% comment %}
+      Итог строки — ссылка на след расчёта (T029): «откуда это число» спрашивают
+      именно про него. Отдельной колонкой ссылку не ставим — ведомость едва
+      уместилась в 1440 (см. журнал блока), и ещё одна колонка вернула бы тот
+      самый перелив, который там лечили.
+      {% endcomment %}
+      <td class="{{ row.total|numclass }} strong">{% if row.trace_url %}<a class="trace" href="{{ row.trace_url }}"
+        title="{% translate "Как получилась эта сумма" %}">{{ row.total }}</a>{% else %}{{ row.total }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="grand">
+      <td colspan="4">{% blocktranslate with employees=sheet.employees %}Итого · {{ employees }} чел.{% endblocktranslate %}</td>
+      {% for cell in sheet.column_totals %}<td class="{{ cell|numclass }} num--total">{{ cell }}</td>{% endfor %}
+      <td class="{{ total|numclass }} num--total">{{ total }}</td>
+    </tr>
+  </tfoot>
+</table>
+{% endscroll %}
+
+{% if show_registers_link %}
+<p><a class="btn" href="{% url 'period-registers' period.id %}">{% translate "Итоги по регистрам" %}</a></p>
+{% endif %}
+<p class="note">
+  {% translate "Итог посчитан по тому, что видно вашей роли: строки чужих регистров не доезжают до страницы и не входят в сумму." %}
+  {% if cut_title %}{% blocktranslate with title=cut_title %}Сейчас показан один регистр — {{ title }};
+  итог посчитан по нему.{% endblocktranslate %}{% endif %}
+</p>
+{% comment %}
+Кнопки заморозки нет по двум разным причинам, и они не смешиваются: права нет
+(тогда на её месте тот же текст, которым ответит отказ) или период утверждён
+(тогда заморожен весь расчёт, и об этом уже сказано выше).
+{% endcomment %}
+{% if freeze_denied %}
+<p class="note">{{ freeze_denied }}</p>
+{% endif %}
+{% else %}
+{% comment %}
+Пустое состояние ведомости объясняет следующий шаг, а не сообщает о пустоте
+(T077). Причин пустоты две, и делать они требуют разного: часов ещё нет —
+идти в табель; часы есть, а расчёта не было — нажать кнопку выше. Свалить их
+в одно «расчёта не было» значило бы отправить человека нажимать кнопку, после
+которой он получит отказ «считать нечего».
+{% endcomment %}
+{% translate "Ведомости пока нет" as no_sheet %}
+{% notice "empty" title=no_sheet %}
+  {% if not employees_in_timesheet %}
+    {% blocktranslate %}Месяц начинается с часов: без них считать нечего. Внесите их в табеле
+    руками или загрузите таблицей партнёра, а потом вернитесь сюда и посчитайте
+    период.{% endblocktranslate %}
+    <a class="btn next" href="{% url 'timesheets' period.id %}">{% translate "Перейти к табелю" %}</a>
+  {% else %}
+    {% blocktranslate %}Часы за месяц уже внесены — осталось посчитать период. Ведомость появится
+    здесь же: строка на каждого сотрудника в каждом регистре, который видно
+    вашей роли.{% endblocktranslate %}
+    {% if calculate_denied %}<span class="note">{{ calculate_denied }}</span>
+    {% else %}<a class="btn next" href="{% url 'period' period.id %}">{% translate "К расчёту месяца" %}</a>{% endif %}
+  {% endif %}
+{% endnotice %}
+{% endif %}
+{% endblock %}
