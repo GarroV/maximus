@@ -206,11 +206,16 @@ def waiting_count(who) -> int:
     )).filter(matched=False).count()
 
 
-def line_or_none(line_id):
-    """Строка по номеру — под политиками базы. Чужая и выдуманная — одинаково."""
+def line_or_none(who, line_id):
+    """Строка по номеру — своего партнёра, под политиками базы.
+
+    Партнёр — явным условием, а не только политикой: человек может состоять
+    у нескольких партнёров, и строка другого из них не должна решаться из
+    контекста этого. Чужая и выдуманная отвечают одинаково (D023).
+    """
     return with_state(
         BankLine.objects.select_related("counterparty", "statement", "duplicate_of__statement")
-    ).filter(pk=line_id).first()
+    ).filter(tenant_id=who.tenant_id, pk=line_id).first()
 
 
 # --- кандидаты ------------------------------------------------------------------
@@ -356,7 +361,9 @@ def pay(who, row, document_id: str) -> None:
 
 def _pay(who, row, document_id: str, *, how: str) -> None:
     document = suppliers.document_or_none(document_id)
-    if document is None:
+    # Счёт — того же партнёра, что строка и человек: явным условием, не только
+    # политикой (см. `line_or_none`).
+    if document is None or document.tenant_id != who.tenant_id:
         raise BankRefused(_("Счёт не найден."))
     left = suppliers.outstanding(
         suppliers.invoice_amount(document),
