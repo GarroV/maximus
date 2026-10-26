@@ -203,3 +203,62 @@ def test_the_bank_reference_is_unique_only_within_the_account():
     """Идентификатор операции уникален внутри банка, а не во всём мире."""
     lines = read(CAMT.encode(), "izvod.xml").lines
     assert set(line_keys("acc-1", lines)).isdisjoint(line_keys("acc-2", lines))
+
+
+# --- файл, который пытается навредить разборщику -------------------------------
+
+
+def test_a_declaration_is_refused_in_any_encoding():
+    """Объявление ловит разборщик, а не поиск по байтам: кодировка его не прячет."""
+    hostile = CAMT.replace(
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<?xml version="1.0" encoding="UTF-16"?><!DOCTYPE Document [<!ENTITY a "x">]>',
+    )
+    with pytest.raises(Unreadable) as refused:
+        read(hostile.encode("utf-16"), "izvod.xml")
+    assert "объявлением" in str(refused.value)
+
+
+def test_a_utf16_statement_without_declarations_is_read():
+    plain = CAMT.replace('encoding="UTF-8"', 'encoding="UTF-16"')
+    assert read(plain.encode("utf-16"), "izvod.xml").format == "camt053"
+
+
+def test_an_archive_that_unpacks_into_too_much_is_refused_before_unpacking():
+    import zipfile
+
+    from bankstatement.reader import MAX_COMPRESSION_RATIO
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("xl/worksheets/sheet1.xml", b"0" * (MAX_COMPRESSION_RATIO * 20_000))
+    with pytest.raises(Unreadable) as refused:
+        read(buffer.getvalue(), "izvod.xlsx")
+    assert "разворачивается" in str(refused.value)
+
+
+def test_a_table_longer_than_the_ceiling_is_refused():
+    from bankstatement.reader import MAX_ROWS
+
+    row = "naknada;1,00;;24.06.2026;Bank\n"
+    huge = "Svrha;Iznos na teret;Iznos u korist;Datum valute;Naziv primaoca\n" + row * MAX_ROWS
+    with pytest.raises(Unreadable) as refused:
+        read(huge.encode(), "x.csv")
+    assert str(MAX_ROWS) in str(refused.value)
+
+
+def test_an_xlsx_longer_than_the_ceiling_is_refused(monkeypatch):
+    from openpyxl import Workbook
+
+    from bankstatement import reader
+
+    monkeypatch.setattr(reader, "MAX_ROWS", 3)
+    book = Workbook()
+    sheet = book.active
+    sheet.append(["Datum", "Duguje"])
+    for _ in range(5):
+        sheet.append([date(2026, 6, 8), 1])
+    buffer = io.BytesIO()
+    book.save(buffer)
+    with pytest.raises(Unreadable):
+        read(buffer.getvalue(), "izvod.xlsx")
