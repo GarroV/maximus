@@ -74,7 +74,7 @@ from core.models import (
     SourceDocument,
 )
 
-from . import cash, permissions
+from . import cash, permissions, two_hands
 from .dbrefusal import BadInput
 
 # Приставки ключей идемпотентности. Разные у счёта, платежа и оплаты без счёта:
@@ -887,6 +887,9 @@ def classify(who, fact, *, item, unit_id) -> Recorded:
                                      dedup_key=fact.dedup_key + cash.FIX_SUFFIX)
         if shares:
             _split_again(recorded.fact_id, shares, who)
+        # Первая рука разбора (T206): кто сказал, чья строка и за что. В той же
+        # транзакции — разбор без следа не дошёл бы до сверки.
+        two_hands.record_allocation(who, recorded.fact_id)
     return recorded
 
 

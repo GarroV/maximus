@@ -67,6 +67,7 @@ def tills(sql, tenant, units):  # noqa: F811
             (tenant, units[unit_code], code, code, ledger),
         ).fetchone()[0])
     yield made
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where till_id = any(%s::uuid[])", (list(made.values()),))
     sql.execute("delete from tills where id = any(%s::uuid[])", (list(made.values()),))
 

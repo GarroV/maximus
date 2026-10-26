@@ -76,6 +76,7 @@ def item(sql, tenant):  # noqa: F811
                         "sr-latn": "Struja"}), pnl),
     ).fetchone()[0]
     yield str(row)
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where expense_item_id = %s", (row,))
     sql.execute("delete from expense_items where id = %s", (row,))
 
@@ -96,6 +97,7 @@ def invoices_removed(sql, tenant):  # noqa: F811
         ).fetchall()
     ]
     yield
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute(
         "delete from facts where dedup_key like 'manual:invoice:%%' "
         "or dedup_key like 'manual:payment:%%' or dedup_key like 'manual:purchase:%%'"

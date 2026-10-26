@@ -76,6 +76,8 @@
 | `/i18n/setlang/` | `set_language` | `django.views.i18n.set_language` |
 | `/inbox/` | `inbox` | `web.suppliers_views.inbox` |
 | `/inbox/<uuid:fact_id>/classify/` | `inbox-classify` | `web.suppliers_views.inbox_classify` |
+| `/inbox/check/` | `inbox-check` | `web.two_hands_views.check` |
+| `/inbox/check/<uuid:fact_id>/confirm/` | `inbox-check-confirm` | `web.two_hands_views.check_confirm` |
 | `/inbox/classify/` | `inbox-batch` | `web.suppliers_views.inbox_batch` |
 | `/inbox/split/` | `inbox-split` | `web.inbox_split_views.inbox_split` |
 | `/invoices/` | `invoices` | `web.suppliers_views.invoices` |

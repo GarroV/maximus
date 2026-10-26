@@ -1,0 +1,76 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Сверка суммы и НДС — вторая рука разбора первички (T206, модуль 15).
+
+Экран отвечает на один вопрос: какие разнесённые строки ещё никто не сверил с
+бумагой. Точка и статья уже проставлены — их сказал тот, кто разносил, и его имя
+стоит в строке. Дело этого экрана — цифры и документ.
+
+Кто сверяет — роли с правом шага, из базы (D060). Свою строку человек не сверяет:
+вместо кнопки — слова, почему.
+{% endcomment %}
+{% block title %}{% translate "Сверка первички" %}{% endblock %}
+{% block content %}
+<h1>{% translate "Сверка первички" %}</h1>
+<p class="sub">{% translate "Строки уже разнесены: точка и статья проставлены. Сверьте сумму и НДС с бумагой." %}</p>
+<p class="note" data-waits-for>{% blocktranslate with who=waits_for %}Ждёт сверки суммы и НДС: {{ who }}{% endblocktranslate %}</p>
+
+{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+{% if failed %}{% notice "alert" %}{{ failed }}{% endnotice %}{% endif %}
+{% if no_right %}{% notice "alert" %}{{ no_right }}{% endnotice %}{% endif %}
+
+{% if rows %}
+{% notice "alert" title=total_text %}<span data-total="{{ total_raw }}">{% blocktranslate count counter=counted %}ждёт сверки {{ counter }} строка{% plural %}ждут сверки {{ counter }} строк{% endblocktranslate %}</span>{% endnotice %}
+
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Дата" %}</th>
+      <th>{% translate "Контрагент" %}</th>
+      <th>{% translate "Статья" %}</th>
+      <th>{% translate "Точка" %}</th>
+      <th class="num">{% translate "Сумма" %}</th>
+      <th class="num">{% translate "НДС" %}</th>
+      <th>{% translate "Период учёта" %}</th>
+      <th>{% translate "Регистр" %}</th>
+      <th>{% translate "Разнёс" %}</th>
+      <th>{% translate "Сверка" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr data-amount="{{ row.amount_raw }}" data-fact="{{ row.id }}">
+      <td>{% if row.invoice_url %}<a href="{{ row.invoice_url }}">{{ row.date }}</a>{% else %}{{ row.date }}{% endif %}</td>
+      <td>{{ row.counterparty }}</td>
+      <td>{{ row.article }}</td>
+      <td>{{ row.unit }}</td>
+      <td class="{{ row.amount_text|numclass }}">{{ row.amount_text }}</td>
+      <td class="num">{{ row.vat }}{% if row.vat_rate %} <span class="hint">{{ row.vat_rate }}</span>{% endif %}</td>
+      <td>{{ row.period }}</td>
+      <td>{{ row.ledger }}</td>
+      <td>{{ row.allocated_by }}</td>
+      <td>
+        {% if row.own %}<span class="hint">{% translate "вы разнесли — сверяет другой человек" %}</span>
+        {% elif row.may_confirm %}
+        <form class="inline" method="post" action="{{ row.url }}">{% csrf_token %}
+          <button type="submit">{% translate "Сверено" %}</button>
+        </form>
+        {% else %}<span class="hint">{% translate "Ждёт сверки" %}</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr data-total="{{ total_raw }}">
+      <th colspan="4">{% translate "Итого ждёт сверки" %}</th>
+      <th class="{{ total_text|numclass }}">{{ total_text }}</th>
+      <th colspan="5"></th>
+    </tr>
+  </tfoot>
+</table>{% endscroll %}
+{% else %}
+{% translate "Сверять нечего." as empty %}
+{% notice "empty" title=empty %}<span data-total="{{ total_raw }}">{% translate "Все разнесённые строки сверены. Новые появятся, когда в инбоксе разнесут следующие." %} <a href="{{ inbox_url }}">{% translate "Инбокс" %}</a></span>{% endnotice %}
+{% endif %}
+
+{% endblock %}

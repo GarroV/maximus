@@ -192,6 +192,7 @@ def test_a_batch_of_different_legal_entities_is_refused_in_words(
     ).fetchone()[0]
     sql.execute("update facts set legal_entity_id = %s where id = %s", (other, second))
     request.addfinalizer(lambda: (
+        sql.execute("delete from fact_reviews"),  # след двух рук держит факты
         sql.execute("delete from facts where legal_entity_id = %s", (other,)),
         sql.execute("delete from legal_entities where id = %s", (other,)),
     ))

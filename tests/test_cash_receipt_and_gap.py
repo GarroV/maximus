@@ -105,6 +105,7 @@ def gap_data(sql):
         yield {"unit": unit}
     finally:
         sql.execute("delete from cash_receipts where entry_key like 't184-%'")
+        sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
         sql.execute("delete from facts where dedup_key like 'manual:cash:t184-%'")
         sql.execute("delete from expense_items where code like 't184-%'")
 
@@ -222,6 +223,7 @@ def one_expense(client, sql):
         yield {"id": fact[0], "key": key, "item": item, "unit": unit}
     finally:
         sql.execute("delete from cash_receipts where entry_key = %s", [key])
+        sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
         sql.execute("delete from facts where note = 'T184 чек'")
         sql.execute("delete from expense_items where code = 't184-receipt'")
 
@@ -414,5 +416,6 @@ def test_the_receipt_may_come_with_the_expense_itself(client, sql):
         sql.execute("delete from cash_receipts where entry_key in ("
                     "select replace(dedup_key, 'manual:cash:', '') from facts "
                     "where note = 'T184 телефон')")
+        sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
         sql.execute("delete from facts where note = 'T184 телефон'")
         sql.execute("delete from expense_items where code = 't184-phone'")
