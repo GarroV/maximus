@@ -846,19 +846,70 @@ class AllocationRule(models.Model):
 
 
 class FxRate(models.Model):
-    """Курс на дату. Консолидация по сети идёт по курсу конца месяца."""
+    """Курс на дату: 1 `base_currency` = `rate` `quote_currency`.
+
+    Консолидация по сети идёт по курсу конца месяца (T209). Строка не правится и
+    не удаляется (триггер `fx_rates_append_only`, `0277`): исправленный курс —
+    новая строка с той же датой и более поздним `entered_at`. Иначе правка
+    справочника молча сдвигала бы закрытые месяцы, которые на эту строку
+    сослались при закрытии (`period_fx_rates`).
+    """
 
     id = uuid_pk()
     base_currency = models.TextField()
     quote_currency = models.TextField()
     rate_date = models.DateField()
     rate = models.DecimalField(max_digits=18, decimal_places=8)
+    # Откуда взят курс: «НБС, средний курс», «банк партнёра»… Источник курсов не
+    # выбран (ручной ввод или лента), поэтому он записывается словами при вводе.
+    note = models.TextField(db_default="")
+    entered_by = models.UUIDField(null=True, blank=True)
+    # Часы, а не `now()`: две правки курса в одной транзакции обязаны
+    # упорядочиться, а `now()` в ней одно на всех.
+    entered_at = models.DateTimeField(db_default=models.Func(function="clock_timestamp"))
 
     class Meta:
         db_table = "fx_rates"
         constraints = [
             models.UniqueConstraint(
-                fields=["base_currency", "quote_currency", "rate_date"], name="fx_rates_uniq"
+                fields=["base_currency", "quote_currency", "rate_date", "entered_at"],
+                name="fx_rates_version_uniq",
+            ),
+            models.CheckConstraint(condition=models.Q(rate__gt=0), name="fx_rates_rate_positive"),
+            models.CheckConstraint(
+                condition=~models.Q(base_currency=models.F("quote_currency")),
+                name="fx_rates_two_currencies",
+            ),
+        ]
+
+
+class PeriodFxRate(models.Model):
+    """Какой курс закрытый месяц партнёра взял для своей валюты (T209).
+
+    Строка появляется при закрытии месяца и исчезает при его открытии — оба
+    раза триггером на `periods` (`0277`), приложение сюда не пишет. Ссылка на
+    строку справочника, а не копия числа: строка справочника неизменна, и по
+    ссылке видно и курс, и его дату, и откуда он взят. Пустая ссылка — курса на
+    день закрытия не было; её заполняет первый введённый курс, и дальше она не
+    меняется.
+    """
+
+    id = uuid_pk()
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, db_column="tenant_id")
+    period = models.DateField()
+    currency = models.TextField()
+    report_currency = models.TextField()
+    fx_rate = models.ForeignKey(
+        FxRate, on_delete=models.PROTECT, null=True, blank=True, db_column="fx_rate_id"
+    )
+    fixed_at = models.DateTimeField(db_default=now_default())
+
+    class Meta:
+        db_table = "period_fx_rates"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "period", "currency", "report_currency"],
+                name="period_fx_rates_once",
             ),
         ]
 
