@@ -17,8 +17,15 @@
 <form class="import" method="post" enctype="multipart/form-data"
       action="{% url 'timesheet-import' period.id %}">
   {% csrf_token %}
-  {% translate "Загрузить таблицу партнёра (.xlsx)" as import_field_label %}
-  {% include "web/components/field.html" with id="table" name="table" type="file" label=import_field_label accept=".xlsx" %}
+  {% comment %}
+  Зона перетаскивания (T239, эталон «Перетащите свой xlsx»). Зона — само
+  нативное поле файла, растянутое на всю рамку: браузер принимает файл,
+  брошенный на такое поле, сам, и без единой строки скрипта. Подпись остаётся
+  настоящей `<label>`, поэтому поле доступно и с клавиатуры, и диктору.
+  {% endcomment %}
+  <label class="dropzone-title" for="table">{% translate "Перетащите свой xlsx сюда или выберите файл" %}</label>
+  <input class="dropzone" type="file" id="table" name="table" accept=".xlsx" aria-describedby="table_help" required>
+  <span class="note" id="table_help">{% translate "Колонки подбираются сами: имя, точка, типы часов. Если колонка не распознана — спросим, но файл не отклоним." %}</span>
   <button type="submit">{% translate "Загрузить" %}</button>
   <span class="hint">{% translate "Повторная загрузка того же файла ничего не изменит." %}</span>
 </form>
