@@ -80,7 +80,7 @@ def payout(request, period_id):
         printing.build_payout(period.tenant_id, period.period)
         if not cut and whole_run else None
     )
-    back = f"/periods/{period.id}/"
+    back = f"/periods/{period.id}/sheet/"
     reason = printing.payout_refusal(
         has_rows=bool(doc), whole_run=whole_run, cut=cut,
     )

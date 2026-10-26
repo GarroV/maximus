@@ -440,7 +440,7 @@ def test_the_accountant_is_not_offered_a_button_she_cannot_use(client, calculate
     """
     with narrowed_ledgers(web_env, "accountant", ["official"]):
         login_as(client, "accountant")
-        html = body(client.get(period_url(client)))
+        html = body(client.get(period_url(client) + "sheet/"))
 
         assert not re.search(r"/payslips/[0-9a-f-]+/freeze/", html), (
             "на странице бухгалтера стоит форма заморозки, которой ей нельзя пользоваться"
@@ -450,7 +450,7 @@ def test_the_accountant_is_not_offered_a_button_she_cannot_use(client, calculate
 def test_the_director_is_still_offered_the_button(client, calculated_june):
     """Обратная сторона: чинить видимость кнопки вырезанием кнопки нельзя."""
     login_as(client, "director")
-    html = body(client.get(period_url(client)))
+    html = body(client.get(period_url(client) + "sheet/"))
 
     assert re.search(r"/payslips/[0-9a-f-]+/freeze/", html), (
         "у директора пропала форма заморозки"

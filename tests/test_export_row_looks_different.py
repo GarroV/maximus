@@ -39,7 +39,7 @@ def calculated(client, web_env):
 
 def rows(client) -> tuple[str, str]:
     """Разметка двух рядов под ведомостью: переключатель и выгрузки."""
-    html = body(client.get(period_url(client)))
+    html = body(client.get(period_url(client) + "sheet/"))
     cuts = re.search(r'<nav class="cuts".*?</nav>', html, re.S)
     exports = re.search(r'<nav class="exports".*?</nav>', html, re.S)
     assert cuts and exports, "под ведомостью больше нет двух рядов — проверка устарела"

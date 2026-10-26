@@ -736,7 +736,7 @@ def test_the_page_offers_the_transfer_and_names_the_target(client, web_env, june
 
     bump_rates("2")
     login_as(client, "director")
-    html = body(client.get(page_of(client, date(2026, 6, 1), june_approved)))
+    html = body(client.get(page_of(client, date(2026, 6, 1), june_approved) + "retro/"))
     assert "Перенести разницу" in html
     assert retro.month_title(date(2026, 7, 1)) in html
 
@@ -764,7 +764,7 @@ def test_the_sheet_says_the_row_is_a_delta(client, web_env, june_approved):
     carry_forward(june_approved, date(2026, 6, 1), date(2026, 7, 1))
 
     login_as(client, "director")
-    page = body(client.get(page_of(client, date(2026, 7, 1), june_approved)))
+    page = body(client.get(page_of(client, date(2026, 7, 1), june_approved) + "sheet/"))
     assert "Перерасчёт за" in page, "строка разницы себя не объясняет"
     assert retro.month_title(date(2026, 6, 1)) in page
 

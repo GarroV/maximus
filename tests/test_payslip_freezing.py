@@ -600,10 +600,10 @@ def test_the_page_marks_the_frozen_row(client, clean_payruns):
     url = calculated_period(client, clean_payruns)
     payslip_id, _ = any_payslip(clean_payruns)
 
-    assert "Заморожена" not in body(client.get(url))
+    assert "Заморожена" not in body(client.get(url + "sheet/"))
     client.post(freeze_url(payslip_id), {"reason": REASON}, follow=True)
 
-    page = body(client.get(url))
+    page = body(client.get(url + "sheet/"))
     assert "Заморожена" in page
     assert REASON in page
 
@@ -625,7 +625,7 @@ def test_a_role_without_the_right_sees_no_button_but_an_explanation(client, clea
     calculated_period(client, clean_payruns)
     login_as(client, "manager")
 
-    page = body(client.get(period_url(client)))
+    page = body(client.get(period_url(client) + "sheet/"))
     assert "/freeze/" not in page
     assert "Заморозка строки ведомости" in page
 

@@ -9536,3 +9536,100 @@ msgid ""
 "Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из "
 "пачки не записано — откройте инбокс заново."
 msgstr "The row “%(what)s” was not split: it has already been split or sorted out. Nothing from the batch was saved — open the inbox again."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s чел., итого %(total)s"
+msgstr "%(count)s people, total %(total)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Данные этого месяца не менялись после утверждения: закрытый расчёт "
+"совпадает с сегодняшним."
+msgstr "This month's data has not changed since approval: the closed calculation matches today's."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итоги появятся, когда период будет посчитан."
+msgstr "Totals appear once the period is calculated."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итогов пока нет"
+msgstr "No totals yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К ведомости"
+msgstr "To the payroll sheet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К расчёту месяца"
+msgstr "To the month's calculation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц ещё не утверждён"
+msgstr "The month is not approved yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Переходов пока нет"
+msgstr "No transitions yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Период ещё не считали: история начинается с первого расчёта."
+msgstr "The period has not been calculated yet: history starts with the first calculation."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Правка задним числом касается только утверждённого месяца. Пока месяц "
+"открыт, изменённые данные просто пересчитываются."
+msgstr "Back-dated corrections apply only to an approved month. While the month is open, changed data is simply recalculated."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правки задним числом"
+msgstr "Back-dated corrections"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разобрать расхождение"
+msgstr "Review the difference"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Расхождений нет"
+msgstr "No differences"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Часы за месяц уже внесены — осталось посчитать период. Ведомость "
+"появится\n    на своей странице: строка на каждого сотрудника в каждом "
+"регистре, который видно\n    вашей роли."
+msgstr "The month's hours are already in — only the calculation is left. The sheet will appear on its own page: a row for each employee in every ledger your role can see."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что в этом месяце"
+msgstr "What is in this month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "данные изменились после утверждения"
+msgstr "data changed after approval"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ещё не посчитана"
+msgstr "not calculated yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "переходов: %(count)s"
+msgstr "transitions: %(count)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "расхождений с утверждённым расчётом нет"
+msgstr "no differences from the approved calculation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сколько в каждом регистре учёта"
+msgstr "how much is in each ledger"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "итог месяца по статьям"
+msgstr "the month's result by line"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сравнить расчёт с таблицей бухгалтера"
+msgstr "compare the calculation with the accountant's spreadsheet"

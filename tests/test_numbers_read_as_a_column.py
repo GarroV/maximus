@@ -185,7 +185,7 @@ def test_every_amount_in_the_payroll_sheet_sits_in_a_marked_cell(client, web_env
     from conftest import period_url
 
     login_as(client, "accountant")
-    page = body(client.get(period_url(client)))
+    page = body(client.get(period_url(client) + "sheet/"))
     sheet = page.split('<table class="sheet">', 1)
     assert len(sheet) == 2, "ведомости на странице нет — проверять нечего"
     table = sheet[1].split("</table>", 1)[0]
@@ -218,7 +218,7 @@ def test_the_sheet_shows_both_dashes_and_amounts_at_once(client, web_env, calcul
     from conftest import period_url
 
     login_as(client, "accountant")
-    page = body(client.get(period_url(client)))
+    page = body(client.get(period_url(client) + "sheet/"))
     table = page.split('<table class="sheet">', 1)[1].split("</table>", 1)[0]
     kinds = {
         "прочерк": 0,

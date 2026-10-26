@@ -9374,3 +9374,100 @@ msgid ""
 "Строка «%(what)s» не разнесена: её уже разнесли или разобрали. Ничего из "
 "пачки не записано — откройте инбокс заново."
 msgstr "Red „%(what)s“ nije raspoređen: već je raspoređen ili razvrstan. Ništa iz grupe nije sačuvano — ponovo otvorite prijemno sanduče."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s чел., итого %(total)s"
+msgstr "%(count)s osoba, ukupno %(total)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Данные этого месяца не менялись после утверждения: закрытый расчёт "
+"совпадает с сегодняшним."
+msgstr "Podaci ovog meseca nisu menjani posle odobrenja: zatvoreni obračun se poklapa sa današnjim."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итоги появятся, когда период будет посчитан."
+msgstr "Ukupni iznosi se pojavljuju kada se period obračuna."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итогов пока нет"
+msgstr "Ukupnih iznosa još nema"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К ведомости"
+msgstr "Na obračunsku listu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К расчёту месяца"
+msgstr "Na obračun meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц ещё не утверждён"
+msgstr "Mesec još nije odobren"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Переходов пока нет"
+msgstr "Prelaza još nema"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Период ещё не считали: история начинается с первого расчёта."
+msgstr "Period još nije obračunavan: istorija počinje prvim obračunom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Правка задним числом касается только утверждённого месяца. Пока месяц "
+"открыт, изменённые данные просто пересчитываются."
+msgstr "Ispravke unazad se odnose samo na odobren mesec. Dok je mesec otvoren, izmenjeni podaci se jednostavno ponovo obračunavaju."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правки задним числом"
+msgstr "Ispravke unazad"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разобрать расхождение"
+msgstr "Pregledaj razliku"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Расхождений нет"
+msgstr "Nema razlika"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Часы за месяц уже внесены — осталось посчитать период. Ведомость "
+"появится\n    на своей странице: строка на каждого сотрудника в каждом "
+"регистре, который видно\n    вашей роли."
+msgstr "Sati za mesec su već uneti — preostaje samo obračun. Lista će se pojaviti na svojoj stranici: red za svakog zaposlenog u svakom registru koji vaša uloga vidi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что в этом месяце"
+msgstr "Šta je u ovom mesecu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "данные изменились после утверждения"
+msgstr "podaci su se promenili posle odobrenja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ещё не посчитана"
+msgstr "još nije obračunata"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "переходов: %(count)s"
+msgstr "prelaza: %(count)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "расхождений с утверждённым расчётом нет"
+msgstr "nema razlika u odnosu na odobreni obračun"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сколько в каждом регистре учёта"
+msgstr "koliko ima u svakom registru evidencije"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "итог месяца по статьям"
+msgstr "rezultat meseca po stavkama"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сравнить расчёт с таблицей бухгалтера"
+msgstr "uporedi obračun sa tabelom knjigovođe"

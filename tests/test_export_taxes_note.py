@@ -145,7 +145,7 @@ def test_the_screen_and_the_file_of_a_cut_say_the_same(client, sql, june_calcula
     написана вся задача, поэтому проверка стоит отдельно.
     """
     _rows, in_file = pnl_file(client, sql, "?ledger=official")
-    on_screen = body(client.get(page_url(sql) + "?ledger=official"))
+    on_screen = body(client.get(page_url(sql) + "sheet/" + "?ledger=official"))
 
     assert SAID_MISSING in in_file
     assert SAID_MISSING in on_screen, "экран разреза молчит о том, о чём говорит файл"
@@ -157,11 +157,11 @@ def test_the_screen_says_it_too(client, sql, june_calculated):  # noqa: F811
     client.post("/logout/")
     login_as(client, "manager")
     try:
-        html = body(client.get(page_url(sql)))
+        html = body(client.get(page_url(sql) + "sheet/"))
         assert SAID_MISSING in html, "экран управляющего молчит о налогах"
         assert SAID_RIGHTS in html
     finally:
         client.post("/logout/")
 
     login_as(client, "director")
-    assert SAID_MISSING not in body(client.get(page_url(sql))), "лишняя надпись у директора"
+    assert SAID_MISSING not in body(client.get(page_url(sql) + "sheet/")), "лишняя надпись у директора"
