@@ -16,7 +16,8 @@
 действующему на конец месяца. Здесь только сложение по партнёру.
 
 **Чего не знаем — не складываем.** Партнёр, у которого хоть одна сумма без
-курса или скрыты строки зарплаты, в итог сети не входит: сумма без части
+курса, скрыты строки зарплаты или смотрящему закрыта часть регистров или точек
+(управляющий точки видит только её), в итог сети не входит: сумма без части
 фактов выглядела бы полной, не будучи ею. Незакрытые месяцы в итог входят, но
 подвал называет их числом — эталон: «складывать закрытое с незакрытым и не
 говорить об этом — единственный способ получить цифру, которой никто не
@@ -62,13 +63,16 @@ class Partner:
     profit: Decimal
     unrated: int             # фактов без курса
     payroll_hidden: bool
+    # Смотрящему закрыта часть регистров или точек партнёра: он видит срез, а
+    # не партнёра целиком, и сумма среза в итоге сети читалась бы как полная.
+    narrowed: bool
     status: str | None       # open | closed | None — месяц не заведён
     rate: Rate | None
 
     @property
     def complete(self) -> bool:
         """Сумма партнёра полная: у каждого факта есть курс и ничего не скрыто."""
-        return self.unrated == 0 and not self.payroll_hidden
+        return self.unrated == 0 and not self.payroll_hidden and not self.narrowed
 
     @property
     def closed(self) -> bool:
@@ -131,6 +135,7 @@ select t.id::text, t.title, t.country_code, t.base_currency, t.report_currency,
        coalesce(s.revenue, 0), coalesce(s.payroll, 0), coalesce(s.profit, 0),
        coalesce(s.unrated, 0),
        not app_sees_payroll(t.id) as payroll_hidden,
+       (not app_sees_every_ledger(t.id) or app_unit_ids(t.id) is not null) as narrowed,
        p.status::text,
        r.base_currency, r.quote_currency, r.rate, r.rate_date, r.note,
        x.id is not null as fixed
@@ -174,13 +179,14 @@ def collect(cursor, period: date) -> Network:
 
 def _partner(row) -> Partner:
     (tenant_id, title, country, currency, report, units, revenue, payroll, profit,
-     unrated, payroll_hidden, status, base, quote, value, on, note, fixed) = row
+     unrated, payroll_hidden, narrowed, status, base, quote, value, on, note, fixed) = row
     rate = Rate(base, quote, value, on, note, fixed) if base else None
     return Partner(
         tenant_id=tenant_id, title=title, country_code=country, currency=currency,
         report_currency=report, units=units, revenue=revenue,
         payroll=payroll if not payroll_hidden else ZERO, profit=profit,
-        unrated=unrated, payroll_hidden=payroll_hidden, status=status, rate=rate,
+        unrated=unrated, payroll_hidden=payroll_hidden, narrowed=narrowed, status=status,
+        rate=rate,
     )
 
 

@@ -122,5 +122,9 @@
   "Месяц ещё не закрыт у партнёров: %(counter)s из %(summed)s. Их суммы в итоге могут измениться — складывать закрытое с незакрытым молча значило бы получить цифру, которой никто не поверит.": {
     "en": "The month is not closed yet for partners: %(counter)s of %(summed)s. Their amounts in the total may still change — adding closed and unclosed months silently would give a figure nobody trusts.",
     "sr": "Mesec još nije zatvoren kod partnera: %(counter)s od %(summed)s. Njihovi iznosi u zbiru se još mogu promeniti — sabirati zatvoreno i nezatvoreno ćutke značilo bi dobiti cifru kojoj niko ne veruje."
+  },
+  "видна не вся сеть партнёра: часть регистров или точек закрыта": {
+    "en": "not the whole partner is visible: some ledgers or stores are closed to you",
+    "sr": "ne vidi se ceo partner: deo registara ili objekata je zatvoren"
   }
 }
