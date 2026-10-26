@@ -455,11 +455,15 @@ def _grid_url(client) -> str:
 
 
 def test_grid_offers_the_upload_to_those_who_may_edit(client, web_env):
+    """С сетки — вход на страницу загрузки, а форма живёт на ней (T231)."""
     from conftest import body, login_as
 
     login_as(client, "director")
-    html = body(client.get(_grid_url(client)))
-    assert 'name="table"' in html, "на табеле нет формы загрузки"
+    grid = _grid_url(client)
+    assert f'href="{grid}import/"' in body(client.get(grid)), "с табеля нет входа в загрузку"
+    page = client.get(f"{grid}import/")
+    assert page.status_code == 200
+    assert 'name="table"' in body(page), "на странице загрузки нет формы"
 
 
 def test_grid_does_not_offer_the_upload_without_the_right(
@@ -469,7 +473,11 @@ def test_grid_does_not_offer_the_upload_without_the_right(
     from conftest import body, login_as
 
     login_as(client, "admin")
-    assert 'name="table"' not in body(client.get(_grid_url(client)))
+    grid = _grid_url(client)
+    assert f"{grid}import/" not in body(client.get(grid))
+    page = client.get(f"{grid}import/")
+    assert page.status_code == 200
+    assert 'name="table"' not in body(page)
 
 
 def test_upload_shows_the_report(client, period_restored):

@@ -143,6 +143,10 @@ table.grid th:first-child, table.grid td:first-child {
   position: sticky; left: 0; background: var(--surface); z-index: 1;
 }
 table.grid tbody tr:hover td:first-child { background: var(--surface-2); }
+/* Угол шапки — залит как остальная шапка и выше всех: правило выше делало
+   его белым, а `z-index: 1` опускало под прилипшие имена строк, и при
+   прокрутке вниз имена наезжали на подпись «Сотрудник» (issue #268). */
+table.grid thead th:first-child { background: var(--surface-head); z-index: 4; }
 
 #cell-error { margin-top: 16px; }
 
@@ -212,3 +216,21 @@ section.units .note { margin: 0; flex-basis: 100%; }
    правило стоит в листе табеля, а не в общем. */
 section.units button.secondary { color: var(--ink-2); }
 section.units button.secondary:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Входы в загрузку и закрытие часов над сеткой (T231). Одна тихая строка:
+   это соседние функции, а не главное на экране, и на телефоне они не должны
+   отодвигать сетку — ссылки переносятся, а не растут в карточки. */
+nav.tools {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  margin: 0 0 16px; font-size: var(--fs-dense);
+}
+nav.tools .hint { color: var(--ink-2); font-size: var(--fs-meta); }
+
+/* Карточка точки на узком экране (T231, находка T223 #298): подписи «17 чел.» и
+   «часы открыты» не рвутся посреди, а карточка переносит кнопку на свою строку. */
+section.units .unit { flex-wrap: wrap; }
+section.units .unit .hint, section.units .unit-state { white-space: nowrap; }
+@media (max-width: 600px) {
+  section.units { flex-direction: column; }
+  section.units .unit { width: 100%; box-sizing: border-box; }
+}
