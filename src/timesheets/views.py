@@ -17,11 +17,12 @@ from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseNotFound
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
 from payrun.errors import PayrunRefused
-from web import permissions
+from web import filter_links, permissions
 from web.principal import get_current_principal
 from web.views import find_period, month_title
 
@@ -32,11 +33,12 @@ from .closing import (
     reopen_unit,
     unit_states,
 )
-from .grid import build_grid, visible_rows
+from .grid import Grid, build_grid, visible_rows
 from .importer import import_partner_table
 from .store import (
     CellRefused,
     ensure_row,
+    month_norm,
     parse_hours,
     parse_insured,
     parse_piece,
@@ -45,7 +47,9 @@ from .store import (
     set_piece,
 )
 
-__all__ = ["cell", "close", "grid", "import_table", "insured", "piece", "reopen"]
+__all__ = [
+    "cell", "close", "export", "grid", "import_table", "insured", "piece", "reopen",
+]
 
 # Больше этого файл зарплатной таблицы не бывает: восемь листов на несколько
 # сотен человек — это сотни килобайт. Ограничение не про безопасность, а про
@@ -122,6 +126,11 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
     units = (
         unit_states(period.tenant_id, period.period, table.rows) if table else []
     )
+    # Фильтр точек — ссылки-чипы (D081). Варианты — из полной сетки роли, а не из
+    # отобранной: иначе после выбора точки остальные чипы пропали бы.
+    chosen = _chosen_unit(request, units)
+    if table is not None and chosen:
+        table = _only_unit(table, chosen)
     return render(
         request,
         "timesheets/grid.html",
@@ -140,13 +149,98 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
             # них — две ссылки и сводка «сколько точек открыто».
             "units": units,
             "open_count": sum(1 for unit in units if not unit.closed),
+            # Плашка состояния шапки: «Закрыт» только когда закрыты все точки
+            # сетки; смесь — «Открыт», а сколько именно, говорит сводка рядом.
+            "all_closed": bool(units) and all(unit.closed for unit in units),
+            "norm_hours": _norm_or_none(period),
+            "unit_filter": _unit_filter(period, units, chosen),
+            "chosen_unit": chosen,
+            "export_url": _export_url(period, chosen),
         },
         status=refusal.http_status if refusal else status,
     )
 
 
+def _chosen_unit(request, units) -> str:
+    """Точка из `?unit=` — только если она есть на табеле этой роли.
+
+    Чужой или выдуманный номер молча снимает отбор: адрес с ним, присланный
+    человеку, не должен ни падать, ни намекать, что такая точка существует.
+    """
+    wanted = request.GET.get("unit") or ""
+    return wanted if wanted in {str(unit.unit_id) for unit in units} else ""
+
+
+def _only_unit(table: Grid, unit_id: str) -> Grid:
+    """Сетка одной точки: итоги считаются из строк, значит, пересчитаются сами."""
+    return Grid(
+        columns=table.columns,
+        rows=[row for row in table.rows if str(row.unit_id) == unit_id],
+    )
+
+
+def _unit_filter(period, units, chosen: str) -> list[dict]:
+    """Ряд чипов «Точка»: пустой, пока точка на табеле одна — выбирать не из чего."""
+    if len(units) < 2:
+        return []
+    base = reverse("timesheets", args=[period.id])
+    options = [(str(unit.unit_id), unit.code or unit.title) for unit in units]
+    return [filter_links.row(
+        "unit", _("Точка"), options, chosen, base=base, query={},
+        everything=_("Все"),
+    )]
+
+
+def _export_url(period, chosen: str) -> str:
+    # Файл обязан содержать то, что человек видит: выбранная точка уезжает в адрес.
+    return filter_links.url(
+        reverse("timesheet-export", args=[period.id]), {}, unit=chosen,
+    )
+
+
+def _norm_or_none(period):
+    """Норма месяца для шапки; календаря нет — строки нормы нет, а не «0 ч»."""
+    try:
+        return month_norm(period.tenant_id, period.period)
+    except CellRefused:
+        return None
+
+
 @login_required
-@require_POST
+def export(request, period_id):
+    """Табель месяца как xlsx: то, что на сетке, с отбором по точке из адреса.
+
+    Права те же, что у чтения сетки: строки идут через `build_grid` с точками
+    роли, и управляющий получит в файле только свои точки.
+    """
+    from .export import grid_workbook
+
+    period = find_period(period_id)
+    who = _context(request, period)
+    try:
+        table = build_grid(period.tenant_id, period.period, unit_ids=who.unit_ids)
+    except PayrunRefused as denied:
+        return HttpResponse(
+            denied.message, status=denied.http_status,
+            content_type="text/plain; charset=utf-8",
+        )
+    chosen = _chosen_unit(
+        request, unit_states(period.tenant_id, period.period, table.rows),
+    )
+    if chosen:
+        table = _only_unit(table, chosen)
+    response = HttpResponse(
+        grid_workbook(table, period.period),
+        content_type=(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ),
+    )
+    response["Content-Disposition"] = (
+        f'attachment; filename="timesheet-{period.period:%Y-%m}.xlsx"'
+    )
+    return response
+
+
 def _row_of(request, period, who):
     """Строка табеля, в которую пишет ячейка. Заводит её, если ещё нет.
 
@@ -421,7 +515,9 @@ def close(request, period_id):
         return _switch_closing(request, period_id, closing=True)
     period = find_period(period_id)
     who = _context(request, period)
-    return _close_page(request, period, who)
+    return _close_page(
+        request, period, who, confirm_unit=request.GET.get("unit") or "",
+    )
 
 
 @login_required
@@ -471,7 +567,8 @@ def _switch_closing(request, period_id, *, closing: bool):
     return redirect("timesheet-close", period_id=period.id)
 
 
-def _close_page(request, period, who, *, notice: str = "", status: int = 200):
+def _close_page(request, period, who, *, notice: str = "", status: int = 200,
+                confirm_unit: str = ""):
     table, refusal = None, None
     try:
         table = build_grid(period.tenant_id, period.period, unit_ids=who.unit_ids)
@@ -480,6 +577,15 @@ def _close_page(request, period, who, *, notice: str = "", status: int = 200):
     # Права нет — кнопок нет, но сказано, почему их нет: исчезнувшее без
     # объяснения действие читается как поломка, а не как запрет (T064).
     close_denied = permissions.explain(who, permissions.UNIT_CLOSE)
+    units = unit_states(period.tenant_id, period.period, table.rows) if table else []
+    # Шаг подтверждения — обычная страница с `?unit=`, а не окно на JS: работает
+    # без скриптов, обновляется и открывается по ссылке. Подтверждать нечего, если
+    # права нет, точки нет в списке роли или она уже закрыта — тогда обычный список.
+    confirm = None
+    if confirm_unit and not close_denied:
+        state = next((u for u in units if str(u.unit_id) == confirm_unit), None)
+        if state is not None and not state.closed:
+            confirm = _confirmation(table, state)
     return render(
         request,
         "timesheets/close.html",
@@ -492,13 +598,26 @@ def _close_page(request, period, who, *, notice: str = "", status: int = 200):
             "limited_to_units": bool(who.unit_ids),
             "can_close": not close_denied,
             "close_denied": close_denied,
-            "units": (
-                unit_states(period.tenant_id, period.period, table.rows)
-                if table else []
-            ),
+            "units": units,
+            "confirm": confirm,
         },
         status=refusal.http_status if refusal else status,
     )
+
+
+def _confirmation(table: Grid, state) -> dict:
+    """Что человек закрывает: сколько людей, часов и замечаний у этой точки.
+
+    Замечания — те же подозрительные числа, что на сетке (T118): они не мешают
+    закрыть, но перед закрытием их надо показать, а не оставить находкой после.
+    """
+    rows = [row for row in table.rows if row.unit_id == state.unit_id]
+    return {
+        "unit": state,
+        "people": len(rows),
+        "hours": sum((row.total for row in rows), Decimal("0")),
+        "hints": [hint for row in rows if row.suspicious for hint in row.hints],
+    }
 
 
 @login_required

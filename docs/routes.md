@@ -142,6 +142,7 @@
 | `/timesheets/<uuid:period_id>/` | `timesheets` | `timesheets.views.grid` |
 | `/timesheets/<uuid:period_id>/cell/` | `timesheet-cell` | `timesheets.views.cell` |
 | `/timesheets/<uuid:period_id>/close/` | `timesheet-close` | `timesheets.views.close` |
+| `/timesheets/<uuid:period_id>/export/` | `timesheet-export` | `timesheets.views.export` |
 | `/timesheets/<uuid:period_id>/import/` | `timesheet-import` | `timesheets.views.import_table` |
 | `/timesheets/<uuid:period_id>/insured/` | `timesheet-insured` | `timesheets.views.insured` |
 | `/timesheets/<uuid:period_id>/piece/` | `timesheet-piece` | `timesheets.views.piece` |

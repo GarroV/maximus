@@ -726,10 +726,6 @@ msgstr "%(who)s: %(total)s h pri normi od %(norm)s h"
 msgid "%(who)s: уволен %(date)s, а часов за этот месяц %(total)s"
 msgstr "%(who)s: otpušten %(date)s, a ima %(total)s sati ovog meseca"
 
-#: timesheets/templates/timesheets/_hints.html:17
-msgid "Стоит посмотреть до расчёта"
-msgstr "Vredi pogledati pre obračuna"
-
 #: timesheets/templates/timesheets/_hints.html:24
 msgid ""
 "Ни одно из этих чисел не ошибка само по себе — но незамеченными они и "
@@ -819,14 +815,6 @@ msgstr "Ponovo otvori"
 #: timesheets/templates/timesheets/grid.html:97
 msgid "часы открыты"
 msgstr "sati otvoreni"
-
-#: timesheets/templates/timesheets/grid.html:98
-msgid "Закрыть часы точки"
-msgstr "Zatvori sate objekta"
-
-#: timesheets/templates/timesheets/grid.html:123
-msgid "Загрузить таблицу партнёра (.xlsx)"
-msgstr "Učitaj partnerovu tabelu (.xlsx)"
 
 #: timesheets/templates/timesheets/grid.html:125
 msgid "Загрузить"
@@ -9575,3 +9563,67 @@ msgstr "Redovi zarada su u izveštaju zatvoreni, ukupan iznos je obračunat bez 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "закрыто: нет права видеть суммы расчёта"
 msgstr "zatvoreno: nema prava da se vide obračunati iznosi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Все"
+msgstr "Sve"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Всего часов"
+msgstr "Ukupno sati"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Закрыть часы по %(unit)s?"
+msgstr "Zatvoriti sate za %(unit)s?"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Закрыть часы по точке"
+msgstr "Zatvori sate za lokaciju"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Замечания не мешают закрыть: система предупреждает, но не запрещает. "
+"Открыть часы обратно можно на этой же странице."
+msgstr "Napomene ne sprečavaju zatvaranje: sistem upozorava, ali ne zabranjuje. Sate možete ponovo otvoriti na ovoj istoj stranici."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Колонки подбираются сами: имя, точка, типы часов. Если колонка не "
+"распознана — спросим, но файл не отклоним."
+msgstr "Kolone se prepoznaju automatski: ime, lokacija, tipovi sati. Ako kolona nije prepoznata, pitaćemo, ali fajl nećemo odbiti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Незакрытых замечаний"
+msgstr "Otvorenih napomena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отмена"
+msgstr "Otkaži"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Перетащите свой xlsx сюда или выберите файл"
+msgstr "Prevucite svoj xlsx ovde ili izaberite fajl"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"После закрытия часы этой точки не меняются, и расчёт можно запускать. "
+"Другие точки остаются открытыми — закрытие идёт по каждой независимо."
+msgstr "Nakon zatvaranja sati ove lokacije se ne menjaju i obračun može da se pokrene. Ostale lokacije ostaju otvorene — svaka se zatvara nezavisno."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Скачать xlsx"
+msgstr "Preuzmi xlsx"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сотрудников"
+msgstr "Zaposlenih"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Требует вашего взгляда"
+msgstr "Zahteva vašu pažnju"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "норма месяца %(norm)s ч"
+msgstr "norma meseca %(norm)s h"
