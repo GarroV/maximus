@@ -231,6 +231,22 @@ def test_the_one_who_allocated_cannot_confirm_in_the_database(
         insert_review(conn, tenant, sorted_line, "confirmed")
 
 
+def test_the_author_of_the_version_cannot_confirm_it(
+    web_env, sql, tenant, sorted_line,  # noqa: F811
+):
+    """Новая версия строки мимо разбора (правка счёта) шага «разнесено» не
+    оставляет — и её автор не должен сверять собственную работу.
+
+    Версия «написана бухгалтером» правкой автора владельцем схемы: так база
+    выглядит после того, как бухгалтер переписал разнесённую строку сам.
+    """
+    sql.execute("update facts set created_by = %s where id = %s",
+                (person(sql, "accountant"), sorted_line))
+    with app_conn(web_env, person(sql, "accountant")) as conn, \
+            pytest.raises(psycopg.Error):
+        insert_review(conn, tenant, sorted_line, "confirmed")
+
+
 def test_the_accountant_may_confirm_in_the_database(web_env, sql, tenant, sorted_line):  # noqa: F811
     """Положительная половина: иначе отказы выше доказывали бы закрытую дверь."""
     with app_conn(web_env, person(sql, "accountant")) as conn:
