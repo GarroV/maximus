@@ -9,7 +9,9 @@ from django.utils.translation import gettext as _
 
 CENT = Decimal("0.01")
 
-_DATE_FORMATS = ("%Y-%m-%d", "%d.%m.%Y", "%d.%m.%y", "%d/%m/%Y", "%Y%m%d")
+# Слэшей нет намеренно: `01/06/2026` — и 1 июня, и 6 января, а угаданная не
+# туда дата выглядит прочитанной из файла (то же правило у справочника статей).
+_DATE_FORMATS = ("%Y-%m-%d", "%d.%m.%Y", "%d.%m.%y", "%Y%m%d")
 
 
 def amount(raw) -> Decimal | None:

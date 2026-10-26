@@ -296,3 +296,15 @@ def test_the_cell_budget_is_refused_by_name(monkeypatch):
     with pytest.raises(Unreadable) as refused:
         reader._capped([["1", "2", "3"], ["4", "5", "6"]])
     assert "ячеек" in str(refused.value)
+
+
+def test_a_slashed_date_is_not_guessed():
+    """`01/06/2026` — и 1 июня, и 6 января: дата не угадывается, а называется.
+
+    То же правило, что у загрузки справочника статей (T155): угаданная не туда
+    дата выглядит прочитанной из файла, и платёж молча уезжает в другой месяц.
+    """
+    from bankstatement.values import day
+
+    with pytest.raises(ValueError, match="01/06/2026"):
+        day("01/06/2026")
