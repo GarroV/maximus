@@ -47,6 +47,7 @@ from django.utils.translation import gettext_noop
 from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
 
+from reports.cells import safe_cell
 from reports.sheet import ALL, SheetSlice
 
 # Строка блока налогов: статья, точка и два числа. Кортеж, а не словарь: у него
@@ -104,6 +105,12 @@ def _file_name(kind: str, period: date | None, cut: str) -> str:
     return f"{kind}-{_stamp(period)}{tail}.xlsx"
 
 
+def _append(ws, row) -> None:
+    """Строка листа. Текст — через `safe_cell`: названия и назначения приходят
+    от людей и из чужих файлов (выписка банка), формулой они быть не должны."""
+    ws.append([safe_cell(value) for value in row])
+
+
 def _head(ws, text: str, width: int, note: str = "") -> None:
     """Шапка документа: заголовок, при необходимости примечание и пустая строка.
 
@@ -112,17 +119,17 @@ def _head(ws, text: str, width: int, note: str = "") -> None:
     прочитана как позиция с пустой суммой. В преамбуле она читается человеком и
     пропускается загрузчиком — там же, где уже живёт название документа.
     """
-    ws.append([text])
+    _append(ws, [text])
     ws["A1"].font = Font(bold=True, size=13)
     if note:
-        ws.append([note])
+        _append(ws, [note])
         ws[f"A{ws.max_row}"].alignment = Alignment(vertical="top", wrap_text=True)
-    ws.append([])
+    _append(ws, [])
     del width
 
 
 def _headers(ws, row: list[str]) -> None:
-    ws.append(row)
+    _append(ws, row)
     for cell in ws[ws.max_row]:
         cell.font = Font(bold=True)
         cell.alignment = Alignment(vertical="top", wrap_text=True)
@@ -230,7 +237,7 @@ def payout(view: SheetSlice, *, tenant_id=None, period=None, title="",
                 _("строка заморожена: %(reason)s") % {"reason": row.freeze_reason}
                 if row.freeze_reason else _("строка заморожена")
             )
-        ws.append(
+        _append(ws,
             [number, row.employee, row.unit, ledger_title(row.ledger)]
             + [row.amounts.get(column.code) for column in columns]
             + [row.total, "; ".join(notes)]
@@ -573,7 +580,7 @@ def pnl(view: SheetSlice, *, tenant_id=None, period=None, title="",
             accruals[key] = accruals.get(key, Decimal(0)) + amount
 
     for (article, unit, ledger, _code, column_title), amount in sorted(accruals.items()):
-        ws.append([article, unit, ledger_title(ledger), _("Начисление"), column_title, amount])
+        _append(ws, [article, unit, ledger_title(ledger), _("Начисление"), column_title, amount])
 
     # Расходы — рядом с начислениями и в тех же статьях, а не отдельным листом:
     # файл собирают в P&L одним разбором, и вторая таблица со своими колонками
@@ -583,13 +590,13 @@ def pnl(view: SheetSlice, *, tenant_id=None, period=None, title="",
         key = (line.article, line.unit or NO_UNIT, line.ledger, line.title)
         spent[key] = spent.get(key, Decimal(0)) + line.amount
     for (article, unit, ledger, spent_on), amount in sorted(spent.items()):
-        ws.append([article, unit, ledger_title(ledger), _("Расход"), spent_on, amount])
+        _append(ws, [article, unit, ledger_title(ledger), _("Расход"), spent_on, amount])
 
     for line in taxes:
         # Регистра у налога нет, и прочерк здесь честнее пустой ячейки: пустая
         # читается как «забыли заполнить».
-        ws.append([line.article, line.unit, "—", _("Налог"), _("Налог на доход"), line.tax])
-        ws.append([line.article, line.unit, "—", _("Взносы"), _("Взносы"), line.contributions])
+        _append(ws, [line.article, line.unit, "—", _("Налог"), _("Налог на доход"), line.tax])
+        _append(ws, [line.article, line.unit, "—", _("Взносы"), _("Взносы"), line.contributions])
 
     _fit(ws, [26, 8, 15, 14, 26, 14])
     _money_format(ws, 6)
@@ -629,7 +636,7 @@ def partner(view: SheetSlice, *, tenant_id=None, period=None, title="",
 
         rows = [row for row in view.sheet.rows if row.unit == unit]
         for number, row in enumerate(rows, start=1):
-            ws.append(
+            _append(ws,
                 [number, row.employee, ledger_title(row.ledger)]
                 + [row.amounts.get(column.code) for column in columns]
                 + [row.total]
