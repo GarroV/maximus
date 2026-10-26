@@ -35,6 +35,9 @@
 {% if papers_waiting %}
 <p class="note" data-papers="{{ papers_waiting }}"><a href="{{ papers_url }}">{% blocktranslate count counter=papers_waiting %}Бумаги с точек: ждёт разбора {{ counter }}{% plural %}Бумаги с точек: ждут разбора {{ counter }}{% endblocktranslate %}</a> — {% translate "их в P&L ещё нет, разбираются на своей странице" %}</p>
 {% endif %}
+{% if check_waiting %}
+<p class="note" data-check="{{ check_waiting }}"><a href="{{ check_url }}">{% blocktranslate count counter=check_waiting %}Сверка суммы и НДС: ждёт {{ counter }} строка{% plural %}Сверка суммы и НДС: ждут {{ counter }} строк{% endblocktranslate %}</a> — {% translate "разнесены, ждут второй руки" %}</p>
+{% endif %}
 {% if statement_waiting %}
 <p class="note" data-statement="{{ statement_waiting }}"><a href="{{ statement_url }}">{% blocktranslate count counter=statement_waiting %}Банковская выписка: ждёт решения {{ counter }} строка{% plural %}Банковская выписка: ждут решения {{ counter }} строк{% endblocktranslate %}</a> — {% translate "без решения их в P&L нет, решаются на сопоставлении" %}</p>
 {% endif %}
@@ -44,6 +47,7 @@
 
 {% if rows %}
 {% notice "alert" title=total_text %}<span data-total="{{ total_raw }}">{% blocktranslate count counter=counted %}ждёт разбора {{ counter }} строка{% plural %}ждут разбора {{ counter }} строк{% endblocktranslate %}</span>{% endnotice %}
+<p class="note" data-waits-for>{% blocktranslate with who=waits_for %}Ждёт разнесения — чья строка и за что: {{ who }}{% endblocktranslate %}</p>
 
 {% translate "Статья расхода" as item_label %}{% translate "Не выбрана" as not_chosen %}{% translate "Точка" as unit_label %}
 <form id="inbox-batch" class="search row" method="post" action="{% url 'inbox-batch' %}">{% csrf_token %}

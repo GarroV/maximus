@@ -20,6 +20,8 @@
       <th>{% translate "Что это" %}</th>
       <th class="num">{% translate "Сумма" %}</th>
       <th>{% translate "Откуда" %}</th>
+      <th>{% translate "Разнёс" %}</th>
+      <th>{% translate "Подтвердил" %}</th>
     </tr>
   </thead>
   <tbody>
@@ -31,6 +33,8 @@
       <td>{{ row.title }}</td>
       <td class="{{ row.amount|numclass }}">{{ row.amount }}</td>
       <td>{{ row.source }}</td>
+      <td>{{ row.allocated_by }}</td>
+      <td>{{ row.confirmed_by }}</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -38,7 +42,7 @@
     <tr class="grand">
       <th colspan="4">{% translate "Итого по строке" %}</th>
       <th class="{{ total|numclass }}">{{ total }}</th>
-      <th></th>
+      <th colspan="3"></th>
     </tr>
   </tfoot>
 </table>{% endscroll %}

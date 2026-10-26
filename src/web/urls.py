@@ -31,6 +31,7 @@ from . import (
     suppliers_views,
     theme,
     tills_views,
+    two_hands_views,
     views,
 )
 
@@ -431,6 +432,13 @@ urlpatterns = [
     path("inbox/classify/", suppliers_views.inbox_batch, name="inbox-batch"),
     # Разнести отмеченные строки по точкам одними долями (T234, D089).
     path("inbox/split/", inbox_split_views.inbox_split, name="inbox-split"),
+    # Вторая рука разбора: сверка суммы и НДС у разнесённых строк (T206).
+    path("inbox/check/", two_hands_views.check, name="inbox-check"),
+    path(
+        "inbox/check/<uuid:fact_id>/confirm/",
+        two_hands_views.check_confirm,
+        name="inbox-check-confirm",
+    ),
     # Расходы по HTTP (T112). Отдельный префикс `api/`, а не те же адреса с
     # другим заголовком: два разных ответа на один адрес разъезжаются молча — и
     # разъезжаться будут именно там, где их никто не смотрит глазами. Роль и

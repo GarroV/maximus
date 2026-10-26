@@ -45,7 +45,7 @@ def role_choice(role) -> dict:
 # их строки только на чтение (`LEDGER_GROUP`).
 RIGHT_GROUPS = (
     (gettext_noop("Табель и операционка"),
-     ("timesheet.edit", "unit.close", "suppliers.classify")),
+     ("timesheet.edit", "unit.close", "suppliers.classify", "suppliers.confirm")),
     (gettext_noop("Зарплата и деньги"),
      ("payroll.view", "payrun.calculate", "period.approve", "period.reopen", "payslip.freeze",
       "retro.post")),
