@@ -37,6 +37,8 @@ STYLESHEETS = (
     ROOT / "src/timesheets/static/timesheets/grid.css",
     # Аналитика по людям — свой лист: app.css в волне ведёт блок visual.
     ROOT / "src/web/static/web/people.css",
+    # Банковская выписка (T198) — свой лист, подключается только её страницами.
+    ROOT / "src/web/static/web/bank.css",
 )
 
 # Классы без оформления по замыслу: крючки для htmx и для проверок. Каждый

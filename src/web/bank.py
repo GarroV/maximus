@@ -62,6 +62,7 @@ from core.models import (
 )
 
 from . import cash, suppliers
+from . import format as fmt
 
 # Состояния строки — выводятся, а не хранятся (см. `BankLine`).
 MATCHED = "matched"
@@ -102,7 +103,13 @@ class AlreadyLoaded(BankRefused):
         self.statement = statement
         super().__init__(_(
             "Этот файл уже загружен %(when)s — второй раз он ничего не добавит."
-        ) % {"when": timezone.localtime(statement.created_at).strftime("%d.%m.%Y %H:%M")})
+        ) % {"when": _moment(statement.created_at)})
+
+
+def _moment(value) -> str:
+    """Дата и время загрузки так же, как остальной продукт пишет дату."""
+    local = timezone.localtime(value)
+    return f"{fmt.day(local.date())} {local:%H:%M}"
 
 
 @dataclass
@@ -226,8 +233,8 @@ def _conflict(number: int, line, first) -> str:
     sign = {OUT: "−", "in": "+"}
     return _("Строка %(n)s: было %(was)s, в файле %(now)s.") % {
         "n": number,
-        "was": f"{on:%d.%m.%Y} {sign.get(direction, '')}{amount:.2f}",
-        "now": f"{line.op_date:%d.%m.%Y} {sign.get(line.direction, '')}{line.amount:.2f}",
+        "was": f"{fmt.day(on)} {sign.get(direction, '')}{fmt.money(amount)}",
+        "now": f"{fmt.day(line.op_date)} {sign.get(line.direction, '')}{fmt.money(line.amount)}",
     }
 
 

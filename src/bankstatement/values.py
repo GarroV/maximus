@@ -17,7 +17,11 @@ MAX_AMOUNT = Decimal("1e16")
 
 # Слэшей нет намеренно: `01/06/2026` — и 1 июня, и 6 января, а угаданная не
 # туда дата выглядит прочитанной из файла (то же правило у справочника статей).
-_DATE_FORMATS = ("%Y-%m-%d", "%d.%m.%Y", "%d.%m.%y", "%Y%m%d")
+_DATE_FORMATS = ("%Y-%m-%d", "%Y%m%d")
+# День, месяц и год через точку — как пишут сербские банки: «05.06.2026» или
+# «05.06.26». Разбирается выражением, а не шаблоном strptime: так видно, что
+# двузначный год — всегда 20xx (выписки до 2000 года не бывает).
+_DOTTED = re.compile(r"(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})")
 
 
 def amount(raw) -> Decimal | None:
@@ -96,6 +100,13 @@ def _parsed_day(raw) -> date | None:
     if not text:
         return None
     text = text[:10] if re.match(r"\d{4}-\d{2}-\d{2}T", text) else text.split(" ")[0]
+    dotted = _DOTTED.fullmatch(text)
+    if dotted:
+        day_, month_, year = (int(part) for part in dotted.groups())
+        try:
+            return date(year + 2000 if year < 100 else year, month_, day_)
+        except ValueError as error:
+            raise ValueError(_("не дата: %(value)s") % {"value": repr(raw)}) from error
     for pattern in _DATE_FORMATS:
         try:
             return datetime.strptime(text, pattern).date()
