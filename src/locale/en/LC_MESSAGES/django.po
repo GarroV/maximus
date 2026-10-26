@@ -11137,3 +11137,7 @@ msgid ""
 "Закрытый месяц держит курс, действовавший при закрытии. Исправить курс — "
 "ввести новый с той же датой: он заменит прежний для незакрытых месяцев."
 msgstr "These rates consolidate the network into one currency, at the rate on the last day of the month. A closed month keeps the rate that applied when it was closed. To correct a rate, enter a new one with the same date: it replaces the previous one for months not yet closed."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "в итог не вошёл ни один партнёр"
+msgstr "no partner made it into the total"

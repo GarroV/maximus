@@ -10978,3 +10978,7 @@ msgid ""
 "Закрытый месяц держит курс, действовавший при закрытии. Исправить курс — "
 "ввести новый с той же датой: он заменит прежний для незакрытых месяцев."
 msgstr "Po njima se mreža svodi u jednu valutu — po kursu na poslednji dan meseca. Zatvoren mesec zadržava kurs koji je važio pri zatvaranju. Da biste ispravili kurs, unesite novi sa istim datumom: on zamenjuje prethodni za nezatvorene mesece."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "в итог не вошёл ни один партнёр"
+msgstr "nijedan partner nije ušao u zbir"
