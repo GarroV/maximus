@@ -76,10 +76,22 @@ MEANINGFUL_VALUES: dict[str, dict[str, str]] = {
     # Строка выписки — расход или приход (`bank_lines_direction`) и
     # сумма строго больше нуля (`bank_lines_amount_positive`): знак несёт
     # направление, а нулевой операции банк не присылает.
-    "bank_lines": {"direction": "'out'", "amount": "1"},
+    # Партнёр строки — партнёр её выписки (составной внешний ключ), поэтому и
+    # выписка, и партнёр берутся из одной родительской строки, а не каждый
+    # «первый попавшийся»: в базе с чужими данными это разные партнёры.
+    "bank_lines": {
+        "direction": "'out'", "amount": "1",
+        "statement_id": "(select id from bank_statements order by id limit 1)",
+        "tenant_id": "(select tenant_id from bank_statements order by id limit 1)",
+    },
     # Связь строки выписки называет, как она легла (`bank_line_links_known_how`):
-    # без этого не отличить сведённую машиной от решённой человеком.
-    "bank_line_links": {"how": "'manual'"},
+    # без этого не отличить сведённую машиной от решённой человеком. Партнёр
+    # связи — партнёр строки, по той же причине, что выше.
+    "bank_line_links": {
+        "how": "'manual'",
+        "line_id": "(select id from bank_lines order by id limit 1)",
+        "tenant_id": "(select tenant_id from bank_lines order by id limit 1)",
+    },
 }
 
 
