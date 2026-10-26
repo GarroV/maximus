@@ -50,7 +50,7 @@ APP_PASSWORD = "app-login-test-only"
 QUEUE_PASSWORD = "queue-login-test-only"
 
 
-def _migrate(dsn: str) -> None:
+def _migrate(dsn: str, *target: str) -> None:
     """Накатить схему, показав причину, если не вышло.
 
     Голый `CalledProcessError` прячет текст ошибки Postgres в stderr
@@ -60,17 +60,18 @@ def _migrate(dsn: str) -> None:
     import subprocess
 
     try:
-        run_manage(dsn, "migrate", "--no-input")
+        run_manage(dsn, "migrate", *target, "--no-input")
     except subprocess.CalledProcessError as exc:
         pytest.fail(f"миграции не накатились ролью без bypassrls:\n{exc.stderr}")
 
 
 @contextmanager
-def _plain_owner_cluster():
+def _plain_owner_cluster(*target: str):
     """База, накатанная ролью без права обходить RLS, плюс логин-роль приложения.
 
     Роли и база временные, с pid в имени: параллельный прогон в том же кластере
-    не должен натыкаться на чужие.
+    не должен натыкаться на чужие. `target` — накатить не до конца (`core
+    0276`): так проверяется миграция поверх уже живых данных.
     """
     psycopg = pytest.importorskip("psycopg", reason="нужен psycopg: pip install -e '.[dev]'")
     from psycopg.conninfo import conninfo_to_dict, make_conninfo
@@ -88,7 +89,7 @@ def _plain_owner_cluster():
     # и проверять его надо на конфигурации площадки, где ни у кого нет права
     # обходить политики.
     queue_login = f"dodo_queue_{pid}"
-    dbname = f"maximus_test_owner_{pid}"
+    dbname = f"maximus_test_owner_{pid}{'_' + target[-1] if target else ''}"
 
     params = conninfo_to_dict(ADMIN_DSN)
     host = params.get("host") or "localhost"
@@ -140,7 +141,7 @@ def _plain_owner_cluster():
         admin.execute(f'grant queue_worker to "{owner}" with admin option')
 
     try:
-        _migrate(owner_dsn(dbname))
+        _migrate(owner_dsn(dbname), *target)
         # Данные заводит администратор — это ровно та операция, которая обход
         # политик подразумевает (сид, восстановление дампа, обслуживание).
         with psycopg.connect(make_conninfo(ADMIN_DSN, dbname=dbname)) as seeder:

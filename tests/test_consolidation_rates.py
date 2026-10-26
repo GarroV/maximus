@@ -161,15 +161,18 @@ def test_month_closed_without_a_rate_takes_the_first_one_and_keeps_it(db):
     assert reported(db, fact_id) == Decimal("2.50"), "заполненный курс закрытого месяца сдвинулся"
 
 
-def test_closing_fixes_every_currency_of_the_month(db):
-    """Закрепляются валюта учёта и валюты фактов месяца — каждая своей строкой."""
+def test_closing_fixes_currencies_that_have_a_rate_and_the_first_rate_adds_the_rest(db):
+    """Закрепление не читает факты: валюта учёта и валюты с курсом — при
+    закрытии, валюта без курса — первым её курсом, уже после закрытия."""
     fact(db, "1000.00", key="rsd")
     fact(db, "1000.00", key="huf", currency="HUF")
     close_june(db)
+    assert set(fixes(db)) == {"RSD"}
+
+    rate(db, "EUR", "HUF", "400", on="2026-06-30")
 
     fixed = fixes(db)
-    assert set(fixed) == {"RSD", "HUF"}
-    assert fixed["RSD"] is not None and fixed["HUF"] is None
+    assert set(fixed) == {"RSD", "HUF"} and fixed["HUF"] is not None
 
 
 # --- справочник и закрепление не правятся -------------------------------------
