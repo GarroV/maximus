@@ -10785,3 +10785,124 @@ msgid_plural "Банковская выписка: ждут решения %(cou
 msgstr[0] "Bankovni izvod: %(counter)s red čeka odluku"
 msgstr[1] "Bankovni izvod: %(counter)s reda čekaju odluku"
 msgstr[2] "Bankovni izvod: %(counter)s redova čeka odluku"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вас ещё не завели ни к одному партнёру, поэтому сверять нечего."
+msgstr "Još niste dodati nijednom partneru, pa nema šta da se proverava."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Все разнесённые строки сверены. Новые появятся, когда в инбоксе разнесут "
+"следующие."
+msgstr "Svi raspoređeni redovi su provereni. Novi se pojavljuju kada se u inboksu rasporede sledeći."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Ждёт разнесения — чья строка и за что: %(who)s"
+msgstr "Čeka raspoređivanje — čiji je red i za šta: %(who)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ждёт сверки"
+msgstr "Čeka proveru"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Ждёт сверки суммы и НДС: %(who)s"
+msgstr "Čeka proveru iznosa i PDV-a: %(who)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итого ждёт сверки"
+msgstr "Ukupno čeka proveru"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Подтвердил"
+msgstr "Potvrdio"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Разбор не записан: разносить первичку — право роли «%(right)s», а у "
+"вашей роли его нет."
+msgstr "Nije razvrstano: raspoređivanje primarne dokumentacije je pravo uloge „%(right)s”, a vaša uloga ga nema."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разнёс"
+msgstr "Rasporedio"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверено"
+msgstr "Provereno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверка"
+msgstr "Provera"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сверка не записана: строка изменилась или ещё не разнесена. Обновите "
+"очередь."
+msgstr "Provera nije sačuvana: red se promenio ili još nije raspoređen. Osvežite red čekanja."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверка первички"
+msgstr "Provera primarne dokumentacije"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверка суммы и НДС первички"
+msgstr "Provera iznosa i PDV-a primarne dokumentacije"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверять нечего."
+msgstr "Nema šta da se proverava."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка сверена."
+msgstr "Red je proveren."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Строки уже разнесены: точка и статья проставлены. Сверьте сумму и НДС с "
+"бумагой."
+msgstr "Ovi redovi su već raspoređeni: objekat i stavka su postavljeni. Proverite iznos i PDV prema papiru."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Эту строку разнесли вы. Сверяет сумму и НДС другой человек — в этом "
+"смысл двух рук."
+msgstr "Ovaj red ste rasporedili vi. Iznos i PDV proverava druga osoba — u tome je smisao dve ruke."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "вы разнесли — сверяет другой человек"
+msgstr "vi ste rasporedili — proverava druga osoba"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ждёт сверки"
+msgstr "čeka proveru"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ни у одной роли нет этого права"
+msgstr "nijedna uloga nema ovo pravo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "разнесена по точкам"
+msgstr "raspoređeno po objektima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "разнесены, ждут второй руки"
+msgstr "raspoređeni, čekaju drugu ruku"
+
+#: web/templates/web/suppliers/inbox.html
+#, python-format
+msgid "Сверка суммы и НДС: ждёт %(counter)s строка"
+msgid_plural "Сверка суммы и НДС: ждут %(counter)s строк"
+msgstr[0] "Provera iznosa i PDV-a: %(counter)s red čeka"
+msgstr[1] "Provera iznosa i PDV-a: %(counter)s reda čekaju"
+msgstr[2] "Provera iznosa i PDV-a: %(counter)s redova čeka"
+
+#: web/templates/web/suppliers/check.html
+#, python-format
+msgid "ждёт сверки %(counter)s строка"
+msgid_plural "ждут сверки %(counter)s строк"
+msgstr[0] "%(counter)s red čeka proveru"
+msgstr[1] "%(counter)s reda čekaju proveru"
+msgstr[2] "%(counter)s redova čeka proveru"

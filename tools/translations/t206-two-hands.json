@@ -1,0 +1,94 @@
+{
+  "Вас ещё не завели ни к одному партнёру, поэтому сверять нечего.": {
+    "en": "You have not been added to any partner yet, so there is nothing to check.",
+    "sr": "Još niste dodati nijednom partneru, pa nema šta da se proverava."
+  },
+  "Все разнесённые строки сверены. Новые появятся, когда в инбоксе разнесут следующие.": {
+    "en": "All allocated lines are checked. New ones appear when the next lines are allocated in the inbox.",
+    "sr": "Svi raspoređeni redovi su provereni. Novi se pojavljuju kada se u inboksu rasporede sledeći."
+  },
+  "Ждёт разнесения — чья строка и за что: %(who)s": {
+    "en": "Waiting for allocation — whose line it is and what for: %(who)s",
+    "sr": "Čeka raspoređivanje — čiji je red i za šta: %(who)s"
+  },
+  "Ждёт сверки": {
+    "en": "Waiting for check",
+    "sr": "Čeka proveru"
+  },
+  "Ждёт сверки суммы и НДС: %(who)s": {
+    "en": "Waiting for the amount and VAT check: %(who)s",
+    "sr": "Čeka proveru iznosa i PDV-a: %(who)s"
+  },
+  "Итого ждёт сверки": {
+    "en": "Total waiting for check",
+    "sr": "Ukupno čeka proveru"
+  },
+  "Подтвердил": {
+    "en": "Confirmed by",
+    "sr": "Potvrdio"
+  },
+  "Разбор не записан: разносить первичку — право роли «%(right)s», а у вашей роли его нет.": {
+    "en": "Not sorted: allocating source documents is the role right “%(right)s”, and your role does not have it.",
+    "sr": "Nije razvrstano: raspoređivanje primarne dokumentacije je pravo uloge „%(right)s”, a vaša uloga ga nema."
+  },
+  "Разнёс": {
+    "en": "Allocated by",
+    "sr": "Rasporedio"
+  },
+  "Сверено": {
+    "en": "Checked",
+    "sr": "Provereno"
+  },
+  "Сверка": {
+    "en": "Check",
+    "sr": "Provera"
+  },
+  "Сверка не записана: строка изменилась или ещё не разнесена. Обновите очередь.": {
+    "en": "Check not saved: the line has changed or is not allocated yet. Refresh the queue.",
+    "sr": "Provera nije sačuvana: red se promenio ili još nije raspoređen. Osvežite red čekanja."
+  },
+  "Сверка первички": {
+    "en": "Source document check",
+    "sr": "Provera primarne dokumentacije"
+  },
+  "Сверка суммы и НДС первички": {
+    "en": "Checking amount and VAT of source documents",
+    "sr": "Provera iznosa i PDV-a primarne dokumentacije"
+  },
+  "Сверять нечего.": {
+    "en": "Nothing to check.",
+    "sr": "Nema šta da se proverava."
+  },
+  "Строка сверена.": {
+    "en": "Line checked.",
+    "sr": "Red je proveren."
+  },
+  "Строки уже разнесены: точка и статья проставлены. Сверьте сумму и НДС с бумагой.": {
+    "en": "These lines are already allocated: the unit and the item are set. Check the amount and VAT against the paper.",
+    "sr": "Ovi redovi su već raspoređeni: objekat i stavka su postavljeni. Proverite iznos i PDV prema papiru."
+  },
+  "Эту строку разнесли вы. Сверяет сумму и НДС другой человек — в этом смысл двух рук.": {
+    "en": "You allocated this line. Another person checks the amount and VAT — that is the point of two hands.",
+    "sr": "Ovaj red ste rasporedili vi. Iznos i PDV proverava druga osoba — u tome je smisao dve ruke."
+  },
+  "вы разнесли — сверяет другой человек": {
+    "en": "you allocated it — another person checks",
+    "sr": "vi ste rasporedili — proverava druga osoba"
+  },
+  "ждёт сверки": {
+    "en": "waiting for check",
+    "sr": "čeka proveru"
+  },
+  "ни у одной роли нет этого права": {
+    "en": "no role has this right",
+    "sr": "nijedna uloga nema ovo pravo"
+  },
+  "разнесена по точкам": {
+    "en": "split across units",
+    "sr": "raspoređeno po objektima"
+  },
+  "разнесены, ждут второй руки": {
+    "en": "allocated, waiting for the second hand",
+    "sr": "raspoređeni, čekaju drugu ruku"
+  }
+}

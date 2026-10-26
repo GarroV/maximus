@@ -92,6 +92,16 @@ MEANINGFUL_VALUES: dict[str, dict[str, str]] = {
         "line_id": "(select id from bank_lines order by id limit 1)",
         "tenant_id": "(select tenant_id from bank_lines order by id limit 1)",
     },
+    # След двух рук (T206): шаг — один из двух (`step`), автора ставит
+    # умолчание `app_user_id()`, а у пробы контекста нет — поэтому он назван
+    # здесь. Строка следа и её партнёр — от одного факта, по той же причине,
+    # что у выписки.
+    "fact_reviews": {
+        "step": "'allocated'",
+        "done_by": "gen_random_uuid()",
+        "fact_id": "(select id from facts order by id limit 1)",
+        "tenant_id": "(select tenant_id from facts order by id limit 1)",
+    },
 }
 
 
