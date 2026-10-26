@@ -10303,3 +10303,7 @@ msgid "Банковская выписка: ждёт решения %(counter)s 
 msgid_plural "Банковская выписка: ждут решения %(counter)s строк"
 msgstr[0] "Bank statement: %(counter)s line awaits a decision"
 msgstr[1] "Bank statement: %(counter)s lines await a decision"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счёт в банке"
+msgstr "Bank account"
