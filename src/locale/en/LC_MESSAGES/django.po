@@ -8423,20 +8423,12 @@ msgid "Именованные надбавки и вилка ставки дол
 msgstr "Named allowances and a rate range for the position"
 
 #: web/stages.py
-msgid "Шестая очередь продуктовой карты"
-msgstr "Sixth stage of the product map"
-
-#: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Once payroll is complete"
 
 #: web/stages.py
 msgid "Седьмая очередь; ждёт доступа к API Dodo IS"
 msgstr "Seventh stage; waiting for Dodo IS API access"
-
-#: web/stages.py
-msgid "Загрузка выписки банка и сопоставление платежей со счетами поставщиков: что оплачено, что ждёт, что пришло без счёта."
-msgstr "Uploading the bank statement and matching payments to supplier invoices: what is paid, what is waiting, what arrived without an invoice."
 
 #: web/stages.py
 msgid "Что и когда ушло людям: ведомость к выплате, отметки о переводе, остаток задолженности по каждому человеку."
@@ -10265,3 +10257,690 @@ msgstr "Work measure"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Схема"
 msgstr "Scheme"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "XML не читается: %(why)s."
+msgstr "The XML cannot be read: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "XML с объявлением типа документа или сущностей не принимается."
+msgstr "XML with a document type or entity declaration is not accepted."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"XML этого банка пока не знаком: знаем camt.053 и izvod iBank и "
+"Raiffeisen. Пришлите образец — формат заводится профилем."
+msgstr "This bank's XML is not known yet: we read camt.053 and the iBank and Raiffeisen izvod. Send a sample — a format is added as a profile."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "izvod Raiffeisen"
+msgstr "Raiffeisen izvod"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "izvod iBank (Banca Intesa)"
+msgstr "iBank izvod (Banca Intesa)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без документа"
+msgstr "Without a document"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В camt.053 нет выписки (Stmt)."
+msgstr "The camt.053 file contains no statement (Stmt)."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В книге Excel часть %(part)s объявляет тип документа или сущности — "
+"такая книга не принимается."
+msgstr "Part %(part)s of the Excel workbook declares a document type or entities — such a workbook is not accepted."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В справочнике"
+msgstr "In the directory"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В файле"
+msgstr "In the file"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В файле больше %(n)s заполненных ячеек — это не выписка за месяц."
+msgstr "The file has more than %(n)s filled cells — that is not a monthly statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В файле больше %(n)s операций — это не выписка за месяц."
+msgstr "The file has more than %(n)s transactions — that is not a monthly statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В файле больше %(n)s строк — это не выписка за месяц. Выгрузите выписку "
+"за более короткий период."
+msgstr "The file has more than %(n)s rows — that is not a monthly statement. Export a statement for a shorter period."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В файле нет ни одной операции."
+msgstr "The file contains no transactions."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет номера счёта. Укажите счёт, по которому эта выписка: без "
+"него операции двух счетов не отличить друг от друга."
+msgstr "The file has no account number. Enter the account this statement belongs to: without it, transactions of two accounts cannot be told apart."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В этом месяце строк нет."
+msgstr "There are no lines in this month."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта"
+msgstr "Currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта счёта (%(invoice)s) и платежа (%(line)s) разная — такой платёж "
+"этот счёт не оплачивает. Отправьте строку в инбокс или выберите счёт в "
+"той же валюте."
+msgstr "The invoice currency (%(invoice)s) differs from the payment currency (%(line)s) — this payment does not pay this invoice. Send the line to the inbox or choose an invoice in the same currency."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Вас ещё не завели ни к одному партнёру, поэтому выписки у вас нет."
+msgstr "You have not been added to any partner yet, so you have no bank statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вернуть в работу"
+msgstr "Return to work"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Внесённые платежи на эту сумму"
+msgstr "Entered payments for this amount"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выберите другой месяц или состояние — или загрузите выписку за этот."
+msgstr "Choose another month or state — or upload the statement for this one."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите файл выписки."
+msgstr "Choose a statement file."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выписку ещё не загружали."
+msgstr "No statement has been uploaded yet."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выписку по этому счёту сейчас загружают ещё раз — повторите через "
+"минуту."
+msgstr "A statement for this account is being uploaded right now — try again in a minute."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дубли и чужое"
+msgstr "Duplicates and not ours"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дубль"
+msgstr "Duplicate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загружена"
+msgstr "Uploaded"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загруженные выписки"
+msgstr "Uploaded statements"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Загрузите файл выписки из банка — строки сведутся с внесёнными платежами "
+"и счетами, остальное встанет сюда на решение."
+msgstr "Upload the bank statement file — lines will be matched with entered payments and invoices, the rest will wait here for a decision."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузить выписку"
+msgstr "Upload a statement"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузка"
+msgstr "Upload"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузка выписки"
+msgstr "Statement upload"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Закрывающая строка вам не видна."
+msgstr "You cannot see the closing entry."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Идентификатор операции"
+msgstr "Transaction ID"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Из банка · не редактируется"
+msgstr "From the bank · not editable"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Из них дублей"
+msgstr "Of them duplicates"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Каждая строка выписки за месяц сопоставлена, отмечена дублем или как не "
+"наш платёж."
+msgstr "Every statement line of the month is matched, marked as a duplicate or as not our payment."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как разобраны колонки"
+msgstr "How the columns were read"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Книга Excel не открывается."
+msgstr "The Excel workbook cannot be opened."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Книга Excel разворачивается в слишком большой объём — это не выписка за "
+"месяц."
+msgstr "The Excel workbook unpacks into too much data — that is not a monthly statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кодировка файла не распознана: ждём UTF-8 или Windows-1250/1251."
+msgstr "The file encoding was not recognised: expected UTF-8 or Windows-1250/1251."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Лист книги Excel не читается: первым должен быть лист с таблицей "
+"выписки."
+msgstr "The Excel sheet cannot be read: the first sheet must hold the statement table."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц сведён."
+msgstr "The month is reconciled."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Назначение"
+msgstr "Purpose"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Напишите, почему платёж не наш: через полгода иначе не вспомнить."
+msgstr "Write why the payment is not ours: in six months nobody will remember otherwise."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Например: личная трата партнёра с расчётного счёта"
+msgstr "For example: the partner's personal spending from the business account"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не наш"
+msgstr "Not ours"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не наш платёж"
+msgstr "Not our payment"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не наш платёж — почему"
+msgstr "Not our payment — why"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Не нашли колонки даты и суммы. Узнаём заголовки вроде «Datum valute», "
+"«Iznos na teret», «Iznos u korist» — проверьте, что в файле есть строка "
+"заголовков."
+msgstr "No date and amount columns were found. We recognise headers such as “Datum valute”, “Iznos na teret”, “Iznos u korist” — check that the file has a header row."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Неоплаченные счета"
+msgstr "Unpaid invoices"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Непонятное действие."
+msgstr "Unknown action."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ни одного неоплаченного счёта от этого контрагента на такую сумму. Либо "
+"документ ещё не пришёл, либо платёж — без счёта."
+msgstr "No unpaid invoice from this counterparty for such an amount. Either the document has not arrived yet, or the payment has no invoice."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Номер счёта, если его нет в файле"
+msgstr "Account number, if the file does not carry it"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Нужно решить"
+msgstr "Needs a decision"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Операция %(n)s: %(why)s."
+msgstr "Transaction %(n)s: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Операция %(n)s: нет даты, суммы или направления."
+msgstr "Transaction %(n)s: no date, amount or direction."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Оплата счёта заведена с датой из выписки."
+msgstr "The invoice payment was recorded with the statement date."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Оплатить этот счёт"
+msgstr "Pay this invoice"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отвязать"
+msgstr "Unlink"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отвязать нечего: платёж заведён из выписки — исправьте его в счёте или "
+"инбоксе."
+msgstr "Nothing to unlink: the payment was created from the statement — correct it in the invoice or the inbox."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Отмечено %(on)s. В P&L не идёт, но остаётся в выписке: остаток по счёту "
+"должен сходиться с банком до копейки."
+msgstr "Marked on %(on)s. It does not go into the P&L but stays in the statement: the account balance must agree with the bank to the cent."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отправить в инбокс"
+msgstr "Send to the inbox"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Перейти к сопоставлению"
+msgstr "Go to matching"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Период"
+msgstr "Period"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Платёж больше остатка по счёту (%(left)s). Разложить один платёж на "
+"несколько счетов или провести остаток авансом пока нельзя — отправьте "
+"строку в инбокс или выберите другой счёт."
+msgstr "The payment is larger than the invoice balance (%(left)s). Splitting one payment across several invoices or booking the rest as an advance is not available yet — send the line to the inbox or pick another invoice."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Платёж и документ — не одно и то же: строка банка сводится с внесённым "
+"платежом или счётом, а без решения в учёт не идёт."
+msgstr "A payment and a document are not the same thing: a bank line is matched with an entered payment or an invoice, and without a decision it does not go into the books."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Платёж по выписке"
+msgstr "Bank statement payment"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Повторная загрузка не удваивает платежи: тот же файл второй раз не "
+"ложится, а строка, уже бывшая в прошлой выписке, становится дублем."
+msgstr "Uploading again does not double payments: the same file is not accepted twice, and a line already present in an earlier statement becomes a duplicate."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Показать исходную строку"
+msgstr "Show the original line"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поле"
+msgstr "Field"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поступление не оплачивает счёт поставщика."
+msgstr "An incoming payment does not pay a supplier invoice."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Правила сопоставления, порог и платёж на несколько счетов с авансом"
+msgstr "Matching rules, the threshold and one payment across several invoices with an advance"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Свободного внесённого платежа на эту сумму в пределах месяца нет."
+msgstr "There is no unmatched entered payment for this amount within a month."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставление"
+msgstr "Matching"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставление снято, строка снова ждёт решения."
+msgstr "The match was removed; the line is waiting for a decision again."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено"
+msgstr "Matched"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено правилом"
+msgstr "Matched by the rule"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено само"
+msgstr "Matched automatically"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: %(why)s."
+msgstr "Row %(n)s: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: было %(was)s, в файле %(now)s."
+msgstr "Line %(n)s: was %(was)s, in the file %(now)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: нет даты или суммы."
+msgstr "Row %(n)s: no date or amount."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка и так в работе."
+msgstr "The line is already in work."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка помечена как не наш платёж и в учёт не идёт."
+msgstr "The line is marked as not our payment and does not go into the books."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка помечена как не наш платёж. Сначала верните её в работу."
+msgstr "The line is marked as not our payment. Return it to work first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка снова ждёт решения."
+msgstr "The line is waiting for a decision again."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка сопоставлена с внесённым платежом."
+msgstr "The line is matched with an entered payment."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка уже сопоставлена."
+msgstr "The line is already matched."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Строка ушла в инбокс: сумма в P&L строкой «Не разобрано», статью дайте "
+"там."
+msgstr "The line went to the inbox: the amount is in the P&L as “Unclassified” — assign the category there."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сумма войдёт в P&L строкой «Не разобрано» и встанет в инбокс — статью и "
+"точку дадите там."
+msgstr "The amount goes into the P&L as “Unclassified” and into the inbox — assign the category and the unit there."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сумма со знаком"
+msgstr "Signed amount"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сумма, приход"
+msgstr "Amount, credit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сумма, расход"
+msgstr "Amount, debit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счёт в банке"
+msgstr "Bank account"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счёт контрагента"
+msgstr "Counterparty account"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счёта с остатком ровно на эту сумму нет."
+msgstr "There is no invoice with a balance of exactly this amount."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Таблица не читается: %(why)s."
+msgstr "The table cannot be read: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Тот же банковский идентификатор операции — в выписке «%(file)s», "
+"загруженной %(loaded)s, строка %(line)s. Второй раз в учёт она не "
+"пойдёт. Строку не удаляем: иначе при следующей загрузке она вернулась бы "
+"новой."
+msgstr "The same bank transaction ID is in the statement “%(file)s” uploaded on %(loaded)s, line %(line)s. It will not go into the books a second time. The line is not deleted: otherwise the next upload would bring it back as new."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл больше 5 МБ — это не выписка за месяц."
+msgstr "The file is larger than 5 MB — that is not a monthly statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл выписки"
+msgstr "Statement file"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Файл не загружен: операции банка с теми же номерами уже загружены с "
+"другой суммой, датой или направлением. Проверьте, та ли это выписка и "
+"тот ли счёт. %(lines)s"
+msgstr "The file was not uploaded: bank transactions with the same references are already uploaded with a different amount, date or direction. Check that this is the right statement and the right account. %(lines)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Файл не разобран: %(why)s"
+msgstr "The file was not read: %(why)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл принят"
+msgstr "File accepted"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл пустой."
+msgstr "The file is empty."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Формат"
+msgstr "Format"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Форматы: ISO 20022 camt.053, izvod (XML iBank и Raiffeisen), CSV и xlsx. "
+"Колонки таблицы узнаются по заголовкам, а не по номеру."
+msgstr "Formats: ISO 20022 camt.053, izvod (iBank and Raiffeisen XML), CSV and xlsx. Table columns are recognised by their headers, not by position."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Чем закрыто"
+msgstr "Closed by"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта операция уже загружена"
+msgstr "This transaction is already uploaded"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Это дубль уже загруженной строки — в учёт он не идёт."
+msgstr "This is a duplicate of an already uploaded line — it does not go into the books."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Это он"
+msgstr "This one"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот платёж не подходит: сумма другая, он уже сведён с другой строкой "
+"или вам не виден."
+msgstr "This payment does not fit: the amount differs, it is already matched with another line, or you cannot see it."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Этот файл уже загружен %(when)s — второй раз он ничего не добавит."
+msgstr "This file was already uploaded on %(when)s — uploading it again adds nothing."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "без номера"
+msgstr "no number"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "без решения их в P&L нет, решаются на сопоставлении"
+msgstr "without a decision they are not in the P&L; they are decided on the matching page"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "больше двух знаков после запятой: %(value)s"
+msgstr "more than two decimal places: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выбрано вручную"
+msgstr "chosen by hand"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "дата вне %(first)s–%(last)s годов: %(value)s"
+msgstr "date outside the years %(first)s–%(last)s: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "заполнены обе колонки — и расход, и приход"
+msgstr "both columns are filled — debit and credit"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не дата: %(value)s"
+msgstr "not a date: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не опознан — по названию из банка такого контрагента нет"
+msgstr "not recognised — no counterparty with the bank's name"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не число: %(value)s"
+msgstr "not a number: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "непонятное направление %(value)s"
+msgstr "unclear direction %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет даты"
+msgstr "no date"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет однозначной пары"
+msgstr "no unambiguous match"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет суммы"
+msgstr "no amount"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "оборот"
+msgstr "turnover"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "оплата счёта из выписки"
+msgstr "invoice payment from the statement"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "оплатится частично"
+msgstr "will be paid partially"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "остаток"
+msgstr "balance"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "отправлено в инбокс"
+msgstr "sent to the inbox"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "свело правило"
+msgstr "matched by the rule"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "счёт"
+msgstr "account"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "таблица по заголовкам"
+msgstr "table by headers"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "уже был в прошлой выписке"
+msgstr "already in an earlier statement"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "человек не нужен"
+msgstr "no person needed"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В книге Excel больше %(n)s частей — это не выписка за месяц."
+msgstr "The Excel workbook has more than %(n)s parts — this is not a monthly statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет валюты. Укажите валюту счёта — трёхбуквенный код, например "
+"RSD или EUR."
+msgstr "The file has no currency. Enter the account currency as a three-letter code, e.g. RSD or EUR."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта — трёхбуквенный латинский код, например RSD или EUR, а не "
+"«%(value)s»."
+msgstr "The currency must be a three-letter Latin code such as RSD or EUR, not “%(value)s”."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код валюты, если его нет в файле"
+msgstr "Currency code, if the file has none"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
+"несёт. Без счёта и валюты выписка не загружается: операции двух счетов "
+"иначе не отличить, а валюта учёта за выписку не подставляется."
+msgstr "Account and currency are taken from the file; fill these fields in if the bank's table does not carry them. A statement without an account and currency is not loaded: otherwise operations of two accounts cannot be told apart, and the accounting currency is not assumed for the statement."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот платёж только что сведён с другой строкой. Обновите страницу и "
+"выберите другой."
+msgstr "This payment has just been matched to another line. Reload the page and choose another one."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "слишком большая сумма: %(value)s"
+msgstr "amount too large: %(value)s"
+
+#: web/templates/web/bank/statement.html:29
+#, python-format
+msgid "ждёт решения %(counter)s строка за месяц — в учёт она не идёт"
+msgid_plural "ждут решения %(counter)s строк за месяц — в учёт они не идут"
+msgstr[0] "%(counter)s line this month awaits a decision — it is not in the books"
+msgstr[1] "%(counter)s lines this month await a decision — they are not in the books"
+
+#: web/templates/web/bank/statement.html:40
+#, python-format
+msgid "%(counter)s строка"
+msgid_plural "%(counter)s строк"
+msgstr[0] "%(counter)s line"
+msgstr[1] "%(counter)s lines"
+
+#: web/templates/web/suppliers/inbox.html:39
+#, python-format
+msgid "Банковская выписка: ждёт решения %(counter)s строка"
+msgid_plural "Банковская выписка: ждут решения %(counter)s строк"
+msgstr[0] "Bank statement: %(counter)s line awaits a decision"
+msgstr[1] "Bank statement: %(counter)s lines await a decision"

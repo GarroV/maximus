@@ -23,6 +23,8 @@ from django.http import HttpResponse
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_noop
 
+from reports.cells import safe_cell
+
 from .roles_display import shown_role_title
 
 # Слова действий — существительными, а не глаголом из фразы экрана: в таблице
@@ -33,16 +35,9 @@ _ACTIONS = {
     "revoked": gettext_noop("снятие роли"),
 }
 
-# Ячейка, начатая с этих знаков, в Excel и его родне — формула, а не текст.
-# Причину пишет человек, и «=HYPERLINK(...)» в ней сработало бы у того, кто
-# откроет файл. Такая ячейка отдаётся с апострофом впереди: таблица покажет
-# текст как есть.
-_FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
-
-
 def _cell(value) -> str:
-    text = "" if value is None else str(value)
-    return "'" + text if text.startswith(_FORMULA_START) else text
+    """Причину пишет человек — в файл она уходит текстом, а не формулой."""
+    return safe_cell("" if value is None else str(value))
 
 
 def _rows(tenant_id):

@@ -36,7 +36,7 @@ from django.utils.translation import gettext_lazy
 
 from core.models import INVOICE, Counterparty, Unit
 
-from . import cash, filter_links, papers, suppliers
+from . import cash, filter_links, papers, permissions, suppliers
 from .cash_views import _ledger, _till, _unit, _vat_rate
 from .counterparties_views import found as counterparties_found
 from .dbrefusal import BadInput
@@ -1193,6 +1193,7 @@ def inbox(request):
         "total_raw": f"{total}", "total_text": money(total),
         "counted": len(rows),
         **_papers_link(who),
+        **_statement_link(who),
         "notice": _inbox_notice(request),
         "failed": "",
         **_batch_fields(who),
@@ -1212,6 +1213,24 @@ def _papers_link(who) -> dict:
     return {
         "papers_waiting": papers.waiting_count(who),
         "papers_url": reverse("papers"),
+    }
+
+
+def _statement_link(who) -> dict:
+    """Сколько строк выписки ждёт решения — числом для ссылки на `/statement/`.
+
+    Тот же приём, что у бумаг: строки выписки без решения в P&L не входят
+    (их может закрыть внесённый платёж или счёт), поэтому в списке инбокса их
+    нет. Решают их на сопоставлении, а «Отправить в инбокс» делает строку
+    обычной строкой этого списка. Число — только тому, кто вправе разбирать.
+    """
+    from . import bank
+
+    if not permissions.has(who, permissions.SUPPLIERS_CLASSIFY):
+        return {"statement_waiting": 0, "statement_url": ""}
+    return {
+        "statement_waiting": bank.waiting_count(who),
+        "statement_url": reverse("statement"),
     }
 
 

@@ -139,7 +139,9 @@
 | `/rules/about/` | `rules-about` | `web.rules_pages.about` |
 | `/rules/partner/` | `rules-partner` | `web.rules_pages.partner` |
 | `/settings/dodo-is/` | `planned-dodo-is` | `web.planned_views.planned` |
-| `/statement/` | `planned-statement` | `web.planned_views.planned` |
+| `/statement/` | `statement` | `web.bank_views.statement` |
+| `/statement/lines/<uuid:line_id>/` | `statement-line` | `web.bank_views.statement_line` |
+| `/statement/upload/` | `statement-upload` | `web.bank_views.statement_upload` |
 | `/theme/` | `set-theme` | `web.theme.set_theme` |
 | `/timesheets/<uuid:period_id>/` | `timesheets` | `timesheets.views.grid` |
 | `/timesheets/<uuid:period_id>/cell/` | `timesheet-cell` | `timesheets.views.cell` |

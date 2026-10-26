@@ -1,0 +1,19 @@
+/* Банковская выписка (модуль 7 эталона): список строк слева, карточка
+   выбранной строки справа. Значения — только токены (tests/test_visual_tokens). */
+.bank-tabs { margin: 0 0 var(--space-7); }
+.bank-split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-7); align-items: start; }
+.bank-lines tr.is-selected td { background: var(--accent-soft); }
+.bank-lines tr.is-aside td { color: var(--ink-2); }
+.bank-lines td.purpose { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bank-card .card__body > * + * { margin-top: var(--space-6); }
+.bank-card dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-5); margin: 0; }
+.bank-card dt { color: var(--ink-3); font-size: var(--fs-meta); }
+.bank-card dd { margin: 0; overflow-wrap: anywhere; }
+.bank-card h3 { margin: 0 0 var(--space-3); font-size: var(--fs-body); font-weight: var(--w-semibold); }
+.bank-pick { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.bank-pick li form { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+.bank-pick li .what { flex: 1 1 160px; min-width: 0; }
+.bank-mapping { max-width: 560px; }
+@media (max-width: 1099px) {
+  .bank-split { grid-template-columns: minmax(0, 1fr); }
+}

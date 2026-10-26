@@ -109,3 +109,27 @@ msgid_plural "Бумаги с точек: ждут разбора %(counter)s"
 msgstr[0] "Бумаги с точек: ждёт разбора %(counter)s"
 msgstr[1] "Бумаги с точек: ждут разбора %(counter)s"
 msgstr[2] "Бумаги с точек: ждут разбора %(counter)s"
+
+#: web/templates/web/bank/statement.html:29
+#, python-format
+msgid "ждёт решения %(counter)s строка за месяц — в учёт она не идёт"
+msgid_plural "ждут решения %(counter)s строк за месяц — в учёт они не идут"
+msgstr[0] "ждёт решения %(counter)s строка за месяц — в учёт она не идёт"
+msgstr[1] "ждут решения %(counter)s строки за месяц — в учёт они не идут"
+msgstr[2] "ждут решения %(counter)s строк за месяц — в учёт они не идут"
+
+#: web/templates/web/bank/statement.html:40
+#, python-format
+msgid "%(counter)s строка"
+msgid_plural "%(counter)s строк"
+msgstr[0] "%(counter)s строка"
+msgstr[1] "%(counter)s строки"
+msgstr[2] "%(counter)s строк"
+
+#: web/templates/web/suppliers/inbox.html:39
+#, python-format
+msgid "Банковская выписка: ждёт решения %(counter)s строка"
+msgid_plural "Банковская выписка: ждут решения %(counter)s строк"
+msgstr[0] "Банковская выписка: ждёт решения %(counter)s строка"
+msgstr[1] "Банковская выписка: ждут решения %(counter)s строки"
+msgstr[2] "Банковская выписка: ждут решения %(counter)s строк"
