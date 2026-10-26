@@ -21,7 +21,6 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-
 COMMENTS = """
 comment on table bank_statements is
     'Загруженный файл выписки. Тот же файл второй раз не ложится (content_hash), пересекающийся — ложится, общие строки становятся дублями';
@@ -92,6 +91,9 @@ alter table bank_statements disable row level security;
 PRIVILEGES = """
 revoke all on bank_statements, bank_lines, bank_line_links from app_user;
 grant select, insert on bank_statements to app_user;
+-- Итог загрузки дописывается в ту же транзакцию после сопоставления; кроме
+-- него у файла не меняется ничего.
+grant update (stats) on bank_statements to app_user;
 grant select, insert, update on bank_lines to app_user;
 grant select, insert, delete on bank_line_links to app_user;
 """
