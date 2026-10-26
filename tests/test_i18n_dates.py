@@ -111,12 +111,10 @@ def _closed_at_text(html: str) -> str:
     return match.group(1)
 
 
-# Закрывает часы региональный управляющий: с T236 у управляющего точки этого
-# права по умолчанию нет (эталон «Роли и права»).
 def test_grid_closed_at_is_english_on_the_english_page(client, clean_closures):
     """Английская страница: не `13.08.2026`, а `Aug. 13, 2026, ...` — как рядом
     на странице периода показывает `calculated_at` без фильтра."""
-    login_as(client, "regional_manager")
+    login_as(client, "manager")
     url = _grid_url(client)
     html = body(client.get(f"{url}close/"))
     client.post(f"{url}close/", {"unit": _closable_unit(html)})
@@ -150,7 +148,7 @@ def test_grid_closed_at_stays_familiar_on_the_russian_page(client, clean_closure
     """Русская страница: дата остаётся привычной — тем же видом, каким уже
     рисуется `calculated_at` на странице периода (полное русское имя месяца),
     а не байт-в-байт старым `d.m.Y H:i`."""
-    login_as(client, "regional_manager")
+    login_as(client, "manager")
     url = _grid_url(client)
     html = body(client.get(f"{url}close/"))
     client.post(f"{url}close/", {"unit": _closable_unit(html)})
