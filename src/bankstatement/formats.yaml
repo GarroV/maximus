@@ -1,0 +1,67 @@
+# Форматы выписки — данными, а не кодом.
+#
+# Новый банк или новая страна заводятся здесь: профилем XML или строчкой в
+# словаре заголовков таблицы. Код разбора про банки не знает ничего, кроме
+# camt.053 — международного стандарта, у которого контрагент зависит от
+# направления платежа и простым соответствием «поле → тег» не описывается.
+#
+# Откуда взяты профили (открытые спецификации, проверены 26.10.2026):
+#   ibank          — OfficeBanking / iBank (Banca Intesa и банки на той же
+#                    платформе): корень stmtrs, операции stmttrn
+#   raiffeisen_rs  — «Dinarski izvod» Raiffeisen banka Srbija: атрибуты Stavke
+# Настоящих файлов партнёра не было: профили сверены со спецификацией, а не с
+# выпиской. Первый же файл банка проверяет их по-настоящему.
+
+xml:
+  - code: ibank
+    root: stmtrs            # ищется на любой глубине: банки оборачивают по-разному
+    record: stmttrn
+    account: acctid          # первый такой тег под корнем — счёт выписки
+    currency: curdef
+    fields:
+      bank_ref: fitid
+      date: [dtavail, dtposted, dtuser]
+      amount: trnamt
+      direction: benefit
+      party_name: payeeinfo/name
+      party_account: payeeaccountinfo/acctid
+      purpose: purpose
+    direction_values:
+      out: [debit]
+      in: [credit]
+
+  - code: raiffeisen_rs
+    root: TransakcioniRacunPrivredaIzvod
+    record: Stavke
+    attributes: true         # поля — атрибуты записи, а не вложенные теги
+    account: Zaglavlje@Partija
+    fields:
+      bank_ref: BrojZaReklamaciju
+      date: [DatumValute]
+      debit: Duguje
+      credit: Potrazuje
+      party_name: NalogKorisnik
+      party_account: BrojRacunaPrimaocaPosiljaoca
+      purpose: Opis
+
+# Таблица (CSV, xlsx): колонки узнаются по заголовку, а не по номеру — банк
+# меняет порядок (эталон, модуль 7). Заголовки сравниваются без регистра,
+# пробелов и диакритики. Языки — сербский латиницей и кириллицей, английский,
+# русский: добавить страну — добавить сюда её слова.
+table:
+  date: [datum valute, datum, datum knjizenja, datum transakcije, value date,
+         booking date, date, датум валуте, датум, дата, дата операции]
+  debit: [iznos na teret, na teret, duguje, isplata, zaduzenje, debit, debit amount,
+          withdrawal, на терет, дугује, списание, расход]
+  credit: [iznos u korist, u korist, potrazuje, uplata, odobrenje, credit,
+           credit amount, deposit, у корист, потражује, поступление, приход]
+  amount: [iznos, amount, сумма, износ]
+  party_name: [naziv primaoca, naziv primaoca/platioca, primalac/platilac, naziv,
+               primalac, platilac, nalogodavac, partner, payee, counterparty,
+               beneficiary, назив, контрагент]
+  party_account: [racun primaoca, racun primaoca/platioca, broj racuna, racun,
+                  account, iban, рачун, счёт контрагента, счет контрагента]
+  purpose: [svrha placanja, svrha, opis, description, details, reference text,
+            сврха плаћања, сврха, назначение]
+  bank_ref: [broj za reklamaciju, referenca, id transakcije, transaction id,
+             reference, ref, референца, идентификатор операции]
