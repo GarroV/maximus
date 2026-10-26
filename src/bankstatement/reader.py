@@ -15,6 +15,7 @@ import io
 import unicodedata
 import xml.parsers.expat
 import zipfile
+import zlib
 from functools import cache
 from pathlib import Path
 from xml.etree import ElementTree
@@ -49,8 +50,17 @@ MAX_CELLS = 400_000
 MAX_UNPACKED_BYTES = 50 * 1024 * 1024
 MAX_COMPRESSION_RATIO = 200
 UTF16_BOMS = (b"\xff\xfe", b"\xfe\xff")
-# Части книги, которые по имени — XML. Сравнение без учёта регистра.
-XML_PART_SUFFIXES = (".xml", ".rels", ".vml")
+# Частей в книге выписки — десятки. Две тысячи — запас, дальше не выписка.
+MAX_PARTS = 2000
+# Части книги, которые заведомо не XML: картинки, макросы (OLE), вложенный
+# архив. Узнаются по первым байтам, а не по имени: имя ничего не обещает.
+BINARY_SIGNATURES = (
+    b"\x89PNG", b"\xff\xd8", b"GIF8",
+    b"\x01\x00\x00\x00",              # EMF
+    b"\xd7\xcd\xc6\x9a",              # WMF
+    b"\xd0\xcf\x11\xe0",              # OLE: vbaProject.bin и встроенные объекты
+    b"PK\x03\x04",
+)
 
 
 class Unreadable(Exception):
@@ -306,6 +316,9 @@ def _refuse_bombs(content: bytes) -> None:
     try:
         with zipfile.ZipFile(io.BytesIO(content)) as archive:
             members = archive.infolist()
+            if len(members) > MAX_PARTS:
+                raise Unreadable(_("В книге Excel больше %(n)s частей — "
+                                   "это не выписка за месяц.") % {"n": MAX_PARTS})
             unpacked = sum(m.file_size for m in members)
             packed = sum(m.compress_size for m in members) or 1
             if unpacked > MAX_UNPACKED_BYTES or unpacked / packed > MAX_COMPRESSION_RATIO:
@@ -314,17 +327,19 @@ def _refuse_bombs(content: bytes) -> None:
             # Части книги — тот же XML, и правило у них то же, что у выписки
             # XML: объявлений типа документа и сущностей не бывает. Проверка —
             # после потолка объёма, поэтому читает не больше разрешённого.
-            # Смотрим на содержимое, а не на имя: какую часть разборщик возьмёт
-            # как XML, решает [Content_Types] книги, а не расширение, и регистр
-            # имени ему тоже безразличен.
+            # Ни имени, ни пометке «каталог» не верим: какую часть разборщик
+            # возьмёт как XML, решает книга, а не имя. Пропускаются только
+            # заведомо двоичные части, узнанные по первым байтам; всё прочее
+            # обязано разобраться как XML без объявлений.
             for member in members:
-                if member.is_dir():
+                if member.file_size == 0:
                     continue
                 body = archive.read(member)
-                named_xml = member.filename.lower().endswith(XML_PART_SUFFIXES)
-                if named_xml or _looks_like_xml(body):
-                    _refuse_declarations(body, part=member.filename)
-    except (zipfile.BadZipFile, OSError, RuntimeError) as error:
+                if body.startswith(BINARY_SIGNATURES):
+                    continue
+                _refuse_declarations(body, part=member.filename)
+    except (zipfile.BadZipFile, zipfile.LargeZipFile, OSError, RuntimeError,
+            EOFError, NotImplementedError, zlib.error) as error:
         raise Unreadable(_("Книга Excel не открывается.")) from error
 
 
