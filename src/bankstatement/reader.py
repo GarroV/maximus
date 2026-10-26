@@ -13,12 +13,11 @@ from __future__ import annotations
 import csv
 import io
 import unicodedata
+import xml.parsers.expat
+import zipfile
 from functools import cache
 from pathlib import Path
 from xml.etree import ElementTree
-
-import xml.parsers.expat
-import zipfile
 
 import yaml
 
