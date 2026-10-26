@@ -17,6 +17,9 @@ from functools import cache
 from pathlib import Path
 from xml.etree import ElementTree
 
+import xml.parsers.expat
+import zipfile
+
 import yaml
 
 from . import camt
@@ -28,6 +31,17 @@ FORMATS = Path(__file__).with_name("formats.yaml")
 # мегабайт — запас в десять раз, а не приглашение грузить архив за год.
 MAX_BYTES = 5 * 1024 * 1024
 XLSX_SIGNATURE = b"PK\x03\x04"
+# Потолок строк — та же мысль, что у размера: месяц самого оборотистого
+# партнёра — сотни операций, 20 000 — запас на годовую выгрузку, и не больше.
+# Без потолка маленький файл мог бы развернуться в миллионы строк в памяти.
+MAX_ROWS = 20_000
+# Книга Excel — zip-архив. Лист выписки на сотни строк в развёрнутом виде —
+# единицы мегабайт; 50 МБ — запас в десятки раз. Степень сжатия у живого
+# листа — до нескольких десятков; выше 200 сжимаются только намеренно
+# пустые данные, а не выписка.
+MAX_UNPACKED_BYTES = 50 * 1024 * 1024
+MAX_COMPRESSION_RATIO = 200
+UTF16_BOMS = (b"\xff\xfe", b"\xfe\xff")
 
 
 class Unreadable(Exception):
@@ -46,25 +60,55 @@ def read(content: bytes, file_name: str = "") -> Statement:
         raise Unreadable("Файл больше 5 МБ — это не выписка за месяц.")
     if content.startswith(XLSX_SIGNATURE):
         statement = _table(_xlsx_rows(content))
-    elif content.lstrip()[:1] == b"<":
+    elif _looks_like_xml(content):
         statement = _xml(content)
     else:
         statement = _table(_csv_rows(content))
     if not statement.lines:
         raise Unreadable("В файле нет ни одной операции.")
+    if len(statement.lines) > MAX_ROWS:
+        raise Unreadable(f"В файле больше {MAX_ROWS} операций — это не выписка за месяц.")
     return statement
 
 
 # --- XML ------------------------------------------------------------------------
 
 
+def _looks_like_xml(content: bytes) -> bool:
+    """XML в любой кодировке, которую понимает разборщик, — а не только в UTF-8."""
+    if content.startswith(UTF16_BOMS):
+        try:
+            return content.decode("utf-16").lstrip().startswith("<")
+        except UnicodeDecodeError:
+            return False
+    return content.removeprefix(b"\xef\xbb\xbf").lstrip()[:1] == b"<"
+
+
+def _refuse_declarations(content: bytes) -> None:
+    """Отказать XML с объявлением типа документа или сущностей.
+
+    В выписке их не бывает, а в атаке на разборщик XML они есть всегда.
+    Проверку делает сам разборщик (expat), а не поиск по байтам: он читает
+    файл в той кодировке, которую файл объявил, и видит объявление там же,
+    где его увидел бы `ElementTree`. Библиотека `defusedxml` делала бы то же
+    одной строкой, но в зависимостях её нет.
+    """
+    def refuse(*_args):
+        raise Unreadable("XML с объявлением типа документа или сущностей не принимается.")
+
+    probe = xml.parsers.expat.ParserCreate()
+    probe.StartDoctypeDeclHandler = refuse
+    probe.EntityDeclHandler = refuse
+    probe.UnparsedEntityDeclHandler = refuse
+    probe.ExternalEntityRefHandler = refuse
+    try:
+        probe.Parse(content, True)
+    except xml.parsers.expat.ExpatError as error:
+        raise Unreadable(f"XML не читается: {error}.") from error
+
+
 def _xml(content: bytes) -> Statement:
-    # Объявлений сущностей в выписке не бывает, а в атаке на разборщик XML
-    # («миллиард смехов», внешние сущности) — бывают всегда. Отказываем по
-    # самому объявлению, не полагаясь на то, что разборщик его переживёт.
-    upper = content.upper()
-    if b"<!DOCTYPE" in upper or b"<!ENTITY" in upper:
-        raise Unreadable("XML с объявлением сущностей не принимается.")
+    _refuse_declarations(content)
     try:
         root = ElementTree.fromstring(content)
     except ElementTree.ParseError as error:
@@ -192,7 +236,8 @@ def _two_columns(debit, credit):
 
 
 def _csv_rows(content: bytes) -> list[list]:
-    for encoding in ("utf-8-sig", "cp1250", "cp1251"):
+    encodings = ("utf-16",) if content.startswith(UTF16_BOMS) else ()
+    for encoding in (*encodings, "utf-8-sig", "cp1250", "cp1251"):
         try:
             text = content.decode(encoding)
             break
@@ -205,22 +250,50 @@ def _csv_rows(content: bytes) -> list[list]:
         dialect = csv.Sniffer().sniff(sample, delimiters=";,\t")
     except csv.Error:
         dialect = _Semicolon if sample.count(";") >= sample.count(",") else csv.excel
-    return [row for row in csv.reader(io.StringIO(text), dialect)]
+    return _capped(csv.reader(io.StringIO(text), dialect))
+
+
+def _capped(rows) -> list[list]:
+    """Строки с потолком: дочитать до MAX_ROWS и остановиться отказом."""
+    taken = []
+    for row in rows:
+        if len(taken) >= MAX_ROWS:
+            raise Unreadable(
+                f"В файле больше {MAX_ROWS} строк — это не выписка за месяц. "
+                "Выгрузите выписку за более короткий период."
+            )
+        taken.append(list(row))
+    return taken
 
 
 class _Semicolon(csv.excel):
     delimiter = ";"
 
 
+def _refuse_bombs(content: bytes) -> None:
+    """Посмотреть в архив до распаковки: сколько он займёт развёрнутым."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            members = archive.infolist()
+    except zipfile.BadZipFile as error:
+        raise Unreadable("Книга Excel не открывается.") from error
+    unpacked = sum(m.file_size for m in members)
+    packed = sum(m.compress_size for m in members) or 1
+    if unpacked > MAX_UNPACKED_BYTES or unpacked / packed > MAX_COMPRESSION_RATIO:
+        raise Unreadable("Книга Excel разворачивается в слишком большой объём — "
+                         "это не выписка за месяц.")
+
+
 def _xlsx_rows(content: bytes) -> list[list]:
     from openpyxl import load_workbook
 
+    _refuse_bombs(content)
     try:
         book = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
     except Exception as error:  # openpyxl бросает что угодно на битом архиве
         raise Unreadable("Книга Excel не открывается.") from error
     sheet = book.worksheets[0]
-    return [list(row) for row in sheet.iter_rows(values_only=True)]
+    return _capped(sheet.iter_rows(values_only=True))
 
 
 def _header_key(text) -> str:
