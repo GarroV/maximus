@@ -38,6 +38,13 @@ MAX_ROWS = 20_000
 # единицы мегабайт; 50 МБ — запас в десятки раз. Степень сжатия у живого
 # листа — до нескольких десятков; выше 200 сжимаются только намеренно
 # пустые данные, а не выписка.
+# Ширина: в выписке банка — десяток-два колонок. Лист может объявить себя
+# шириной в 16 384 колонки (XFD) или тянуть хвост пустых ячеек, поэтому дальше
+# пятидесятой не читаем вовсе, а объявленному размеру листа не верим.
+MAX_COLS = 50
+# Общий бюджет непустых ячеек — последняя граница памяти, если и строки, и
+# колонки в пределах: 20 000 строк по 10 заполненных полей с запасом.
+MAX_CELLS = 400_000
 MAX_UNPACKED_BYTES = 50 * 1024 * 1024
 MAX_COMPRESSION_RATIO = 200
 UTF16_BOMS = (b"\xff\xfe", b"\xfe\xff")
@@ -253,15 +260,27 @@ def _csv_rows(content: bytes) -> list[list]:
 
 
 def _capped(rows) -> list[list]:
-    """Строки с потолком: дочитать до MAX_ROWS и остановиться отказом."""
+    """Строки с потолком по длине, ширине и числу ячеек — отказ словами.
+
+    Ширина режется **до** сохранения строки, хвост пустых ячеек отбрасывается:
+    иначе потолок строк обходился бы одной бесконечно широкой строкой.
+    """
     taken = []
+    cells = 0
     for row in rows:
         if len(taken) >= MAX_ROWS:
             raise Unreadable(
                 f"В файле больше {MAX_ROWS} строк — это не выписка за месяц. "
                 "Выгрузите выписку за более короткий период."
             )
-        taken.append(list(row))
+        kept = list(row[:MAX_COLS]) if isinstance(row, (list, tuple)) else list(row)[:MAX_COLS]
+        while kept and (kept[-1] is None or kept[-1] == ""):
+            kept.pop()
+        cells += sum(1 for cell in kept if cell is not None and cell != "")
+        if cells > MAX_CELLS:
+            raise Unreadable(f"В файле больше {MAX_CELLS} заполненных ячеек — "
+                             "это не выписка за месяц.")
+        taken.append(kept)
     return taken
 
 
@@ -292,7 +311,9 @@ def _xlsx_rows(content: bytes) -> list[list]:
     except Exception as error:  # openpyxl бросает что угодно на битом архиве
         raise Unreadable("Книга Excel не открывается.") from error
     sheet = book.worksheets[0]
-    return _capped(sheet.iter_rows(values_only=True))
+    # Границы — свои, а не объявленные листом: размер листа (dimension) пишет
+    # тот, кто сделал файл.
+    return _capped(sheet.iter_rows(max_row=MAX_ROWS + 1, max_col=MAX_COLS, values_only=True))
 
 
 def _header_key(text) -> str:

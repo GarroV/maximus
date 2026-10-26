@@ -262,3 +262,37 @@ def test_an_xlsx_longer_than_the_ceiling_is_refused(monkeypatch):
     book.save(buffer)
     with pytest.raises(Unreadable):
         read(buffer.getvalue(), "izvod.xlsx")
+
+
+def test_a_sheet_of_absurd_width_is_read_only_to_the_column_ceiling():
+    """Ячейка в колонке XFD не разворачивает лист в шестнадцать тысяч колонок."""
+    from openpyxl import Workbook
+
+    from bankstatement import reader
+
+    book = Workbook()
+    sheet = book.active
+    sheet.append(["Datum", "Naziv", "Duguje"])
+    sheet.append([date(2026, 6, 8), "Telekom Test", 5900])
+    sheet.cell(row=2, column=16384, value="x")
+    buffer = io.BytesIO()
+    book.save(buffer)
+    rows = reader._xlsx_rows(buffer.getvalue())
+    assert max(len(row) for row in rows) <= reader.MAX_COLS
+    (line,) = read(buffer.getvalue(), "izvod.xlsx").lines
+    assert line.amount == Decimal("5900.00")
+
+
+def test_a_long_tail_of_empty_cells_is_not_kept():
+    from bankstatement.reader import _capped
+
+    assert _capped([["a", "b"] + [None] * 10_000]) == [["a", "b"]]
+
+
+def test_the_cell_budget_is_refused_by_name(monkeypatch):
+    from bankstatement import reader
+
+    monkeypatch.setattr(reader, "MAX_CELLS", 5)
+    with pytest.raises(Unreadable) as refused:
+        reader._capped([["1", "2", "3"], ["4", "5", "6"]])
+    assert "ячеек" in str(refused.value)
