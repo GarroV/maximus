@@ -454,7 +454,7 @@ def period_page(
     # Ведомость и суммы — по своему праву (T236). Строки без него срежет и
     # политика чтения (`0275`), но пустая таблица читалась бы как «не
     # посчитано»; здесь вместо неё слова отказа.
-    payroll_denied = permissions.explain(who, permissions.PAYROLL_VIEW)
+    payroll_denied = permissions.sums_denied(who)
 
     # Что цикл позволяет сделать с расчётом дальше — спрашивается у базы, а не
     # выводится из статуса здесь (T025): единственный источник истины о цикле
@@ -1431,6 +1431,15 @@ def payslip_trace(request, payslip_id):
     who = get_current_principal(request)
     if who is None or who.tenant_id is None:
         raise Http404("строка ведомости не найдена")
+    # След — те же суммы по шагам. Без права их видеть база строк не отдаст, и
+    # человек прочитал бы «строки нет» там, где ему не открыто: отказ словами.
+    try:
+        permissions.check_sums(who)
+    except permissions.PermissionRefused as refusal:
+        return HttpResponse(
+            refusal.message, status=refusal.http_status,
+            content_type="text/plain; charset=utf-8",
+        )
 
     try:
         view = build_trace(
@@ -1535,6 +1544,20 @@ def period_variance(request, period_id):
     не может попасть сумма из регистра, которого роли не видно (D023).
     """
     period = find_period(period_id)
+    # Отклонения — это суммы расчёта двух месяцев. Без права их видеть политика
+    # отдаёт ноль строк с обеих сторон, и «отклонений нет» было бы неправдой.
+    denied = permissions.sums_denied(get_current_principal(request))
+    if denied:
+        return render(
+            request, "web/variance.html",
+            {
+                "title": month_title(period.period),
+                "back_url": reverse("period", args=[period.id]),
+                "error": denied,
+                "lines": [],
+            },
+            status=403,
+        )
     try:
         report = build_variance(
             period.tenant_id, period.period, request.GET.get("ledger", "")

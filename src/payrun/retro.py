@@ -64,7 +64,7 @@ from .errors import PayrunRefused
 
 __all__ = [
     "DELTA", "RECALCULATE", "Drift", "Line", "adjustments_for", "drift",
-    "mode", "next_open_period", "pending", "post", "require_sums_visible",
+    "mode", "next_open_period", "pending", "post", "require_sums_visible", "sums_visible",
 ]
 
 # Видит ли текущий смотрящий суммы расчёта партнёра (T236, `payroll.view`).
@@ -77,6 +77,13 @@ select coalesce((select rolbypassrls or rolsuper from pg_roles where rolname = c
 """
 
 
+def sums_visible(tenant_id: UUID) -> bool:
+    """Открыты ли смотрящему суммы расчёта — ответом той же функции базы."""
+    with connection.cursor() as cursor:
+        cursor.execute(_SEES_SUMS_SQL, [str(tenant_id)])
+        return bool(cursor.fetchone()[0])
+
+
 def require_sums_visible(tenant_id: UUID) -> None:
     """Отказ, если смотрящему не открыты суммы расчёта.
 
@@ -87,10 +94,8 @@ def require_sums_visible(tenant_id: UUID) -> None:
     """
     from web import permissions
 
-    with connection.cursor() as cursor:
-        cursor.execute(_SEES_SUMS_SQL, [str(tenant_id)])
-        if not cursor.fetchone()[0]:
-            raise permissions.PermissionRefused(permissions.PAYROLL_VIEW)
+    if not sums_visible(tenant_id):
+        raise permissions.PermissionRefused(permissions.PAYROLL_VIEW)
 
 
 DELTA = "delta"

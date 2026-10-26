@@ -193,6 +193,34 @@ def has(who, code: str) -> bool:
     return who is not None and code in (who.permissions or [])
 
 
+# Кто видит суммы расчёта: право смотреть — или право, которое без чтения сумм
+# не исполнить (расчёт, утверждение, перенос разницы). Тот же список, что у
+# функции базы `app_sees_payroll` (`0275`): экран и политика обязаны отвечать
+# одинаково, иначе экран откажет тому, кому база суммы отдаёт, или наоборот.
+SEES_SUMS = (PAYROLL_VIEW, PAYRUN_CALCULATE, PERIOD_APPROVE, RETRO_POST)
+
+
+def sums_visible(who) -> bool:
+    """Открыты ли смотрящему суммы расчёта — вопросом, для страниц."""
+    return any(has(who, code) for code in SEES_SUMS)
+
+
+def sums_denied(who) -> str:
+    """Пусто, если суммы открыты; иначе — отказ словами про право их видеть.
+
+    Страница без сумм обязана сказать почему, а не показать ноль: политика
+    базы отдаёт такой роли ноль строк, и «ФОТ 0» читался бы как посчитанный
+    ответ.
+    """
+    return "" if sums_visible(who) else explain(who, PAYROLL_VIEW)
+
+
+def check_sums(who) -> None:
+    """Отказ, если суммы расчёта смотрящему не открыты."""
+    if not sums_visible(who):
+        check(who, PAYROLL_VIEW)
+
+
 def explain(who, code: str) -> str:
     """Пусто, если право есть; иначе текст, объясняющий отсутствие действия.
 

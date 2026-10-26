@@ -1,0 +1,26 @@
+{
+  "Без зарплаты": {
+    "en": "Without payroll",
+    "sr": "Bez zarada"
+  },
+  "Строки зарплаты в отчёте закрыты, итог посчитан без них.": {
+    "en": "Payroll lines are closed in this report; the total is calculated without them.",
+    "sr": "Redovi zarada su u izveštaju zatvoreni, ukupan iznos je obračunat bez njih."
+  },
+  "закрыто: нет права видеть суммы расчёта": {
+    "en": "closed: no right to see calculated amounts",
+    "sr": "zatvoreno: nema prava da se vide obračunati iznosi"
+  },
+  "Итог без зарплаты": {
+    "en": "Total without payroll",
+    "sr": "Ukupno bez zarada"
+  },
+  "Отклонения от прошлого месяца не проверены": {
+    "en": "Changes against last month were not checked",
+    "sr": "Odstupanja u odnosu na prethodni mesec nisu provereni"
+  },
+  "Сравнение идёт по суммам расчёта, а права видеть их у вашей роли нет. Проверит тот, у кого это право есть.": {
+    "en": "The comparison uses calculated amounts, and your role has no right to see them. Someone who has that right will check it.",
+    "sr": "Poređenje se radi po obračunatim iznosima, a vaša uloga nema pravo da ih vidi. Proveriće onaj ko ima to pravo."
+  }
+}

@@ -9615,3 +9615,29 @@ msgstr "The partner's familiar table is the second way to enter hours next to th
 #: timesheets/templates/timesheets/close.html
 msgid "Показаны только ваши точки."
 msgstr "Only your units are shown."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без зарплаты"
+msgstr "Without payroll"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итог без зарплаты"
+msgstr "Total without payroll"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отклонения от прошлого месяца не проверены"
+msgstr "Changes against last month were not checked"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сравнение идёт по суммам расчёта, а права видеть их у вашей роли нет. "
+"Проверит тот, у кого это право есть."
+msgstr "The comparison uses calculated amounts, and your role has no right to see them. Someone who has that right will check it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строки зарплаты в отчёте закрыты, итог посчитан без них."
+msgstr "Payroll lines are closed in this report; the total is calculated without them."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "закрыто: нет права видеть суммы расчёта"
+msgstr "closed: no right to see calculated amounts"
