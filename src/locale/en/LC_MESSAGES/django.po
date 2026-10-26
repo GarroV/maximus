@@ -8741,10 +8741,6 @@ msgid ""
 msgstr "The value in force is %(value)s, although the rule is set by law (%(source)s). The override was created before the frame, and the calculation uses it — a new version can restore the country value."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Кто меняет:"
-msgstr "Who changes it:"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Что читает правило, последствия правки и сравнение стран"
 msgstr "What reads the rule, the effect of changing it, and a country comparison"
 

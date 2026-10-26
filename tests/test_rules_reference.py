@@ -90,7 +90,7 @@ def test_the_card_has_the_type_the_readers_and_the_effect(client):
 
     assert "<h1>Ночные — коэффициент оплаты</h1>" in html, "название не в заголовке"
     assert f"<code>{NIGHT}</code>" in html, "код пропал с карточки"
-    assert "Тип: Число" in html
+    assert re.search(r"<dt>Тип</dt><dd>Число</dd>", html), "тип не в поле карточки"
     assert "Что читает это правило" in html and "Табель" in html and "Расчёт периода" in html
     assert "Если поменять" in html and "Закрытые не двигаются" in html
     assert "mark--free" in free, "у свободного правила на карточке нет цветной метки"

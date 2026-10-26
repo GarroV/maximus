@@ -63,14 +63,12 @@
 {% endif %}
 
 {% if rows %}
-{% scroll %}<table>
+{% scroll %}<table class="rules-list">
   <thead>
     <tr>
-      <th>{% translate "Код" %}</th>
-      <th>{% translate "Название" %}</th>
+      <th>{% translate "Правило" %}</th>
       <th>{% translate "Значение" %}</th>
       <th>{% translate "Кто меняет" %}</th>
-      <th>{% translate "Откуда" %}</th>
       <th>{% translate "Действует с" %}</th>
       <th>{% translate "Задано отдельно" %}</th>
     </tr>
@@ -78,8 +76,12 @@
   <tbody>
     {% for row in rows %}
     <tr>
-      <td><code>{% if row.url %}<a href="{{ row.url }}">{{ row.path }}</a>{% else %}{{ row.path }}{% endif %}</code></td>
-      <td>{{ row.title|default:"—" }}</td>
+      {% comment %}
+      Название и код одной ячейкой: две колонки делили ширину так, что код
+      занимал половину таблицы, а название переносилось на три строки, и
+      таблица вылезала из контейнера.
+      {% endcomment %}
+      <td>{% if row.url %}<a href="{{ row.url }}">{{ row.title|default:row.path }}</a>{% else %}{{ row.title|default:row.path }}{% endif %}{% if row.title %}<br><code>{{ row.path }}</code>{% endif %}</td>
       <td class="{{ row.value|numclass }}">{{ row.value }}</td>
       {% comment %}
       Кто решает значение: закон, рамка страны или сам партнёр (T192, эталон
@@ -90,8 +92,7 @@
       это трогать».
       {% endcomment %}
       <td><span class="mark mark--{{ row.owner_mode }}">{{ row.owner }}</span></td>
-      <td>{{ row.origin }}</td>
-      <td>{{ row.since|default:"—" }}</td>
+      <td>{{ row.since|default:"—" }}<br><span class="note">{{ row.origin }}</span></td>
       {% comment %}
       Колонка про то, что таблица НЕ показывает. Значение в строке — общее: страна
       плюс партнёр, то есть то, что действует у всех. Версия, заведённая одной
