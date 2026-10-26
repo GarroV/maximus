@@ -21,16 +21,25 @@ EPS = "party-eps"
 OTHER = "party-other"
 
 
-def fact(ref, amount="24000.00", on=ON, party=EPS):
-    return Candidate(kind="fact", ref=ref, amount=Decimal(amount), on=on, party=party)
+HOME = "RSD"
 
 
-def invoice(ref, amount="24000.00", on=date(2026, 6, 1), party=EPS):
-    return Candidate(kind="invoice", ref=ref, amount=Decimal(amount), on=on, party=party)
+def fact(ref, amount="24000.00", on=ON, party=EPS, currency=HOME):
+    return Candidate(kind="fact", ref=ref, amount=Decimal(amount), on=on, party=party,
+                     currency=currency)
 
 
-def decide(amount="24000.00", on=ON, party=EPS, facts=(), invoices=()):
-    return choose(Decimal(amount), on, party, list(facts), list(invoices))
+def invoice(ref, amount="24000.00", on=date(2026, 6, 1), party=EPS, currency=HOME):
+    return Candidate(kind="invoice", ref=ref, amount=Decimal(amount), on=on, party=party,
+                     currency=currency)
+
+
+def decide(amount="24000.00", on=ON, party=EPS, facts=(), invoices=(), *,
+           currency=HOME, by_account=True, home=HOME):
+    """По умолчанию получатель опознан по счёту, а валюты совпадают: так
+    проверки ниже говорят каждая о своём, а не спотыкаются о валюту."""
+    return choose(Decimal(amount), on, party, list(facts), list(invoices),
+                  currency=currency, party_by_account=by_account, home_currency=home)
 
 
 # --- уже внесённый платёж ------------------------------------------------------
@@ -125,3 +134,48 @@ def test_an_ambiguous_payment_does_not_fall_through_to_an_invoice():
 def test_nothing_to_match_is_said_so():
     chosen = decide()
     assert (chosen.kind, chosen.reason) == ("decide", "none")
+
+
+# --- валюта ---------------------------------------------------------------------
+
+
+def test_a_payment_in_another_currency_is_another_payment():
+    """24 000 евро и 24 000 динаров — разные деньги, хоть число одно."""
+    chosen = decide(currency="EUR", facts=[fact("p1")])
+    assert chosen.kind == "decide"
+
+
+def test_an_invoice_in_another_currency_is_not_paid():
+    chosen = decide(invoices=[invoice("inv1", currency="EUR")])
+    assert chosen.kind == "decide"
+
+
+def test_a_line_without_a_currency_is_matched_with_nothing():
+    chosen = decide(currency="", facts=[fact("p1", currency="")], invoices=[invoice("inv1")])
+    assert (chosen.kind, chosen.reason) == ("decide", "no_currency")
+
+
+def test_a_foreign_currency_line_never_pays_an_invoice_by_itself():
+    """Счёт и строка в евро, а учёт партнёра в динарах: курс решает человек."""
+    chosen = decide(currency="EUR", home="RSD", invoices=[invoice("inv1", currency="EUR")])
+    assert chosen.kind == "decide"
+
+
+def test_a_foreign_currency_payment_already_entered_is_still_matched():
+    chosen = decide(currency="EUR", home="RSD", facts=[fact("p1", currency="EUR")])
+    assert (chosen.kind, chosen.ref) == ("fact", "p1")
+
+
+# --- получатель по названию ----------------------------------------------------
+
+
+def test_a_payee_known_only_by_name_does_not_get_an_invoice_paid():
+    """Название в выписке пишет плательщик — его можно совпасть случайно или
+    нарочно. Само оплачивается только при совпадении счёта получателя."""
+    chosen = decide(by_account=False, invoices=[invoice("inv1")])
+    assert chosen.kind == "decide"
+
+
+def test_a_payee_known_only_by_name_still_settles_a_tie_between_payments():
+    chosen = decide(by_account=False, facts=[fact("p1", party=OTHER), fact("p2")])
+    assert (chosen.kind, chosen.ref) == ("fact", "p2")
