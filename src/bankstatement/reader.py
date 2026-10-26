@@ -93,7 +93,7 @@ def _looks_like_xml(content: bytes) -> bool:
     return content.removeprefix(b"\xef\xbb\xbf").lstrip()[:1] == b"<"
 
 
-def _refuse_declarations(content: bytes) -> None:
+def _refuse_declarations(content: bytes, *, part: str = "") -> None:
     """Отказать XML с объявлением типа документа или сущностей.
 
     В выписке их не бывает, а в атаке на разборщик XML они есть всегда.
@@ -103,6 +103,9 @@ def _refuse_declarations(content: bytes) -> None:
     одной строкой, но в зависимостях её нет.
     """
     def refuse(*_args):
+        if part:
+            raise Unreadable(_("В книге Excel часть %(part)s объявляет тип документа или "
+                               "сущности — такая книга не принимается.") % {"part": part})
         raise Unreadable(_("XML с объявлением типа документа или сущностей не принимается."))
 
     probe = xml.parsers.expat.ParserCreate()
@@ -113,6 +116,8 @@ def _refuse_declarations(content: bytes) -> None:
     try:
         probe.Parse(content, True)
     except xml.parsers.expat.ExpatError as error:
+        if part:
+            raise Unreadable(_("Книга Excel не открывается.")) from error
         raise Unreadable(_("XML не читается: %(why)s.") % {"why": error}) from error
 
 
@@ -259,7 +264,10 @@ def _csv_rows(content: bytes) -> list[list]:
         dialect = csv.Sniffer().sniff(sample, delimiters=";,\t")
     except csv.Error:
         dialect = _Semicolon if sample.count(";") >= sample.count(",") else csv.excel
-    return _capped(csv.reader(io.StringIO(text), dialect))
+    try:
+        return _capped(csv.reader(io.StringIO(text), dialect))
+    except csv.Error as error:
+        raise Unreadable(_("Таблица не читается: %(why)s.") % {"why": error}) from error
 
 
 def _capped(rows) -> list[list]:
@@ -296,13 +304,19 @@ def _refuse_bombs(content: bytes) -> None:
     try:
         with zipfile.ZipFile(io.BytesIO(content)) as archive:
             members = archive.infolist()
-    except zipfile.BadZipFile as error:
+            unpacked = sum(m.file_size for m in members)
+            packed = sum(m.compress_size for m in members) or 1
+            if unpacked > MAX_UNPACKED_BYTES or unpacked / packed > MAX_COMPRESSION_RATIO:
+                raise Unreadable(_("Книга Excel разворачивается в слишком большой объём — "
+                                   "это не выписка за месяц."))
+            # Части книги — тот же XML, и правило у них то же, что у выписки
+            # XML: объявлений типа документа и сущностей не бывает. Проверка —
+            # после потолка объёма, поэтому читает не больше разрешённого.
+            for member in members:
+                if member.filename.endswith((".xml", ".rels")):
+                    _refuse_declarations(archive.read(member), part=member.filename)
+    except (zipfile.BadZipFile, OSError, RuntimeError) as error:
         raise Unreadable(_("Книга Excel не открывается.")) from error
-    unpacked = sum(m.file_size for m in members)
-    packed = sum(m.compress_size for m in members) or 1
-    if unpacked > MAX_UNPACKED_BYTES or unpacked / packed > MAX_COMPRESSION_RATIO:
-        raise Unreadable(_("Книга Excel разворачивается в слишком большой объём — "
-                           "это не выписка за месяц."))
 
 
 def _xlsx_rows(content: bytes) -> list[list]:
@@ -313,10 +327,18 @@ def _xlsx_rows(content: bytes) -> list[list]:
         book = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
     except Exception as error:  # openpyxl бросает что угодно на битом архиве
         raise Unreadable(_("Книга Excel не открывается.")) from error
-    sheet = book.worksheets[0]
     # Границы — свои, а не объявленные листом: размер листа (dimension) пишет
-    # тот, кто сделал файл.
-    return _capped(sheet.iter_rows(max_row=MAX_ROWS + 1, max_col=MAX_COLS, values_only=True))
+    # тот, кто сделал файл. Битый лист или лист-диаграмма openpyxl роняет чем
+    # угодно и уже при обходе — отказ словами, а не падение страницы.
+    try:
+        sheet = book.worksheets[0]
+        return _capped(sheet.iter_rows(max_row=MAX_ROWS + 1, max_col=MAX_COLS,
+                                       values_only=True))
+    except Unreadable:
+        raise
+    except Exception as error:  # noqa: BLE001 — openpyxl не обещает типа ошибки
+        raise Unreadable(_("Лист книги Excel не читается: первым должен быть лист "
+                           "с таблицей выписки.")) from error
 
 
 def _header_key(text) -> str:

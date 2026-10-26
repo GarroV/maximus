@@ -308,3 +308,83 @@ def test_a_slashed_date_is_not_guessed():
 
     with pytest.raises(ValueError, match="01/06/2026"):
         day("01/06/2026")
+
+
+@pytest.mark.parametrize("raw", ["1.840,005", "12.5051", "0.001"])
+def test_a_sum_with_more_than_two_decimals_is_refused(raw):
+    """Сумма не округляется молча: третий знак после запятой — не копейки,
+    а ошибка разбора, и её надо назвать, а не спрятать в округлении."""
+    from bankstatement.values import amount
+
+    with pytest.raises(ValueError):
+        amount(raw)
+
+
+@pytest.mark.parametrize("raw", ["1.840,50", "12.50", "100,500", Decimal("7.100"), 12.5])
+def test_trailing_zeros_and_thousands_are_not_extra_decimals(raw):
+    from bankstatement.values import amount
+
+    assert amount(raw) is not None
+
+
+@pytest.mark.parametrize("raw", ["01.01.1999", "9999-12-31", "01.06.2101"])
+def test_a_date_outside_any_statement_is_refused(raw):
+    """Год 9999 завёл бы учётный месяц через восемь тысяч лет."""
+    from bankstatement.values import day
+
+    with pytest.raises(ValueError):
+        day(raw)
+
+
+def _book_bytes() -> bytes:
+    from openpyxl import Workbook
+
+    book = Workbook()
+    book.active.append(["Datum", "Duguje"])
+    book.active.append([date(2026, 6, 8), 5900])
+    buffer = io.BytesIO()
+    book.save(buffer)
+    return buffer.getvalue()
+
+
+def _with_part(content: bytes, name: str, replace) -> bytes:
+    """Та же книга, но одна её часть заменена — так, как её прислали бы."""
+    import zipfile
+
+    source = zipfile.ZipFile(io.BytesIO(content))
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as target:
+        for item in source.infolist():
+            data = source.read(item.filename)
+            target.writestr(item.filename, replace(data) if item.filename == name else data)
+    return out.getvalue()
+
+
+def test_a_sheet_with_a_doctype_is_refused():
+    doctype = b'<!DOCTYPE worksheet [<!ENTITY x "y">]>'
+
+    def declared(data: bytes) -> bytes:
+        if data.startswith(b"<?xml"):
+            end = data.index(b"?>") + 2
+            return data[:end] + doctype + data[end:]
+        return doctype + data
+
+    probe = _with_part(_book_bytes(), "xl/worksheets/sheet1.xml", declared)
+    import zipfile
+    assert doctype in zipfile.ZipFile(io.BytesIO(probe)).read("xl/worksheets/sheet1.xml")
+
+    book = _with_part(_book_bytes(), "xl/worksheets/sheet1.xml", declared)
+    with pytest.raises(Unreadable):
+        read(book, "izvod.xlsx")
+
+
+def test_a_broken_sheet_is_refused_in_words():
+    book = _with_part(_book_bytes(), "xl/worksheets/sheet1.xml", lambda data: data[:120])
+    with pytest.raises(Unreadable):
+        read(book, "izvod.xlsx")
+
+
+def test_an_absurdly_long_csv_field_is_refused_in_words():
+    huge = "x" * 200_000
+    with pytest.raises(Unreadable):
+        read((CSV + f'"{huge}";1,00;;18.06.2026;Neko\n').encode("utf-8"), "izvod.csv")

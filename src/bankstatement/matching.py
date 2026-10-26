@@ -13,9 +13,15 @@
    них ровно один его; иначе человек. И неоднозначность здесь **не
    проваливается** к счетам: «не знаю, какой из двух платежей» — не повод
    платить третье.
-2. **Неоплаченный счёт** опознанного получателя с остатком ровно на сумму
-   строки и датой не позже платежа. Без опознанного получателя счёт не
-   оплачивается никогда: совпадение суммы у незнакомца — случайность.
+2. **Неоплаченный счёт** получателя, опознанного **по счёту**, с остатком
+   ровно на сумму строки и датой не позже платежа. Название в выписке пишет
+   плательщик, оно совпадает случайно — по одному названию счёт не
+   оплачивается никогда, его предлагают человеку.
+
+**Валюта — часть суммы.** 24 000 евро и 24 000 динаров — разные деньги:
+кандидат в другой валюте не кандидат вовсе. Строка без валюты не сводится
+ни с чем. Счёт сам оплачивается только в валюте учёта партнёра: платёж в
+другой валюте требует курса, и его выбирает человек.
 
 Окно дат — потому что дату денег человек вносит по памяти или по дате
 поручения, а банк проводит на день-два позже.
@@ -40,6 +46,7 @@ class Candidate:
     amount: Decimal      # сумма платежа или остаток счёта
     on: date             # дата денег или дата счёта
     party: str | None    # контрагент
+    currency: str        # валюта платежа или счёта
 
 
 @dataclass(frozen=True)
@@ -53,9 +60,13 @@ class Choice:
 
 def choose(amount: Decimal, on: date, party: str | None,
            facts: list[Candidate], invoices: list[Candidate],
-           window: int = DATE_WINDOW_DAYS) -> Choice:
+           window: int = DATE_WINDOW_DAYS, *, currency: str,
+           party_by_account: bool = False, home_currency: str = "") -> Choice:
+    if not currency:
+        return Choice(DECIDE, reason="no_currency")
     span = timedelta(days=window)
-    same = [f for f in facts if f.amount == amount and abs(f.on - on) <= span]
+    same = [f for f in facts if f.currency == currency
+            and f.amount == amount and abs(f.on - on) <= span]
     if len(same) == 1:
         return Choice(FACT, same[0].ref, "single")
     if same:
@@ -63,10 +74,11 @@ def choose(amount: Decimal, on: date, party: str | None,
         if len(theirs) == 1:
             return Choice(FACT, theirs[0].ref, "single_of_party")
         return Choice(DECIDE, reason="ambiguous")
-    if party is None:
+    if party is None or not party_by_account or currency != home_currency:
         return Choice(DECIDE, reason="none")
     payable = [i for i in invoices
-               if i.party == party and i.amount == amount and i.on <= on + span]
+               if i.party == party and i.currency == currency
+               and i.amount == amount and i.on <= on + span]
     if len(payable) == 1:
         return Choice(INVOICE, payable[0].ref, "invoice_of_party")
     return Choice(DECIDE, reason="ambiguous" if payable else "none")
