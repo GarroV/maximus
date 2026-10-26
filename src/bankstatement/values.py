@@ -5,6 +5,8 @@ import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
+from django.utils.translation import gettext as _
+
 CENT = Decimal("0.01")
 
 _DATE_FORMATS = ("%Y-%m-%d", "%d.%m.%Y", "%d.%m.%y", "%d/%m/%Y", "%Y%m%d")
@@ -44,7 +46,7 @@ def amount(raw) -> Decimal | None:
     try:
         value = Decimal(text).quantize(CENT)
     except InvalidOperation as error:
-        raise ValueError(f"не число: {raw!r}") from error
+        raise ValueError(_("не число: %(value)s") % {"value": repr(raw)}) from error
     return -value if negative else value
 
 
@@ -65,7 +67,7 @@ def day(raw) -> date | None:
             return datetime.strptime(text, pattern).date()
         except ValueError:
             continue
-    raise ValueError(f"не дата: {raw!r}")
+    raise ValueError(_("не дата: %(value)s") % {"value": repr(raw)})
 
 
 def norm(text: str) -> str:
