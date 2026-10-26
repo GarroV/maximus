@@ -7058,10 +7058,6 @@ msgstr "As of"
 msgid "Правило"
 msgstr "Rule"
 
-#: web/templates/web/rules/index.html:35
-msgid "Часть кода правила: night, sick, net_factor"
-msgstr "Part of the rule code: night, sick, net_factor"
-
 #: web/templates/web/rules/index.html:46
 #, python-format
 msgid "Набор правил: %(code)s (%(country)s)"
@@ -7079,16 +7075,6 @@ msgstr "Set separately"
 #: web/templates/web/rules/index.html:87
 msgid "По этому запросу правил нет."
 msgstr "No rules match this search."
-
-#: web/templates/web/rules/index.html:88
-msgid ""
-"Поиск идёт по коду правила — той самой строке, которой правило адресуется "
-"расчёту: hour_types.night.pay_percent. Очистите поле, чтобы увидеть весь "
-"набор."
-msgstr ""
-"The search matches the rule code — the exact string the rule is addressed to "
-"in the calculation: hour_types.night.pay_percent. Clear the field to see the "
-"whole set."
 
 #: web/templates/web/rules/index.html:90
 msgid "Правил расчёта для этой страны на эту дату в базе нет."
@@ -8743,10 +8729,6 @@ msgid ""
 msgstr "The value in force is %(value)s, although the rule is set by law (%(source)s). The override was created before the frame, and the calculation uses it — a new version can restore the country value."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Кто меняет:"
-msgstr "Who changes it:"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Что читает правило, последствия правки и сравнение стран"
 msgstr "What reads the rule, the effect of changing it, and a country comparison"
 
@@ -9727,6 +9709,17 @@ msgid "закрыто: нет права видеть суммы расчёта"
 msgstr "closed: no right to see calculated amounts"
 
 #: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"%(locked)s заданы законом и не редактируются · %(framed)s партнёр может "
+"только ужесточить"
+msgstr "%(locked)s set by law and not editable · %(framed)s the partner can only tighten"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Анатомия правила"
+msgstr "Anatomy of a rule"
+
+#: новые строки, добавлены tools/apply_translations.py
 msgid "Все"
 msgstr "All"
 
@@ -9789,3 +9782,484 @@ msgstr "Needs your attention"
 #, python-format
 msgid "норма месяца %(norm)s ч"
 msgstr "monthly norm %(norm)s h"
+msgid ""
+"Все правила лежат в одной таблице с одинаковым устройством. Новое "
+"правило не требует переписывать модули: они спрашивают значение по коду."
+msgstr "All rules live in one table with the same structure. A new rule does not require rewriting modules: they ask for the value by code."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Все правила наследуются из страны. Первое переопределение появится "
+"здесь, как только его заведут с карточки правила."
+msgstr "All rules are inherited from the country. The first override will appear here as soon as it is created from a rule card."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выбор из списка"
+msgstr "Choice from a list"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Готовность периода"
+msgstr "Period readiness"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Группы правил"
+msgstr "Rule groups"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Если поменять"
+msgstr "If changed"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Завести новое правило — значит описать эти поля, а не трогать код "
+"расчёта."
+msgstr "Adding a new rule means describing these fields, not touching the calculation code."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Задано партнёром"
+msgstr "Set by the partner"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Закон, рамка страны или партнёр. Закон не меняется вовсе, рамка "
+"допускает только более строгое значение."
+msgstr "Law, country frame or partner. Law is never changed; a frame allows only a stricter value."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Значение всегда с датой"
+msgstr "A value always has a date"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Значение страны задаёт администратор платформы"
+msgstr "The country value is set by the platform administrator"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Значения по датам. Закрытый месяц считается по версии, действовавшей в "
+"нём."
+msgstr "Values by date. A closed month is calculated by the version that was in force in it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "История"
+msgstr "History"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как правило попадает в продукт"
+msgstr "How a rule gets into the product"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как устроено"
+msgstr "How it works"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код или название: night, ночные, net_factor"
+msgstr "Code or name: night, sick, net_factor"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Код, тип и список читателей — часть кода, потому что от них зависит "
+"расчёт. Это единственный шаг, где нужен релиз."
+msgstr "The code, type and list of readers are part of the code, because the calculation depends on them. This is the only step that needs a release."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Коэффициент пересчёта нето в бруто"
+msgstr "Net-to-gross conversion factor"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет доплату до минимума в незакрытых месяцах."
+msgstr "Changes the top-up to the minimum in open months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет надбавку у всех, кому она положена, в незакрытых месяцах."
+msgstr "Changes the allowance for everyone entitled to it in open months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет налог и взносы в каждой ведомости незакрытых месяцев."
+msgstr "Changes tax and contributions in every payroll sheet of open months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет налог, взносы и доплаты у всех, кого они касаются, в незакрытых "
+"месяцах."
+msgstr "Changes tax, contributions and top-ups for everyone they concern in open months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет начисление за эти часы в незакрытых месяцах. Закрытые не "
+"двигаются."
+msgstr "Changes the pay for these hours in open months. Closed months do not move."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет оплату работы, которая меряется этой мерой, в незакрытых месяцах."
+msgstr "Changes the pay for work measured by this measure in open months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет расчёт у всех сотрудников на этой схеме в незакрытых месяцах."
+msgstr "Changes the calculation for all employees on this scheme in open months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет расчёт часов этого вида в незакрытых месяцах."
+msgstr "Changes the calculation of hours of this kind in open months."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет только подпись строки ручной корректировки."
+msgstr "Changes only the label of the manual correction line."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет только подпись. Сумма расчёта не меняется."
+msgstr "Changes only the label. The calculated amount does not change."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Меняет, входят ли эти часы в базу взносов."
+msgstr "Changes whether these hours are part of the contribution base."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет, как считаются сотрудники этой группы и куда падают их расходы в "
+"P&L."
+msgstr "Changes how employees of this group are calculated and where their costs land in the P&L."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет, при каком расхождении с прошлым месяцем отчёт поднимет "
+"замечание. На суммы расчёта не влияет."
+msgstr "Changes at what difference from the previous month the report raises a flag. Does not affect calculated amounts."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Меняет, считаются ли эти часы отработанными, когда месяц сверяется с "
+"нормой."
+msgstr "Changes whether these hours count as worked when the month is checked against the norm."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Минимальная месячная база взносов"
+msgstr "Minimum monthly contribution base"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Минимальная цена часа, нето"
+msgstr "Minimum hourly rate, net"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Модули продукта, которые берут это значение. Список привязан к "
+"исходникам и проверяется тестом."
+msgstr "Product modules that take this value. The list is tied to the source code and checked by a test."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не меняется никогда. По нему правило находит расчёт."
+msgstr "Never changes. The calculation finds the rule by it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Необлагаемый минимум в месяц"
+msgstr "Tax-free minimum per month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Никто не пробовал поставить правилу значение за рамкой страны."
+msgstr "Nobody has tried to set a value outside the country frame for this rule."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Опорная норма часов в месяц"
+msgstr "Reference norm of hours per month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отчёт расхождений"
+msgstr "Variance report"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Партнёр пока ничего не менял."
+msgstr "The partner has not changed anything yet."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Партнёр становится строже рамки, но никогда мягче. Попытка выйти за "
+"рамку записывается в журнал с автором и временем — это след для аудита, "
+"а не защита от ошибки."
+msgstr "A partner can be stricter than the frame, never softer. An attempt to go outside the frame is logged with author and time — a trail for audit, not protection from mistakes."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Партнёр уточняет внутри рамки"
+msgstr "The partner refines within the frame"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Партнёр, группа или человек задают своё значение с даты. Закрытые месяцы "
+"от этого не двигаются."
+msgstr "A partner, group or person sets their own value from a date. Closed months do not move."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Первичная загрузка из файла страны или новая версия правил страны с "
+"экрана правила — только у того, кто ведёт правила страны."
+msgstr "Initial load from the country file or a new version of country rules from the rule screen — only for whoever maintains country rules."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Переключатель"
+msgstr "Switch"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Подпись для человека на трёх языках. Выводится из словаря продукта, а не "
+"хранится в базе."
+msgstr "A human-readable label in three languages. Derived from the product dictionary, not stored in the database."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Поиск идёт по коду правила — той самой строке, которой правило "
+"адресуется расчёту: hour_types.night.pay_percent, — и по его названию. "
+"Очистите поле и выберите «Все», чтобы увидеть весь набор."
+msgstr "The search goes by the rule code — the very string by which the calculation addresses the rule: hour_types.night.pay_percent — and by its name. Clear the field and choose “All” to see the whole set."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Порог расхождения по умолчанию, %"
+msgstr "Default variance threshold, %"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Порог расхождения по умолчанию, сумма"
+msgstr "Default variance threshold, amount"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правило заводит разработка"
+msgstr "Development adds the rule"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Правило — строка, а не поле"
+msgstr "A rule is a row, not a field"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Праздничные дни"
+msgstr "Public holidays"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Профиль страны"
+msgstr "Country profile"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Разделы справочника правил"
+msgstr "Rules reference sections"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Рамку двигает закон, не администратор"
+msgstr "The law moves the frame, not an administrator"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Расчёт ведомости"
+msgstr "Payroll calculation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Расчёт это правило сегодня не читает."
+msgstr "The calculation does not read this rule today."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Румыния"
+msgstr "Romania"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Своё у каждой страны. Партнёр, группа и человек могут задать своё поверх "
+"— с датой."
+msgstr "Each country has its own. A partner, group or person can set their own on top — with a date."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сербия"
+msgstr "Serbia"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Список"
+msgstr "List"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка взносов по договору о временных работах"
+msgstr "Contribution rate for temporary-work contracts"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка взносов с работника"
+msgstr "Employee contribution rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка взносов с работодателя"
+msgstr "Employer contribution rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставка налога на доходы"
+msgstr "Income tax rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Суммарная ставка взносов"
+msgstr "Combined contribution rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Текст"
+msgstr "Text"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Тип"
+msgstr "Type"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Три закона справочника"
+msgstr "Three laws of the reference"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У правила нет «текущего значения» — есть значение на дату. Поэтому "
+"закрытый месяц считается по правилам своего времени, даже если страна "
+"уже сменила ставку."
+msgstr "A rule has no “current value” — it has a value on a date. That is why a closed month is calculated by the rules of its own time, even if the country has already changed the rate."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Хорватия"
+msgstr "Croatia"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часов в полном рабочем дне"
+msgstr "Hours in a full working day"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Черногория"
+msgstr "Montenegro"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Число"
+msgstr "Numeric value"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Число, переключатель, список, выбор из списка или текст. Тип берётся у "
+"действующего значения и задаёт поле ввода."
+msgstr "Number, switch, list, choice from a list or text. The type comes from the current value and sets the input field."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что изменено поверх страны"
+msgstr "What is changed on top of the country"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что читает"
+msgstr "Who reads it"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что читает это правило"
+msgstr "What reads this rule"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Это календарь месяца для первичной загрузки: расчёт по нему сегодня не "
+"идёт."
+msgstr "This is the month calendar for the initial load: the calculation does not use it today."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Это пометка, а не параметр расчёта: движок её не читает."
+msgstr "This is a marker, not a calculation parameter: the engine does not read it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "включена"
+msgstr "enabled"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "входит в базу взносов"
+msgstr "is part of the contribution base"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "делитель часов при пересчёте"
+msgstr "hours divisor in conversion"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "какая ставка взносов"
+msgstr "which contribution rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "какие часы вызывают доплату"
+msgstr "which hours trigger the top-up"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "коэффициент оплаты"
+msgstr "pay coefficient"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "месячная оплата"
+msgstr "monthly pay"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "надбавки"
+msgstr "allowances"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "название"
+msgstr "name"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "облагается налогом"
+msgstr "is taxable"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "откуда берутся отработанные часы"
+msgstr "where worked hours come from"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "платится за единицу"
+msgstr "paid per unit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "пометка о проверке"
+msgstr "verification marker"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "порог, %"
+msgstr "threshold, %"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "порог, сумма"
+msgstr "threshold, amount"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "пропорция надбавки"
+msgstr "allowance proration"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "регистр учёта"
+msgstr "accounting register"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "способ пересчёта нето в бруто"
+msgstr "net-to-gross method"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "способ расчёта взносов"
+msgstr "contribution method"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "способ расчёта налога"
+msgstr "tax method"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "строка P&L"
+msgstr "P&L reporting line"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сумма за норму"
+msgstr "amount per norm"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "схема расчёта"
+msgstr "calculation scheme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "считается отработанным"
+msgstr "counts as worked"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "чем меряется работа"
+msgstr "how work is measured"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "чем пропорционально"
+msgstr "prorated by"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Мера работы"
+msgstr "Work measure"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Схема"
+msgstr "Scheme"

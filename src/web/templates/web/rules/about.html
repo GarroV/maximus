@@ -1,0 +1,34 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+«Как устроено»: анатомия правила, три закона и путь правила в продукт (эталон
+модуля 17, вкладка «Как устроено»). Слова, а не данные: страница объясняет,
+почему правила такие, тому, кто пришёл не менять, а понять.
+{% endcomment %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<h1>{{ heading }}</h1>
+{% translate "Разделы справочника правил" as tabs_label %}
+{% include "web/components/cuts.html" with cuts=tabs label=tabs_label %}
+
+<h2>{% translate "Анатомия правила" %}</h2>
+<p class="sub">{% translate "Завести новое правило — значит описать эти поля, а не трогать код расчёта." %}</p>
+{% scroll %}<table>
+  <tbody>
+    {% for name, text in anatomy %}
+    <tr><th scope="row">{{ name }}</th><td>{{ text }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+
+<h2>{% translate "Три закона справочника" %}</h2>
+{% for name, text in laws %}
+<h3>{{ name }}</h3>
+<p>{{ text }}</p>
+{% endfor %}
+
+<h2>{% translate "Как правило попадает в продукт" %}</h2>
+{% for number, name, text in steps %}
+<h3>{{ number }} · {{ name }}</h3>
+<p>{{ text }}</p>
+{% endfor %}
+{% endblock %}

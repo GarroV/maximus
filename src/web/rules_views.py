@@ -53,7 +53,7 @@ from django.views.decorators.http import require_http_methods
 
 from core.rules import PresetNotFound, load_rules_at
 
-from . import directory, permissions, rule_targets, rules, rules_country
+from . import directory, filter_links, permissions, rule_names, rule_targets, rules, rules_country
 from .dbrefusal import ConstraintRefused, saving
 from .format import EMPTY
 from .principal import get_current_principal
@@ -144,9 +144,32 @@ def _preset_for(who, assembled, target, on_date):
     return assembled.base
 
 
+def _tabs(current: str, on_date: date) -> list[dict]:
+    """Три страницы справочника правил — ссылками, а не переключателем (D081/D087).
+
+    Одна страница — одна функция: профиль страны (что действует), задано
+    партнёром (что он изменил и что у него не вышло), как устроено (почему
+    правила такие). Дата едет со всеми переходами — тем же правилом, что у
+    страниц самого правила.
+    """
+    return [
+        {
+            "title": title,
+            "selected": key == current,
+            "url": f"{reverse(name)}?on={on_date.isoformat()}",
+        }
+        for key, title, name in (
+            ("country", _("Профиль страны"), "rules"),
+            ("partner", _("Задано партнёром"), "rules-partner"),
+            ("about", _("Как устроено"), "rules-about"),
+        )
+    ]
+
+
 def _no_rules_notice(request, who, on_date, *, heading):
     return render(request, "web/rules/index.html", {
         "heading": heading,
+        "tabs": _tabs("country", on_date),
         "on_date": on_date.isoformat(),
         "country": directory.country_of(who.tenant_id),
         "sections": [],
@@ -202,37 +225,66 @@ def index(request):
     # «Показать» поле оказывалось бы пустым при отфильтрованной таблице, и
     # человек читал бы неполный список как полный.
     query = (request.GET.get("q") or "").strip()
+    group = (request.GET.get("group") or "").strip()
+    country = directory.country_of(who.tenant_id)
+    everything = rules.sections(preset, hidden=hidden)
+    shown = rules.sections(preset, hidden=hidden, query=query, group=group)
+    base = reverse("rules")
+    state = {"on": on_date.isoformat(), "q": query}
+
+    def count_of(rows) -> int:
+        return sum(len(section["rows"]) for section in rows)
+
+    owners = [
+        rules.frame_mode(preset, leaf.path)
+        for section in everything for leaf in section["rows"]
+    ]
     return render(request, "web/rules/index.html", {
         "heading": _("Правила расчёта"),
+        "tabs": _tabs("country", on_date),
         "on_date": on_date.isoformat(),
         "query": query,
-        "country": directory.country_of(who.tenant_id),
+        "country": country,
+        "country_name": rule_names.country_name(country),
         "preset_code": preset.get("preset", ""),
-        "sections": [
+        "total": count_of(everything),
+        "locked_count": owners.count("lock"),
+        "frame_count": owners.count("frame"),
+        # Группы-фильтры — ссылками со счётчиком (эталон модуля 17, D081/D087):
+        # каждая видна без раскрытия, а выбранная не ссылка. Счёт — по всем
+        # правилам, а не по найденным: число у группы отвечает «сколько их
+        # всего», а не «сколько осталось после поиска».
+        "groups": [
             {
-                **section,
-                "rows": [
-                    {
-                        "path": leaf.path,
-                        "title": leaf.title,
-                        "value": leaf.value,
-                        "origin": rules.level_title(leaf.level),
-                        "since": leaf.valid_from.isoformat() if leaf.valid_from else "",
-                        "lower": rule_targets.counts_words(lower.get(leaf.path, {})),
-                        # Кто решает значение: закон, рамка или партнёр (T192).
-                        # Колонка эталона модуля 17 — без неё рамка узнаётся
-                        # только отказом, то есть после набранного значения.
-                        "owner": rules.frame_owner(preset, leaf.path),
-                        "owner_mode": rules.frame_mode(preset, leaf.path),
-                        "url": (
-                            f"{reverse('rule', args=[leaf.path])}?on={on_date.isoformat()}"
-                            if leaf.editable else ""
-                        ),
-                    }
-                    for leaf in section["rows"]
-                ],
+                "title": f"{title} · {count}",
+                "selected": group == key,
+                "url": filter_links.url(base, state, group=key),
             }
-            for section in rules.sections(preset, hidden=hidden, query=query)
+            for key, title, count in (
+                [("", _("Все"), count_of(everything))]
+                + [(s["name"], s["title"], len(s["rows"])) for s in everything]
+            )
+        ],
+        "rows": [
+            {
+                "path": leaf.path,
+                "title": leaf.title,
+                "value": leaf.value,
+                "origin": rules.level_title(leaf.level),
+                "since": leaf.valid_from.isoformat() if leaf.valid_from else "",
+                "lower": rule_targets.counts_words(lower.get(leaf.path, {})),
+                # Кто решает значение: закон, рамка или партнёр (T192).
+                # Колонка эталона модуля 17 — без неё рамка узнаётся
+                # только отказом, то есть после набранного значения.
+                "owner": rules.frame_owner(preset, leaf.path),
+                "owner_mode": rules.frame_mode(preset, leaf.path),
+                "url": (
+                    f"{reverse('rule', args=[leaf.path])}?on={on_date.isoformat()}"
+                    if leaf.editable else ""
+                ),
+            }
+            for section in shown
+            for leaf in section["rows"]
         ],
         "closed_note": directory.closed_month_warning(who.tenant_id),
         "notice": _carried_notice(request, who),
@@ -389,8 +441,18 @@ def rule(request, path: str):
     )
     attempts = rules.frame_attempts(who.tenant_id, path).count()
     names = rule_targets.titles_of_targets(who, on_date)
+    name = rule_names.name_of(preset, path)
     return render(request, "web/rules/rule.html", {
-        "heading": path,
+        # Название рядом с кодом, а не вместо него (issue #256): код — то, чем
+        # правило адресуется расчёту, и его по-прежнему видно.
+        "heading": name or path,
+        "rule_name": name,
+        "code": path,
+        "rule_type": rule_names.type_of(
+            current, has_choices=bool(rules.choices_for(preset, path, who=who)),
+        ),
+        "readers": rule_names.readers_of(path),
+        "effect": rule_names.effect_of(path),
         "on_date": on_date.isoformat(),
         "back_url": f"{reverse('rules')}?on={on_date.isoformat()}",
         "new_url": _rule_url("rule-new", path, on_date) if may_add else "",
@@ -520,21 +582,35 @@ def rule_new(request, path: str):
 
     preset = assembled.base
     options = rules.choices_for(preset, path, who=who)
+    # Набранное возвращается в поле, а не заменяется действующим (issue #282):
+    # человек, получивший отказ рамкой, должен видеть, ЧТО именно отвергнуто, а
+    # не набирать заново по памяти. Показ раздельный по слоям — страна и
+    # партнёр шлют одно имя поля `value`, и набранное для одной формы не должно
+    # оказаться во второй.
+    posted = request.POST.get("value", "") if request.method == "POST" else ""
+    country_posted = posted if request.POST.get("level") == "country" else ""
+    tenant_posted = "" if request.POST.get("level") == "country" else posted
     return render(request, "web/rules/rule_new.html", {
-        "heading": path,
+        "heading": rule_names.name_of(preset, path) or path,
+        "code": path,
         "on_date": on_date.isoformat(),
         "back_url": _rule_url("rule", path, on_date),
         **_now_in_force(preset, path, current),
         "error": error,
         "notice": notice,
         "kind": rules.kind_of(current),
+        "entered_value": tenant_posted,
+        "country_entered_value": country_posted,
         "options": [
-            {"code": code, "title": title, "selected": code == current}
+            {"code": code, "title": title,
+             "selected": code == (tenant_posted or current)}
             for code, title in options
         ],
         "bool_options": [
-            {"code": "true", "title": _("да"), "selected": current is True},
-            {"code": "false", "title": _("нет"), "selected": current is False},
+            {"code": "true", "title": _("да"),
+             "selected": (tenant_posted == "true") if tenant_posted else current is True},
+            {"code": "false", "title": _("нет"),
+             "selected": (tenant_posted == "false") if tenant_posted else current is False},
         ],
         "default_from": _default_from(who, on_date),
         # Подсказка под полем даты приходит готовой — из того же места, что и
