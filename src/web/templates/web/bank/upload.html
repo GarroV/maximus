@@ -1,0 +1,87 @@
+{% extends "web/base.html" %}{% load ui i18n static %}
+{% comment %}
+Загрузка выписки (T198, модуль 7 эталона): «загрузилось ли и как банк понят».
+
+Колонки узнаются по заголовкам, а не по номеру — банк меняет порядок. Поэтому
+после загрузки экран показывает, как именно поняты колонки: ошибку разбора
+должно быть видно до того, как она стала суммой. Итог загрузки — на момент
+загрузки; сегодняшнее состояние строк — на странице сопоставления.
+{% endcomment %}
+{% block title %}{% translate "Загрузка выписки" %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'web/bank.css' %}">{% endblock %}
+{% block content %}
+<h1>{% translate "Банковская выписка" %}</h1>
+<p class="sub">{% translate "Повторная загрузка не удваивает платежи: тот же файл второй раз не ложится, а строка, уже бывшая в прошлой выписке, становится дублем." %}</p>
+{% include "web/bank/tabs.html" %}
+
+{% if error %}{% notice "alert" %}<span data-error="1">{{ error }}</span>{% endnotice %}{% endif %}
+
+{% if loaded %}
+<section class="card" data-loaded="{{ loaded.id }}">
+  <div class="card__head">
+    <div>
+      <div class="card__title">{% translate "Файл принят" %} · {{ loaded.file }}</div>
+      <div class="card__meta">{{ loaded.period }} · {{ loaded.format }}{% if loaded.account != "—" %} · {% translate "счёт" %} {{ loaded.account }}{% endif %}{% if loaded.currency %} · {{ loaded.currency }}{% endif %}</div>
+    </div>
+  </div>
+  <div class="card__body">
+    <div class="stats">
+      <div class="stat" data-count="matched"><div class="stat__label">{% translate "Сопоставлено само" %}</div><div class="stat__value">{{ loaded.matched }}</div><div class="stat__delta">{% translate "человек не нужен" %}</div></div>
+      <div class="stat{% if loaded.decide %} stat--flagged{% endif %}" data-count="decide"><div class="stat__label">{% translate "Нужно решить" %}</div><div class="stat__value">{{ loaded.decide }}</div><div class="stat__delta">{% translate "нет однозначной пары" %}</div></div>
+      <div class="stat" data-count="duplicate"><div class="stat__label">{% translate "Дубль" %}</div><div class="stat__value">{{ loaded.duplicate }}</div><div class="stat__delta">{% translate "уже был в прошлой выписке" %}</div></div>
+    </div>
+    {% if loaded.mapping %}
+    <h3>{% translate "Как разобраны колонки" %}</h3>
+    {% scroll %}<table class="bank-mapping">
+      <thead><tr><th>{% translate "В файле" %}</th><th>{% translate "Поле" %}</th></tr></thead>
+      <tbody>{% for m in loaded.mapping %}<tr><td>{{ m.from }}</td><td>{{ m.to }}</td></tr>{% endfor %}</tbody>
+    </table>{% endscroll %}
+    {% endif %}
+    <p class="actions"><a class="btn primary" href="{{ loaded.match_url }}">{% translate "Перейти к сопоставлению" %}</a></p>
+  </div>
+</section>
+{% endif %}
+
+<form class="upload card" method="post" enctype="multipart/form-data">{% csrf_token %}
+  <p class="upload__title">{% translate "Загрузить выписку" %}</p>
+  <p class="upload__lead">{% translate "Форматы: ISO 20022 camt.053, izvod (XML iBank и Raiffeisen), CSV и xlsx. Колонки таблицы узнаются по заголовкам, а не по номеру." %}</p>
+  <p class="field"><label for="statement-file">{% translate "Файл выписки" %}</label>
+  <input type="file" id="statement-file" name="file" accept=".xml,.csv,.xlsx,.txt" required></p>
+  <p class="field"><label for="statement-account">{% translate "Счёт в банке" %}</label>
+  <input type="text" id="statement-account" name="account" maxlength="64" value="{{ form.account }}" placeholder="{% translate "Номер счёта, если его нет в файле" %}"></p>
+  <p class="field"><label for="statement-currency">{% translate "Валюта" %}</label>
+  <input type="text" id="statement-currency" name="currency" maxlength="3" pattern="[A-Za-z]{3}" value="{{ form.currency }}" placeholder="{% translate "Код валюты, если его нет в файле" %}"></p>
+  <p class="hint">{% translate "Счёт и валюта берутся из файла; поля нужны, если таблица банка их не несёт. Без счёта и валюты выписка не загружается: операции двух счетов иначе не отличить, а валюта учёта за выписку не подставляется." %}</p>
+  <button class="primary" type="submit">{% translate "Загрузить" %}</button>
+</form>
+
+{% if statements %}
+<h2>{% translate "Загруженные выписки" %}</h2>
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Загружена" %}</th>
+      <th>{% translate "Файл" %}</th>
+      <th>{% translate "Период" %}</th>
+      <th>{% translate "Счёт в банке" %}</th>
+      <th>{% translate "Формат" %}</th>
+      <th class="num">{% translate "Строк" %}</th>
+      <th class="num">{% translate "Из них дублей" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in statements %}
+    <tr data-statement="{{ s.id }}">
+      <td><a href="{{ s.url }}">{{ s.loaded }}</a></td>
+      <td>{{ s.file }}</td>
+      <td>{{ s.period }}</td>
+      <td>{{ s.account }}</td>
+      <td>{{ s.format }}</td>
+      <td class="num">{{ s.lines }}</td>
+      <td class="num">{{ s.duplicates }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% endif %}
+{% endblock %}

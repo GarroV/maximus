@@ -2534,3 +2534,148 @@ class Fact(models.Model):
                 name="facts_vat_rate_range",
             ),
         ]
+
+
+# ─────────────────────────────────────────────────────────────
+#  Банковская выписка (T198, модуль 7 эталона, миграция `0276`)
+# ─────────────────────────────────────────────────────────────
+
+
+class BankStatement(models.Model):
+    """Загруженный файл выписки. Один файл — одна строка, второй раз не ложится.
+
+    `content_hash` уникален у партнёра: тот же файл, загруженный повторно, не
+    заводит ничего — ни выписки, ни строк. Пересекающийся файл (неделя внутри
+    месяца) заводится, а его общие строки ложатся дублями (`BankLine`).
+    """
+
+    id = uuid_pk()
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, db_column="tenant_id")
+    account = models.TextField(db_default="")
+    bank = models.TextField(db_default="")
+    currency = models.TextField(db_default="")
+    file_name = models.TextField(db_default="")
+    format = models.TextField()
+    content_hash = models.TextField()
+    period_from = models.DateField(null=True, blank=True)
+    period_to = models.DateField(null=True, blank=True)
+    # Как поняты колонки и чем кончилась загрузка — то, что видно на вкладке
+    # «Загрузка» после файла, а не только в момент загрузки.
+    stats = models.JSONField(db_default={})
+    uploaded_by = models.UUIDField(null=True, blank=True)
+    created_at = models.DateTimeField(db_default=now_default())
+
+    class Meta:
+        db_table = "bank_statements"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "content_hash"], name="bank_statements_same_file_once"
+            ),
+        ]
+
+
+class BankLine(models.Model):
+    """Операция по счёту, как её дал банк. Не правится: это источник, а не учёт.
+
+    **Состояние строки выводится, а не хранится** (так же в эталоне): дубль —
+    есть `duplicate_of`; не наш платёж — есть `not_ours_at`; сопоставлена — есть
+    живая связь `BankLineLink`; иначе ждёт решения. Хранимый статус разошёлся
+    бы со связями на первом удалённом платеже.
+
+    **Дубль не удаляется.** Удалённая строка при следующей загрузке вернулась
+    бы новой; оставленная с отсылкой к исходной — нет, и видно, откуда она.
+    """
+
+    id = uuid_pk()
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, db_column="tenant_id")
+    statement = models.ForeignKey(
+        BankStatement, on_delete=models.PROTECT, db_column="statement_id", related_name="lines"
+    )
+    line_no = models.IntegerField()
+    op_date = models.DateField()
+    direction = models.TextField()
+    amount = models.DecimalField(max_digits=18, decimal_places=2)
+    currency = models.TextField(db_default="")
+    party_name = models.TextField(db_default="")
+    party_account = models.TextField(db_default="")
+    purpose = models.TextField(db_default="")
+    bank_ref = models.TextField(db_default="")
+    dedup_key = models.TextField()
+    duplicate_of = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.PROTECT,
+        db_column="duplicate_of", related_name="+",
+    )
+    # Контрагент, опознанный по налоговому номеру или написанию (`aliases`).
+    counterparty = models.ForeignKey(
+        Counterparty, null=True, blank=True, on_delete=models.PROTECT,
+        db_column="counterparty_id",
+    )
+    not_ours_at = models.DateTimeField(null=True, blank=True)
+    not_ours_by = models.UUIDField(null=True, blank=True)
+    not_ours_why = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(db_default=now_default())
+
+    class Meta:
+        db_table = "bank_lines"
+        indexes = [models.Index("tenant", "op_date", name="bank_lines_by_date")]
+        constraints = [
+            # Повторная загрузка не удваивает: оригинал у ключа один, остальные
+            # с тем же ключом — дубли со ссылкой на него.
+            models.UniqueConstraint(
+                fields=["tenant", "dedup_key"],
+                condition=models.Q(duplicate_of__isnull=True),
+                name="bank_lines_one_original",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(direction__in=["in", "out"]), name="bank_lines_direction",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(amount__gt=0), name="bank_lines_amount_positive",
+            ),
+            # «Не наш» без причины через полгода читается как случайность.
+            models.CheckConstraint(
+                condition=models.Q(not_ours_at__isnull=True)
+                | (models.Q(not_ours_why__isnull=False) & ~models.Q(not_ours_why="")),
+                name="bank_lines_not_ours_has_reason",
+            ),
+        ]
+
+
+class BankLineLink(models.Model):
+    """Чем закрыта строка выписки: ключ факта, а не его номер.
+
+    Ключ (`dedup_key`), а не `fact_id`, потому что разбор и правка заменяют
+    строку факта новой версией с тем же ключом (D020): связь по номеру
+    обрывалась бы на первом же разборе в инбоксе, и строка выписки молча
+    возвращалась бы в «нужно решить».
+
+    Ключ уникален у партнёра: один платёж не закрывает две строки выписки —
+    иначе одна оплата сводилась бы дважды.
+    """
+
+    id = uuid_pk()
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, db_column="tenant_id")
+    line = models.ForeignKey(
+        BankLine, on_delete=models.CASCADE, db_column="line_id", related_name="links"
+    )
+    fact_key = models.TextField()
+    # auto — свело правило; manual — человек выбрал внесённый платёж;
+    # paid — по строке заведена оплата счёта; inbox — строка ушла в инбокс.
+    how = models.TextField()
+    linked_by = models.UUIDField(null=True, blank=True)
+    linked_at = models.DateTimeField(db_default=now_default())
+
+    class Meta:
+        db_table = "bank_line_links"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "fact_key"], name="bank_line_links_fact_once"
+            ),
+            # Одна связь на строку: два решения по одной строке не ложатся оба.
+            # Мёртвая связь (факт удалён) снимается перед новым решением.
+            models.UniqueConstraint(fields=["line"], name="bank_line_links_one_per_line"),
+            models.CheckConstraint(
+                condition=models.Q(how__in=["auto", "manual", "paid", "inbox"]),
+                name="bank_line_links_known_how",
+            ),
+        ]

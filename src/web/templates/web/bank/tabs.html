@@ -1,0 +1,7 @@
+{% load i18n %}{% comment %}
+Две страницы выписки (D081) — переключателем, как вкладки эталона. Текущая —
+не ссылка (`span[aria-current]`), тот же инвариант, что у `filters.html`.
+{% endcomment %}
+<nav class="seg bank-tabs" aria-label="{% translate "Банковская выписка" %}">
+  {% for tab in tabs %}{% if tab.selected %}<span class="seg__current" aria-current="page">{{ tab.title }}</span>{% else %}<a class="seg__item" href="{{ tab.url }}">{{ tab.title }}</a>{% endif %}{% endfor %}
+</nav>

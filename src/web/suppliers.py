@@ -53,6 +53,7 @@
 from __future__ import annotations
 
 import json
+import uuid
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
@@ -790,7 +791,12 @@ def document_or_none(document_id):
 
     Строка банковской выписки и расчёт зарплаты сюда не попадают: править их
     экраном счетов нечем, а 404 на них — тот же ответ, что на чужой (D023).
+    Номер не в форме uuid — тоже «не найден», а не падение запроса.
     """
+    try:
+        uuid.UUID(str(document_id))
+    except (TypeError, ValueError):
+        return None
     return SourceDocument.objects.filter(
         pk=document_id, kind__in=DOCUMENT_KINDS, source=MANUAL_SOURCE,
     ).select_related("counterparty").first()

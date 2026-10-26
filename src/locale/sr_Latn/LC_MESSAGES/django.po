@@ -8260,20 +8260,12 @@ msgid "Именованные надбавки и вилка ставки дол
 msgstr "Imenovani dodaci i raspon stope radnog mesta"
 
 #: web/stages.py
-msgid "Шестая очередь продуктовой карты"
-msgstr "Šesta faza mape proizvoda"
-
-#: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Nakon što se obračun zarada završi u celini"
 
 #: web/stages.py
 msgid "Седьмая очередь; ждёт доступа к API Dodo IS"
 msgstr "Sedma faza; čeka pristup Dodo IS API-ju"
-
-#: web/stages.py
-msgid "Загрузка выписки банка и сопоставление платежей со счетами поставщиков: что оплачено, что ждёт, что пришло без счёта."
-msgstr "Učitavanje bankovnog izvoda i uparivanje plaćanja sa fakturama dobavljača: šta je plaćeno, šta čeka, šta je stiglo bez fakture."
 
 #: web/stages.py
 msgid "Что и когда ушло людям: ведомость к выплате, отметки о переводе, остаток задолженности по каждому человеку."
@@ -10103,3 +10095,693 @@ msgstr "Mera posla"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Схема"
 msgstr "Šema"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "XML не читается: %(why)s."
+msgstr "XML se ne može pročitati: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "XML с объявлением типа документа или сущностей не принимается."
+msgstr "XML sa deklaracijom tipa dokumenta ili entiteta se ne prihvata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"XML этого банка пока не знаком: знаем camt.053 и izvod iBank и "
+"Raiffeisen. Пришлите образец — формат заводится профилем."
+msgstr "XML ove banke još nije poznat: čitamo camt.053 i izvod iBank i Raiffeisen. Pošaljite primer — format se dodaje profilom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "izvod Raiffeisen"
+msgstr "izvod Raiffeisen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "izvod iBank (Banca Intesa)"
+msgstr "izvod iBank (Banca Intesa)"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без документа"
+msgstr "Bez dokumenta"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В camt.053 нет выписки (Stmt)."
+msgstr "camt.053 fajl ne sadrži izvod (Stmt)."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В книге Excel часть %(part)s объявляет тип документа или сущности — "
+"такая книга не принимается."
+msgstr "Deo %(part)s Excel radne sveske deklariše tip dokumenta ili entitete — takva sveska se ne prihvata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В справочнике"
+msgstr "U šifarniku"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В файле"
+msgstr "U fajlu"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В файле больше %(n)s заполненных ячеек — это не выписка за месяц."
+msgstr "Fajl ima više od %(n)s popunjenih ćelija — to nije mesečni izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В файле больше %(n)s операций — это не выписка за месяц."
+msgstr "Fajl ima više od %(n)s transakcija — to nije mesečni izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"В файле больше %(n)s строк — это не выписка за месяц. Выгрузите выписку "
+"за более короткий период."
+msgstr "Fajl ima više od %(n)s redova — to nije mesečni izvod. Preuzmite izvod za kraći period."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В файле нет ни одной операции."
+msgstr "Fajl ne sadrži nijednu transakciju."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет номера счёта. Укажите счёт, по которому эта выписка: без "
+"него операции двух счетов не отличить друг от друга."
+msgstr "U fajlu nema broja računa. Unesite račun na koji se ovaj izvod odnosi: bez njega se transakcije dva računa ne mogu razlikovati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "В этом месяце строк нет."
+msgstr "U ovom mesecu nema stavki."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта"
+msgstr "Valuta"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта счёта (%(invoice)s) и платежа (%(line)s) разная — такой платёж "
+"этот счёт не оплачивает. Отправьте строку в инбокс или выберите счёт в "
+"той же валюте."
+msgstr "Valuta fakture (%(invoice)s) razlikuje se od valute plaćanja (%(line)s) — ovo plaćanje ne izmiruje ovu fakturu. Pošaljite red u inboks ili izaberite fakturu u istoj valuti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Вас ещё не завели ни к одному партнёру, поэтому выписки у вас нет."
+msgstr "Još niste dodati nijednom partneru, pa nemate izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вернуть в работу"
+msgstr "Vrati u rad"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Внесённые платежи на эту сумму"
+msgstr "Uneta plaćanja na ovaj iznos"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выберите другой месяц или состояние — или загрузите выписку за этот."
+msgstr "Izaberite drugi mesec ili stanje — ili otpremite izvod za ovaj."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите файл выписки."
+msgstr "Izaberite fajl izvoda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выписку ещё не загружали."
+msgstr "Izvod još nije otpremljen."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выписку по этому счёту сейчас загружают ещё раз — повторите через "
+"минуту."
+msgstr "Izvod za ovaj račun se upravo otprema — pokušajte ponovo za minut."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дубли и чужое"
+msgstr "Duplikati i tuđe"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дубль"
+msgstr "Duplikat"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загружена"
+msgstr "Otpremljen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загруженные выписки"
+msgstr "Otpremljeni izvodi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Загрузите файл выписки из банка — строки сведутся с внесёнными платежами "
+"и счетами, остальное встанет сюда на решение."
+msgstr "Otpremite fajl izvoda iz banke — stavke će se upariti sa unetim plaćanjima i fakturama, ostalo će ovde čekati odluku."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузить выписку"
+msgstr "Otpremi izvod"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузка"
+msgstr "Otpremanje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Загрузка выписки"
+msgstr "Otpremanje izvoda"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Закрывающая строка вам не видна."
+msgstr "Stavka koja zatvara vam nije vidljiva."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Идентификатор операции"
+msgstr "Identifikator transakcije"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Из банка · не редактируется"
+msgstr "Iz banke · ne menja se"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Из них дублей"
+msgstr "Od toga duplikata"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Каждая строка выписки за месяц сопоставлена, отмечена дублем или как не "
+"наш платёж."
+msgstr "Svaka stavka izvoda za mesec je uparena, označena kao duplikat ili kao tuđe plaćanje."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как разобраны колонки"
+msgstr "Kako su kolone pročitane"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Книга Excel не открывается."
+msgstr "Excel radna sveska se ne može otvoriti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Книга Excel разворачивается в слишком большой объём — это не выписка за "
+"месяц."
+msgstr "Excel radna sveska se raspakuje u previše podataka — to nije mesečni izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кодировка файла не распознана: ждём UTF-8 или Windows-1250/1251."
+msgstr "Kodiranje fajla nije prepoznato: očekuje se UTF-8 ili Windows-1250/1251."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Лист книги Excel не читается: первым должен быть лист с таблицей "
+"выписки."
+msgstr "List Excel sveske se ne može pročitati: prvi list mora sadržati tabelu izvoda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц сведён."
+msgstr "Mesec je usaglašen."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Назначение"
+msgstr "Svrha"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Напишите, почему платёж не наш: через полгода иначе не вспомнить."
+msgstr "Napišite zašto plaćanje nije naše: za pola godine niko se inače neće setiti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Например: личная трата партнёра с расчётного счёта"
+msgstr "Na primer: lični trošak partnera sa tekućeg računa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не наш"
+msgstr "Nije naše"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не наш платёж"
+msgstr "Nije naše plaćanje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не наш платёж — почему"
+msgstr "Nije naše plaćanje — zašto"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Не нашли колонки даты и суммы. Узнаём заголовки вроде «Datum valute», "
+"«Iznos na teret», «Iznos u korist» — проверьте, что в файле есть строка "
+"заголовков."
+msgstr "Kolone datuma i iznosa nisu pronađene. Prepoznajemo zaglavlja kao „Datum valute“, „Iznos na teret“, „Iznos u korist“ — proverite da fajl ima red zaglavlja."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Неоплаченные счета"
+msgstr "Neplaćene fakture"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Непонятное действие."
+msgstr "Nepoznata radnja."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ни одного неоплаченного счёта от этого контрагента на такую сумму. Либо "
+"документ ещё не пришёл, либо платёж — без счёта."
+msgstr "Nema neplaćene fakture ove druge strane na taj iznos. Ili dokument još nije stigao, ili je plaćanje bez fakture."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Номер счёта, если его нет в файле"
+msgstr "Broj računa, ako ga nema u fajlu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Нужно решить"
+msgstr "Treba odlučiti"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Операция %(n)s: %(why)s."
+msgstr "Transakcija %(n)s: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Операция %(n)s: нет даты, суммы или направления."
+msgstr "Transakcija %(n)s: nema datuma, iznosa ili smera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Оплата счёта заведена с датой из выписки."
+msgstr "Plaćanje fakture je evidentirano sa datumom iz izvoda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Оплатить этот счёт"
+msgstr "Plati ovu fakturu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отвязать"
+msgstr "Odveži"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отвязать нечего: платёж заведён из выписки — исправьте его в счёте или "
+"инбоксе."
+msgstr "Nema šta da se odveže: plaćanje je kreirano iz izvoda — ispravite ga u fakturi ili inboxu."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Отмечено %(on)s. В P&L не идёт, но остаётся в выписке: остаток по счёту "
+"должен сходиться с банком до копейки."
+msgstr "Označeno %(on)s. Ne ide u P&L, ali ostaje u izvodu: stanje računa mora da se slaže sa bankom do pare."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отправить в инбокс"
+msgstr "Pošalji u inbox"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Перейти к сопоставлению"
+msgstr "Idi na uparivanje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Период"
+msgstr "Period"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Платёж больше остатка по счёту (%(left)s). Разложить один платёж на "
+"несколько счетов или провести остаток авансом пока нельзя — отправьте "
+"строку в инбокс или выберите другой счёт."
+msgstr "Plaćanje je veće od ostatka po fakturi (%(left)s). Raspodela jednog plaćanja na više faktura ili knjiženje ostatka kao avansa još nije moguće — pošaljite stavku u inbox ili izaberite drugu fakturu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Платёж и документ — не одно и то же: строка банка сводится с внесённым "
+"платежом или счётом, а без решения в учёт не идёт."
+msgstr "Plaćanje i dokument nisu isto: stavka banke se uparuje sa unetim plaćanjem ili fakturom, a bez odluke ne ide u knjige."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Платёж по выписке"
+msgstr "Plaćanje po izvodu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Повторная загрузка не удваивает платежи: тот же файл второй раз не "
+"ложится, а строка, уже бывшая в прошлой выписке, становится дублем."
+msgstr "Ponovno otpremanje ne udvostručuje plaćanja: isti fajl se ne prihvata dvaput, a stavka koja je već bila u ranijem izvodu postaje duplikat."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Показать исходную строку"
+msgstr "Prikaži izvornu stavku"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поле"
+msgstr "Polje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поступление не оплачивает счёт поставщика."
+msgstr "Priliv ne plaća fakturu dobavljača."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Правила сопоставления, порог и платёж на несколько счетов с авансом"
+msgstr "Pravila uparivanja, prag i jedno plaćanje na više faktura sa avansom"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Свободного внесённого платежа на эту сумму в пределах месяца нет."
+msgstr "Nema neuparenog unetog plaćanja na ovaj iznos u roku od mesec dana."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставление"
+msgstr "Uparivanje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставление снято, строка снова ждёт решения."
+msgstr "Uparivanje je uklonjeno, stavka ponovo čeka odluku."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено"
+msgstr "Upareno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено правилом"
+msgstr "Upareno pravilom"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сопоставлено само"
+msgstr "Upareno automatski"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: %(why)s."
+msgstr "Red %(n)s: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: было %(was)s, в файле %(now)s."
+msgstr "Red %(n)s: bilo je %(was)s, u fajlu %(now)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Строка %(n)s: нет даты или суммы."
+msgstr "Red %(n)s: nema datuma ili iznosa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка и так в работе."
+msgstr "Stavka je već u radu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка помечена как не наш платёж и в учёт не идёт."
+msgstr "Stavka je označena kao tuđe plaćanje i ne ide u knjige."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка помечена как не наш платёж. Сначала верните её в работу."
+msgstr "Stavka je označena kao tuđe plaćanje. Prvo je vratite u rad."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка снова ждёт решения."
+msgstr "Stavka ponovo čeka odluku."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка сопоставлена с внесённым платежом."
+msgstr "Stavka je uparena sa unetim plaćanjem."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Строка уже сопоставлена."
+msgstr "Stavka je već uparena."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Строка ушла в инбокс: сумма в P&L строкой «Не разобрано», статью дайте "
+"там."
+msgstr "Stavka je otišla u inbox: iznos je u P&L kao „Nerazvrstano“ — dodelite stavku troška tamo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сумма войдёт в P&L строкой «Не разобрано» и встанет в инбокс — статью и "
+"точку дадите там."
+msgstr "Iznos ulazi u P&L kao „Nerazvrstano“ i u inbox — stavku troška i objekat dodelite tamo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сумма со знаком"
+msgstr "Iznos sa znakom"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сумма, приход"
+msgstr "Iznos, u korist"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сумма, расход"
+msgstr "Iznos, na teret"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счёт в банке"
+msgstr "Račun u banci"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счёт контрагента"
+msgstr "Račun druge strane"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счёта с остатком ровно на эту сумму нет."
+msgstr "Nema fakture sa ostatkom tačno na ovaj iznos."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Таблица не читается: %(why)s."
+msgstr "Tabela se ne može pročitati: %(why)s."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Тот же банковский идентификатор операции — в выписке «%(file)s», "
+"загруженной %(loaded)s, строка %(line)s. Второй раз в учёт она не "
+"пойдёт. Строку не удаляем: иначе при следующей загрузке она вернулась бы "
+"новой."
+msgstr "Isti bankarski identifikator transakcije je u izvodu „%(file)s“ otpremljenom %(loaded)s, stavka %(line)s. Drugi put neće ići u knjige. Stavku ne brišemo: inače bi se pri sledećem otpremanju vratila kao nova."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл больше 5 МБ — это не выписка за месяц."
+msgstr "Fajl je veći od 5 MB — to nije mesečni izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл выписки"
+msgstr "Fajl izvoda"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Файл не загружен: операции банка с теми же номерами уже загружены с "
+"другой суммой, датой или направлением. Проверьте, та ли это выписка и "
+"тот ли счёт. %(lines)s"
+msgstr "Fajl nije otpremljen: bankovne transakcije sa istim referencama već su otpremljene sa drugim iznosom, datumom ili smerom. Proverite da li je to pravi izvod i pravi račun. %(lines)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Файл не разобран: %(why)s"
+msgstr "Fajl nije pročitan: %(why)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл принят"
+msgstr "Fajl je prihvaćen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Файл пустой."
+msgstr "Fajl je prazan."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Формат"
+msgstr "Format"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Форматы: ISO 20022 camt.053, izvod (XML iBank и Raiffeisen), CSV и xlsx. "
+"Колонки таблицы узнаются по заголовкам, а не по номеру."
+msgstr "Formati: ISO 20022 camt.053, izvod (XML iBank i Raiffeisen), CSV i xlsx. Kolone tabele se prepoznaju po zaglavljima, a ne po redosledu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Чем закрыто"
+msgstr "Čime je zatvoreno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта операция уже загружена"
+msgstr "Ova transakcija je već otpremljena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Это дубль уже загруженной строки — в учёт он не идёт."
+msgstr "Ovo je duplikat već otpremljene stavke — ne ide u knjige."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Это он"
+msgstr "To je to"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот платёж не подходит: сумма другая, он уже сведён с другой строкой "
+"или вам не виден."
+msgstr "Ovo plaćanje ne odgovara: iznos je drugačiji, već je upareno sa drugom stavkom ili vam nije vidljivo."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Этот файл уже загружен %(when)s — второй раз он ничего не добавит."
+msgstr "Ovaj fajl je već otpremljen %(when)s — ponovno otpremanje ne dodaje ništa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "без номера"
+msgstr "bez broja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "без решения их в P&L нет, решаются на сопоставлении"
+msgstr "bez odluke nisu u P&L, odlučuje se na uparivanju"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "больше двух знаков после запятой: %(value)s"
+msgstr "više od dve decimale: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "выбрано вручную"
+msgstr "izabrano ručno"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "дата вне %(first)s–%(last)s годов: %(value)s"
+msgstr "datum van godina %(first)s–%(last)s: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "заполнены обе колонки — и расход, и приход"
+msgstr "popunjene su obe kolone — i na teret i u korist"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не дата: %(value)s"
+msgstr "nije datum: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не опознан — по названию из банка такого контрагента нет"
+msgstr "nije prepoznat — nema druge strane sa nazivom iz banke"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не число: %(value)s"
+msgstr "nije broj: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "непонятное направление %(value)s"
+msgstr "nejasan smer %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет даты"
+msgstr "nema datuma"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет однозначной пары"
+msgstr "nema jednoznačnog para"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет суммы"
+msgstr "nema iznosa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "оборот"
+msgstr "promet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "оплата счёта из выписки"
+msgstr "plaćanje fakture iz izvoda"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "оплатится частично"
+msgstr "biće plaćena delimično"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "остаток"
+msgstr "ostatak"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "отправлено в инбокс"
+msgstr "poslato u inbox"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "свело правило"
+msgstr "uparilo pravilo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "счёт"
+msgstr "račun"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "таблица по заголовкам"
+msgstr "tabela po zaglavljima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "уже был в прошлой выписке"
+msgstr "već je bio u ranijem izvodu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "человек не нужен"
+msgstr "čovek nije potreban"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В книге Excel больше %(n)s частей — это не выписка за месяц."
+msgstr "Excel radna sveska ima više od %(n)s delova — to nije mesečni izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"В файле нет валюты. Укажите валюту счёта — трёхбуквенный код, например "
+"RSD или EUR."
+msgstr "Fajl nema valutu. Unesite valutu računa troslovnim kodom, npr. RSD ili EUR."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Валюта — трёхбуквенный латинский код, например RSD или EUR, а не "
+"«%(value)s»."
+msgstr "Valuta mora biti troslovni latinični kod, npr. RSD ili EUR, a ne „%(value)s“."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код валюты, если его нет в файле"
+msgstr "Kod valute, ako ga nema u fajlu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Счёт и валюта берутся из файла; поля нужны, если таблица банка их не "
+"несёт. Без счёта и валюты выписка не загружается: операции двух счетов "
+"иначе не отличить, а валюта учёта за выписку не подставляется."
+msgstr "Račun i valuta uzimaju se iz fajla; polja su potrebna ako ih bankina tabela ne sadrži. Izvod bez računa i valute se ne učitava: inače se transakcije dva računa ne mogu razlikovati, a valuta knjigovodstva se ne podrazumeva za izvod."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот платёж только что сведён с другой строкой. Обновите страницу и "
+"выберите другой."
+msgstr "Ovo plaćanje je upravo upareno sa drugim redom. Osvežite stranicu i izaberite drugo."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "слишком большая сумма: %(value)s"
+msgstr "prevelik iznos: %(value)s"
+
+#: web/templates/web/bank/statement.html:29
+#, python-format
+msgid "ждёт решения %(counter)s строка за месяц — в учёт она не идёт"
+msgid_plural "ждут решения %(counter)s строк за месяц — в учёт они не идут"
+msgstr[0] "%(counter)s red ovog meseca čeka odluku — ne ulazi u knjige"
+msgstr[1] "%(counter)s reda ovog meseca čekaju odluku — ne ulaze u knjige"
+msgstr[2] "%(counter)s redova ovog meseca čeka odluku — ne ulaze u knjige"
+
+#: web/templates/web/bank/statement.html:40
+#, python-format
+msgid "%(counter)s строка"
+msgid_plural "%(counter)s строк"
+msgstr[0] "%(counter)s red"
+msgstr[1] "%(counter)s reda"
+msgstr[2] "%(counter)s redova"
+
+#: web/templates/web/suppliers/inbox.html:39
+#, python-format
+msgid "Банковская выписка: ждёт решения %(counter)s строка"
+msgid_plural "Банковская выписка: ждут решения %(counter)s строк"
+msgstr[0] "Bankovni izvod: %(counter)s red čeka odluku"
+msgstr[1] "Bankovni izvod: %(counter)s reda čekaju odluku"
+msgstr[2] "Bankovni izvod: %(counter)s redova čeka odluku"

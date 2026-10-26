@@ -1,0 +1,192 @@
+{% extends "web/base.html" %}{% load ui i18n static %}
+{% comment %}
+Сопоставление выписки (T198, модуль 7 эталона): что из выписки ещё не сведено
+и чем закрыть строку.
+
+Сверху вниз: число ждущих решения с суммой, отбор месяцем и состоянием,
+строки, карточка выбранной строки. Карточка справа, а не отдельной страницей:
+строки разбирают подряд, и переход туда-обратно на каждую удваивал бы работу.
+
+Строка из банка в карточке **не правится** — это источник. Решений четыре:
+свести с внесённым платежом, оплатить счёт, отправить в инбокс, «не наш».
+{% endcomment %}
+{% block title %}{% translate "Банковская выписка" %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'web/bank.css' %}">{% endblock %}
+{% block content %}
+<h1>{% translate "Банковская выписка" %}</h1>
+<p class="sub">{% translate "Платёж и документ — не одно и то же: строка банка сводится с внесённым платежом или счётом, а без решения в учёт не идёт." %}</p>
+{% include "web/bank/tabs.html" %}
+
+{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+{% if error %}{% notice "alert" %}<span data-error="1">{{ error }}</span>{% endnotice %}{% endif %}
+
+{% if not has_any %}
+{% translate "Выписку ещё не загружали." as empty %}
+{% notice "empty" title=empty %}{% translate "Загрузите файл выписки из банка — строки сведутся с внесёнными платежами и счетами, остальное встанет сюда на решение." %} <a href="{{ upload_url }}">{% translate "Загрузить выписку" %}</a>{% endnotice %}
+{% else %}
+
+{% if waiting %}
+{% notice "alert" title=waiting_sum %}<span data-waiting="{{ waiting }}" data-waiting-sum="{{ waiting_sum_raw }}">{% blocktranslate count counter=waiting %}ждёт решения {{ counter }} строка за месяц — в учёт она не идёт{% plural %}ждут решения {{ counter }} строк за месяц — в учёт они не идут{% endblocktranslate %}</span>{% endnotice %}
+{% elif counted %}
+{% translate "Месяц сведён." as all_done %}
+{% notice "ok" title=all_done %}<span data-waiting="0">{% translate "Каждая строка выписки за месяц сопоставлена, отмечена дублем или как не наш платёж." %}</span>{% endnotice %}
+{% endif %}
+
+{% include "web/components/filters.html" %}
+
+<div class="bank-split">
+<section>
+{% if rows %}
+<p class="note" data-shown="{{ shown_count }}">{% blocktranslate count counter=shown_count %}{{ counter }} строка{% plural %}{{ counter }} строк{% endblocktranslate %} · {% translate "оборот" %} {{ shown_turnover }}</p>
+{% scroll %}<table class="bank-lines">
+  <thead>
+    <tr>
+      <th>{% translate "Дата" %}</th>
+      <th>{% translate "Контрагент" %}</th>
+      <th>{% translate "Назначение" %}</th>
+      <th class="num">{% translate "Сумма" %}</th>
+      <th>{% translate "Состояние" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr data-line="{{ row.id }}" data-state="{{ row.state }}"{% if row.selected or row.state == "duplicate" or row.state == "not_ours" %} class="{% if row.selected %}is-selected{% endif %}{% if row.state == "duplicate" or row.state == "not_ours" %} is-aside{% endif %}"{% endif %}>
+      <td><a href="{{ row.url }}"{% if row.selected %} aria-current="true"{% endif %}>{{ row.date }}</a></td>
+      <td>{{ row.who }}</td>
+      <td class="purpose" title="{{ row.purpose }}">{{ row.purpose }}</td>
+      <td class="num{% if row.incoming %} num--up{% endif %}">{{ row.sum }}</td>
+      <td><span{% if row.by_rule %} data-by-rule="1"{% endif %} class="tag {% if row.state == "matched" %}tag--ok{% elif row.state == "decide" %}tag--accent{% else %}tag--neutral tag--dashed{% endif %}">{{ row.state_title }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% else %}
+{% translate "В этом месяце строк нет." as nothing %}
+{% notice "empty" title=nothing %}{% translate "Выберите другой месяц или состояние — или загрузите выписку за этот." %}{% endnotice %}
+{% endif %}
+</section>
+
+{% if card %}
+<aside class="card bank-card" data-card="{{ card.id }}" data-state="{{ card.state }}">
+  <div class="card__head">
+    <div>
+      <div class="card__title">{{ card.sum }}</div>
+      <div class="card__meta">{{ card.date }} · {{ card.party_name }}</div>
+    </div>
+    <span class="tag {% if card.state == "matched" %}tag--ok{% elif card.state == "decide" %}tag--accent{% else %}tag--neutral tag--dashed{% endif %}">{{ card.state_title }}</span>
+  </div>
+  <div class="card__body">
+    <div>
+      <h3>{% translate "Из банка · не редактируется" %}</h3>
+      <dl>
+        <dt>{% translate "Контрагент" %}</dt><dd>{{ card.party_name }}{% if card.party_account %} · {{ card.party_account }}{% endif %}</dd>
+        <dt>{% translate "Назначение" %}</dt><dd>{{ card.purpose }}</dd>
+        {% if card.bank_ref %}<dt>{% translate "Идентификатор операции" %}</dt><dd>{{ card.bank_ref }}</dd>{% endif %}
+        <dt>{% translate "Файл" %}</dt><dd>{{ card.file }}</dd>
+        <dt>{% translate "В справочнике" %}</dt><dd>{% if card.counterparty %}{{ card.counterparty }}{% else %}{% translate "не опознан — по названию из банка такого контрагента нет" %}{% endif %}</dd>
+      </dl>
+    </div>
+
+    {% if card.state == "duplicate" %}
+    <div>
+      <h3>{% translate "Эта операция уже загружена" %}</h3>
+      <p class="hint">{% blocktranslate with file=card.original.file loaded=card.original.loaded line=card.original.line_no %}Тот же банковский идентификатор операции — в выписке «{{ file }}», загруженной {{ loaded }}, строка {{ line }}. Второй раз в учёт она не пойдёт. Строку не удаляем: иначе при следующей загрузке она вернулась бы новой.{% endblocktranslate %}</p>
+      <p><a href="{{ card.original.url }}">{% translate "Показать исходную строку" %}</a></p>
+    </div>
+
+    {% elif card.state == "not_ours" %}
+    <div>
+      <h3>{% translate "Не наш платёж" %}</h3>
+      <p class="hint">{% blocktranslate with on=card.not_ours_on %}Отмечено {{ on }}. В P&L не идёт, но остаётся в выписке: остаток по счёту должен сходиться с банком до копейки.{% endblocktranslate %}</p>
+      <p data-why>{{ card.not_ours_why }}</p>
+      <form method="post" action="{{ card.act_url }}">{% csrf_token %}
+        <input type="hidden" name="action" value="back">
+        <button type="submit">{% translate "Вернуть в работу" %}</button>
+      </form>
+    </div>
+
+    {% elif card.state == "matched" %}
+    <div>
+      <h3>{% translate "Чем закрыто" %}</h3>
+      <ul class="bank-pick">
+        {% for item in card.closed_by %}
+        <li data-closed-by>
+          <form method="post" action="{{ card.act_url }}">{% csrf_token %}
+            <span class="what"><a href="{{ item.url }}">{{ item.title }}</a> · {{ item.date }} · <span class="hint">{{ item.how }}</span></span>
+            <span class="num">{{ item.sum }}</span>
+            {% if item.may_unlink %}<input type="hidden" name="action" value="unlink"><button type="submit">{% translate "Отвязать" %}</button>{% endif %}
+          </form>
+        </li>
+        {% empty %}
+        <li class="hint">{% translate "Закрывающая строка вам не видна." %}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    {% else %}
+    <div>
+      <h3>{% translate "Внесённые платежи на эту сумму" %}</h3>
+      {% if card.payments %}
+      <ul class="bank-pick">
+        {% for item in card.payments %}
+        <li data-payment="{{ item.key }}">
+          <form method="post" action="{{ card.act_url }}">{% csrf_token %}
+            <input type="hidden" name="action" value="link"><input type="hidden" name="fact" value="{{ item.key }}">
+            <span class="what">{{ item.title }} · {{ item.who }} · {{ item.date }}</span>
+            <span class="num">{{ item.sum }}</span>
+            <button type="submit">{% translate "Это он" %}</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="hint">{% translate "Свободного внесённого платежа на эту сумму в пределах месяца нет." %}</p>
+      {% endif %}
+    </div>
+
+    {% if card.is_out %}
+    <div>
+      <h3>{% translate "Неоплаченные счета" %}</h3>
+      {% if card.invoices %}
+      <ul class="bank-pick">
+        {% for item in card.invoices %}
+        <li data-invoice="{{ item.id }}">
+          <form method="post" action="{{ card.act_url }}">{% csrf_token %}
+            <input type="hidden" name="action" value="pay"><input type="hidden" name="invoice" value="{{ item.id }}">
+            <span class="what">{% translate "Счёт" %} {{ item.title }} · {{ item.who }} · {{ item.date }}{% if not item.exact %} · <span class="hint">{% translate "оплатится частично" %}</span>{% endif %}</span>
+            <span class="num">{% translate "остаток" %} {{ item.left }}</span>
+            <button type="submit">{% translate "Оплатить этот счёт" %}</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="hint">{% if card.counterparty %}{% translate "Ни одного неоплаченного счёта от этого контрагента на такую сумму. Либо документ ещё не пришёл, либо платёж — без счёта." %}{% else %}{% translate "Счёта с остатком ровно на эту сумму нет." %}{% endif %}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div>
+      <h3>{% translate "Без документа" %}</h3>
+      <form method="post" action="{{ card.act_url }}">{% csrf_token %}
+        <input type="hidden" name="action" value="inbox">
+        <p class="hint">{% translate "Сумма войдёт в P&L строкой «Не разобрано» и встанет в инбокс — статью и точку дадите там." %}</p>
+        <button class="primary" type="submit">{% translate "Отправить в инбокс" %}</button>
+      </form>
+    </div>
+
+    <div>
+      <form class="search row" method="post" action="{{ card.act_url }}">{% csrf_token %}
+        <input type="hidden" name="action" value="not_ours">
+        <p class="field"><label for="why-{{ card.id }}">{% translate "Не наш платёж — почему" %}</label>
+        <input type="text" id="why-{{ card.id }}" name="why" maxlength="500" required placeholder="{% translate "Например: личная трата партнёра с расчётного счёта" %}"></p>
+        <button type="submit">{% translate "Не наш платёж" %}</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</aside>
+{% endif %}
+</div>
+{% endif %}
+{% endblock %}
