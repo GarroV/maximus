@@ -53,7 +53,7 @@ def _rows(who) -> list[dict]:
             "allocated_by": allocator or EMPTY,
             # Своя строка — без кнопки, а со словами почему: кнопка, которая
             # отвечает отказом, хуже объяснения рядом.
-            "own": two_hands.last_allocator(line) == me,
+            "own": me in (two_hands.last_allocator(line), str(line.created_by)),
             "may_confirm": may_confirm,
             "url": reverse("inbox-check-confirm", args=[line.id]),
             "invoice_url": (reverse("invoice", args=[line.document_id])

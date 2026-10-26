@@ -220,23 +220,26 @@ def test_repeating_the_same_decision_counts_it(client, sql, item, three_lines): 
     assert hits == 2
 
 
-def test_a_role_without_the_right_to_remember_still_sorts(
+def test_a_role_without_the_right_to_sort_is_refused_not_crashed(
     client, sql, web_env, item, three_lines,  # noqa: F811
 ):
-    """Памяти нет права — разбор всё равно проходит, а не падает пятисоткой.
+    """Нет права разбора — отказ словами, а не пятисотка и не разбор мимо права.
 
-    Политика `classify_insert` требует `suppliers.classify`. Роль, которая
-    строки разбирать может, а память вести — нет, получила бы отказ базы
-    посреди запроса, и при `ATOMIC_REQUESTS` вместе с памятью развалился бы сам
-    разбор. Это не гипотеза: ровно такая роль стояла на стенде — у бухгалтера
-    права не было, форма ролей туда не доехала.
+    Раньше здесь проверялось обратное: роль без `suppliers.classify` строки
+    разбирала, а память пропускалась. Так было, пока разбор был одним действием
+    одного человека. С двумя руками (T206) разбор — первый шаг, и его право
+    решает форма роли (D060): разбор без права не оставил бы следа «кто разнёс»,
+    и строка молча не дошла бы до сверки. Осталось главное из прежней проверки:
+    отказ базы посреди запроса не роняет страницу, а строка остаётся в инбоксе.
     """
     first = waiting_ids(client)[0]
     with narrowed_permissions(web_env, "accountant", MONTH_CYCLE_WITHOUT_CLASSIFY):
         answer = client.post(f"/inbox/{first}/classify/",
                              {"item": item, "unit": "network"})
         assert answer.status_code == 302, body(answer)[:300]
+        assert "failed" in answer["Location"], answer["Location"]
 
-    assert sorted_out(sql, item) == 1, "строка не разобралась"
+    assert sorted_out(sql, item) == 0, "строка разобралась без права разбора"
+    assert first in waiting_ids(client), "строка пропала из инбокса"
     remembered = sql.execute("select count(*) from classification_rules").fetchone()[0]
     assert remembered == 0, "память записалась без права на неё"

@@ -11,7 +11,7 @@
 `suppliers.confirm`. Его получает каждая роль, у которой уже есть разбор: у
 партнёра директор и бухгалтер равны (D036), и дать новое право одному из них
 значило бы молча отменить то решение. Две руки держит не набор прав, а правило
-этой таблицы: **сверяет не тот, кто разнёс.**
+этой таблицы: **сверяет не тот, кто разнёс, и не автор сверяемой версии.**
 
 **Привязка.** Разнесение — к ключу строки (`fact_key`): разбор заменяет версию
 факта, ключ остаётся (тот же приём у выписки, `0276`). Сверка — к версии
@@ -127,6 +127,11 @@ create policy review_step on fact_reviews
                and f.tenant_id = fact_reviews.tenant_id
                and f.dedup_key = fact_reviews.fact_key
                and f.superseded_at is null
+               -- автор действующей версии свою же версию не сверяет: новую
+               -- версию с тем же ключом можно записать мимо разбора (правка
+               -- счёта), и шага «разнесено» она не оставит
+               and (fact_reviews.step <> 'confirmed'
+                    or f.created_by is distinct from app_user_id())
         )
         and case step
             when 'allocated' then app_has_permission(tenant_id, 'suppliers.classify')
