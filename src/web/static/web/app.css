@@ -440,6 +440,14 @@ a.mark--ok:hover { background: var(--ok-line); }
 .mark--reader { color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line-2); }
 .mark--free  { color: var(--ok);       background: var(--ok-soft);     border: 1px solid var(--ok-line); }
 
+/* Длинный код правила (variance.components.meal_and_vacation_bonus.absolute) в
+   ячейке таблицы переносится: без этого он один растягивал таблицу шире
+   контейнера, и колонки справа уезжали за край. */
+td code { overflow-wrap: anywhere; }
+/* Значение правила бывает словом («Полставки со взносами от минимальной
+   базы»), а не числом: цифры `.num` не переносятся, а слово обязано. */
+table.rules-list td.num { white-space: normal; overflow-wrap: anywhere; }
+
 /* Число рядом с заголовком: «Сербия · 203». Тише заголовка и не жирнее. */
 h2 .count { color: var(--ink-3); font-weight: var(--w-regular); }
 

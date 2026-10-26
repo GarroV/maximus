@@ -8577,10 +8577,6 @@ msgid ""
 msgstr "Sada važi %(value)s, iako pravilo zadaje zakon (%(source)s). Izmena je uneta pre okvira i obračun uzima baš nju — vrednost zemlje se vraća novom verzijom."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Кто меняет:"
-msgstr "Ko menja:"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Что читает правило, последствия правки и сравнение стран"
 msgstr "Šta čita pravilo, posledice izmene i poređenje zemalja"
 

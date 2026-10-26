@@ -20,21 +20,18 @@
   {% if new_url %}<a class="btn primary" href="{{ new_url }}">{% translate "Завести версию" %}</a>{% endif %}
 </div>
 
-{% if rule_name %}<p class="sub"><code>{{ code }}</code> · {% translate "Тип" %}: {{ rule_type }}</p>
-{% else %}<p class="sub">{% translate "Тип" %}: {{ rule_type }}</p>{% endif %}
-
-<p class="sub">{% blocktranslate with value=value origin=origin %}Сейчас действует: {{ value }} — {{ origin }}{% endblocktranslate %}{% if since %} ({% blocktranslate with day=since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
-
+{% if rule_name %}<p class="sub"><code>{{ code }}</code></p>{% endif %}
 {% comment %}
-Рамка страны — до всего остального, потому что она отвечает на первый вопрос
-человека, открывшего правило: можно ли его вообще менять и в какую сторону.
-Эталон модуля 17 держит её плашкой у самого значения по той же причине.
-
-Слово «мягче» здесь не звучит само по себе: рамка называет границу числом и
-сторону словами. «Не мягче страны» без числа переспрашивают, а не выполняют.
+Поля панели эталона модуля 17 — подписанными парами, а не одной фразой: тип,
+значение, с какого числа и откуда, кто решает. Рамка и источник — ниже, плашкой.
 {% endcomment %}
-<p class="sub">{% translate "Кто меняет:" %}
-  <span class="mark mark--{{ frame_mode }}">{{ frame_owner }}</span></p>
+<dl class="facts">
+  <dt>{% translate "Тип" %}</dt><dd>{{ rule_type }}</dd>
+  <dt>{% translate "Значение" %}</dt><dd><span class="{{ value|numclass }}">{{ value }}</span></dd>
+  <dt>{% translate "Откуда" %}</dt><dd>{{ origin }}</dd>
+  {% if since %}<dt>{% translate "Действует с" %}</dt><dd>{{ since }}</dd>{% endif %}
+  <dt>{% translate "Кто меняет" %}</dt><dd><span class="mark mark--{{ frame_mode }}">{{ frame_owner }}</span></dd>
+</dl>
 {% if frame_note %}
 <p class="note">{{ frame_note }}</p>
 {% endif %}
