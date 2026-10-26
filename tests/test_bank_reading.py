@@ -388,3 +388,42 @@ def test_an_absurdly_long_csv_field_is_refused_in_words():
     huge = "x" * 200_000
     with pytest.raises(Unreadable):
         read((CSV + f'"{huge}";1,00;;18.06.2026;Neko\n').encode("utf-8"), "izvod.csv")
+
+
+def _renamed_sheet(content: bytes, new_name: str, replace=lambda data: data) -> bytes:
+    """Та же книга, но часть листа лежит под другим именем, и книга на него ссылается."""
+    import zipfile
+
+    old = "xl/worksheets/sheet1.xml"
+    source = zipfile.ZipFile(io.BytesIO(content))
+    out = io.BytesIO()
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as target:
+        for item in source.infolist():
+            data = source.read(item.filename)
+            if item.filename == old:
+                target.writestr(new_name, replace(data))
+                continue
+            short_old, short_new = old.removeprefix("xl/"), new_name.removeprefix("xl/")
+            data = data.replace(old.encode(), new_name.encode())
+            data = data.replace(short_old.encode(), short_new.encode())
+            target.writestr(item.filename, data)
+    return out.getvalue()
+
+
+@pytest.mark.parametrize("name", ["xl/worksheets/SHEET1.XML", "xl/worksheets/sheet1.dat"])
+def test_a_sheet_under_another_name_is_checked_too(name):
+    doctype = b'<!DOCTYPE worksheet [<!ENTITY x "y">]>'
+
+    def declared(data: bytes) -> bytes:
+        end = data.index(b"?>") + 2 if data.startswith(b"<?xml") else 0
+        return data[:end] + doctype + data[end:]
+
+    # Под новым именем книга по-прежнему открывается: лист берут по ссылке.
+    clean = _renamed_sheet(_book_bytes(), name)
+    assert read(clean, "izvod.xlsx").lines
+
+    book = _renamed_sheet(_book_bytes(), name, declared)
+    import zipfile
+    assert doctype in zipfile.ZipFile(io.BytesIO(book)).read(name)
+    with pytest.raises(Unreadable):
+        read(book, "izvod.xlsx")
