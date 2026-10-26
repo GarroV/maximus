@@ -35,6 +35,7 @@
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass, field
 from datetime import timedelta
 from decimal import Decimal
@@ -82,6 +83,8 @@ MAX_PARTY_NAME = 200
 MAX_PURPOSE = 500
 MAX_ACCOUNT = 64
 MAX_BANK_REF = 100
+# Код валюты ISO 4217: три латинские буквы.
+CURRENCY_CODE = re.compile(r"[A-Z]{3}")
 
 
 class BankRefused(cash.CashRefused):
@@ -124,7 +127,7 @@ def upload(who, content: bytes, file_name: str, *, account: str = "",
             "В файле нет номера счёта. Укажите счёт, по которому эта выписка: "
             "без него операции двух счетов не отличить друг от друга."
         ))
-    currency = (parsed.currency or currency or "").strip().upper()[:3]
+    currency = _currency(parsed.currency, currency)
     content_hash = hashlib.sha256(content).hexdigest()
     earlier = _earlier(who, content_hash)
     if earlier is not None:
@@ -140,6 +143,24 @@ def upload(who, content: bytes, file_name: str, *, account: str = "",
         raise BankRefused(_(
             "Выписку по этому счёту сейчас загружают ещё раз — повторите через минуту."
         )) from error
+
+
+def _currency(in_file: str, in_form: str) -> str:
+    """Валюта выписки: из файла, а если файл её не несёт — выбранная явно.
+
+    Валюту учёта партнёра молча не подставляем: выписка валютного счёта,
+    загруженная «в динарах», свела бы евро с динаровыми платежами.
+    """
+    chosen = (in_file or in_form or "").strip().upper()
+    if not chosen:
+        raise BankRefused(_(
+            "В файле нет валюты. Укажите валюту счёта — трёхбуквенный код, например RSD или EUR."
+        ))
+    if not CURRENCY_CODE.fullmatch(chosen):
+        raise BankRefused(_(
+            "Валюта — трёхбуквенный латинский код, например RSD или EUR, а не «%(value)s»."
+        ) % {"value": chosen[:10]})
+    return chosen
 
 
 def _earlier(who, content_hash: str):

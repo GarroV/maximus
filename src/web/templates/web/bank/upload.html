@@ -50,8 +50,8 @@
   <p class="field"><label for="statement-account">{% translate "Счёт в банке" %}</label>
   <input type="text" id="statement-account" name="account" maxlength="64" value="{{ form.account }}" placeholder="{% translate "Номер счёта, если его нет в файле" %}"></p>
   <p class="field"><label for="statement-currency">{% translate "Валюта" %}</label>
-  <input type="text" id="statement-currency" name="currency" maxlength="3" value="{{ form.currency }}"></p>
-  <p class="hint">{% translate "Счёт и валюта берутся из файла; поля нужны, если таблица банка их не несёт. Без счёта выписка не загружается: операции двух счетов иначе не отличить." %}</p>
+  <input type="text" id="statement-currency" name="currency" maxlength="3" pattern="[A-Za-z]{3}" value="{{ form.currency }}" placeholder="{% translate "Код валюты, если его нет в файле" %}"></p>
+  <p class="hint">{% translate "Счёт и валюта берутся из файла; поля нужны, если таблица банка их не несёт. Без счёта и валюты выписка не загружается: операции двух счетов иначе не отличить, а валюта учёта за выписку не подставляется." %}</p>
   <button class="primary" type="submit">{% translate "Загрузить" %}</button>
 </form>
 

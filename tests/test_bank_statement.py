@@ -467,6 +467,22 @@ def test_a_table_without_an_account_is_refused_in_words(accountant, sql):  # noq
     assert lines(sql) == []
 
 
+@pytest.mark.parametrize("currency", ["", "R$D", "EURO", "12A"])
+def test_a_table_without_a_proper_currency_is_refused_in_words(
+    accountant, sql, currency,  # noqa: F811
+):
+    """Валюту учёта за выписку не подставляем: без кода валюты — отказ."""
+    answer = upload(accountant, "05.07.2026;1.840,00;;Banca Test;naknada\n", currency=currency)
+    assert answer.status_code == 400 and 'data-error="1"' in body(answer)
+    assert lines(sql) == []
+
+
+def test_a_currency_code_is_taken_in_any_case(accountant, sql):  # noqa: F811
+    answer = upload(accountant, "05.07.2026;1.840,00;;Banca Test;naknada\n", currency="eur")
+    assert answer.status_code == 302, body(answer)[:300]
+    assert sql.execute("select currency from bank_lines").fetchall() == [("EUR",)]
+
+
 def test_two_accounts_with_the_same_operations_both_load_fully(accountant, sql):  # noqa: F811
     """Одинаковые операции на двух счетах партнёра — разные деньги, не дубли."""
     rows = ("05.07.2026;1.840,00;;Banca Test;naknada\n",
