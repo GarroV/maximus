@@ -73,6 +73,13 @@ MEANINGFUL_VALUES: dict[str, dict[str, str]] = {
     # загрузка. Значение названо здесь, потому что типового правила для `bytea`
     # у пробника нет.
     "cash_receipts": {"content": r"'\x00'::bytea", "byte_size": "1"},
+    # Строка выписки — расход или приход (`bank_lines_direction`) и
+    # сумма строго больше нуля (`bank_lines_amount_positive`): знак несёт
+    # направление, а нулевой операции банк не присылает.
+    "bank_lines": {"direction": "'out'", "amount": "1"},
+    # Связь строки выписки называет, как она легла (`bank_line_links_known_how`):
+    # без этого не отличить сведённую машиной от решённой человеком.
+    "bank_line_links": {"how": "'manual'"},
 }
 
 
