@@ -46,6 +46,7 @@ def test_platform_admin_enters_a_rate_as_published(client, platform_admin):  # n
 @pytest.mark.parametrize("changes", [
     {"rate": "0"}, {"rate": "-1"}, {"rate": "abc"}, {"rate": "1.123456789"},
     {"quote_currency": "EUR"}, {"quote_currency": "Q1"}, {"rate_date": "31/01/2001"},
+    {"rate_date": "2099-01-31"}, {"note": "н" * 201},
 ])
 def test_a_bad_rate_is_refused_in_words(client, platform_admin, changes):  # noqa: F811
     login_as(client, "admin")
