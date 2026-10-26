@@ -22,6 +22,7 @@ from . import (
     platform_views,
     positions_views,
     printing_views,
+    rates_views,
     reports_views,
     roles_views,
     rules_pages,
@@ -108,6 +109,8 @@ urlpatterns = [
     # так же, как видно по правам.
     path("platform/", platform_views.index, name="platform-index"),
     path("platform/new/", platform_views.space_create, name="platform-space-create"),
+    # Курсы для консолидации сети (T209): справочник общий, ведёт платформа.
+    path("platform/rates/", rates_views.rates, name="platform-rates"),
     path("platform/<uuid:tenant_id>/", platform_views.space, name="platform-space"),
     path(
         "platform/<uuid:tenant_id>/roles/",

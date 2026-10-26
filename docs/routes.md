@@ -123,6 +123,7 @@
 | `/platform/<uuid:tenant_id>/` | `platform-space` | `web.platform_views.space` |
 | `/platform/<uuid:tenant_id>/roles/` | `platform-member-role` | `web.platform_views.member_role` |
 | `/platform/new/` | `platform-space-create` | `web.platform_views.space_create` |
+| `/platform/rates/` | `platform-rates` | `web.rates_views.rates` |
 | `/reconciliations/findings/<uuid:finding_id>/` | `reconciliation-decide` | `web.reports_views.reconciliation_decide` |
 | `/reports/pnl/` | `reports-pnl` | `web.planned_views.pnl` |
 | `/reports/reconcile/` | `reports-reconcile` | `web.planned_views.reconcile` |

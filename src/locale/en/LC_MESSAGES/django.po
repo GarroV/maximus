@@ -11065,3 +11065,75 @@ msgstr "no right to see payroll amounts"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "та же валюта"
 msgstr "same currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "1 единица валюты"
+msgstr "1 unit of currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "База не приняла курс. Проверьте поля и повторите."
+msgstr "The database did not accept the rate. Check the fields and try again."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта курса"
+msgstr "Rate currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта — три латинские буквы кода ISO: EUR, RSD, HUF."
+msgstr "A currency is three Latin letters of its ISO code: EUR, RSD, HUF."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Введён"
+msgstr "Entered"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дата курса пишется как 2026-06-30."
+msgstr "The rate date is written as 2026-06-30."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Записать курс"
+msgstr "Save rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Источник"
+msgstr "Source"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Курс на %(on)s записан."
+msgstr "Rate as of %(on)s saved."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс связывает две разные валюты."
+msgstr "A rate links two different currencies."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — не больше восьми знаков после запятой и десяти до неё."
+msgstr "A rate has at most eight digits after the decimal point and ten before it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — положительное число."
+msgstr "A rate is a positive number."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — число: 117,1834."
+msgstr "A rate is a number: 117.1834."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курсов пока нет: сеть не сводится, пока их не ввести."
+msgstr "No rates yet: the network cannot be consolidated until they are entered."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курсы валют"
+msgstr "Exchange rates"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "НБС, средний курс"
+msgstr "NBS, middle rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"По ним сеть сводится в одну валюту — по курсу на последний день месяца. "
+"Закрытый месяц держит курс, действовавший при закрытии. Исправить курс — "
+"ввести новый с той же датой: он заменит прежний для незакрытых месяцев."
+msgstr "These rates consolidate the network into one currency, at the rate on the last day of the month. A closed month keeps the rate that applied when it was closed. To correct a rate, enter a new one with the same date: it replaces the previous one for months not yet closed."

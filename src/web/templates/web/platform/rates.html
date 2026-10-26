@@ -1,0 +1,49 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+Курсы валют для консолидации сети (T209). Ввод и список — одна страница:
+новый курс вводят, глядя на прежние. Строку не правят и не удаляют —
+исправленный курс вводится новой строкой той же даты (см. `rates_views`).
+{% endcomment %}
+{% block title %}{% translate "Курсы валют" %}{% endblock %}
+{% block content %}
+<p class="note"><a href="{% url 'platform-index' %}">{% translate "← Все пространства" %}</a></p>
+<h1>{% translate "Курсы валют" %}</h1>
+<p class="sub">{% blocktranslate %}По ним сеть сводится в одну валюту — по курсу на последний день месяца. Закрытый месяц держит курс, действовавший при закрытии. Исправить курс — ввести новый с той же датой: он заменит прежний для незакрытых месяцев.{% endblocktranslate %}</p>
+
+{% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+{% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
+
+<form class="card" method="post" action="{% url 'platform-rates' %}">
+  {% csrf_token %}
+  {% translate "Дата" as f_day %}{% translate "1 единица валюты" as f_base %}{% translate "Курс" as f_rate %}{% translate "Валюта курса" as f_quote %}{% translate "Источник" as f_note %}{% translate "НБС, средний курс" as f_note_hint %}
+  {% include "web/components/field.html" with id="id_rate_date" name="rate_date" type="date" label=f_day value=filled.rate_date required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_base" name="base_currency" label=f_base value=filled.base_currency placeholder="EUR" required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_rate" name="rate" label=f_rate value=filled.rate placeholder="117,1834" inputmode="decimal" required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_quote" name="quote_currency" label=f_quote value=filled.quote_currency placeholder="RSD" required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_note" name="note" label=f_note value=filled.note placeholder=f_note_hint stacked=1 %}
+  <button type="submit" class="primary">{% translate "Записать курс" %}</button>
+</form>
+
+{% scroll %}<table class="stack" data-rates>
+  <thead>
+    <tr>
+      <th>{% translate "Дата" %}</th>
+      <th>{% translate "Курс" %}</th>
+      <th>{% translate "Источник" %}</th>
+      <th>{% translate "Введён" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rate in rates %}
+    <tr>
+      <td data-label="{% translate "Дата" %}">{{ rate.on }}</td>
+      <td data-label="{% translate "Курс" %}">{{ rate.text }}</td>
+      <td data-label="{% translate "Источник" %}">{{ rate.note|default:"—" }}</td>
+      <td data-label="{% translate "Введён" %}">{{ rate.entered }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="hint">{% translate "Курсов пока нет: сеть не сводится, пока их не ввести." %}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% endblock %}
