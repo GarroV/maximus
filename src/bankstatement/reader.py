@@ -11,11 +11,13 @@
 from __future__ import annotations
 
 import csv
+import dataclasses
 import io
 import unicodedata
 import xml.parsers.expat
 import zipfile
 import zlib
+from decimal import Decimal
 from functools import cache
 from pathlib import Path
 from xml.etree import ElementTree
@@ -83,6 +85,12 @@ def read(content: bytes, file_name: str = "") -> Statement:
         statement = _xml(content)
     else:
         statement = _table(_csv_rows(content))
+    # Операция на ноль денег не двигает: справочные строки банка («комиссия
+    # 0,00») в учёт не идут. Отсекаются здесь, при разборе, а не упираются
+    # потом в ограничение базы.
+    moved = [line for line in statement.lines if line.amount != 0]
+    if len(moved) != len(statement.lines):
+        statement = dataclasses.replace(statement, lines=moved)
     if not statement.lines:
         raise Unreadable(_("В файле нет ни одной операции."))
     if len(statement.lines) > MAX_ROWS:
@@ -246,7 +254,10 @@ def _direction(raw: str, profile: dict) -> str | None:
 
 
 def _two_columns(debit, credit):
-    """«На терет» и «в корист» — две колонки; заполнена ровно одна."""
+    """«На терет» и «в корист» — две колонки; заполнена ровно одна.
+    Обе нулевые — операция на ноль, её отсечёт `read`."""
+    if (debit is not None or credit is not None) and not debit and not credit:
+        return Decimal(0), OUT
     debit = debit or 0
     credit = credit or 0
     if debit and not credit:
