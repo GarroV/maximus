@@ -18,7 +18,7 @@
 {% block content %}
 <p class="back"><a href="{{ back_url }}">{% translate "← К правилу" %}</a></p>
 <h1>{% translate "Новая версия правила" %}</h1>
-<p class="sub"><code>{{ heading }}</code> · {% blocktranslate with value=value origin=origin %}Сейчас действует: {{ value }} — {{ origin }}{% endblocktranslate %}{% if since %} ({% blocktranslate with day=since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
+<p class="sub"><code>{{ code }}</code> · {% blocktranslate with value=value origin=origin %}Сейчас действует: {{ value }} — {{ origin }}{% endblocktranslate %}{% if since %} ({% blocktranslate with day=since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
 
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 {% if error %}
@@ -61,15 +61,15 @@
   Уровни, на которых это правило не действует, в список не попадают, а причина
   сказана словами рядом (`scope_note`) — до правки, а не отказом после неё.
   {% endcomment %}
-  <p class="field">
+  <div class="field">
     {% translate "Кому" as target_label %}
     {% translate "Уровни складываются: значение группы сильнее значения партнёра, значение человека сильнее обоих." as target_help %}
     {% include "web/components/select.html" with id="target" name="target" label=target_label options=targets required=True help=target_help %}
-  </p>
+  </div>
   {% if scope_note %}
   <p class="note">{{ scope_note }}</p>
   {% endif %}
-  <p class="field">
+  <div class="field">
     {% translate "Действует с" as from_label %}
     {% comment %}
     Подсказка приходит из `web/rules.monthly_help` — тем же местом, откуда
@@ -78,22 +78,22 @@
     дата внутри месяца на этот месяц не влияет вовсе (issue #99).
     {% endcomment %}
     {% include "web/components/field.html" with id="valid_from" name="valid_from" label=from_label value=default_from required=True type="date" help=from_help %}
-  </p>
-  <p class="field">
+  </div>
+  <div class="field">
     {% translate "Значение" as value_label %}
     {% if options %}
       {% include "web/components/select.html" with id="value" name="value" label=value_label options=options required=True %}
     {% elif kind == "bool" %}
       {% include "web/components/select.html" with id="value" name="value" label=value_label options=bool_options required=True %}
     {% elif kind == "number" %}
-      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value required=True inputmode="decimal" help=frame_note %}
+      {% include "web/components/field.html" with id="value" name="value" label=value_label value=entered_value|default:value required=True inputmode="decimal" help=frame_note %}
     {% elif kind == "list" %}
       {% translate "Через запятую." as list_help %}
-      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value help=list_help %}
+      {% include "web/components/field.html" with id="value" name="value" label=value_label value=entered_value|default:value help=list_help %}
     {% else %}
-      {% include "web/components/field.html" with id="value" name="value" label=value_label value=value required=True %}
+      {% include "web/components/field.html" with id="value" name="value" label=value_label value=entered_value|default:value required=True %}
     {% endif %}
-  </p>
+  </div>
   <button type="submit" class="primary">{% translate "Завести версию" %}</button>
 </form>
 {% endif %}
@@ -110,22 +110,22 @@
 <form class="card" method="post">{% csrf_token %}
   <input type="hidden" name="level" value="country">
   <p class="note">{% blocktranslate %}Новая версия правил страны действует на всех партнёров этой страны. Прежняя закрывается днём начала новой и остаётся в истории: уже посчитанные месяцы собираются своей версией и не двигаются.{% endblocktranslate %}</p>
-  <p class="field">
+  <div class="field">
     {% translate "Действует с" as country_from_label %}
     {% include "web/components/field.html" with id="country_valid_from" name="valid_from" label=country_from_label value=default_from required=True type="date" help=from_help %}
-  </p>
-  <p class="field">
+  </div>
+  <div class="field">
     {% translate "Значение в правилах страны" as country_value_label %}
     {% if country_options %}
       {% include "web/components/select.html" with id="country_value" name="value" label=country_value_label options=country_options required=True %}
     {% elif country_kind == "bool" %}
       {% include "web/components/select.html" with id="country_value" name="value" label=country_value_label options=country_bool required=True %}
     {% elif country_kind == "number" %}
-      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_value required=True inputmode="decimal" %}
+      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_entered_value|default:country_value required=True inputmode="decimal" %}
     {% else %}
-      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_value required=True %}
+      {% include "web/components/field.html" with id="country_value" name="value" label=country_value_label value=country_entered_value|default:country_value required=True %}
     {% endif %}
-  </p>
+  </div>
   <button type="submit" class="primary">{% translate "Завести версию правил страны" %}</button>
 </form>
 {% else %}

@@ -138,7 +138,7 @@ def test_the_payslip_row_says_the_money_is_split(client, sql, calculated):  # no
     bind(sql, person, "BG1")
 
     login_as(client, "director")
-    line = row_of(body(client.get(calculated)), name)
+    line = row_of(body(client.get(calculated + "sheet/")), name)
 
     assert "BG1" in line and "NS1" in line, f"обе точки человека не названы: {line[:400]}"
 

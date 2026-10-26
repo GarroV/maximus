@@ -20,20 +20,18 @@
   {% if new_url %}<a class="btn primary" href="{{ new_url }}">{% translate "Завести версию" %}</a>{% endif %}
 </div>
 
-<p class="sub">{% blocktranslate with value=value origin=origin %}Сейчас действует: {{ value }} — {{ origin }}{% endblocktranslate %}{% if since %} ({% blocktranslate with day=since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
-
+{% if rule_name %}<p class="sub"><code>{{ code }}</code></p>{% endif %}
 {% comment %}
-Рамка страны — до всего остального, потому что она отвечает на первый вопрос
-человека, открывшего правило: можно ли его вообще менять и в какую сторону.
-Эталон модуля 17 держит её плашкой у самого значения по той же причине.
-
-Слово «мягче» здесь не звучит само по себе: рамка называет границу числом и
-сторону словами. «Не мягче страны» без числа переспрашивают, а не выполняют.
+Поля панели эталона модуля 17 — подписанными парами, а не одной фразой: тип,
+значение, с какого числа и откуда, кто решает. Рамка и источник — ниже, плашкой.
 {% endcomment %}
-<p class="sub">{% translate "Кто меняет:" %}
-  {% if frame_mode == "lock" %}<span class="mark mark--lock">{{ frame_owner }}</span>
-  {% elif frame_mode == "frame" %}<span class="mark mark--frame">{{ frame_owner }}</span>
-  {% else %}{{ frame_owner }}{% endif %}</p>
+<dl class="facts">
+  <dt>{% translate "Тип" %}</dt><dd>{{ rule_type }}</dd>
+  <dt>{% translate "Значение" %}</dt><dd><span class="{{ value|numclass }}">{{ value }}</span></dd>
+  <dt>{% translate "Откуда" %}</dt><dd>{{ origin }}</dd>
+  {% if since %}<dt>{% translate "Действует с" %}</dt><dd>{{ since }}</dd>{% endif %}
+  <dt>{% translate "Кто меняет" %}</dt><dd><span class="mark mark--{{ frame_mode }}">{{ frame_owner }}</span></dd>
+</dl>
 {% if frame_note %}
 <p class="note">{{ frame_note }}</p>
 {% endif %}
@@ -46,6 +44,25 @@
 {% if frame_breach %}
 {% translate "Действующее значение вне рамки страны." as out_of_frame %}
 {% notice "alert" title=out_of_frame %}{{ frame_breach }}{% endnotice %}
+{% endif %}
+
+{% comment %}
+Два поля эталона модуля 17, которых карточка не имела (issue #255): кто читает
+правило и что случится, если его поменять. Первое привязано к исходникам —
+карта разделов проверяется тестом на то, что названный файл правда читает
+раздел; второе — слова про устройство движка и версий, без цифр: цифры
+пришлось бы считать на данных партнёра.
+{% endcomment %}
+{% if readers %}
+<h2>{% translate "Что читает это правило" %}</h2>
+<p>{% for reader in readers %}<span class="mark mark--reader">{{ reader }}</span> {% endfor %}</p>
+{% else %}
+<h2>{% translate "Что читает это правило" %}</h2>
+<p class="note">{% translate "Расчёт это правило сегодня не читает." %}</p>
+{% endif %}
+{% if effect %}
+<h2>{% translate "Если поменять" %}</h2>
+<p>{{ effect }}</p>
 {% endif %}
 
 {% if country_layer %}

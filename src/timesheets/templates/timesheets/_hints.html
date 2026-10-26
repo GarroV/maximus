@@ -14,7 +14,7 @@
 а не «исправьте», и сохранению это не мешает.
 {% endcomment %}<div id="grid-hints"{% if oob %} hx-swap-oob="true"{% endif %}>
 {% if grid.suspicious_rows %}
-{% translate "Стоит посмотреть до расчёта" as hints_title %}
+{% translate "Требует вашего взгляда" as hints_title %}
 {% notice "alert" title=hints_title %}
   <ul>
     {% for row in grid.suspicious_rows %}

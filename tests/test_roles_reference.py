@@ -123,7 +123,15 @@ def test_the_people_list_shows_the_unit_and_the_last_visit(client, web_env):
     manager = Membership.objects.filter(role__code="manager").exclude(unit_ids=None).first()
     assert manager, "в сиде нет управляющего с точкой"
     unit = Unit.objects.get(pk=manager.unit_ids[0])
-    assert unit.title in person_row(html, "Управляющий"), "точка управляющего не названа"
+    # Строка именно этого человека — по адресу его карточки, а не по слову
+    # «Управляющий»: соседние тесты заводят «Управляющего соседней точки», и
+    # поиск по вхождению находил его или нет в зависимости от порядка прогона.
+    row = next(
+        (r for r in re.findall(r"<tr>.*?</tr>", html, flags=re.S)
+         if f"/roles/people/{manager.user_id}/" in r),
+        "",
+    )
+    assert unit.title in row, "точка управляющего не названа"
     assert "все точки" in person_row(html, "Бухгалтер")
     assert "не входил" not in person_row(html, "Администратор сети"), (
         "администратор только что вошёл, а список говорит, что он не входил"

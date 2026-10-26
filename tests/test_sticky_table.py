@@ -41,7 +41,9 @@ def test_the_container_can_actually_be_scrolled_inside():
 
 
 def test_the_head_of_the_sheet_is_sticky():
-    body = rule("table.sheet th")
+    # Прилипает шапка целиком, а не каждая ячейка (T223): у ведомости два
+    # яруса, и при `top: 0` у каждой ячейки второй наезжал на первый.
+    body = rule("table.sheet thead")
     assert "position: sticky" in body, "шапка ведомости не липкая"
     assert "top: 0" in body
 

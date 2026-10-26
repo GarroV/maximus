@@ -337,7 +337,7 @@ def test_the_frame_is_named_on_the_rule_page(client):
 
     # Слово и метка стоят рядом, но в разных элементах: класс метки собирается
     # из режима рамки, а не из переведённого слова.
-    assert "Кто меняет:" in html, html[:900]
+    assert "Кто меняет" in html, html[:900]
     assert "mark--frame" in html and "Внутри рамки" in html, "рамка не помечена"
     assert "не ниже 1.26" in html, "границы рамки не названы"
     assert "Закон о раду, чл. 108" in html, "источник рамки не назван"

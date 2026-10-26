@@ -93,7 +93,8 @@ def test_the_accountant_closes_the_hours_of_a_unit(client, clean_payruns):
     grid = _grid_url(client)
     # После T231 закрытие часов живёт на своей странице, а не на сетке.
     page = body(client.get(f"{grid}close/"))
-    assert 'name="unit"' in page, "бухгалтеру не предложена форма закрытия точки"
+    # С T239 закрытие — шаг подтверждения: точка предлагается ссылкой `?unit=`.
+    assert "close/?unit=" in page, "бухгалтеру не предложено закрыть точку"
 
     unit = Unit.objects.filter(tenant__code="rs-dev").order_by("code").first()
     response = client.post(f"{grid}close/", {"unit": str(unit.id)}, follow=True)
