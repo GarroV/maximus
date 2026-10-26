@@ -199,7 +199,7 @@ def test_the_month_leads_to_the_report(client, with_expenses, calculated):  # no
     разного поведения — то, из-за чего человек нажимает наугад.
     """
     login_as(client, "director")
-    page = body(client.get(calculated))
+    page = body(client.get(calculated + "sheet/"))
 
     assert "Отчёт P&L" in page, "с месяца нет пути в отчёт"
     assert f'href="{pnl_url(calculated)}"' in page
