@@ -164,4 +164,5 @@ def test_the_screen_says_it_too(client, sql, june_calculated):  # noqa: F811
         client.post("/logout/")
 
     login_as(client, "director")
-    assert SAID_MISSING not in body(client.get(page_url(sql) + "sheet/")), "лишняя надпись у директора"
+    sheet = body(client.get(page_url(sql) + "sheet/"))
+    assert SAID_MISSING not in sheet, "лишняя надпись у директора"

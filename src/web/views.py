@@ -38,7 +38,6 @@ from core.models import (
     Tenant,
     Timesheet,
 )
-from core.people_units import units_note
 
 # Демо спрашивают ровно об одном: показывать ли путь внутрь (T160).
 # Импортируется `demo.access`, а не `demo.views`: тот сам зовёт `web.auth`, и
@@ -47,7 +46,6 @@ from core.people_units import units_note
 from demo import access as demo_access
 from payrun import freezing, jobs, lifecycle, retro
 from payrun.errors import PayrunRefused
-from reports import export as exports
 from reports.sheet import build_slice
 from reports.trace import TraceNotFound, build_trace
 from reports.variance import ThresholdsMissing, build_variance
