@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
@@ -38,6 +38,10 @@ SHOWN = 100
 # Пределы колонки `fx_rates.rate` (18 знаков, 8 после запятой): больше — отказ
 # словами здесь, а не ошибка базы.
 RATE_PLACES = 8
+# Курс публикуется на прошедший или текущий день; дальше недели вперёд — почти
+# наверняка опечатка в годе, а такой курс тихо станет курсом всех будущих месяцев.
+AHEAD_DAYS = 7
+NOTE_LIMIT = 200
 RATE_WHOLE_DIGITS = 10
 
 
@@ -83,6 +87,11 @@ def _parse(data) -> dict:
         on = datetime.strptime(raw_day, "%Y-%m-%d").date()
     except ValueError:
         raise BadRate(_("Дата курса пишется как 2026-06-30.")) from None
+    if on > date.today() + timedelta(days=AHEAD_DAYS):
+        raise BadRate(_("Курс на дату дальше недели вперёд не вводится — проверьте год."))
+    note = (data.get("note") or "").strip()
+    if len(note) > NOTE_LIMIT:
+        raise BadRate(_("Источник — не длиннее %(limit)s знаков.") % {"limit": NOTE_LIMIT})
     raw_rate = (data.get("rate") or "").strip().replace(" ", "").replace(",", ".")
     try:
         value = Decimal(raw_rate)
@@ -95,7 +104,7 @@ def _parse(data) -> dict:
         raise BadRate(_("Курс — не больше восьми знаков после запятой и десяти до неё."))
     return {
         "base_currency": base, "quote_currency": quote, "rate_date": on,
-        "rate": value, "note": (data.get("note") or "").strip(),
+        "rate": value, "note": note,
     }
 
 

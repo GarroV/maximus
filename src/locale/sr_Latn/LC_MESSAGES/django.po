@@ -10994,3 +10994,16 @@ msgid ""
 "итоге могут измениться — складывать закрытое с незакрытым молча значило "
 "бы получить цифру, которой никто не поверит."
 msgstr "Mesec još nije zatvoren kod partnera: %(counter)s od %(summed)s. Njihovi iznosi u zbiru se još mogu promeniti — sabirati zatvoreno i nezatvoreno ćutke značilo bi dobiti cifru kojoj niko ne veruje."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Источник — не длиннее %(limit)s знаков."
+msgstr "Izvor nije duži od %(limit)s znakova."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс на дату дальше недели вперёд не вводится — проверьте год."
+msgstr "Kurs za datum dalji od nedelju dana unapred se ne unosi — proverite godinu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
+msgstr "ne vidi se ceo partner: deo registara ili objekata je zatvoren"

@@ -11153,3 +11153,16 @@ msgid ""
 "итоге могут измениться — складывать закрытое с незакрытым молча значило "
 "бы получить цифру, которой никто не поверит."
 msgstr "The month is not closed yet for partners: %(counter)s of %(summed)s. Their amounts in the total may still change — adding closed and unclosed months silently would give a figure nobody trusts."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Источник — не длиннее %(limit)s знаков."
+msgstr "The source is at most %(limit)s characters."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс на дату дальше недели вперёд не вводится — проверьте год."
+msgstr "A rate more than a week ahead cannot be entered — check the year."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
+msgstr "not the whole partner is visible: some ledgers or stores are closed to you"
