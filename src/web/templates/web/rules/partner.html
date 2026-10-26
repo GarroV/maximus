@@ -1,0 +1,73 @@
+{% extends "web/base.html" %}{% load ui i18n %}
+{% comment %}
+«Задано партнёром»: что партнёр, его группы и люди изменили поверх правил страны
+и какие попытки выйти за рамку страны были отвергнуты (эталон модуля 17, вкладка
+«Юрлицо»). Отдельная страница, а не вкладка-переключатель: у неё свой адрес и
+своя функция (D081/D087). Значение этой страницы в том, что заведённое
+переопределение обязано быть видно где-то одним списком — иначе правило считает
+деньги, а перечня таких правил нет.
+{% endcomment %}
+{% block title %}{{ heading }}{% endblock %}
+{% block content %}
+<h1>{{ heading }}</h1>
+{% translate "Разделы справочника правил" as tabs_label %}
+{% include "web/components/cuts.html" with cuts=tabs label=tabs_label %}
+
+<h2>{% translate "Что изменено поверх страны" %}</h2>
+{% if changed %}
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Код" %}</th>
+      <th>{% translate "Название" %}</th>
+      <th>{% translate "Уровень" %}</th>
+      <th>{% translate "Кому" %}</th>
+      <th>{% translate "Значение" %}</th>
+      <th>{% translate "Действует с" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in changed %}
+    <tr>
+      <td><code><a href="{{ row.url }}">{{ row.path }}</a></code></td>
+      <td>{{ row.title|default:"—" }}</td>
+      <td>{{ row.level }}</td>
+      <td>{{ row.who|default:"—" }}</td>
+      <td class="{{ row.value|numclass }}">{{ row.value }}</td>
+      <td>{{ row.since }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% else %}
+{% translate "Партнёр пока ничего не менял." as nothing_changed %}
+{% notice "empty" title=nothing_changed %}{% translate "Все правила наследуются из страны. Первое переопределение появится здесь, как только его заведут с карточки правила." %}{% endnotice %}
+{% endif %}
+
+<h2>{% translate "Попытки выйти за рамку" %}</h2>
+{% if attempts %}
+{% scroll %}<table>
+  <thead>
+    <tr>
+      <th>{% translate "Когда" %}</th>
+      <th>{% translate "Кто" %}</th>
+      <th>{% translate "Правило" %}</th>
+      <th>{% translate "Ставили" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for attempt in attempts %}
+    <tr>
+      <td>{{ attempt.at }}</td>
+      <td>{{ attempt.who }}</td>
+      <td><a href="{{ attempt.url }}">{{ attempt.title|default:attempt.path }}</a></td>
+      <td class="{{ attempt.wanted|numclass }}">{{ attempt.wanted }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>{% endscroll %}
+{% else %}
+{% translate "Попыток не было." as no_attempts %}
+{% notice "empty" title=no_attempts %}{% translate "Никто не пробовал поставить правилу значение за рамкой страны." %}{% endnotice %}
+{% endif %}
+{% endblock %}

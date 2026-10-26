@@ -28,52 +28,70 @@
 эталон модуля 17 поэтому и говорит «реестр, а не форма настроек» и ищет по коду
 и по названию. Без поиска правило находится прокруткой, то есть глазами.
 {% endcomment %}
+{% translate "Разделы справочника правил" as tabs_label %}
+{% include "web/components/cuts.html" with cuts=tabs label=tabs_label %}
+
+{% if total %}
+{% comment %}
+Сводка страны — как в эталоне модуля 17: сколько правил и сколько из них
+закрыто законом. Читается раньше таблицы: ответ на «а что здесь вообще можно
+менять» стоит до двухсот строк, а не выводится из них.
+{% endcomment %}
+<h2>{{ country_name }} <span class="count">· {{ total }}</span></h2>
+<p class="note">{% blocktranslate with locked=locked_count framed=frame_count %}{{ locked }} заданы законом и не редактируются · {{ framed }} партнёр может только ужесточить{% endblocktranslate %}</p>
+{% if preset_code %}<p class="note">{% blocktranslate with code=preset_code country=country %}Набор правил: {{ code }} ({{ country }}){% endblocktranslate %}</p>{% endif %}
+{% endif %}
+
 <form class="search" method="get">
   {% translate "Действующие на" as on_label %}
   {% include "web/components/field.html" with id="on" name="on" label=on_label value=on_date type="date" %}
   {% translate "Правило" as q_label %}
-  {% translate "Часть кода правила: night, sick, net_factor" as q_help %}
+  {% translate "Код или название: night, ночные, net_factor" as q_help %}
   {% include "web/components/field.html" with id="q" name="q" label=q_label value=query help=q_help %}
+  {% if group %}<input type="hidden" name="group" value="{{ group }}">{% endif %}
   <button type="submit">{% translate "Показать" %}</button>
 </form>
+
+{% if groups %}
+{% translate "Группы правил" as groups_label %}
+{% include "web/components/cuts.html" with cuts=groups label=groups_label %}
+{% endif %}
 
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 {% if closed_note %}
 <p class="note">{{ closed_note }}</p>
 {% endif %}
 
-{% if sections %}
-{% if preset_code %}<p class="note">{% blocktranslate with code=preset_code country=country %}Набор правил: {{ code }} ({{ country }}){% endblocktranslate %}</p>{% endif %}
-{% for section in sections %}
-<h2>{{ section.title }}</h2>
+{% if rows %}
 {% scroll %}<table>
   <thead>
     <tr>
-      <th>{% translate "Правило" %}</th>
+      <th>{% translate "Код" %}</th>
+      <th>{% translate "Название" %}</th>
       <th>{% translate "Значение" %}</th>
+      <th>{% translate "Кто меняет" %}</th>
       <th>{% translate "Откуда" %}</th>
       <th>{% translate "Действует с" %}</th>
-      <th>{% translate "Кто меняет" %}</th>
       <th>{% translate "Задано отдельно" %}</th>
     </tr>
   </thead>
   <tbody>
-    {% for row in section.rows %}
+    {% for row in rows %}
     <tr>
-      <td>{% if row.url %}<a href="{{ row.url }}">{{ row.path }}</a>{% else %}{{ row.path }}{% endif %}</td>
+      <td><code>{% if row.url %}<a href="{{ row.url }}">{{ row.path }}</a>{% else %}{{ row.path }}{% endif %}</code></td>
+      <td>{{ row.title|default:"—" }}</td>
       <td class="{{ row.value|numclass }}">{{ row.value }}</td>
-      <td>{{ row.origin }}</td>
-      <td>{{ row.since|default:"—" }}</td>
       {% comment %}
       Кто решает значение: закон, рамка страны или сам партнёр (T192, эталон
       модуля 17). Колонка отвечает на вопрос, который до неё задавался формой:
-      человек набирал значение и узнавал о рамке отказом. Правил больше сотни,
-      и запертых среди них меньшинство — поэтому слово, а не значок: значок
-      пришлось бы расшифровывать легендой под каждой из десяти таблиц.
+      человек набирал значение и узнавал о рамке отказом. Метка у всех трёх
+      режимов (issue #257): два цветных чипа и голый текст читались как «два
+      особых случая и всё остальное», а это три равноправных ответа на «можно ли
+      это трогать».
       {% endcomment %}
-      <td>{% if row.owner_mode == "lock" %}<span class="mark mark--lock">{{ row.owner }}</span>
-        {% elif row.owner_mode == "frame" %}<span class="mark mark--frame">{{ row.owner }}</span>
-        {% else %}{{ row.owner }}{% endif %}</td>
+      <td><span class="mark mark--{{ row.owner_mode }}">{{ row.owner }}</span></td>
+      <td>{{ row.origin }}</td>
+      <td>{{ row.since|default:"—" }}</td>
       {% comment %}
       Колонка про то, что таблица НЕ показывает. Значение в строке — общее: страна
       плюс партнёр, то есть то, что действует у всех. Версия, заведённая одной
@@ -86,8 +104,7 @@
     {% endfor %}
   </tbody>
 </table>{% endscroll %}
-{% endfor %}
-{% elif query %}
+{% elif query or group %}
 {% comment %}
 Пустой поиск и отсутствие правил вовсе — разные события, и объясняются они
 по-разному: в первом случае правила есть, просто не эти, и человеку надо сказать,
@@ -95,7 +112,7 @@
 кто просто опечатался.
 {% endcomment %}
 {% translate "По этому запросу правил нет." as nothing_found %}
-{% notice "empty" title=nothing_found %}{% blocktranslate %}Поиск идёт по коду правила — той самой строке, которой правило адресуется расчёту: hour_types.night.pay_percent. Очистите поле, чтобы увидеть весь набор.{% endblocktranslate %}{% endnotice %}
+{% notice "empty" title=nothing_found %}{% blocktranslate %}Поиск идёт по коду правила — той самой строке, которой правило адресуется расчёту: hour_types.night.pay_percent, — и по его названию. Очистите поле и выберите «Все», чтобы увидеть весь набор.{% endblocktranslate %}{% endnotice %}
 {% else %}
 {% translate "Правил расчёта для этой страны на эту дату в базе нет." as no_rules %}
 {% notice "empty" title=no_rules %}{% blocktranslate %}Первичная загрузка страны делается командой load_presets — до неё считать нечем, и показывать здесь тоже нечего.{% endblocktranslate %}{% endnotice %}

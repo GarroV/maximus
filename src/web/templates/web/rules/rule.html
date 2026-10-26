@@ -20,6 +20,9 @@
   {% if new_url %}<a class="btn primary" href="{{ new_url }}">{% translate "Завести версию" %}</a>{% endif %}
 </div>
 
+{% if rule_name %}<p class="sub"><code>{{ code }}</code> · {% translate "Тип" %}: {{ rule_type }}</p>
+{% else %}<p class="sub">{% translate "Тип" %}: {{ rule_type }}</p>{% endif %}
+
 <p class="sub">{% blocktranslate with value=value origin=origin %}Сейчас действует: {{ value }} — {{ origin }}{% endblocktranslate %}{% if since %} ({% blocktranslate with day=since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
 
 {% comment %}
@@ -31,9 +34,7 @@
 сторону словами. «Не мягче страны» без числа переспрашивают, а не выполняют.
 {% endcomment %}
 <p class="sub">{% translate "Кто меняет:" %}
-  {% if frame_mode == "lock" %}<span class="mark mark--lock">{{ frame_owner }}</span>
-  {% elif frame_mode == "frame" %}<span class="mark mark--frame">{{ frame_owner }}</span>
-  {% else %}{{ frame_owner }}{% endif %}</p>
+  <span class="mark mark--{{ frame_mode }}">{{ frame_owner }}</span></p>
 {% if frame_note %}
 <p class="note">{{ frame_note }}</p>
 {% endif %}
@@ -46,6 +47,25 @@
 {% if frame_breach %}
 {% translate "Действующее значение вне рамки страны." as out_of_frame %}
 {% notice "alert" title=out_of_frame %}{{ frame_breach }}{% endnotice %}
+{% endif %}
+
+{% comment %}
+Два поля эталона модуля 17, которых карточка не имела (issue #255): кто читает
+правило и что случится, если его поменять. Первое привязано к исходникам —
+карта разделов проверяется тестом на то, что названный файл правда читает
+раздел; второе — слова про устройство движка и версий, без цифр: цифры
+пришлось бы считать на данных партнёра.
+{% endcomment %}
+{% if readers %}
+<h2>{% translate "Что читает это правило" %}</h2>
+<p>{% for reader in readers %}<span class="mark mark--reader">{{ reader }}</span> {% endfor %}</p>
+{% else %}
+<h2>{% translate "Что читает это правило" %}</h2>
+<p class="note">{% translate "Расчёт это правило сегодня не читает." %}</p>
+{% endif %}
+{% if effect %}
+<h2>{% translate "Если поменять" %}</h2>
+<p>{{ effect }}</p>
 {% endif %}
 
 {% if country_layer %}
