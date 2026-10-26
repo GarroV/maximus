@@ -4,6 +4,9 @@
 разреза — по точкам и по группам. Каркас страницы — `people.html`.
 {% endcomment %}
 {% block people_body %}
+{% if payroll_denied %}
+<p class="note">{{ payroll_denied }}</p>
+{% else %}
 {% comment %}
 Плитка отвечает на вопрос, который иначе считают глазами по таблице. Под числом
 подписано, из чего оно посчитано: доля без базы врёт (эталон модуля 12).
@@ -92,4 +95,5 @@
     {% endfor %}
   </tbody>
 </table>{% endscroll %}
+{% endif %}
 {% endblock %}

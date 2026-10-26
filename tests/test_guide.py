@@ -170,16 +170,20 @@ def test_a_role_limited_to_one_unit_is_shown_as_limited(stranger):
     его данные, а не устройство продукта, и на странице, открытой до входа, ему
     делать нечего.
     """
-    from core.roles import ROLE_SHAPES
+    from core.roles import ALL_UNITS, ONE_UNIT, ROLE_SHAPES, SOME_UNITS
     from web.guide import role_cards
 
     cards = {card["code"]: card for card in role_cards()}
-    assert cards["manager"]["one_unit"], "ограничение точкой потерялось"
-    assert not cards["director"]["one_unit"], "директору приписана одна точка"
+    assert cards["manager"]["scope"] == ONE_UNIT, "ограничение точкой потерялось"
+    assert cards["regional_manager"]["scope"] == SOME_UNITS, "у региона потерялся набор точек"
+    assert cards["director"]["scope"] == ALL_UNITS, "директору приписаны не все точки"
 
-    unit = ROLE_SHAPES["manager"].unit
-    assert unit, "у управляющего в форме роли нет точки — проверка потеряла смысл"
-    assert unit not in body(stranger.get(GUIDE)), "код точки партнёра показан до входа"
+    page = body(stranger.get(GUIDE))
+    assert "только своя" in page and "свои, несколько" in page, "охват точек не назван словами"
+    units = ROLE_SHAPES["manager"].units + ROLE_SHAPES["regional_manager"].units
+    assert units, "у точечных ролей в форме нет точек — проверка потеряла смысл"
+    for unit in units:
+        assert unit not in page, "код точки партнёра показан до входа"
 
 
 # --- регистры: механизм объясняется, имена — нет -------------------------

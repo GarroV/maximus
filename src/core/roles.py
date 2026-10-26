@@ -31,6 +31,7 @@ ALL_LEDGERS = ("official", "supplementary", "internal")
 # (`web/permissions.py`): здесь коды, там слова для человека.
 ALL_PERMISSIONS = (
     "timesheet.edit",
+    "payroll.view",
     "payrun.calculate",
     "period.approve",
     "period.reopen",
@@ -38,6 +39,8 @@ ALL_PERMISSIONS = (
     "payslip.freeze",
     "retro.post",
     "suppliers.classify",
+    "staff.manage",
+    "terms.manage",
     "directory.manage",
     "rules.manage",
     "roles.manage",
@@ -61,9 +64,14 @@ NEVER = "never"         # – этому набору не выдаётся ни
 # Полный цикл месяца: ввод часов, расчёт, утверждение и всё, что нужно, чтобы
 # исправить собственную ошибку, — откат с причиной, заморозка спорной строки,
 # перенос разницы за закрытый месяц, закрытие часов точки.
+#
+# Отката утверждения (`period.reopen`) здесь нет (T236): эталон «Роли и права»
+# даёт его только администратору — «требует причины, остаётся в истории».
+# Спека и T115 давали его бухгалтеру и директору, решения владельца об этом
+# нет, и по D056 побеждает эталон. Партнёр вправе выдать его сам (○).
 MONTH_CYCLE = (
-    "timesheet.edit", "payrun.calculate", "period.approve",
-    "period.reopen", "payslip.freeze", "retro.post", "unit.close",
+    "timesheet.edit", "payroll.view", "payrun.calculate", "period.approve",
+    "payslip.freeze", "retro.post", "unit.close",
     # Разбор первички — часть ведения месяца, а не отдельная обязанность:
     # принесённая бумага становится строкой P&L того же периода, который эта
     # роль считает и утверждает (T174). Управляющему точки не даётся нарочно:
@@ -71,6 +79,20 @@ MONTH_CYCLE = (
     # по-прежнему — там он не классифицирует чужое, а вносит свою трату (T109).
     "suppliers.classify",
 )
+
+
+# Ведение справочников целиком (D059): люди, их условия найма и сами
+# справочники — три права, а не одно, как три строки эталона «Роли и права»
+# (T236, миграция `0274`). У тех, кто вёл справочники, их по-прежнему три сразу:
+# разводить их по ролям — решение партнёра на месте (D060), а не продукта.
+DIRECTORIES = ("staff.manage", "terms.manage", "directory.manage")
+
+# Охват роли по точкам. Три вида, а не «точка или все»: эталон «Роли и права»
+# знает управляющего региона — «несколько точек», — и одна точка для него
+# такая же ошибка, как все точки для управляющего точки (T236).
+ALL_UNITS = "all"        # весь партнёр: членство без точек (`unit_ids is null`)
+ONE_UNIT = "unit"        # ровно одна точка
+SOME_UNITS = "units"     # набор точек, хотя бы одна
 
 
 class RoleShape(NamedTuple):
@@ -89,7 +111,11 @@ class RoleShape(NamedTuple):
     """
 
     ledgers: tuple[str, ...]
-    unit: str | None  # None — все точки тенанта
+    # Охват по точкам (`ALL_UNITS`, `ONE_UNIT`, `SOME_UNITS`) и точки, которые
+    # дают роли сиды разработки и демо. У партнёра точки выбирает человек при
+    # выдаче роли, а не продукт.
+    scope: str
+    units: tuple[str, ...]
     permissions: tuple[str, ...]
     never: tuple[str, ...] = ()
 
@@ -120,7 +146,7 @@ ROLE_SHAPES: dict[str, RoleShape] = {
     # контрагенты заводит он же. Правила страны и роли при этом остаются за
     # администратором сети — это платформенный уровень, а не работа партнёра.
     "director": RoleShape(
-        ALL_LEDGERS, None, MONTH_CYCLE + ("directory.manage",), PARTNER_WALLS,
+        ALL_LEDGERS, ALL_UNITS, (), MONTH_CYCLE + DIRECTORIES, PARTNER_WALLS,
     ),
     # Все три регистра и тот же набор прав, что у директора (D036, ответ
     # владельца на Q012). Раньше здесь стоял один официальный — догадка, что
@@ -140,13 +166,30 @@ ROLE_SHAPES: dict[str, RoleShape] = {
     # другому значило бы молча отменить прежнее решение, о котором нас не
     # спрашивали, — а у партнёра именно бухгалтер ведёт проект целиком.
     "accountant": RoleShape(
-        ALL_LEDGERS, None, MONTH_CYCLE + ("directory.manage",), PARTNER_WALLS,
+        ALL_LEDGERS, ALL_UNITS, (), MONTH_CYCLE + DIRECTORIES, PARTNER_WALLS,
+    ),
+    # Региональный управляющий — «Управляющий региона» эталона (T236); название
+    # на трёх языках владелец решил заранее (`role.regional_manager`). Эталон:
+    # «всё то же, что у управляющего, плюс срезы по регистрам» — на нескольких
+    # точках. Регистры
+    # те же два, что у управляющего точки (D031): внутренний эталон ему не
+    # открывает. Ведомости нет — «больше точек — не значит больше денег»;
+    # закрытие часов есть — свои точки он закрывает, как управляющий свою (D022).
+    "regional_manager": RoleShape(
+        ("official", "supplementary"), SOME_UNITS, ("NS1", "NS2"),
+        ("timesheet.edit", "unit.close"), PARTNER_WALLS,
     ),
     # Два регистра, а не один (D031): управляющий отвечает за свою точку и
-    # должен видеть надбавки своей смены.
+    # должен видеть надбавки своей смены — в ведомости тоже, поэтому
+    # `payroll.view` у него есть (эталон его не даёт, но D031 — решение
+    # владельца, а по D056 оно побеждает эталон).
+    #
+    # Часы своей точки он закрывает сам (D022, решение владельца: «управляющий
+    # закрывает свою точку, бухгалтер — период целиком»). Эталон этого права
+    # управляющему не даёт, но по D056 решение владельца побеждает эталон.
     "manager": RoleShape(
-        ("official", "supplementary"), "NS1", ("timesheet.edit", "unit.close"),
-        PARTNER_WALLS,
+        ("official", "supplementary"), ONE_UNIT, ("NS1",),
+        ("timesheet.edit", "unit.close", "payroll.view"), PARTNER_WALLS,
     ),
     # Администратор сети может ВСЁ (D052, решение владельца 26.08.2026): весь
     # цикл месяца плюс справочники, правила и роли, которые ведёт он и только он.
@@ -165,8 +208,8 @@ ROLE_SHAPES: dict[str, RoleShape] = {
     # вправе выписать себе недостающее. Запрет, который снимается одним экраном
     # самим запрещённым, — не разграничение, а лишний шаг (D033).
     "admin": RoleShape(
-        ALL_LEDGERS, None,
-        MONTH_CYCLE + ("directory.manage", "rules.manage", "roles.manage"),
+        ALL_LEDGERS, ALL_UNITS, (),
+        MONTH_CYCLE + ("period.reopen",) + DIRECTORIES + ("rules.manage", "roles.manage"),
     ),
 }
 
@@ -181,25 +224,33 @@ ROLE_SHAPES: dict[str, RoleShape] = {
 DEFAULT_TITLES = {
     "director": "Оперативный директор",
     "accountant": "Бухгалтер",
+    "regional_manager": "Региональный управляющий",
     "manager": "Управляющий точки",
     "admin": "Администратор сети",
 }
 
 # Порядок ролей на экранах и в выводе сидов. Отдельно от словаря: словарь
 # отвечает за форму роли, а порядок — за то, как их читает человек.
-ROLE_ORDER = ("director", "accountant", "manager", "admin")
+ROLE_ORDER = ("director", "accountant", "regional_manager", "manager", "admin")
 
 
-def leads_one_unit(code: str) -> bool:
-    """Роль ведёт ОДНУ точку, а не всего партнёра (у формы роли стоит точка).
+def unit_scope(code: str) -> str:
+    """Охват роли по точкам: весь партнёр, одна точка или набор (T236).
 
     Одна развилка на все места, где заводится членство: приглашение и выдача
     на странице партнёра, выдача на платформе, первый человек пространства.
-    Членство такой роли без точки (`unit_ids is null`) функции контекста базы
-    (`0264`) читают как ВСЕ точки партнёра — то есть тихо отменяют смысл роли.
+    Членство точечной роли без точек (`unit_ids is null`) функции контекста
+    базы (`0264`) читают как ВСЕ точки партнёра — то есть тихо отменяют смысл
+    роли. Незнакомая роль (заведённая не продуктом) ведёт весь партнёр — как
+    и было до появления охвата.
     """
     shape = ROLE_SHAPES.get(code)
-    return shape is not None and shape.unit is not None
+    return shape.scope if shape is not None else ALL_UNITS
+
+
+def leads_units(code: str) -> bool:
+    """Роль ведёт не всего партнёра, а выбранные точки — одну или набор."""
+    return unit_scope(code) != ALL_UNITS
 
 
 def permission_states(code: str) -> dict[str, str]:

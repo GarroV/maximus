@@ -85,7 +85,7 @@ def test_the_wall_is_the_exception_and_not_the_rule():
     }
     assert walls == {
         (code, right)
-        for code in ("director", "accountant", "manager")
+        for code in ("director", "accountant", "regional_manager", "manager")
         for right in ("rules.manage", "roles.manage")
     }
 

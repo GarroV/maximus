@@ -116,11 +116,11 @@ def test_grid_closed_at_is_english_on_the_english_page(client, clean_closures):
     на странице периода показывает `calculated_at` без фильтра."""
     login_as(client, "manager")
     url = _grid_url(client)
-    html = body(client.get(url))
+    html = body(client.get(f"{url}close/"))
     client.post(f"{url}close/", {"unit": _closable_unit(html)})
 
     client.cookies["django_language"] = "en"
-    closed_text = _closed_at_text(body(client.get(url)))
+    closed_text = _closed_at_text(body(client.get(f"{url}close/")))
 
     assert not DD_MM_YYYY.search(closed_text), (
         f"жёсткий русский формат даты на английской странице табеля: {closed_text!r}"
@@ -150,11 +150,11 @@ def test_grid_closed_at_stays_familiar_on_the_russian_page(client, clean_closure
     а не байт-в-байт старым `d.m.Y H:i`."""
     login_as(client, "manager")
     url = _grid_url(client)
-    html = body(client.get(url))
+    html = body(client.get(f"{url}close/"))
     client.post(f"{url}close/", {"unit": _closable_unit(html)})
 
     client.cookies["django_language"] = "ru"
-    closed_text = _closed_at_text(body(client.get(url)))
+    closed_text = _closed_at_text(body(client.get(f"{url}close/")))
 
     assert "часы закрыты" in closed_text
     # DATETIME_FORMAT русской локали Django — "j E Y г. G:i", например

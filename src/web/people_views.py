@@ -39,6 +39,7 @@ from django.utils.translation import gettext_noop
 
 from reports import people
 
+from . import permissions
 from .format import EMPTY, hours, money, separators
 from .i18n import month_title
 from .principal import get_current_principal
@@ -107,6 +108,12 @@ def analytics(request):
 def cost_page(request):
     """Стоимость труда: динамика ФОТ, плитки, разрезы по точке и группе."""
     report, context = _frame(request, "cost")
+    if context["payroll_denied"]:
+        # Вся страница — суммы расчёта. Без права политика базы отдаёт ноль
+        # строк, и «ФОТ 0» читался бы как посчитанный ответ: отказ словами.
+        return render(request, "web/reports/people_cost.html", {
+            **context, "subtitle": _range_title(report),
+        })
     return render(request, "web/reports/people_cost.html", {
         **context, "subtitle": _range_title(report), **_cost(report),
     })
@@ -165,6 +172,9 @@ def _frame(request, code: str):
         ],
         "months_count": len(report.months),
         "empty": not report.months,
+        # Суммы расчёта — по праву их видеть (T236). Часы и движение людей
+        # открыты и без него: это не деньги.
+        "payroll_denied": permissions.sums_denied(who),
     }
 
 

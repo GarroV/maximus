@@ -37,6 +37,7 @@ from django.utils.translation import gettext as _
 
 from core.models import EmployeeGroup, Position
 
+from . import permissions
 from .dbrefusal import BadInput, ConstraintRefused, saving
 from .directory_views import (
     _choice,
@@ -54,7 +55,7 @@ EMPTY = "—"
 
 @login_required
 def positions(request):
-    who, denied = _guard(request)
+    who, denied = _guard(request, permissions.TERMS_MANAGE)
     if denied is not None:
         return denied
 
@@ -90,7 +91,7 @@ def positions(request):
 
 @login_required
 def position(request, position_id=None):
-    who, denied = _guard(request)
+    who, denied = _guard(request, permissions.TERMS_MANAGE)
     if denied is not None:
         return denied
 

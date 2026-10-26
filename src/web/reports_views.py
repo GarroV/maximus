@@ -27,7 +27,7 @@ from reports import pnl as pnl_report
 from reports.reconcile import reconcile
 from reports.sheet import build_slice
 
-from . import reconciliation_log, runslice
+from . import permissions, reconciliation_log, runslice
 from .cash import item_title
 from .format import EMPTY, day, ledger_title, money
 from .labels import labeller
@@ -228,6 +228,11 @@ def pnl(request, period_id):
     """
     period = find_period(period_id)
     report = pnl_report.build(period.tenant_id, period.period)
+    # Зарплата в P&L — те же суммы расчёта, только проведённые (T236). Роли без
+    # права их видеть политика `facts` строк ФОТ не отдаёт; без слов строка бы
+    # просто пропала, а итог читался бы как полный. Поэтому строки называются и
+    # закрываются отказом, а итог подписывается как неполный.
+    payroll_denied = permissions.sums_denied(get_current_principal(request))
     return render(request, "web/reports/pnl.html", {
         "period": {"id": str(period.id), "title": month_title(period.period)},
         "previous_title": month_title(report.previous_period),
@@ -249,7 +254,21 @@ def pnl(request, period_id):
         "missing_facts": report.missing_facts,
         "has_missing": report.missing != 0,
         "back_url": reverse("period", args=[period.id]),
+        "payroll_denied": payroll_denied,
+        "payroll_hidden": _payroll_lines() if payroll_denied else [],
     })
+
+
+def _payroll_lines() -> list[dict]:
+    """Строки P&L, в которые проводится зарплата, — названием из справочника."""
+    from core.models import PnlItem
+    from payrun.posting import LABOUR, TAXES
+
+    titles = dict(
+        PnlItem.objects.filter(tenant__isnull=True, code__in=(LABOUR, TAXES))
+        .values_list("code", "title")
+    )
+    return [{"code": code, "title": titles.get(code, code)} for code in (LABOUR, TAXES)]
 
 
 @login_required
@@ -261,6 +280,18 @@ def pnl_line(request, period_id, code):
     зарплаты (D025).
     """
     period = find_period(period_id)
+    from payrun.posting import LABOUR, TAXES
+
+    if code in (LABOUR, TAXES):
+        # Строки зарплаты общие для всех партнёров, их существование не тайна —
+        # поэтому здесь отказ словами, а не «строки нет» (D023 про неё не о том).
+        try:
+            permissions.check_sums(get_current_principal(request))
+        except permissions.PermissionRefused as refusal:
+            return HttpResponse(
+                refusal.message, status=refusal.http_status,
+                content_type="text/plain; charset=utf-8",
+            )
     rows = pnl_report.facts_of(period.tenant_id, period.period, code)
     if not rows:
         # Выдуманная строка и строка без фактов отвечают одинаково: по ответу
@@ -299,6 +330,11 @@ def period_reconcile(request, period_id):
     место жительства.
     """
     period = find_period(period_id)
+    # Сверяется таблица бухгалтера с суммами расчёта. Без права их видеть
+    # политика отдаёт ноль строк, и сверка показала бы расхождением всю таблицу.
+    denied = permissions.sums_denied(get_current_principal(request))
+    if denied:
+        return _report(request, period, error=denied, status=403)
     if request.method != "POST":
         return _report(request, period)
 
@@ -392,6 +428,16 @@ def period_export(request, period_id, kind):
         raise Http404("такой выгрузки нет")
 
     period = find_period(period_id)
+    # Все три файла собираются из сумм расчёта — значит, по праву их видеть
+    # (T236, `payroll.view`). Политика чтения (`0275`) отдала бы пустой файл,
+    # а пустой файл читается как «ничего не начислено»; здесь отказ словами.
+    try:
+        permissions.check_sums(get_current_principal(request))
+    except permissions.PermissionRefused as refusal:
+        return HttpResponse(
+            refusal.message, status=refusal.http_status,
+            content_type="text/plain; charset=utf-8",
+        )
     view = build_slice(period.tenant_id, period.period, request.GET.get("ledger", ""))
     book, name = build(
         view, tenant_id=period.tenant_id, period=period.period,
