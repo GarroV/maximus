@@ -67,6 +67,7 @@ def statements_removed(sql, tenant):  # noqa: F811
     sql.execute("delete from bank_line_links where tenant_id = %s", (tenant,))
     sql.execute("delete from bank_lines where tenant_id = %s", (tenant,))
     sql.execute("delete from bank_statements where tenant_id = %s", (tenant,))
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where dedup_key like 'bank:line:%%'")
     for (period,) in sql.execute(
         "select id from periods where tenant_id = %s", (tenant,)
@@ -414,6 +415,7 @@ def foreign(sql):  # noqa: F811
         "delete from bank_line_links where line_id in "
         "(select id from bank_lines where tenant_id = %s)", (other,),
     )
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where dedup_key = %s", (f"bank:line:{line}",))
     sql.execute("delete from bank_lines where tenant_id = %s", (other,))
     sql.execute("delete from bank_statements where tenant_id = %s", (other,))

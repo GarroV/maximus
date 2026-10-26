@@ -194,6 +194,7 @@ def test_editing_keeps_an_item_that_is_no_longer_offered(client, sql, items):
             "статья расхода пропала из формы правки — правка переназначит её молча"
         )
     finally:
+        sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
         sql.execute("delete from facts where note = 'T191 правка'")
 
 

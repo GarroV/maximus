@@ -66,6 +66,7 @@ def cash_item(sql, tenant):  # noqa: F811
         (tenant, Jsonb({"ru": "Вода", "en": "Water", "sr-latn": "Voda"}), line),
     ).fetchone()[0]
     yield str(row)
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where expense_item_id = %s", (row,))
     sql.execute("delete from expense_items where id = %s", (row,))
 

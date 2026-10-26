@@ -264,6 +264,7 @@ def test_payroll_facts_do_not_land_in_the_file_a_second_time(
     try:
         rows = expense_rows(client, june_export_url(sql, tenant))
     finally:
+        sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
         sql.execute("delete from facts where dedup_key = 'payroll:test'")
 
     assert money_of(rows) == [D("100")], (

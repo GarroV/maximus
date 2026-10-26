@@ -317,3 +317,12 @@ def test_without_the_confirm_right_the_queue_explains_instead_of_crashing(
     answer = client.get(CHECK)
     assert answer.status_code == 200, answer.status_code
     assert "Сверено" not in body(answer)
+
+
+def test_a_line_with_a_trail_cannot_be_deleted(web_env, sql, sorted_line):  # noqa: F811
+    """След не стирается вместе со строкой: удаление факта со следом — отказ."""
+    with pytest.raises(psycopg.Error):
+        with sql.transaction():
+            sql.execute("delete from facts where id = %s", (sorted_line,))
+    assert sql.execute("select count(*) from fact_reviews where fact_id = %s",
+                       (sorted_line,)).fetchone()[0] == 1

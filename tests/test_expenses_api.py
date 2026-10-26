@@ -97,6 +97,7 @@ def other_item(sql, tenant):  # noqa: F811
         (tenant, Jsonb({"ru": "Бензин", "en": "Fuel", "sr-latn": "Gorivo"}), line),
     ).fetchone()[0]
     yield str(item_id)
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where expense_item_id = %s", (item_id,))
     sql.execute("delete from expense_items where id = %s", (item_id,))
 

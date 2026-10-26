@@ -74,6 +74,7 @@ def item(sql, tenant):  # noqa: F811
         (tenant, Jsonb({"ru": "Вода", "en": "Water", "sr-latn": "Voda"}), line),
     ).fetchone()[0]
     yield str(item_id)
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where expense_item_id = %s", (item_id,))
     sql.execute("delete from expense_items where id = %s", (item_id,))
 
@@ -99,6 +100,7 @@ def facts_removed(sql, tenant):  # noqa: F811
         ).fetchall()
     ]
     yield
+    sql.execute("delete from fact_reviews")  # след двух рук держит факты (restrict)
     sql.execute("delete from facts where dedup_key like 'manual:cash:%%'")
     sql.execute(
         """delete from periods p

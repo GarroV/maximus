@@ -44,7 +44,9 @@ $$;
 create table fact_reviews (
     id        uuid primary key default gen_random_uuid(),
     tenant_id uuid not null references tenants (id) on delete cascade,
-    fact_id   uuid not null references facts (id) on delete cascade,
+    -- restrict, а не cascade: след не исчезает молча вместе со строкой —
+    -- физическое удаление факта со следом отказывает
+    fact_id   uuid not null references facts (id) on delete restrict,
     fact_key  text not null,
     step      text not null check (step in ('allocated', 'confirmed')),
     done_by   uuid not null default app_user_id(),
