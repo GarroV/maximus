@@ -17,7 +17,7 @@
 
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 {% if failed %}{% notice "alert" %}{{ failed }}{% endnotice %}{% endif %}
-{% if no_right %}{% notice "info" %}{{ no_right }}{% endnotice %}{% endif %}
+{% if no_right %}{% notice "alert" %}{{ no_right }}{% endnotice %}{% endif %}
 
 {% if rows %}
 {% notice "alert" title=total_text %}<span data-total="{{ total_raw }}">{% blocktranslate count counter=counted %}ждёт сверки {{ counter }} строка{% plural %}ждут сверки {{ counter }} строк{% endblocktranslate %}</span>{% endnotice %}

@@ -304,3 +304,16 @@ def test_a_stranger_sees_no_trail(web_env, sorted_line):  # noqa: F811
             "select count(*) from fact_reviews where fact_id = %s", (sorted_line,),
         ).fetchone()[0]
     assert seen == 0
+
+
+def test_without_the_confirm_right_the_queue_explains_instead_of_crashing(
+    client, sorted_line,  # noqa: F811
+):
+    """Нет права сверки — очередь видна, вверху сказано почему кнопки нет.
+
+    Найдено браузером: состояние «нет права» роняло страницу пятисоткой.
+    """
+    login_as(client, "manager")
+    answer = client.get(CHECK)
+    assert answer.status_code == 200, answer.status_code
+    assert "Сверено" not in body(answer)
