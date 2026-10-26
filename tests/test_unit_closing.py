@@ -456,10 +456,14 @@ def closable_unit(html: str) -> str:
     return match.group(1)
 
 
+# Закрывает часы с экрана региональный управляющий: с T236 у управляющего точки
+# права `unit.close` по умолчанию нет (эталон «Роли и права»), а у регионального
+# оно есть — и ведёт он не всю сеть, а свои точки, что здесь и проверяется.
+
+
 def test_manager_closes_own_unit_from_the_screen(client, clean_closures):
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     url = grid_url(client)
-    html = close_page(client, url)
     unit = closable_unit(close_page(client, url))
 
     response = client.post(f"{url}close/", {"unit": unit})
@@ -470,7 +474,7 @@ def test_manager_closes_own_unit_from_the_screen(client, clean_closures):
 
 
 def test_closed_unit_refuses_the_cell_and_says_why(client, clean_closures, period_restored):
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     url = grid_url(client)
     html = body(client.get(url))
     row_id, kind = first_cell(html)
@@ -496,13 +500,12 @@ def test_closing_one_unit_does_not_block_the_others_on_screen(
     """То же требование, что в базе, но по пути, которым ходит человек."""
     from core.models import Membership, Timesheet, User
 
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     url = grid_url(client)
-    manager_html = body(client.get(url))
     client.post(f"{url}close/", {"unit": closable_unit(close_page(client, url))})
 
     own = set(
-        Membership.objects.get(user_id=User.objects.get(username="manager").pk).unit_ids
+        Membership.objects.get(user_id=User.objects.get(username="regional_manager").pk).unit_ids
         or []
     )
     alien = (
@@ -544,24 +547,24 @@ def test_role_without_the_right_gets_no_button_and_no_action(
 
 
 def test_manager_is_offered_only_his_own_unit(client, clean_closures):
-    """У управляющего осталась только своя точка — и на экране тоже (D033).
+    """Управляющему предложены только его точки — и на экране тоже (D033).
 
     Проверяется числом форм, а не наличием одной: «кнопка есть» была бы
     зелёной и в тот момент, когда управляющему предложили бы закрыть всю сеть.
     """
     from core.models import Membership, Unit, User
 
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     html = close_page(client, grid_url(client))
     offered = re.findall(r'name="unit" value="([0-9a-f-]{36})"', html)
 
     own = Membership.objects.get(
-        user_id=User.objects.get(username="manager").pk
+        user_id=User.objects.get(username="regional_manager").pk
     ).unit_ids or []
-    assert len(own) == 1, "у управляющего сида не одна точка — тест надо переписать"
-    assert set(offered) == {str(own[0])}
-    # Контроль: точек в тенанте больше одной, иначе срез ничего не значит.
-    assert Unit.objects.filter(tenant__code="rs-dev").count() > 1
+    assert own, "у регионального управляющего сида нет точек — тест надо переписать"
+    assert set(offered) == {str(unit) for unit in own}
+    # Контроль: в тенанте есть точки сверх своих, иначе срез ничего не значит.
+    assert Unit.objects.filter(tenant__code="rs-dev").count() > len(own)
 
 
 def test_director_closes_and_reopens_any_unit_from_the_screen(client, clean_closures):
@@ -594,7 +597,7 @@ def test_director_closes_and_reopens_any_unit_from_the_screen(client, clean_clos
 
 def test_closed_rows_lose_their_input_fields(client, clean_closures):
     """Закрытую точку экран показывает числами, а не полями, которые не примут."""
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     url = grid_url(client)
     html = body(client.get(url))
     row_id, _ = first_cell(html)
@@ -605,7 +608,7 @@ def test_closed_rows_lose_their_input_fields(client, clean_closures):
 
 
 def test_reopening_from_the_screen_restores_editing(client, clean_closures, period_restored):
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     url = grid_url(client)
     html = body(client.get(url))
     row_id, kind = first_cell(html)
@@ -638,11 +641,11 @@ def test_manager_cannot_close_a_foreign_unit_from_the_page(client, clean_closure
     """Чужую точку управляющий не закроет и в обход страницы: 404, и закрытия нет."""
     from core.models import Membership, TimesheetClosure, Unit, User
 
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     url = grid_url(client)
     own = set(
         map(str, Membership.objects.get(
-            user_id=User.objects.get(username="manager").pk
+            user_id=User.objects.get(username="regional_manager").pk
         ).unit_ids or [])
     )
     alien = next(
@@ -656,7 +659,7 @@ def test_manager_cannot_close_a_foreign_unit_from_the_page(client, clean_closure
 
 
 def test_close_and_reopen_return_to_the_close_page(client, clean_closures, period_restored):
-    login_as(client, "manager")
+    login_as(client, "regional_manager")
     url = grid_url(client)
     unit = closable_unit(close_page(client, url))
     assert client.post(f"{url}close/", {"unit": unit})["Location"] == f"{url}close/"
