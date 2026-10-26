@@ -30,7 +30,7 @@ from reports.sheet import build_slice
 
 from . import permissions, reconciliation_log, runslice
 from .cash import item_title
-from .format import EMPTY, day, exact, ledger_title, money
+from .format import EMPTY, CodedTitle, day, exact, ledger_title, money
 from .labels import labeller
 from .principal import get_current_principal
 from .views import STATUS_TITLES as STATE_TITLES
@@ -330,7 +330,12 @@ def _network_row(partner, currency) -> dict:
         "payroll": EMPTY if hidden else money(partner.payroll),
         "share": EMPTY if hidden else _share(partner.payroll, partner.revenue),
         "profit": EMPTY if partner.unrated else money(partner.profit),
-        "state": STATE_TITLES.get(partner.status or "", _("Месяц не заведён")),
+        # Цвет плашки — цвет состояния расчёта, которым месяц закрывается
+        # (`0190`): закрыт = утверждён, открыт = в работе.
+        "state": CodedTitle(
+            str(STATE_TITLES.get(partner.status or "", _("Месяц не заведён"))),
+            "approved" if partner.closed else ("calculated" if partner.status else "draft"),
+        ),
         "closed": partner.closed,
         "rate": {
             "text": f"1 {rate.base} = {exact(rate.value)} {rate.quote}",

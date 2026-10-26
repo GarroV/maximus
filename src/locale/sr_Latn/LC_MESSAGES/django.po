@@ -10982,3 +10982,15 @@ msgstr "Po njima se mreža svodi u jednu valutu — po kursu na poslednji dan me
 #: новые строки, добавлены tools/apply_translations.py
 msgid "в итог не вошёл ни один партнёр"
 msgstr "nijedan partner nije ušao u zbir"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Консолидация показывает незакрытые периоды честно."
+msgstr "Konsolidacija pošteno prikazuje nezatvorene periode."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Месяц ещё не закрыт у партнёров: %(counter)s из %(summed)s. Их суммы в "
+"итоге могут измениться — складывать закрытое с незакрытым молча значило "
+"бы получить цифру, которой никто не поверит."
+msgstr "Mesec još nije zatvoren kod partnera: %(counter)s od %(summed)s. Njihovi iznosi u zbiru se još mogu promeniti — sabirati zatvoreno i nezatvoreno ćutke značilo bi dobiti cifru kojoj niko ne veruje."
