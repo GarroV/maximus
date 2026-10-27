@@ -226,7 +226,7 @@ def test_the_admin_sees_the_rules_with_where_each_came_from(client):
     login_as(client, "admin")
     html = body(client.get("/rules/"))
     assert "rates.net_factor" in html, "правил на экране нет вовсе"
-    assert "0.701" in html, "значение правила не показано"
+    assert "0,701" in html, "значение правила не показано"
     assert "правила страны" in html, "не сказано, откуда взялось значение"
     assert "Типы часов" in html, "разделы правил не названы"
     client.post("/logout/")
@@ -302,8 +302,8 @@ def test_a_new_version_is_what_the_screen_shows_afterwards(client, overrides_res
     assert post_rule(
         client, NIGHT_PERCENT, value="1.4", valid_from="2026-09-01"
     ).status_code == 302
-    html = body(client.get("/rules/?on=2026-09-15"))
-    assert "1.4" in html and "настройка партнёра" in html, html[:400]
+    html = body(client.get("/rules/?on=2026-09-15&group=hour_types"))
+    assert "1,4" in html and "настройка партнёра" in html, html[:400]
     # А на дату до начала действия — по-прежнему правило страны.
     assert "настройка партнёра" not in body(client.get("/rules/?on=2026-08-15"))
     client.post("/logout/")
@@ -415,7 +415,7 @@ def test_the_rules_never_name_a_ledger_the_role_cannot_see(client, sql):
     sql.execute(GRANT_RULES_TO_MANAGER)
     try:
         login_as(client, "manager")
-        html = body(client.get("/rules/"))
+        html = body(client.get("/rules/?group=groups"))
         assert "groups.office" in html, "срез отобрал вообще всё — проверять нечего"
         assert "groups.kitchen" in html, "дополнительный регистр управляющему открыт (D031)"
         assert "couriers" not in html, "внутренний регистр назван в правилах"

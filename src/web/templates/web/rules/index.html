@@ -76,6 +76,7 @@
       <th>{% translate "Правило" %}</th>
       <th class="num">{% translate "Значение" %}</th>
       <th>{% translate "Кто меняет" %}</th>
+      <th>{% translate "Откуда" %}</th>
       <th>{% translate "Действует с" %}</th>
       {% if has_lower %}<th>{% translate "Задано отдельно" %}</th>{% endif %}
     </tr>
@@ -99,6 +100,7 @@
       это трогать».
       {% endcomment %}
       <td><span class="mark mark--{{ row.owner_mode }}">{{ row.owner }}</span></td>
+      <td>{{ row.origin }}</td>
       <td class="nowrap">{{ row.since }}</td>
       {% comment %}
       Колонка про то, что таблица НЕ показывает. Значение в строке — общее: страна

@@ -62,7 +62,7 @@ def test_the_summary_and_group_chips_are_links_with_counts(client):
 
     assert "Сербия" in html and "заданы законом" in html, "сводки страны нет"
     assert 'href="/rules/?on=' in html and "group=hour_types" in html, "группы не ссылки"
-    assert re.search(r'aria-current="true">Ставки налогов и взносов · 6<', html), (
+    assert re.search(r'aria-current="true">Ставки налогов и взносов <span class="count">6</span>', html), (
         "выбранная группа без счётчика или осталась ссылкой"
     )
     assert "rates.net_factor" in html and NIGHT not in html, "группа ничего не отобрала"

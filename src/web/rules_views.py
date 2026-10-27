@@ -252,6 +252,7 @@ def index(request):
             "title": leaf.title,
             "value": rule_values.display(leaf.path, leaf.value, currency),
             "numeric": leaf.value.replace(".", "", 1).lstrip("-").isdigit(),
+            "origin": rules.level_title(leaf.level),
             "since": day(leaf.valid_from),
             "lower": rule_targets.counts_words(lower.get(leaf.path, {})),
             # Кто решает значение: закон, рамка или партнёр (T192).
