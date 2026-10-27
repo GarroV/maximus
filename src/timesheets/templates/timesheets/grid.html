@@ -112,6 +112,30 @@
 {% endcomment %}
 {% include "timesheets/_hints.html" with grid=grid oob=False %}
 
+{% if units_strip and grid.rows %}
+<div class="units-strip">
+  {% for unit in units_strip %}
+  <div class="stat">
+    <div class="stat__label">{{ unit.code }}{% if unit.title %} · {{ unit.title }}{% endif %}</div>
+    <div class="stat__value">{{ unit.hours|hours }}<span class="stat__unit">{% translate "ч" %}</span></div>
+    <div class="stat__delta">{% blocktranslate with count=unit.people %}{{ count }} чел.{% endblocktranslate %} · {% if unit.closed %}{% translate "Закрыт" %}{% else %}{% translate "Открыт" %}{% endif %}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if grid.rows %}
+{% comment %}
+Расшифровка значков шапки прямо на экране (#302): подсказка мыши на телефоне
+недоступна, а «?» без слов читался как поломка. «База взносов» объяснена здесь,
+а не абзацем в самом низу.
+{% endcomment %}
+<p class="note legend">
+  {% if grid.has_unverified %}{% translate "«?» у колонки — правило не подтверждено бухгалтером." %}{% endif %}
+  {% translate "База взносов — отдельный вход расчёта: по ней считаются взносы и бруто, она может отличаться от часов." %}
+</p>
+{% endif %}
+
 {% if not grid.rows %}
   {% comment %}
   Пустое состояние объясняет следующий шаг, а не сообщает о пустоте (T077).
@@ -156,6 +180,14 @@
          {% if can_edit %}data-url="{% url 'timesheet-cell' period.id %}"
          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'{% endif %}>
     <thead>
+      {% if grid.worked_count and grid.absence_count %}
+      <tr class="groups">
+        <th colspan="2"></th>
+        <th class="num" colspan="{{ grid.worked_count }}">{% translate "Отработано" %}</th>
+        <th class="num" colspan="{{ grid.absence_count }}">{% translate "Отсутствие" %}</th>
+        <th colspan="{{ grid.tail_columns }}"></th>
+      </tr>
+      {% endif %}
       <tr>
         <th>{% translate "Сотрудник" %}</th>
         <th>{% translate "Точка" %}</th>
@@ -177,7 +209,7 @@
         {% if grid.has_piecework %}
           <th class="num" title="{% translate "Чем меряется работа группы, задано правилом; у почасовых групп величины нет" %}">{% translate "Сдельно" %}</th>
         {% endif %}
-        <th class="num">{% translate "Итого" %}</th>
+        <th class="num">{% translate "Всего часов" %}</th>
         {% comment %}
         База для взносов — только на просмотр: придумывать её от часов нельзя,
         у бухгалтера это отдельная колонка, и она может быть задана независимо
@@ -186,7 +218,7 @@
         часами, она идёт за ними и после правки; там, где не шла, — строка
         помечается, и период не считается, пока числа не сойдутся.
         {% endcomment %}
-        <th class="num muted" title="{% translate "Вход расчёта наравне с часами: по ней считаются взносы и бруто" %}">{% translate "База взносов" %}</th>
+        <th class="num muted aux" title="{% translate "Вход расчёта наравне с часами: по ней считаются взносы и бруто" %}">{% translate "База взносов" %}</th>
         {% comment %}
         Договорные часы и расхождение показываются только там, где величину
         ведут (issue #171): пустые колонки на табеле партнёра, который её не
@@ -197,7 +229,7 @@
           <th class="num muted" title="{% translate "Сколько человек обязан отработать по договору" %}">{% translate "Договор" %}</th>
           <th class="num muted" title="{% translate "Отработанное минус договорные часы: плюс — переработал, минус — недобрал" %}">{% translate "Δ к договору" %}</th>
         {% endif %}
-        <th class="num muted">{% translate "Норма" %}</th>
+        <th class="num muted aux">{% translate "Норма" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -307,7 +339,7 @@
             {% endcomment %}
             <td class="num{% if row.contract_diff %} warn{% endif %}">{% if row.contract_diff is not None %}{% if row.contract_diff > 0 %}+{% endif %}{{ row.contract_diff|hours }}{% else %}—{% endif %}</td>
           {% endif %}
-          <td class="num muted">{{ row.norm_hours|hours }}</td>
+          <td class="num muted aux">{{ row.norm_hours|hours }}</td>
         </tr>
       {% endfor %}
     </tbody>

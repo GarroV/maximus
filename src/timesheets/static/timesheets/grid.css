@@ -271,3 +271,11 @@ section.confirm dl.facts dt { color: var(--ink-3); font-size: var(--fs-meta); }
 section.confirm dl.facts dd { margin: 0; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: var(--w-semibold); }
 section.confirm ul.remarks { margin: 0 0 var(--space-6); padding-left: var(--space-9); color: var(--warn-ink); }
 section.confirm form.action { display: flex; gap: var(--space-6); justify-content: flex-end; align-items: center; margin-top: var(--space-6); }
+
+/* Шапка-группы и вспомогательные колонки (#302). На телефоне база взносов и
+   норма уходят: иначе «Отработанные» оказываются за краем экрана. */
+thead tr.groups th { text-align: center; color: var(--ink-3); font-size: var(--fs-micro); text-transform: uppercase; letter-spacing: var(--tracking-micro); border-bottom: 0; }
+.units-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: var(--space-5); margin: 0 0 var(--space-6); }
+@media (max-width: 600px) {
+  table.grid .aux { display: none; }
+}

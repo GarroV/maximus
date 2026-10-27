@@ -11344,3 +11344,25 @@ msgstr "Enter and check your unit's hours. The accountant calculates and approve
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Открыть табель"
 msgstr "Open the timesheet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "«?» у колонки — правило не подтверждено бухгалтером."
+msgstr "“?” on a column means the rule is not confirmed by the accountant."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"База взносов — отдельный вход расчёта: по ней считаются взносы и бруто, "
+"она может отличаться от часов."
+msgstr "Contribution base is a separate input of the calculation: contributions and gross are computed from it, and it may differ from the hours."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отработано"
+msgstr "Time worked"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отсутствие"
+msgstr "Absence"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ч"
+msgstr "h"

@@ -39,6 +39,10 @@ class Column:
     # второе он проверяет глазами, а первое помнит.
     pay_percent: Decimal | None = None
     unverified: bool = False
+    # Часы считаются отработанными (`counts_as_worked`) — иначе это отсутствие:
+    # отпуск, больничный, праздник. По этому признаку шапка сетки делится на
+    # группы «Отработано» и «Отсутствие» (эталон модуля 1, #302).
+    worked: bool = True
 
 
 @dataclass
@@ -167,6 +171,25 @@ class Grid:
         return any(row.piecework for row in self.rows)
 
     @property
+    def has_unverified(self) -> bool:
+        return any(column.unverified for column in self.columns)
+
+    @property
+    def worked_count(self) -> int:
+        return sum(1 for column in self.columns if column.worked)
+
+    @property
+    def absence_count(self) -> int:
+        return sum(1 for column in self.columns if not column.worked)
+
+    @property
+    def tail_columns(self) -> int:
+        """Колонки справа от часов: итог, база, норма, по условию — сдельно и договор."""
+        return (
+            3 + (1 if self.has_piecework else 0) + (2 if self.has_contract_hours else 0)
+        )
+
+    @property
     def has_contract_hours(self) -> bool:
         """Есть ли хоть у кого договорные часы — от этого зависят две колонки.
 
@@ -224,7 +247,7 @@ class Grid:
 
 
 def build_columns(known: dict[str, dict]) -> list[Column]:
-    return [
+    columns = [
         Column(
             code=code,
             title=body.get("title") or code,
@@ -236,9 +259,13 @@ def build_columns(known: dict[str, dict]) -> list[Column]:
             # такие колонки нельзя (их могут заполнять), но и молчать о них —
             # значит выдать догадку за правило.
             unverified=body.get("status") == "unverified",
+            worked=bool(body.get("counts_as_worked", True)),
         )
         for code, body in known.items()
     ]
+    # Отработанные впереди, отсутствие после: группа в шапке — сплошной отрезок.
+    # Порядок внутри группы — тот, что в правилах страны.
+    return sorted(columns, key=lambda column: not column.worked)
 
 
 def visible_rows(tenant_id: UUID, period: date, unit_ids=None):

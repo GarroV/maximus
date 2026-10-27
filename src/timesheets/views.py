@@ -130,6 +130,9 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
     # Фильтр точек — ссылки-чипы (D081). Варианты — из полной сетки роли, а не из
     # отобранной: иначе после выбора точки остальные чипы пропали бы.
     chosen = _chosen_unit(request, units)
+    # Полоса итогов по точкам (эталон модуля 1): людей и часов по каждой точке
+    # сетки. Считается до отбора по одной точке, чтобы соседи не пропадали.
+    strip = _units_strip(units, table)
     if table is not None and chosen:
         table = _only_unit(table, chosen)
     return render(
@@ -149,6 +152,7 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
             # Закрытие и загрузка живут на своих страницах (T231); на сетке от
             # них — две ссылки и сводка «сколько точек открыто».
             "units": units,
+            "units_strip": strip,
             "open_count": sum(1 for unit in units if not unit.closed),
             # Плашка состояния шапки: «Закрыт» только когда закрыты все точки
             # сетки; смесь — «Открыт», а сколько именно, говорит сводка рядом.
@@ -165,6 +169,20 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
         },
         status=refusal.http_status if refusal else status,
     )
+
+
+def _units_strip(units, table) -> list[dict]:
+    """По точке: сколько человек и сколько часов в сетке, закрыта ли."""
+    if table is None:
+        return []
+    hours: dict = {}
+    for row in table.rows:
+        hours[row.unit_id] = hours.get(row.unit_id, Decimal("0")) + row.total
+    return [
+        {"code": unit.code, "title": unit.title, "people": unit.rows,
+         "hours": hours.get(unit.unit_id, Decimal("0")), "closed": unit.closed}
+        for unit in units
+    ]
 
 
 def _chosen_unit(request, units) -> str:

@@ -11187,3 +11187,25 @@ msgstr "Unesite i proverite sate svog objekta. Obračun i odobravanje meseca rad
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Открыть табель"
 msgstr "Otvori evidenciju sati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "«?» у колонки — правило не подтверждено бухгалтером."
+msgstr "„?“ na koloni znači da pravilo nije potvrdio računovođa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"База взносов — отдельный вход расчёта: по ней считаются взносы и бруто, "
+"она может отличаться от часов."
+msgstr "Osnovica doprinosa je poseban ulaz obračuna: po njoj se računaju doprinosi i bruto, a može se razlikovati od sati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отработано"
+msgstr "Odrađeno vreme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отсутствие"
+msgstr "Odsustvo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ч"
+msgstr "h"

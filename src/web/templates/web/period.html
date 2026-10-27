@@ -388,7 +388,7 @@
 {% endcomment %}
 {% if payroll_denied %}
 <p class="note">{{ payroll_denied }}</p>
-{% elif not has_sheet %}
+{% elif not has_sheet and not manager_task %}
 {% comment %}
 Пока ведомости нет, следующий шаг называется словами, а не пустотой (T077).
 Причин пустоты две и требуют разного: часов ещё нет — идти в табель; часы

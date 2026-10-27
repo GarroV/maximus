@@ -92,3 +92,17 @@ def test_upload_zone_is_a_native_file_input(client):
     html = body(client.get(f"{grid_url(client)}import/"))
     assert re.search(r'<input class="dropzone" type="file" id="table" name="table"', html)
     assert '<label class="dropzone-title" for="table"' in html
+
+
+def test_hour_columns_are_grouped_worked_first_then_absence():
+    """Отработанные впереди, отсутствие после — иначе группа в шапке рвётся (#302)."""
+    from timesheets.grid import build_columns
+
+    columns = build_columns({
+        "regular": {"title": "R", "counts_as_worked": True},
+        "vacation": {"title": "V", "counts_as_worked": False},
+        "night": {"title": "N", "counts_as_worked": True},
+        "sick": {"title": "S", "counts_as_worked": False},
+    })
+    assert [c.code for c in columns] == ["regular", "night", "vacation", "sick"]
+    assert [c.worked for c in columns] == [True, True, False, False]

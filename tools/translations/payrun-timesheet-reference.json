@@ -1,0 +1,14 @@
+{
+  "Отработано": {"en": "Time worked", "sr": "Odrađeno vreme"},
+  "Отсутствие": {"en": "Absence", "sr": "Odsustvo"},
+  "ч": {"en": "h", "sr": "h"},
+  "«?» у колонки — правило не подтверждено бухгалтером.": {
+    "en": "“?” on a column means the rule is not confirmed by the accountant.",
+    "sr": "„?“ na koloni znači da pravilo nije potvrdio računovođa."
+  },
+  "База взносов — отдельный вход расчёта: по ней считаются взносы и бруто, она может отличаться от часов.": {
+    "en": "Contribution base is a separate input of the calculation: contributions and gross are computed from it, and it may differ from the hours.",
+    "sr": "Osnovica doprinosa je poseban ulaz obračuna: po njoj se računaju doprinosi i bruto, a može se razlikovati od sati."
+  },
+  "Всего часов": {"en": "Total hours", "sr": "Ukupno sati"}
+}
