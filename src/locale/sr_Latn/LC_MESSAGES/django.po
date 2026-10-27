@@ -8248,10 +8248,6 @@ msgid "Карточки находок, готовность в процента
 msgstr "Kartice nalaza, spremnost u procentima, potvrda zatvaranja"
 
 #: web/stages.py
-msgid "Консолидация сети в EUR по курсу на конец периода"
-msgstr "Konsolidacija mreže u EUR po kursu na kraju perioda"
-
-#: web/stages.py
 msgid "Приглашение человека, история доступов, настраиваемые наборы прав"
 msgstr "Pozivanje osobe, istorija pristupa, podesivi skupovi prava"
 
@@ -10910,3 +10906,228 @@ msgstr[2] "%(counter)s redova čeka proveru"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Эта строка уже сверена. Обновите очередь."
 msgstr "Ovaj red je već proveren. Osvežite red čekanja."
+
+#, python-format
+msgid ""
+"%(month)s · партнёров: %(counter)s · единая валюта %(currency)s по курсу "
+"на последний день периода"
+msgstr "%(month)s · partnera: %(counter)s · jedinstvena valuta %(currency)s po kursu na poslednji dan perioda"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Выручка, %(currency)s"
+msgstr "Prihod, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля ФОТ"
+msgstr "Udeo fonda zarada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля строки в выручке и пометка отклонения выше порога"
+msgstr "Udeo stavke u prihodu i oznaka odstupanja iznad praga"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Консолидация по сети"
+msgstr "Konsolidacija mreže"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс"
+msgstr "Kurs"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс фиксируется на последний день периода."
+msgstr "Kurs se fiksira na poslednji dan perioda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц не заведён"
+msgstr "Mesec nije otvoren"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отчёт"
+msgstr "Izveštaj"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Партнёров нет."
+msgstr "Mreža nema partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"При закрытии месяца курс закрепляется за ним. Новый курс задним числом "
+"не меняет закрытый месяц — иначе июньская цифра менялась бы каждый день "
+"вслед за курсом."
+msgstr "Pri zatvaranju meseca kurs se vezuje za njega. Novi kurs unazad ne menja zatvoren mesec — inače bi se junska cifra menjala svakog dana za kursom."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Прибыль, %(currency)s"
+msgstr "Dobit, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сеть, %(month)s"
+msgstr "Mreža, %(month)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Состояние периода"
+msgstr "Stanje perioda"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точек"
+msgstr "Objekata"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "ФОТ, %(currency)s"
+msgstr "Fond zarada, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "валюта консолидации %(currency)s"
+msgstr "valuta konsolidacije %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все месяцы закрыты"
+msgstr "svi meseci zatvoreni"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "курса нет"
+msgstr "nema kursa"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "месяц не закрыт у партнёров: %(counter)s из %(summed)s"
+msgstr "mesec nije zatvoren kod partnera: %(counter)s od %(summed)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "на %(on)s"
+msgstr "na dan %(on)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "на %(on)s, закреплён при закрытии"
+msgstr "na dan %(on)s, vezan pri zatvaranju"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не в итоге, партнёров: %(counter)s"
+msgstr "van zbira, partnera: %(counter)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не в итоге: %(why)s"
+msgstr "van zbira: %(why)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "нет курса для сумм: %(count)s"
+msgstr "nema kursa za iznose: %(count)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет права видеть суммы расчёта"
+msgstr "nema prava da vidi iznose obračuna"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "та же валюта"
+msgstr "ista valuta"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "1 единица валюты"
+msgstr "1 jedinica valute"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "База не приняла курс. Проверьте поля и повторите."
+msgstr "Baza nije prihvatila kurs. Proverite polja i pokušajte ponovo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта курса"
+msgstr "Valuta kursa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта — три латинские буквы кода ISO: EUR, RSD, HUF."
+msgstr "Valuta je tri latinična slova ISO koda: EUR, RSD, HUF."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Введён"
+msgstr "Unet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дата курса пишется как 2026-06-30."
+msgstr "Datum kursa se piše kao 2026-06-30."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Записать курс"
+msgstr "Sačuvaj kurs"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Источник"
+msgstr "Izvor"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Курс на %(on)s записан."
+msgstr "Kurs na dan %(on)s je sačuvan."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс связывает две разные валюты."
+msgstr "Kurs povezuje dve različite valute."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — не больше восьми знаков после запятой и десяти до неё."
+msgstr "Kurs ima najviše osam cifara iza decimalnog zareza i deset ispred."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — положительное число."
+msgstr "Kurs je pozitivan broj."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — число: 117,1834."
+msgstr "Kurs je broj: 117,1834."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курсов пока нет: сеть не сводится, пока их не ввести."
+msgstr "Kurseva još nema: mreža se ne konsoliduje dok se ne unesu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курсы валют"
+msgstr "Kursevi valuta"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "НБС, средний курс"
+msgstr "NBS, srednji kurs"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"По ним сеть сводится в одну валюту — по курсу на последний день месяца. "
+"Закрытый месяц держит курс, действовавший при закрытии. Исправить курс — "
+"ввести новый с той же датой: он заменит прежний для незакрытых месяцев."
+msgstr "Po njima se mreža svodi u jednu valutu — po kursu na poslednji dan meseca. Zatvoren mesec zadržava kurs koji je važio pri zatvaranju. Da biste ispravili kurs, unesite novi sa istim datumom: on zamenjuje prethodni za nezatvorene mesece."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "в итог не вошёл ни один партнёр"
+msgstr "nijedan partner nije ušao u zbir"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Консолидация показывает незакрытые периоды честно."
+msgstr "Konsolidacija pošteno prikazuje nezatvorene periode."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Месяц ещё не закрыт у партнёров: %(counter)s из %(summed)s. Их суммы в "
+"итоге могут измениться — складывать закрытое с незакрытым молча значило "
+"бы получить цифру, которой никто не поверит."
+msgstr "Mesec još nije zatvoren kod partnera: %(counter)s od %(summed)s. Njihovi iznosi u zbiru se još mogu promeniti — sabirati zatvoreno i nezatvoreno ćutke značilo bi dobiti cifru kojoj niko ne veruje."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Источник — не длиннее %(limit)s знаков."
+msgstr "Izvor nije duži od %(limit)s znakova."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс на дату дальше недели вперёд не вводится — проверьте год."
+msgstr "Kurs za datum dalji od nedelju dana unapred se ne unosi — proverite godinu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
+msgstr "ne vidi se ceo partner: deo registara ili objekata je zatvoren"

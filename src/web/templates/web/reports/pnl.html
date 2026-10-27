@@ -20,6 +20,7 @@
 {% block content %}
 <p class="note"><a href="{{ back_url }}">{% translate "← К месяцу" %}</a></p>
 <h1>{% translate "P&L" %} · {{ period.title }}</h1>
+{% include "web/reports/pnl_tabs.html" %}
 
 {% if has_missing %}
 {% translate "Отчёт неполный" as incomplete %}

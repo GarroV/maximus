@@ -1,0 +1,4 @@
+{% load i18n %}{% comment %}Вкладки P&L месяца: отчёт партнёра и консолидация сети (модуль 5 эталона, T209).{% endcomment %}
+<nav class="seg" aria-label="{% translate "P&L" %}">
+  {% for tab in tabs %}{% if tab.selected %}<span class="seg__current" aria-current="page">{{ tab.title }}</span>{% else %}<a class="seg__item" href="{{ tab.url }}">{{ tab.title }}</a>{% endif %}{% endfor %}
+</nav>

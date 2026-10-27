@@ -8411,10 +8411,6 @@ msgid "Карточки находок, готовность в процента
 msgstr "Finding cards, readiness in percent, closing confirmation"
 
 #: web/stages.py
-msgid "Консолидация сети в EUR по курсу на конец периода"
-msgstr "Network consolidation in EUR at the period-end rate"
-
-#: web/stages.py
 msgid "Приглашение человека, история доступов, настраиваемые наборы прав"
 msgstr "Inviting a person, access history, configurable permission sets"
 
@@ -11067,3 +11063,228 @@ msgstr[1] "%(counter)s lines waiting for check"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Эта строка уже сверена. Обновите очередь."
 msgstr "This line is already checked. Refresh the queue."
+
+#, python-format
+msgid ""
+"%(month)s · партнёров: %(counter)s · единая валюта %(currency)s по курсу "
+"на последний день периода"
+msgstr "%(month)s · partners: %(counter)s · single currency %(currency)s at the rate on the last day of the period"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Выручка, %(currency)s"
+msgstr "Revenue, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля ФОТ"
+msgstr "Payroll share"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доля строки в выручке и пометка отклонения выше порога"
+msgstr "Line share of revenue and a mark for deviation above the threshold"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Консолидация по сети"
+msgstr "Network consolidation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс"
+msgstr "Exchange rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс фиксируется на последний день периода."
+msgstr "The rate is fixed on the last day of the period."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц не заведён"
+msgstr "Month not set up"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отчёт"
+msgstr "Report"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Партнёров нет."
+msgstr "No partners."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"При закрытии месяца курс закрепляется за ним. Новый курс задним числом "
+"не меняет закрытый месяц — иначе июньская цифра менялась бы каждый день "
+"вслед за курсом."
+msgstr "When a month is closed, the rate is pinned to it. A new backdated rate does not change a closed month — otherwise the June figure would change every day following the rate."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Прибыль, %(currency)s"
+msgstr "Profit, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сеть, %(month)s"
+msgstr "Network, %(month)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Состояние периода"
+msgstr "Period state"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точек"
+msgstr "Stores"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "ФОТ, %(currency)s"
+msgstr "Payroll, %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "валюта консолидации %(currency)s"
+msgstr "consolidation currency %(currency)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "все месяцы закрыты"
+msgstr "all months closed"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "курса нет"
+msgstr "no rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "месяц не закрыт у партнёров: %(counter)s из %(summed)s"
+msgstr "month not closed for partners: %(counter)s of %(summed)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "на %(on)s"
+msgstr "as of %(on)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "на %(on)s, закреплён при закрытии"
+msgstr "as of %(on)s, pinned at closing"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не в итоге, партнёров: %(counter)s"
+msgstr "left out of the total, partners: %(counter)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "не в итоге: %(why)s"
+msgstr "left out of the total: %(why)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "нет курса для сумм: %(count)s"
+msgstr "no rate for amounts: %(count)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет права видеть суммы расчёта"
+msgstr "no right to see payroll amounts"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "та же валюта"
+msgstr "same currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "1 единица валюты"
+msgstr "1 unit of currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "База не приняла курс. Проверьте поля и повторите."
+msgstr "The database did not accept the rate. Check the fields and try again."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта курса"
+msgstr "Rate currency"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Валюта — три латинские буквы кода ISO: EUR, RSD, HUF."
+msgstr "A currency is three Latin letters of its ISO code: EUR, RSD, HUF."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Введён"
+msgstr "Entered"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дата курса пишется как 2026-06-30."
+msgstr "The rate date is written as 2026-06-30."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Записать курс"
+msgstr "Save rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Источник"
+msgstr "Source"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Курс на %(on)s записан."
+msgstr "Rate as of %(on)s saved."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс связывает две разные валюты."
+msgstr "A rate links two different currencies."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — не больше восьми знаков после запятой и десяти до неё."
+msgstr "A rate has at most eight digits after the decimal point and ten before it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — положительное число."
+msgstr "A rate is a positive number."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс — число: 117,1834."
+msgstr "A rate is a number: 117.1834."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курсов пока нет: сеть не сводится, пока их не ввести."
+msgstr "No rates yet: the network cannot be consolidated until they are entered."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курсы валют"
+msgstr "Exchange rates"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "НБС, средний курс"
+msgstr "NBS, middle rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"По ним сеть сводится в одну валюту — по курсу на последний день месяца. "
+"Закрытый месяц держит курс, действовавший при закрытии. Исправить курс — "
+"ввести новый с той же датой: он заменит прежний для незакрытых месяцев."
+msgstr "These rates consolidate the network into one currency, at the rate on the last day of the month. A closed month keeps the rate that applied when it was closed. To correct a rate, enter a new one with the same date: it replaces the previous one for months not yet closed."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "в итог не вошёл ни один партнёр"
+msgstr "no partner made it into the total"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Консолидация показывает незакрытые периоды честно."
+msgstr "The consolidation shows unclosed periods honestly."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Месяц ещё не закрыт у партнёров: %(counter)s из %(summed)s. Их суммы в "
+"итоге могут измениться — складывать закрытое с незакрытым молча значило "
+"бы получить цифру, которой никто не поверит."
+msgstr "The month is not closed yet for partners: %(counter)s of %(summed)s. Their amounts in the total may still change — adding closed and unclosed months silently would give a figure nobody trusts."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Источник — не длиннее %(limit)s знаков."
+msgstr "The source is at most %(limit)s characters."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Курс на дату дальше недели вперёд не вводится — проверьте год."
+msgstr "A rate more than a week ahead cannot be entered — check the year."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
+msgstr "not the whole partner is visible: some ledgers or stores are closed to you"

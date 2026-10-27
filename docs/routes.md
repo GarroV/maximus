@@ -111,6 +111,7 @@
 | `/periods/<uuid:period_id>/history/` | `period-history` | `web.period_pages.history` |
 | `/periods/<uuid:period_id>/pnl/` | `period-pnl` | `web.reports_views.pnl` |
 | `/periods/<uuid:period_id>/pnl/<slug:code>/` | `period-pnl-line` | `web.reports_views.pnl_line` |
+| `/periods/<uuid:period_id>/pnl/network/` | `period-pnl-network` | `web.reports_views.pnl_network` |
 | `/periods/<uuid:period_id>/postpone/` | `period-postpone` | `web.views.period_postpone` |
 | `/periods/<uuid:period_id>/print/payout/` | `period-print-payout` | `web.printing_views.payout` |
 | `/periods/<uuid:period_id>/reconcile/` | `period-reconcile` | `web.reports_views.period_reconcile` |
@@ -124,6 +125,7 @@
 | `/platform/<uuid:tenant_id>/` | `platform-space` | `web.platform_views.space` |
 | `/platform/<uuid:tenant_id>/roles/` | `platform-member-role` | `web.platform_views.member_role` |
 | `/platform/new/` | `platform-space-create` | `web.platform_views.space_create` |
+| `/platform/rates/` | `platform-rates` | `web.rates_views.rates` |
 | `/reconciliations/findings/<uuid:finding_id>/` | `reconciliation-decide` | `web.reports_views.reconciliation_decide` |
 | `/reports/pnl/` | `reports-pnl` | `web.planned_views.pnl` |
 | `/reports/reconcile/` | `reports-reconcile` | `web.planned_views.reconcile` |

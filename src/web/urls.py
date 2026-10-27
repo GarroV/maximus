@@ -22,6 +22,7 @@ from . import (
     platform_views,
     positions_views,
     printing_views,
+    rates_views,
     reports_views,
     roles_views,
     rules_pages,
@@ -109,6 +110,8 @@ urlpatterns = [
     # так же, как видно по правам.
     path("platform/", platform_views.index, name="platform-index"),
     path("platform/new/", platform_views.space_create, name="platform-space-create"),
+    # Курсы для консолидации сети (T209): справочник общий, ведёт платформа.
+    path("platform/rates/", rates_views.rates, name="platform-rates"),
     path("platform/<uuid:tenant_id>/", platform_views.space, name="platform-space"),
     path(
         "platform/<uuid:tenant_id>/roles/",
@@ -414,6 +417,13 @@ urlpatterns = [
         "periods/<uuid:period_id>/pnl/",
         reports_views.pnl,
         name="period-pnl",
+    ),
+    # Консолидация сети (T209): тот же месяц у всех видимых партнёров в одной
+    # валюте. Выше раскрытия строки — иначе `network` читался бы кодом строки.
+    path(
+        "periods/<uuid:period_id>/pnl/network/",
+        reports_views.pnl_network,
+        name="period-pnl-network",
     ),
     path(
         "periods/<uuid:period_id>/pnl/<slug:code>/",
