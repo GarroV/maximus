@@ -46,6 +46,7 @@ from .directory_views import LEDGER_CODES, BadInput
 from .format import EMPTY, ledger_title, money
 from .i18n import month_title
 from .principal import get_current_principal
+from .working_month import working_first
 
 # Состояние строки для человека и для приёмки. Значения короткие и машинные:
 # по ним же тест сверяет итог с показанными строками.
@@ -59,12 +60,13 @@ def expenses(request):
     if who is None or who.tenant_id is None:
         return _no_membership(request)
 
+    first = working_first(request)
     error, status = "", 200
     try:
         chosen = filters_from(request)
     except BadInput as bad:
         error, status = bad.message, bad.http_status
-        chosen = filters_default()
+        chosen = filters_default(first)
 
     rows = rows_for(who, chosen) if not error else []
     total = sum((row["amount"] for row in rows if row["state"] == ACTIVE), Decimal("0"))
@@ -82,12 +84,12 @@ def expenses(request):
         "total_raw": f"{total}",
         "total_text": money(total),
         "counted": sum(1 for row in rows if row["state"] == ACTIVE),
-        "filters": _filter_fields(who, chosen),
+        "filters": _filter_fields(who, chosen, first),
         "reset_url": filter_links.reset(
-            reverse("expenses"), filter_links.query_of(chosen, filters_default())
+            reverse("expenses"), filter_links.query_of(chosen, filters_default(first))
         ),
         # Сужен ли отбор — от этого зависит, что говорит пустой список (T160).
-        "narrowed": narrowed(chosen),
+        "narrowed": narrowed(chosen, first),
         "add_url": reverse("expense-new"),
     }, status=status)
 
@@ -165,12 +167,12 @@ def _no_membership(request):
 # --- отбор --------------------------------------------------------------------
 
 
-def filters_default() -> dict:
-    """Умолчание — текущий месяц: с ним человек и сверяет кассу.
+def filters_default(first: date | None = None) -> dict:
+    """Умолчание — рабочий месяц партнёра (#310); без него — текущий.
 
     `ledger` пуст — это «все видимые роли регистры», а не четвёртый безымянный.
     """
-    first = date.today().replace(day=1)
+    first = first or date.today().replace(day=1)
     return {"from": first, "to": _last_day(first), "unit": "", "item": "", "ledger": ""}
 
 
@@ -178,7 +180,7 @@ def _last_day(first: date) -> date:
     return (first.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
 
 
-def narrowed(chosen: dict) -> bool:
+def narrowed(chosen: dict, first: date | None = None) -> bool:
     """Отбор сужен по сравнению с умолчанием — то есть пустота может быть от него.
 
     Нужно пустому состоянию (T160): «за этот месяц расходов ещё нет» и «отбор
@@ -192,7 +194,7 @@ def narrowed(chosen: dict) -> bool:
     сообщение о сужении не может выдать существование скрытых строк (D023) —
     оно про запрос, а не про их наличие.
     """
-    return chosen != filters_default()
+    return chosen != filters_default(first)
 
 
 def filters_from(request) -> dict:
@@ -208,7 +210,7 @@ def filters_from(request) -> dict:
     означало бы, что человек смотрит не тот период (или не ту точку), чем
     думает, и сверяет кассу с чужим числом.
     """
-    chosen = filters_default()
+    chosen = filters_default(working_first(request))
     for name in ("from", "to"):
         raw = (request.GET.get(name) or "").strip()
         if raw:
@@ -428,7 +430,7 @@ def state_title(fact, state: str) -> str:
     return ""
 
 
-def _filter_fields(who, chosen: dict) -> list[dict]:
+def _filter_fields(who, chosen: dict, first: date) -> list[dict]:
     """Отбор ссылками (T224, D081). Варианты — только из того, что видно роли (D023).
 
     Точки и регистры — рядом ссылок: их у партнёра единицы, и видеть их все
@@ -436,7 +438,7 @@ def _filter_fields(who, chosen: dict) -> list[dict]:
     отдельная страница выбора (`expense_item_pick`). Ряд из одного варианта не
     показывается: управляющему одной точки выбирать между «все» и «моя» нечего.
     """
-    base, query = reverse("expenses"), filter_links.query_of(chosen, filters_default())
+    base, query = reverse("expenses"), filter_links.query_of(chosen, filters_default(first))
     units = Unit.objects.order_by("code")
     if who.unit_ids:
         units = units.filter(pk__in=who.unit_ids)
@@ -484,11 +486,12 @@ def expense_item_pick(request):
     who = get_current_principal(request)
     if who is None or who.tenant_id is None:
         return _no_membership(request)
+    first = working_first(request)
     try:
         chosen = filters_from(request)
     except BadInput:
         return redirect(reverse("expenses") + "?" + request.GET.urlencode())
-    base, query = reverse("expenses"), filter_links.query_of(chosen, filters_default())
+    base, query = reverse("expenses"), filter_links.query_of(chosen, filters_default(first))
     q = (request.GET.get("q") or "").strip()
     options = [
         (str(item.id), cash.item_title(item.titles))

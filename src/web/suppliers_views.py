@@ -44,6 +44,7 @@ from .directory_views import LEDGER_CODES, _number, _select, _text
 from .format import EMPTY, day, ledger_title, money
 from .i18n import month_title
 from .principal import get_current_principal
+from .working_month import working_first
 from .tills_views import visible_tills
 
 # Состояние счёта для человека и для приёмки. Значения короткие и машинные: по
@@ -71,9 +72,9 @@ def _no_membership(request, what: str):
 # --- отбор --------------------------------------------------------------------
 
 
-def filters_default() -> dict:
-    """Умолчание — текущий месяц по дате документа: с ним и работают со счетами."""
-    first = date.today().replace(day=1)
+def filters_default(first: date | None = None) -> dict:
+    """Умолчание — рабочий месяц партнёра по дате документа (#310); без него — текущий."""
+    first = first or date.today().replace(day=1)
     return {
         "from": first, "to": _last_day(first),
         "counterparty": "", "ledger": "", "state": "all",
@@ -84,7 +85,7 @@ def _last_day(first: date) -> date:
     return (first.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
 
 
-def narrowed(chosen: dict) -> bool:
+def narrowed(chosen: dict, first: date | None = None) -> bool:
     """Отбор сужен по сравнению с умолчанием — пустота может быть от него.
 
     Нужно пустому списку (T160): «счетов за месяц ещё нет» и «отбор ничего не
@@ -95,7 +96,7 @@ def narrowed(chosen: dict) -> bool:
     требует ничего спрашивать у базы, и поэтому сообщение о сужении не способно
     выдать существование скрытых строк (D023).
     """
-    return chosen != filters_default()
+    return chosen != filters_default(first)
 
 
 def filters_from(request) -> dict:
@@ -106,7 +107,7 @@ def filters_from(request) -> dict:
     значение — отказ, а не тихое умолчание: тихое умолчание означало бы, что
     человек смотрит не тот период, чем думает.
     """
-    chosen = filters_default()
+    chosen = filters_default(working_first(request))
     for name in ("from", "to"):
         raw = (request.GET.get(name) or "").strip()
         if raw:
@@ -168,12 +169,13 @@ def invoices(request):
             "Попросите администратора сети добавить вас."
         ))
 
+    first = working_first(request)
     error, status = "", 200
     try:
         chosen = filters_from(request)
     except BadInput as bad:
         error, status = bad.message, bad.http_status
-        chosen = filters_default()
+        chosen = filters_default(first)
 
     rows = rows_for(who, chosen) if not error else []
     total = sum((row["amount"] for row in rows), Decimal("0"))
@@ -185,12 +187,12 @@ def invoices(request):
         "total_raw": f"{total}", "total_text": money(total),
         "left_raw": f"{left}", "left_text": money(left),
         "counted": len(rows),
-        "filters": _filter_fields(who, chosen),
+        "filters": _filter_fields(who, chosen, first),
         "reset_url": filter_links.reset(
-            reverse("invoices"), filter_links.query_of(chosen, filters_default())
+            reverse("invoices"), filter_links.query_of(chosen, filters_default(first))
         ),
         # Сужен ли отбор — от этого зависит, что говорит пустой список (T160).
-        "narrowed": narrowed(chosen),
+        "narrowed": narrowed(chosen, first),
         "add_url": reverse("invoice-new"),
         "payment_url": reverse("payment-new"),
         "inbox_url": reverse("inbox"),
@@ -280,14 +282,14 @@ def _state_title(state: str) -> str:
     }[state]
 
 
-def _filter_fields(who, chosen: dict) -> list[dict]:
+def _filter_fields(who, chosen: dict, first: date) -> list[dict]:
     """Отбор ссылками (T224, D081). Варианты — только из того, что видно роли (D023).
 
     Регистры и состояние оплаты — рядом ссылок: вариантов единицы. Контрагентов
     десятки — у них выбранное словами и страница выбора с поиском
     (`counterparty_pick`). Ряд регистров из одного варианта не показывается.
     """
-    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default())
+    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default(first))
     ledgers = [(code, ledger_title(code)) for code in LEDGER_CODES
                if code in who.visible_ledgers]
     fields = [
@@ -338,11 +340,12 @@ def counterparty_pick(request):
             "Вас ещё не завели ни к одному партнёру, поэтому счетов у вас нет. "
             "Попросите администратора сети добавить вас."
         ))
+    first = working_first(request)
     try:
         chosen = filters_from(request)
     except BadInput:
         return redirect(reverse("invoices") + "?" + request.GET.urlencode())
-    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default())
+    base, query = reverse("invoices"), filter_links.query_of(chosen, filters_default(first))
     q = (request.GET.get("q") or "").strip()
     options = [(str(pk), title) for pk, title in counterparties_found(q).values_list("id", "title")]
     return render(request, "web/filters/pick.html", filter_links.pick_page(
