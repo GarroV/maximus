@@ -751,7 +751,7 @@ form.upload.card { max-width: 640px; }   /* специфичнее общего 
   border-radius: var(--r-block);
 }
 /* Число столбцов задаёт страница инлайном; 4 — на случай без него. */
-table.matrix { --matrix-cols: 4; table-layout: fixed; min-width: calc(160px + var(--matrix-cols) * 48px); }
+table.matrix { --matrix-cols: 4; table-layout: fixed; min-width: calc(120px + var(--matrix-cols) * 44px); }
 table.matrix th, table.matrix td {
   height: var(--row); padding: var(--space-2) var(--space-3);
   text-align: center; width: 56px;
@@ -773,7 +773,8 @@ table.matrix tr.matrix-group td {
   color: var(--ink-3); font-weight: var(--w-semibold);
 }
 table.matrix input[type="checkbox"] { width: 14px; height: 14px; margin: 0; accent-color: var(--accent); cursor: pointer; }
-table.matrix tfoot button { padding: 0 var(--space-3); min-width: 0; }
+.role-save { margin-top: var(--space-5); }
+.role-save__buttons { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-3); }
 /* Прочерк — «у этой роли такого не бывает», точка — «регистр виден». Цвет у
    точки акцентный, как у включённой галочки: смысл тот же, «есть у роли». */
 .wall { font-family: var(--font-num); color: var(--ink-empty); cursor: default; }
@@ -1992,3 +1993,25 @@ table.pages td.hint { color: var(--ink-2); font-size: var(--fs-meta); }
    в плотном списке, без отбивок между пунктами. */
 ol.steps-next { margin: 0 0 var(--space-6); padding-left: var(--space-8); color: var(--ink-2); }
 ol.steps-next li { margin: 0 0 var(--space-3); }
+
+/* Реестр правил (issue #320): группы столбцом слева, таблица справа. На узком
+   экране группы идут над таблицей одной переносимой строкой. */
+.rules-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.rules-groups { display: flex; flex-direction: column; gap: 2px; }
+.rules-groups__item {
+  display: flex; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3); border-radius: var(--r-block);
+  color: var(--ink); text-decoration: none; font-size: var(--fs-dense);
+}
+.rules-groups__item.current { background: var(--surface-2); font-weight: var(--w-semibold); }
+a.rules-groups__item:hover { background: var(--surface-2); }
+.rule-code { font-size: var(--fs-micro); color: var(--ink-3); }
+.pager { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-4); }
+td.nowrap { white-space: nowrap; }
+@media (max-width: 760px) {
+  .rules-layout { grid-template-columns: 1fr; }
+  .rules-groups { flex-direction: row; flex-wrap: wrap; }
+}
+
+/* Уволенный в списке сотрудников — строка подсвечена, как в эталоне модуля 8. */
+tr.row-warn td { background: var(--warn-soft); }

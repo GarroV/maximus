@@ -76,7 +76,7 @@
 видел слово «правила страны» без ответа на «где они и кто их меняет».
 {% endcomment %}
 <h2>{% translate "Правило страны" %}</h2>
-<p class="sub">{% blocktranslate with value=country_value country=country_code preset=country_preset %}В правилах {{ country }}: {{ value }} — набор {{ preset }}{% endblocktranslate %}{% if country_since %} ({% blocktranslate with day=country_since %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
+<p class="sub">{% blocktranslate with value=country_value_text country=country_title %}В правилах страны «{{ country }}»: {{ value }}{% endblocktranslate %}{% if country_since_text %} ({% blocktranslate with day=country_since_text %}с {{ day }}{% endblocktranslate %}){% endif %}</p>
 
 {% if country_versions %}
 {% scroll %}<table>

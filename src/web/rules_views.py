@@ -53,10 +53,16 @@ from django.views.decorators.http import require_http_methods
 
 from core.rules import PresetNotFound, load_rules_at
 
-from . import directory, filter_links, permissions, rule_names, rule_targets, rules, rules_country
+from . import (
+    directory, filter_links, permissions, rule_names, rule_targets, rule_values, rules, rules_country,
+)
 from .dbrefusal import ConstraintRefused, saving
-from .format import EMPTY
+from .format import EMPTY, day
 from .principal import get_current_principal
+
+
+# Строк правил на странице списка.
+PAGE_SIZE = 40
 
 
 def _who(request):
@@ -239,9 +245,45 @@ def index(request):
         rules.frame_mode(preset, leaf.path)
         for section in everything for leaf in section["rows"]
     ]
+    currency = str(preset.get("currency") or "")
+    all_rows = [
+        {
+            "path": leaf.path,
+            "title": leaf.title,
+            "value": rule_values.display(leaf.path, leaf.value, currency),
+            "numeric": leaf.value.replace(".", "", 1).lstrip("-").isdigit(),
+            "since": day(leaf.valid_from),
+            "lower": rule_targets.counts_words(lower.get(leaf.path, {})),
+            # Кто решает значение: закон, рамка или партнёр (T192).
+            # Колонка эталона модуля 17 — без неё рамка узнаётся
+            # только отказом, то есть после набранного значения.
+            "owner": rules.frame_owner(preset, leaf.path),
+            "owner_mode": rules.frame_mode(preset, leaf.path),
+            "url": (
+                f"{reverse('rule', args=[leaf.path])}?on={on_date.isoformat()}"
+                if leaf.editable else ""
+            ),
+        }
+        for section in shown
+        for leaf in section["rows"]
+    ]
+    # Постраничность (issue #320): 143 правила одной стеной — это ~18 тысяч
+    # знаков. Номер страницы живёт в адресе, как и остальной отбор.
+    pages = max(1, -(-len(all_rows) // PAGE_SIZE))
+    try:
+        page = min(max(int(request.GET.get("page") or 1), 1), pages)
+    except ValueError:
+        page = 1
+    page_state = {**state, "group": group}
     return render(request, "web/rules/index.html", {
         "heading": _("Правила расчёта"),
         "tabs": _tabs("country", on_date),
+        "has_lower": any(row["lower"] for row in all_rows),
+        "page": page,
+        "pages": pages,
+        "shown_count": len(all_rows),
+        "prev_url": filter_links.url(base, page_state, page=page - 1) if page > 1 else "",
+        "next_url": filter_links.url(base, page_state, page=page + 1) if page < pages else "",
         "on_date": on_date.isoformat(),
         "query": query,
         "country": country,
@@ -256,7 +298,8 @@ def index(request):
         # всего», а не «сколько осталось после поиска».
         "groups": [
             {
-                "title": f"{title} · {count}",
+                "title": title,
+                "count": count,
                 "selected": group == key,
                 "url": filter_links.url(base, state, group=key),
             }
@@ -265,27 +308,7 @@ def index(request):
                 + [(s["name"], s["title"], len(s["rows"])) for s in everything]
             )
         ],
-        "rows": [
-            {
-                "path": leaf.path,
-                "title": leaf.title,
-                "value": leaf.value,
-                "origin": rules.level_title(leaf.level),
-                "since": leaf.valid_from.isoformat() if leaf.valid_from else "",
-                "lower": rule_targets.counts_words(lower.get(leaf.path, {})),
-                # Кто решает значение: закон, рамка или партнёр (T192).
-                # Колонка эталона модуля 17 — без неё рамка узнаётся
-                # только отказом, то есть после набранного значения.
-                "owner": rules.frame_owner(preset, leaf.path),
-                "owner_mode": rules.frame_mode(preset, leaf.path),
-                "url": (
-                    f"{reverse('rule', args=[leaf.path])}?on={on_date.isoformat()}"
-                    if leaf.editable else ""
-                ),
-            }
-            for section in shown
-            for leaf in section["rows"]
-        ],
+        "rows": all_rows[(page - 1) * PAGE_SIZE: page * PAGE_SIZE],
         "closed_note": directory.closed_month_warning(who.tenant_id),
         "notice": _carried_notice(request, who),
     })
@@ -409,10 +432,15 @@ def _now_in_force(preset, path: str, current) -> dict:
     """Что действует сейчас и откуда — одинаково на карточке и на форме."""
     where = preset.origin_of(path)
     return {
-        "value": rules.show(current),
+        "value": rule_values.display(path, rules.show(current), _currency_of(preset)),
         "origin": rules.level_title(where.level),
-        "since": where.valid_from.isoformat() if where.valid_from else "",
+        "since": day(where.valid_from) if where.valid_from else "",
     }
+
+
+def _currency_of(preset) -> str:
+    """Валюта страны для подписи сумм; нет её в правилах — без подписи."""
+    return str(preset.get("currency") or "")
 
 
 @login_required
@@ -432,7 +460,7 @@ def rule(request, path: str):
     assembled, current = _resolve(who, path, on_date)
     preset = assembled.base
     frame = _frame_block(who, path, on_date, current)
-    country = _country_block(who, path, on_date)
+    country = _country_block(who, path, on_date, _currency_of(preset))
     # Ссылка на форму — только если форма что-то даст этому человеку. У
     # запертого правила переопределения нет, и ссылка вела бы на страницу со
     # словами «нельзя»; администратору платформы там остаётся правило страны.
@@ -464,9 +492,9 @@ def rule(request, path: str):
         **_now_in_force(preset, path, current),
         "versions": [
             {
-                "from": row.valid_from.isoformat(),
-                "to": row.valid_to.isoformat() if row.valid_to else "—",
-                "value": rules.show(row.value),
+                "from": day(row.valid_from),
+                "to": day(row.valid_to) if row.valid_to else "—",
+                "value": rule_values.display(path, rules.show(row.value), _currency_of(preset)),
                 "level": rules.level_title(row.scope_type),
                 # Имя объекта, а не его uuid: строка истории должна читаться
                 # («группе Курьеры»), а не расшифровываться. У уровня партнёра
@@ -699,7 +727,7 @@ def _frame_block(who, path: str, on_date: date, current) -> dict:
     }
 
 
-def _country_block(who, path: str, on_date: date) -> dict:
+def _country_block(who, path: str, on_date: date, currency: str = "") -> dict:
     """Слой страны на карточке правила: значение, версии и — кому можно — форма.
 
     Показывается **всем**, у кого есть право вести правила, а не только тому,
@@ -726,6 +754,12 @@ def _country_block(who, path: str, on_date: date) -> dict:
         "country_layer": True,
         "country_code": country,
         "country_value": rules.show(value),
+        # Для чтения: название страны и значение с единицей, а не код и голое
+        # число (issue #313). Поле формы берёт `country_value` — вводят то, что
+        # хранится.
+        "country_title": rule_names.country_name(country),
+        "country_value_text": rule_values.display(path, rules.show(value), currency),
+        "country_since_text": day(version.valid_from),
         "country_since": version.valid_from.isoformat(),
         "country_preset": version.code,
         "country_may_edit": may,

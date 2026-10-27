@@ -47,11 +47,21 @@
     {% endfor %}
     {% endfor %}
   </tbody>
-  <tfoot>
-    <tr>
-      <th scope="row" class="matrix-right">{% translate "Сохранить права" %}</th>
-      {% for column in columns %}<td><button type="submit" form="rights-{{ column.id }}" title="{% blocktranslate with role=column.title %}Сохранить права роли «{{ role }}»{% endblocktranslate %}">{{ column.short }}</button></td>{% endfor %}
-    </tr>
-  </tfoot>
 </table></div>
+
+{% comment %}
+Сохранение — отдельным блоком под сеткой, кнопка на роль с её названием
+(issue #316). Пять кнопок-аббревиатур в нижней строке сетки не говорили, что
+каждая из них записывает: человек не понимал, что нажатие касается одного
+столбца, а не всей таблицы. Форма на роль остаётся прежней — галочки столбца
+привязаны к ней атрибутом form, — поэтому правка одной роли по-прежнему не
+трогает остальные, и теперь это сказано словами.
+{% endcomment %}
+<section class="role-save" aria-labelledby="role-save-title">
+  <h2 id="role-save-title">{% translate "Сохранить права" %}</h2>
+  <p class="note">{% translate "Каждая роль сохраняется отдельно: кнопка записывает галочки только своего столбца, остальные роли не меняются. После сохранения над сеткой появится подтверждение." %}</p>
+  <div class="role-save__buttons">
+    {% for column in columns %}<button type="submit" form="rights-{{ column.id }}">{% blocktranslate with role=column.title %}Сохранить права: {{ role }}{% endblocktranslate %}</button>{% endfor %}
+  </div>
+</section>
 {% endblock %}

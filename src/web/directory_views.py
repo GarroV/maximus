@@ -88,7 +88,7 @@ from core.models import (
     Unit,
 )
 
-from . import directory, permissions, rules
+from . import directory, filter_links, permissions, rules
 from .dbrefusal import BadInput, ConstraintRefused, saving
 from .format import EMPTY, day, exact, hours, ledger_title
 from .i18n import month_title
@@ -562,29 +562,46 @@ def employees(request):
     may_manage = permissions.has(who, permissions.STAFF_MANAGE)
 
     query = (request.GET.get("q") or "").strip()
-    rows = _employee_rows(who, query, with_key=may_manage)
 
-    # Сквозной ключ показывается только тому, кто ведёт справочник. Это не
-    # оформление: в Сербии там JMBG — национальный идентификатор, и загрузка
-    # табеля сходится по нему, то есть нужен он администратору, а не
-    # управляющему. Управляющему по D047 нужны имена, должности и ставки; лишний
-    # столбец персональных данных к работе точки не добавляет ничего.
+    # Сквозной ключ (в Сербии там JMBG) в таблицу не выносится: он нужен
+    # загрузке табеля и администратору, а читать его в списке незачем — он лежит
+    # в карточке человека. Поиск по нему остаётся только у того, кто ведёт
+    # справочник (`with_key`): искать по значению, которого на экране нет, —
+    # способ его подобрать, а у читателя его нет и в карточке.
     #
-    # Поиск сужается вместе со столбцом (`with_key`): искать по значению,
-    # которого на экране нет, — это способ его подобрать.
-    columns = [{"label": _("Сотрудник")}]
-    if may_manage:
-        columns.append({"label": _("Внешний ключ")})
-    columns += [
+    # Колонки — по эталону модуля 8: «Должность / Тип оплаты / Условия с /
+    # Статус» вместо «Внешний ключ / Движение / Уволен» (issue #319).
+    columns = [
+        {"label": _("Сотрудник")},
         {"label": _("Группа")},
         {"label": _("Точка")},
+        {"label": _("Должность")},
+        {"label": _("Тип оплаты")},
         {"label": _("Ставка"), "num": True},
-        {"label": _("Движение за месяц")},
-        {"label": _("Уволен")},
+        {"label": _("Условия с")},
+        {"label": _("Статус")},
     ]
+    month = _month_of_the_list()
+    unit_filter = (request.GET.get("unit") or "").strip()
+    move_filter = (request.GET.get("move") or "").strip()
+    everyone = _employee_rows(who, query, with_key=may_manage)
+    unit_rows = _unit_cuts(request, everyone, unit_filter, move_filter, query)
+    rows = [
+        row for row in everyone
+        if (not unit_filter or row["unit_id"] == unit_filter)
+        and (not move_filter or row["movement"] == move_filter)
+    ]
+    hired = sum(1 for row in rows if row["movement"] == "hired")
+    left = sum(1 for row in rows if row["movement"] == "left")
+    summary = _("%(count)s чел. · принято %(hired)s, уволено %(left)s") % {
+        "count": len(rows), "hired": hired, "left": left,
+    }
 
     return render(request, "web/directory/list.html", {
         "heading": _("Сотрудники"),
+        "heading_note": month_title(month),
+        "summary": summary,
+        "filter_rows": unit_rows,
         "about": _(
             "Кто работает у партнёра и по каким условиям. Месяц целиком приносит "
             "загрузка таблицы, одного человека — кнопка ниже: вышел на работу "
@@ -640,7 +657,7 @@ def _current_terms(who) -> dict:
     ту версию, по которой человека посчитают, а не первую попавшуюся.
     """
     terms = {}
-    for term in EmploymentTerm.objects.select_related("group", "unit").order_by("valid_from"):
+    for term in EmploymentTerm.objects.select_related("group", "unit", "position").order_by("valid_from"):
         terms[term.employee_id] = term
     return terms
 
@@ -674,38 +691,58 @@ def _employee_rows(who, query: str = "", *, with_key: bool = True) -> list[dict]
         found = found.filter(where)
 
     terms = _current_terms(who)
+    preset = _preset_now(who)
     seen = set(who.visible_ledgers)
     rows = []
     for person in found:
         term = terms.get(person.id)
         if term is not None and _effective_ledger(term) not in seen:
             continue
-        cells = [{"text": f"{person.last_name} {person.first_name}".strip()}]
-        if with_key:
-            cells.append({"text": person.external_id})
-        cells += [
+        movement = _movement_of(person, term)
+        unit = term.unit if term and term.unit else None
+        cells = [
+            {"text": f"{person.last_name} {person.first_name}".strip()},
             {"text": term.group.title if term else EMPTY},
-            {"text": term.unit.code if term and term.unit else EMPTY},
+            # Точка — названием, а не кодом (issue #313): аналитика пишет
+            # «Beograd 1», и тот же человек не должен быть «BG1» рядом.
+            {"text": unit.title if unit else EMPTY},
+            {"text": term.position.title if term and term.position else EMPTY},
+            {"text": _measure_title(preset, _effective_measure(preset, term)) if term else EMPTY},
             # Ставка — не деньги, а основание расчёта: показывается как есть,
             # без округления до копеек (`format.exact`, T116). 152 × 421,08
             # даёт не ту сумму, что 152 × 421,085, и человек, повторяющий
             # расчёт на калькуляторе, обязан видеть настоящее основание.
             {"text": exact(term.base_rate) if term else EMPTY, "num": True},
-            # Движение за месяц (issue #185): чем этот месяц отличается от
-            # прошлого. Состав список показывал и раньше; без движения «почему
-            # фонд оплаты вырос» выясняется сравнением двух списков глазами.
-            {"text": _movement_of(person, term)},
-            {"text": day(person.dismissed_at)},
+            {"text": day(term.valid_from) if term else EMPTY},
+            {"text": _status_of(person, movement)},
         ]
         rows.append({
             "url": reverse("directory-employee", args=[person.id]),
             "cells": cells,
+            "unit_id": str(unit.id) if unit else "",
+            "movement": movement,
+            "warn": bool(person.dismissed_at),
         })
     return rows
 
 
+def _status_of(person: Employee, movement: str) -> str:
+    """Статус человека словом: работает, принят в этом месяце, уволен.
+
+    Увольнение показывается датой всегда, а не только в месяц списка: человек,
+    уволенный в прошлом году, остаётся в справочнике и читается «Уволен».
+    """
+    if person.dismissed_at:
+        return _("Уволен %(day)s") % {"day": day(person.dismissed_at)}
+    if movement == "hired":
+        return _("Принят %(day)s") % {"day": day(person.hired_at)}
+    if movement == "moved":
+        return _("Переведён")
+    return _("Работает")
+
+
 def _movement_of(person: Employee, term) -> str:
-    """Что случилось с человеком в этом месяце: принят, уволен, переведён.
+    """Что случилось с человеком в этом месяце: hired, left, moved или ничего.
 
     Месяц берётся из даты самого события, а не сравнением двух списков: список
     и так показывает состав на период, и «кто появился» из него не выводится —
@@ -713,9 +750,9 @@ def _movement_of(person: Employee, term) -> str:
     """
     month = _month_of_the_list()
     if person.hired_at and _same_month(person.hired_at, month):
-        return _("принят %(day)s") % {"day": day(person.hired_at)}
+        return "hired"
     if person.dismissed_at and _same_month(person.dismissed_at, month):
-        return _("уволен %(day)s") % {"day": day(person.dismissed_at)}
+        return "left"
     # Перевод — это новая версия условий, начавшаяся в этом месяце и сменившая
     # точку. Смену ставки движением не считаем: это не про состав.
     if term is not None and _same_month(term.valid_from, month):
@@ -727,8 +764,48 @@ def _movement_of(person: Employee, term) -> str:
             .first()
         )
         if previous is not None and previous.unit_id != term.unit_id:
-            return _("переведён %(day)s") % {"day": day(term.valid_from)}
-    return EMPTY
+            return "moved"
+    return ""
+
+
+def _unit_cuts(request, everyone: list, unit_filter: str, move_filter: str, query: str) -> list:
+    """Два ряда отбора над списком — ссылками (D081): точка и движение за месяц.
+
+    Счётчики считаются по всему списку, а не по отобранному: цифра у точки
+    отвечает «сколько здесь людей», а не «сколько осталось после второго
+    отбора». Ряд точек не рисуется, когда точка одна: переключать нечего.
+    """
+    base = reverse("directory-employees")
+    state = {"q": query, "unit": unit_filter, "move": move_filter}
+    units = list(Unit.objects.order_by("title"))
+    counts: dict[str, int] = {}
+    for row in everyone:
+        counts[row["unit_id"]] = counts.get(row["unit_id"], 0) + 1
+    result = []
+    if len(units) > 1:
+        cuts = [{
+            "title": f"{_('Все')} · {len(everyone)}",
+            "selected": not unit_filter,
+            "url": filter_links.url(base, state, unit=""),
+        }] + [
+            {
+                "title": f"{unit.title} · {counts.get(str(unit.id), 0)}",
+                "selected": unit_filter == str(unit.id),
+                "url": filter_links.url(base, state, unit=str(unit.id)),
+            }
+            for unit in units
+        ]
+        result.append({"label": _("Точка"), "cuts": cuts})
+    moves = (("", _("Все")), ("hired", _("Приняты в этом месяце")), ("left", _("Уволены в этом месяце")))
+    result.append({"label": _("Движение за месяц"), "cuts": [
+        {
+            "title": title,
+            "selected": move_filter == key,
+            "url": filter_links.url(base, state, move=key),
+        }
+        for key, title in moves
+    ]})
+    return result
 
 
 def _month_of_the_list() -> date:
@@ -1343,11 +1420,16 @@ def groups(request):
     if denied is not None:
         return denied
     preset = _preset_now(who)
+    people = {}
+    for term in _current_terms(who).values():
+        people[term.group_id] = people.get(term.group_id, 0) + 1
     rows = [
         {
             "url": reverse("directory-group", args=[group.id]),
             "cells": [
-                {"text": group.code},
+                # Название первой ячейкой, кода нет вовсе (issue #313): `temporary`
+                # и `couriers` — служебные ключи, человек их не выбирал и не
+                # читает. Ключ остаётся в карточке группы.
                 {"text": group.title},
                 # Схема словом, как и мера рядом: столбец, где стоит `direct`,
                 # заставляет читать правила страны глазами, чтобы понять список
@@ -1359,6 +1441,7 @@ def groups(request):
                 # курьеры, и «чем меряют работу» — первое, что спрашивают у
                 # справочника групп, а не подробность второго экрана.
                 {"text": _measure_title(preset, _measure_of(preset, group.code))},
+                {"text": str(people.get(group.id, 0)), "num": True},
             ],
         }
         for group in _visible_groups(who).order_by("title")
@@ -1372,9 +1455,10 @@ def groups(request):
         "add_url": reverse("directory-group-new"),
         "add_label": _("Завести группу"),
         "columns": [
-            {"label": _("Код")}, {"label": _("Название")},
+            {"label": _("Название")},
             {"label": _("Схема расчёта")}, {"label": _("Регистр учёта")},
             {"label": _("Чем меряется работа")},
+            {"label": _("Людей"), "num": True},
         ],
         "rows": rows,
         "empty": _("Групп нет."),
@@ -1585,18 +1669,25 @@ def units(request):
     who, denied = _guard(request)
     if denied is not None:
         return denied
+    staff = _staff_by_unit(who)
+    today = date.today()
     rows = [
         {
             "url": reverse("directory-unit", args=[unit.id]),
             "cells": [
-                {"text": unit.code},
                 {"text": unit.title},
+                {"text": unit.code},
                 {"text": unit.legal_entity.title if unit.legal_entity else "—"},
                 {"text": day(unit.opened_at)},
-                {"text": day(unit.closed_at)},
+                {"text": str(staff.get(unit.id, 0)), "num": True},
+                {"text": _unit_status(unit, today)},
+                # Связь с Dodo IS (эталон модуля 11): подключена ли точка. Пока
+                # коннектора нет, ответ честный — «не подключена», а не прочерк,
+                # который читался бы как «данных нет».
+                {"text": _("Подключена") if unit.external_ids else _("Не подключена")},
             ],
         }
-        for unit in Unit.objects.select_related("legal_entity").order_by("code")
+        for unit in Unit.objects.select_related("legal_entity").order_by("title")
     ]
     return render(request, "web/directory/list.html", {
         "heading": _("Точки"),
@@ -1605,13 +1696,39 @@ def units(request):
         "add_url": reverse("directory-unit-new"),
         "add_label": _("Завести точку"),
         "columns": [
-            {"label": _("Код")}, {"label": _("Название")}, {"label": _("Юрлицо")},
-            {"label": _("Открыта")}, {"label": _("Закрыта")},
+            {"label": _("Название")}, {"label": _("Код")}, {"label": _("Юрлицо")},
+            {"label": _("Работает с")}, {"label": _("Персонал"), "num": True},
+            {"label": _("Статус")}, {"label": _("Связь с Dodo IS")},
         ],
         "rows": rows,
         "empty": _("Точек нет."),
         "empty_next": _("На точку разносятся часы и расходы — с неё и начинается учёт."),
     })
+
+
+def _staff_by_unit(who) -> dict:
+    """Сколько людей сейчас работает на каждой точке: по действующим условиям.
+
+    Уволенные не считаются — «персонал» отвечает на вопрос, сколько людей на
+    точке сегодня, а не сколько их когда-либо числилось.
+    """
+    dismissed = set(
+        Employee.objects.filter(dismissed_at__isnull=False).values_list("id", flat=True)
+    )
+    counts: dict = {}
+    for term in _current_terms(who).values():
+        if term.unit_id and term.employee_id not in dismissed:
+            counts[term.unit_id] = counts.get(term.unit_id, 0) + 1
+    return counts
+
+
+def _unit_status(unit: Unit, today: date) -> str:
+    """Статус точки словом: работает, закрыта с даты, откроется с даты."""
+    if unit.closed_at and unit.closed_at <= today:
+        return _("Закрыта %(day)s") % {"day": day(unit.closed_at)}
+    if unit.opened_at and unit.opened_at > today:
+        return _("Откроется %(day)s") % {"day": day(unit.opened_at)}
+    return _("Работает")
 
 
 @login_required
@@ -1684,10 +1801,24 @@ def legal_entities(request):
     who, denied = _guard(request)
     if denied is not None:
         return denied
+    staff = _staff_by_unit(who)
+    units_of: dict = {}
+    staff_of: dict = {}
+    for unit in Unit.objects.all():
+        if unit.legal_entity_id:
+            units_of[unit.legal_entity_id] = units_of.get(unit.legal_entity_id, 0) + 1
+            staff_of[unit.legal_entity_id] = (
+                staff_of.get(unit.legal_entity_id, 0) + staff.get(unit.id, 0)
+            )
     rows = [
         {
             "url": reverse("directory-legal-entity", args=[entity.id]),
-            "cells": [{"text": entity.title}, {"text": entity.tax_number or "—"}],
+            "cells": [
+                {"text": entity.title},
+                {"text": entity.tax_number or "—"},
+                {"text": str(units_of.get(entity.id, 0)), "num": True},
+                {"text": str(staff_of.get(entity.id, 0)), "num": True},
+            ],
         }
         for entity in LegalEntity.objects.order_by("title")
     ]
@@ -1696,7 +1827,10 @@ def legal_entities(request):
         "about": _("Бухгалтерия работает с юрлицом, пиццерий для неё нет."),
         "add_url": reverse("directory-legal-entity-new"),
         "add_label": _("Завести юрлицо"),
-        "columns": [{"label": _("Название")}, {"label": _("Налоговый номер")}],
+        "columns": [
+            {"label": _("Название")}, {"label": _("Налоговый номер")},
+            {"label": _("Точек"), "num": True}, {"label": _("Персонал"), "num": True},
+        ],
         "rows": rows,
         "empty": _("Юрлиц нет."),
         "empty_next": _("Юрлицо нужно точке: с ним бухгалтерия работает в официальном регистре."),
@@ -1762,20 +1896,53 @@ def calendar(request):
         return denied
     country = _country_of(who)
     edge = directory.closed_through(who.tenant_id)
-    rows = [
-        {
-            "url": reverse("directory-calendar-month", args=[month.period.strftime("%Y-%m")]),
+    # Год по месяцам, а не лента всех месяцев подряд (эталон модуля 16, issue
+    # #319): норму января сравнивают с нормой июня, и двенадцать строк года
+    # читаются разом. Месяца, которого в календаре нет, строка всё равно есть —
+    # с прочерком: пропавший месяц должен быть виден, а не выпасть из списка.
+    stored = {
+        row.period: row
+        for row in Calendar.objects.filter(country_code=country).order_by("period")
+    }
+    years = sorted({period.year for period in stored} | {date.today().year})
+    try:
+        year = int(request.GET.get("year") or 0)
+    except ValueError:
+        year = 0
+    if year not in years:
+        year = date.today().year
+    base = reverse("directory-calendar")
+    rows = []
+    for number in range(1, 13):
+        period = date(year, number, 1)
+        month = stored.get(period)
+        rows.append({
+            "url": (
+                reverse("directory-calendar-month", args=[period.strftime("%Y-%m")])
+                if month else ""
+            ),
             "cells": [
-                {"text": month_title(month.period)},
-                {"text": hours(month.norm_hours), "num": True},
-                {"text": str(month.working_days), "num": True},
-                {"text": _("закрыт") if edge and month.period <= edge else ""},
+                {"text": month_title(period)},
+                {"text": hours(month.norm_hours) if month else EMPTY, "num": True},
+                {"text": str(month.working_days) if month else EMPTY, "num": True},
+                {"text": str(len(month.holidays)) if month else EMPTY, "num": True},
+                {"text": (
+                    _("закрыт") if month and edge and period <= edge
+                    else "" if month else _("нет в календаре")
+                )},
             ],
+        })
+    year_cuts = [
+        {
+            "title": str(item),
+            "selected": item == year,
+            "url": filter_links.url(base, {}, year=str(item)),
         }
-        for month in Calendar.objects.filter(country_code=country).order_by("-period")
+        for item in years
     ]
     return render(request, "web/directory/list.html", {
         "heading": _("Производственный календарь"),
+        "heading_note": str(year),
         "about": _(
             "Норма часов месяца берётся отсюда — её показывает страница месяца. "
             "Календаря на месяц нет — там стоит прочерк, а не правдоподобное число."
@@ -1784,9 +1951,11 @@ def calendar(request):
         "add_label": _("Завести месяц"),
         "columns": [
             {"label": _("Месяц")}, {"label": _("Норма часов"), "num": True},
-            {"label": _("Рабочих дней"), "num": True}, {"label": _("Зарплата")},
+            {"label": _("Рабочих дней"), "num": True},
+            {"label": _("Праздничных"), "num": True}, {"label": _("Зарплата")},
         ],
         "rows": rows,
+        "filter_rows": [{"label": _("Год"), "cuts": year_cuts}] if len(years) > 1 else [],
         "empty": _("Календарь пуст."),
         "empty_next": _(
             "Пока месяца нет в календаре, норма часов на его странице — прочерк, "

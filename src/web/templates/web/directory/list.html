@@ -29,14 +29,19 @@
 {% endcomment %}
 {% if back_url %}<p class="note"><a href="{{ back_url }}">{{ back_label }}</a></p>
 {% elif not standalone %}<p class="note"><a href="{% url 'directory' %}">{% translate "← К справочникам" %}</a></p>{% endif %}
-<h1>{{ heading }}</h1>
+<h1>{{ heading }}{% if heading_note %} <span class="count">· {{ heading_note }}</span>{% endif %}</h1>
 <p class="sub">{{ about }}</p>
+{% if summary %}<p class="note">{{ summary }}</p>{% endif %}
 
 {% if error %}
 {% translate "Не загружено." as not_loaded %}
 {% notice "alert" title=not_loaded %}{{ error }}{% endnotice %}
 {% endif %}
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
+
+{% for filter in filter_rows %}
+{% include "web/components/cuts.html" with cuts=filter.cuts label=filter.label %}
+{% endfor %}
 
 {% if search_label %}
 <form class="search" method="get">
@@ -51,8 +56,12 @@
 Формы этих действий живут на своих адресах, а не раскрываются здесь: одна
 страница — одна функция, и список остаётся списком.
 {% endcomment %}
-{% if add_url or links %}
-<p class="actions">{% if add_url %}<a class="btn" href="{{ add_url }}">{{ add_label }}</a>{% endif %}{% for link in links %} <a class="btn" href="{{ link.url }}">{{ link.label }}</a>{% endfor %}</p>
+{% comment %}
+У пустого справочника вход «Завести …» один — кнопкой в пустом состоянии ниже
+(issue #319): верхняя кнопка рядом с ней дублировала бы её на одном экране.
+{% endcomment %}
+{% if rows and add_url or links %}
+<p class="actions">{% if rows and add_url %}<a class="btn" href="{{ add_url }}">{{ add_label }}</a>{% endif %}{% for link in links %} <a class="btn" href="{{ link.url }}">{{ link.label }}</a>{% endfor %}</p>
 {% endif %}
 
 {% if rows %}
@@ -62,7 +71,7 @@
   </thead>
   <tbody>
     {% for row in rows %}
-    <tr>
+    <tr{% if row.warn %} class="row-warn"{% endif %}>
       {% comment %}
       Числовая ячейка собирается фильтром, а не классом руками: `class="num"` в
       разметке означает, что прочерк снова весит как сумма (T179). Признак
@@ -70,7 +79,7 @@
       справочника свой, и угадать его по содержимому нельзя.
       {% endcomment %}
       {% for cell in row.cells %}
-      <td{% if cell.num %} class="{{ cell.text|numclass }}"{% endif %}>{% if forloop.first %}<a href="{{ row.url }}">{{ cell.text }}</a>{% else %}{{ cell.text }}{% endif %}</td>
+      <td{% if cell.num %} class="{{ cell.text|numclass }}"{% endif %}>{% if forloop.first and row.url %}<a href="{{ row.url }}">{{ cell.text }}</a>{% else %}{{ cell.text }}{% endif %}</td>
       {% endfor %}
     </tr>
     {% endfor %}

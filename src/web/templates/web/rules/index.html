@@ -39,38 +39,45 @@
 {% endcomment %}
 <h2>{{ country_name }} <span class="count">· {{ total }}</span></h2>
 <p class="note">{% blocktranslate with locked=locked_count framed=frame_count %}{{ locked }} заданы законом и не редактируются · {{ framed }} партнёр может только ужесточить{% endblocktranslate %}</p>
-{% if preset_code %}<p class="note">{% blocktranslate with code=preset_code country=country %}Набор правил: {{ code }} ({{ country }}){% endblocktranslate %}</p>{% endif %}
 {% endif %}
 
 <form class="search" method="get">
   {% translate "Действующие на" as on_label %}
   {% include "web/components/field.html" with id="on" name="on" label=on_label value=on_date type="date" %}
   {% translate "Правило" as q_label %}
-  {% translate "Код или название: night, ночные, net_factor" as q_help %}
+  {% translate "Название правила или его код" as q_help %}
   {% include "web/components/field.html" with id="q" name="q" label=q_label value=query help=q_help %}
   {% if group %}<input type="hidden" name="group" value="{{ group }}">{% endif %}
   <button type="submit">{% translate "Показать" %}</button>
 </form>
-
-{% if groups %}
-{% translate "Группы правил" as groups_label %}
-{% include "web/components/cuts.html" with cuts=groups label=groups_label %}
-{% endif %}
 
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 {% if closed_note %}
 <p class="note">{{ closed_note }}</p>
 {% endif %}
 
+<div class="rules-layout">
+{% if groups %}
+{% comment %}
+Группы — столбцом слева со счётчиками, как в эталоне модуля 17 (issue #320):
+два ряда чипов над таблицей съедали первый экран. Выбранная группа — не ссылка.
+{% endcomment %}
+<nav class="rules-groups" aria-label="{% translate 'Группы правил' %}">
+  {% for g in groups %}
+  {% if g.selected %}<span class="rules-groups__item current" aria-current="true">{{ g.title }} <span class="count">{{ g.count }}</span></span>{% else %}<a class="rules-groups__item" href="{{ g.url }}">{{ g.title }} <span class="count">{{ g.count }}</span></a>{% endif %}
+  {% endfor %}
+</nav>
+{% endif %}
+<div class="rules-main">
 {% if rows %}
 {% scroll %}<table class="rules-list">
   <thead>
     <tr>
       <th>{% translate "Правило" %}</th>
-      <th>{% translate "Значение" %}</th>
+      <th class="num">{% translate "Значение" %}</th>
       <th>{% translate "Кто меняет" %}</th>
       <th>{% translate "Действует с" %}</th>
-      <th>{% translate "Задано отдельно" %}</th>
+      {% if has_lower %}<th>{% translate "Задано отдельно" %}</th>{% endif %}
     </tr>
   </thead>
   <tbody>
@@ -81,8 +88,8 @@
       занимал половину таблицы, а название переносилось на три строки, и
       таблица вылезала из контейнера.
       {% endcomment %}
-      <td>{% if row.url %}<a href="{{ row.url }}">{{ row.title|default:row.path }}</a>{% else %}{{ row.title|default:row.path }}{% endif %}{% if row.title %}<br><code>{{ row.path }}</code>{% endif %}</td>
-      <td class="{{ row.value|numclass }}">{{ row.value }}</td>
+      <td>{% if row.url %}<a href="{{ row.url }}">{{ row.title|default:row.path }}</a>{% else %}{{ row.title|default:row.path }}{% endif %}{% if row.title %}<br><code class="rule-code">{{ row.path }}</code>{% endif %}</td>
+      <td class="num{% if not row.numeric %} text{% endif %}">{{ row.value }}</td>
       {% comment %}
       Кто решает значение: закон, рамка страны или сам партнёр (T192, эталон
       модуля 17). Колонка отвечает на вопрос, который до неё задавался формой:
@@ -92,7 +99,7 @@
       это трогать».
       {% endcomment %}
       <td><span class="mark mark--{{ row.owner_mode }}">{{ row.owner }}</span></td>
-      <td>{{ row.since|default:"—" }}<br><span class="note">{{ row.origin }}</span></td>
+      <td class="nowrap">{{ row.since }}</td>
       {% comment %}
       Колонка про то, что таблица НЕ показывает. Значение в строке — общее: страна
       плюс партнёр, то есть то, что действует у всех. Версия, заведённая одной
@@ -100,11 +107,18 @@
       ни на одном другом экране: правило считало бы деньги, а найти его было бы
       нечем (T165).
       {% endcomment %}
-      <td>{{ row.lower|default:"—" }}</td>
+      {% if has_lower %}<td>{{ row.lower|default:"—" }}</td>{% endif %}
     </tr>
     {% endfor %}
   </tbody>
 </table>{% endscroll %}
+{% if pages > 1 %}
+<nav class="pager" aria-label="{% translate 'Страницы списка правил' %}">
+  {% if prev_url %}<a class="btn" href="{{ prev_url }}">{% translate "← Назад" %}</a>{% endif %}
+  <span class="note">{% blocktranslate with page=page pages=pages total=shown_count %}Страница {{ page }} из {{ pages }} · правил: {{ total }}{% endblocktranslate %}</span>
+  {% if next_url %}<a class="btn" href="{{ next_url }}">{% translate "Дальше →" %}</a>{% endif %}
+</nav>
+{% endif %}
 {% elif query or group %}
 {% comment %}
 Пустой поиск и отсутствие правил вовсе — разные события, и объясняются они
@@ -118,4 +132,6 @@
 {% translate "Правил расчёта для этой страны на эту дату в базе нет." as no_rules %}
 {% notice "empty" title=no_rules %}{% blocktranslate %}Первичная загрузка страны делается командой load_presets — до неё считать нечем, и показывать здесь тоже нечего.{% endblocktranslate %}{% endnotice %}
 {% endif %}
+</div>
+</div>
 {% endblock %}
