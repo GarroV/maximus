@@ -40,10 +40,10 @@
     {% for p in partners %}
     <tr data-partner="{{ p.title }}"{% if p.left_out %} data-left-out{% endif %}>
       <td><strong>{{ p.title }}</strong><br><span class="hint">{{ p.country }} · {{ p.currency }}</span></td>
-      <td class="num">{{ p.units }}</td>
-      <td class="num">{{ p.revenue }}</td>
-      <td class="num">{{ p.payroll }}</td>
-      <td class="num">{{ p.share }}</td>
+      <td class="{{ p.units|numclass }}">{{ p.units }}</td>
+      <td class="{{ p.revenue|numclass }}">{{ p.revenue }}</td>
+      <td class="{{ p.payroll|numclass }}">{{ p.payroll }}</td>
+      <td class="{{ p.share|numclass }}">{{ p.share }}</td>
       <td class="{{ p.profit|numclass }}">{{ p.profit }}</td>
       <td>{% if p.same_currency %}{% translate "та же валюта" %}{% elif p.rate %}<span data-rate>{{ p.rate.text }}</span><br><span class="hint">{% if p.rate.fixed %}{% blocktranslate with on=p.rate.on %}на {{ on }}, закреплён при закрытии{% endblocktranslate %}{% else %}{% blocktranslate with on=p.rate.on %}на {{ on }}{% endblocktranslate %}{% endif %}{% if p.rate.note %} · {{ p.rate.note }}{% endif %}</span>{% else %}<span class="hint">{% translate "курса нет" %}</span>{% endif %}</td>
       <td>{% state p.state %}{% if p.left_out %}<br><span class="hint">{% blocktranslate with why=p.left_out %}не в итоге: {{ why }}{% endblocktranslate %}</span>{% endif %}</td>
@@ -55,10 +55,10 @@
   <tfoot>
     <tr class="grand">
       <th>{% blocktranslate with month=period.title %}Сеть, {{ month }}{% endblocktranslate %}</th>
-      <th class="num">{{ total.units }}</th>
-      <th class="num">{{ total.revenue }}</th>
-      <th class="num">{{ total.payroll }}</th>
-      <th class="num">{{ total.share }}</th>
+      <th class="{{ total.units|numclass }}">{{ total.units }}</th>
+      <th class="{{ total.revenue|numclass }}">{{ total.revenue }}</th>
+      <th class="{{ total.payroll|numclass }}">{{ total.payroll }}</th>
+      <th class="{{ total.share|numclass }}">{{ total.share }}</th>
       <th class="{{ total.profit|numclass }}">{{ total.profit }}</th>
       <th colspan="2">{% if not summed %}{% translate "в итог не вошёл ни один партнёр" %}{% elif not_closed %}{% blocktranslate with counter=not_closed summed=summed %}месяц не закрыт у партнёров: {{ counter }} из {{ summed }}{% endblocktranslate %}{% else %}{% translate "все месяцы закрыты" %}{% endif %}{% if left_out %}<br>{% blocktranslate with counter=left_out %}не в итоге, партнёров: {{ counter }}{% endblocktranslate %}{% endif %}</th>
     </tr>
