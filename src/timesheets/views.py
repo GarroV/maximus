@@ -21,6 +21,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_http_methods, require_POST
 
+from core.models import Payrun
 from payrun.errors import PayrunRefused
 from web import filter_links, permissions
 from web.principal import get_current_principal
@@ -152,6 +153,11 @@ def _grid_page(request, period, who, *, notice: str = "", status: int = 200):
             # Плашка состояния шапки: «Закрыт» только когда закрыты все точки
             # сетки; смесь — «Открыт», а сколько именно, говорит сводка рядом.
             "all_closed": bool(units) and all(unit.closed for unit in units),
+            # Утверждённый месяц заморожен целиком, что бы ни говорило закрытие
+            # часов по точкам: «Открыт» на нём — ложь (#307).
+            "month_approved": Payrun.objects.filter(
+                tenant_id=period.tenant_id, period=period.period, status="approved",
+            ).exists(),
             "norm_hours": _norm_or_none(period),
             "unit_filter": _unit_filter(period, units, chosen),
             "chosen_unit": chosen,

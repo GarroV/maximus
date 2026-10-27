@@ -306,3 +306,49 @@ def test_the_short_salary_finding_is_visible_on_the_closing_screen(client, calcu
         # Табель возвращается тоже: он общий для всех тестов этой базы, и
         # перекроенный месяц уводит суммы у соседнего модуля.
         Row.objects.filter(pk=row.pk).update(hours=kept_row[0], norm_hours=kept_row[1])
+
+
+# --- страница не говорит «всё на месте», пока это неправда (#307) ------------
+
+
+def test_the_page_does_not_claim_closed_hours_while_they_are_open(client, calculated):
+    """Часы открыты на всех точках — зелёного «Всё на месте» быть не может.
+
+    Раньше фраза в шаблоне была статичной: после «Посчитать период» страница
+    писала «Часы закрыты…», а закрытие часов в ту же минуту показывало «часы
+    открыты» на каждой точке. Ложный свет стоял прямо перед «Утвердить».
+    """
+    html = body(client.get(calculated))
+    assert "Всё на месте" not in html, "страница обещает «всё на месте» при открытых часах"
+    assert "Часы точки не закрыты" in html, "открытые часы не названы карточкой находки"
+
+
+def test_the_hours_step_is_not_done_until_hours_are_closed(client, calculated):
+    """Шаг «1. Часы» не отмечен, пока часы внесены, но не закрыты."""
+    import re
+
+    html = body(client.get(calculated))
+    step = re.search(r'<li class="([^"]*)"[^>]*>\s*<span class="name">1\. Часы', html)
+    assert step, "шаг «1. Часы» не найден на странице"
+    assert "done" not in step.group(1).split(), "шаг отмечен сделанным при открытых часах"
+
+
+def test_the_page_says_all_set_once_every_hour_is_closed(client, calculated):
+    """И наоборот: закрыли часы — находок про них нет, шаг отмечен."""
+    from core.models import Unit
+    from timesheets import closing
+
+    for unit in Unit.objects.all():
+        closing.close_unit(
+            tenant_id=unit.tenant_id, period=JUNE, unit_id=unit.id, actor_id=None,
+        )
+    html = body(client.get(calculated))
+    assert "Часы точки не закрыты" not in html
+
+
+def test_the_readiness_percent_follows_the_unresolved_findings():
+    from web.views import percent_ready
+
+    assert percent_ready(5, 0) == 100
+    assert percent_ready(5, 1) == 80
+    assert percent_ready(5, 9) == 0

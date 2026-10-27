@@ -56,7 +56,8 @@
 {% endcomment %}
 <div class="sheet-head">
   {% if units %}
-    {% if all_closed %}<span class="status status--approved"><i></i>{% translate "Закрыт" %}</span>
+    {% if month_approved %}<span class="status status--approved"><i></i>{% translate "Утверждён" %}</span>
+    {% elif all_closed %}<span class="status status--approved"><i></i>{% translate "Закрыт" %}</span>
     {% else %}<span class="status status--draft"><i></i>{% translate "Открыт" %}</span>{% endif %}
   {% endif %}
   {% if norm_hours is not None %}<span class="hint">{% blocktranslate with norm=norm_hours|hours %}норма месяца {{ norm }} ч{% endblocktranslate %}</span>{% endif %}
@@ -95,7 +96,8 @@
   {% endif %}
   <a class="btn btn--sm" href="{% url 'timesheet-close' period.id %}">{% translate "Закрытие часов по точкам" %}</a>
   {% comment %}Сводка считается из тех же состояний, что страница закрытия.{% endcomment %}
-  <span class="hint">{% blocktranslate with open_count=open_count total_count=units|length %}часы открыты на {{ open_count }} из {{ total_count }} точек{% endblocktranslate %}</span>
+  {% if month_approved %}<span class="hint">{% translate "месяц утверждён, часы заморожены" %}</span>
+  {% else %}<span class="hint">{% blocktranslate with open_count=open_count total_count=units|length %}часы открыты на {{ open_count }} из {{ total_count }} точек{% endblocktranslate %}</span>{% endif %}
 </nav>
 {% elif can_edit %}
 <nav class="tools">

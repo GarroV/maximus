@@ -1,0 +1,23 @@
+{
+  "Блокирующего нет": {"en": "Nothing blocking", "sr": "Nema blokirajućeg"},
+  "Блокирующее": {"en": "Blocking", "sr": "Blokirajuće"},
+  "Внесите часы в табеле или загрузите таблицей, затем закройте их по точкам.": {
+    "en": "Enter hours in the timesheet or upload a table, then close them per unit.",
+    "sr": "Unesite sate u evidenciji ili ih učitajte tabelom, pa ih zatvorite po objektima."
+  },
+  "Готовность": {"en": "Readiness", "sr": "Spremnost"},
+  "Замечание": {"en": "Remark", "sr": "Napomena"},
+  "Замечания": {"en": "Remarks", "sr": "Napomene"},
+  "Итого по ведомости": {"en": "Payroll total", "sr": "Ukupno po platnom spisku"},
+  "Месяц можно утверждать, но ниже есть то, на что стоит посмотреть до этого.": {
+    "en": "The month can be approved, but there is something below worth a look first.",
+    "sr": "Mesec se može odobriti, ali ispod ima nečega što vredi pogledati prvo."
+  },
+  "Отложено": {"en": "Postponed", "sr": "Odloženo"},
+  "Подозрительное": {"en": "Suspicious", "sr": "Sumnjivo"},
+  "Часы по всем точкам закрыты, бумаги разобраны, строк без статьи нет, отклонений нет. Месяц можно утверждать.": {
+    "en": "Hours are closed on every unit, papers are processed, no rows without an item, no deviations. The month can be approved.",
+    "sr": "Sati su zatvoreni na svim objektima, papiri su obrađeni, nema stavki bez konta, nema odstupanja. Mesec se može odobriti."
+  },
+  "месяц утверждён, часы заморожены": {"en": "month approved, hours are frozen", "sr": "mesec je odobren, sati su zamrznuti"}
+}
