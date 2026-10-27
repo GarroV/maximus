@@ -1421,7 +1421,7 @@ def groups(request):
         return denied
     preset = _preset_now(who)
     people = {}
-    for term in _current_terms(who).values():
+    for term in _visible_terms(who, list(_current_terms(who).values())):
         people[term.group_id] = people.get(term.group_id, 0) + 1
     rows = [
         {
@@ -1710,13 +1710,15 @@ def _staff_by_unit(who) -> dict:
     """Сколько людей сейчас работает на каждой точке: по действующим условиям.
 
     Уволенные не считаются — «персонал» отвечает на вопрос, сколько людей на
-    точке сегодня, а не сколько их когда-либо числилось.
+    точке сегодня, а не сколько их когда-либо числилось. Считаются только те,
+    чей регистр видит роль (D023): число с невидимыми людьми называло бы их
+    существование так же, как строка списка.
     """
     dismissed = set(
         Employee.objects.filter(dismissed_at__isnull=False).values_list("id", flat=True)
     )
     counts: dict = {}
-    for term in _current_terms(who).values():
+    for term in _visible_terms(who, list(_current_terms(who).values())):
         if term.unit_id and term.employee_id not in dismissed:
             counts[term.unit_id] = counts.get(term.unit_id, 0) + 1
     return counts

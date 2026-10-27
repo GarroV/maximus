@@ -691,3 +691,51 @@ def test_the_admin_opens_a_card_of_every_ledger(client, sql):
     login_as(client, "admin")
     assert client.get(f"/directory/groups/{group_id}/").status_code == 200
     client.post("/logout/")
+
+
+def _staff_count_of_unit(html: str, title: str) -> int:
+    """Число из колонки «Персонал» в строке точки списка."""
+    import re
+
+    row = next(r for r in re.findall(r"<tr.*?</tr>", html, re.S) if title in r)
+    cells = re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)
+    # Колонки: название, код, юрлицо, работает с, персонал, ...
+    return int(re.sub(r"<[^>]+>", "", cells[4]).strip())
+
+
+def test_unit_staff_count_does_not_include_people_of_a_hidden_ledger(
+    client, sql, manager_manages,
+):
+    """Счётчик «Персонал» считает только тех, чей регистр роль видит (D023).
+
+    Управляющий видит официальный и дополнительный регистры, но не внутренний.
+    Человек внутреннего регистра на его точке в счётчик попадать не должен: цифра
+    с ним называла бы его существование так же, как строка списка.
+    """
+    unit_id, = sql.execute(
+        "select id from units where code = 'NS1' and tenant_id in "
+        "(select id from tenants where code = 'rs-dev')"
+    ).fetchone()
+    group_id, tenant_id = sql.execute(
+        "select id, tenant_id from employee_groups where ledger = 'internal' and tenant_id in "
+        "(select id from tenants where code = 'rs-dev') limit 1"
+    ).fetchone()
+    login_as(client, "manager")
+    before = _staff_count_of_unit(body(client.get("/directory/units/")), "Novi Sad Bulevar")
+    employee_id = sql.execute(
+        "insert into employees (tenant_id, external_id, first_name, last_name) "
+        "values (%s, 'HIDDEN-0001', 'Скрытый', 'Регистр') returning id",
+        (tenant_id,),
+    ).fetchone()[0]
+    try:
+        sql.execute(
+            "insert into employment_terms (tenant_id, employee_id, group_id, unit_id, "
+            "base_rate, valid_from) values (%s, %s, %s, %s, 100, '2025-01-01')",
+            (tenant_id, employee_id, group_id, unit_id),
+        )
+        after = _staff_count_of_unit(body(client.get("/directory/units/")), "Novi Sad Bulevar")
+        assert after == before, "человек скрытого регистра попал в счётчик точки"
+    finally:
+        sql.execute("delete from employment_terms where employee_id = %s", (employee_id,))
+        sql.execute("delete from employees where id = %s", (employee_id,))
+        client.post("/logout/")
