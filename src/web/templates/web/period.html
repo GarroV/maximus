@@ -180,7 +180,7 @@
 Роль без прав на расчёт и утверждение (#315). Вместо трёх абзацев отказов —
 одна карточка с её делом на месяц: часы своей точки.
 {% endcomment %}
-<section class="card manager-task">
+<section class="card">
   <h2>{% translate "Ваше дело в этом месяце" %}</h2>
   <p>{% translate "Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает бухгалтер." %}</p>
   {% for unit in manager_task.units %}
@@ -278,7 +278,7 @@
 когда находок нет вовсе: раньше фраза была статичной и обещала «часы закрыты» при
 открытых часах на всех точках.
 {% endcomment %}
-<section class="card readiness">
+<section class="card">
   <h2>{% translate "Прежде чем закрыть" %}</h2>
   <div class="stats">
     <div class="stat{% if not readiness.clean %} stat--flagged{% endif %}">
