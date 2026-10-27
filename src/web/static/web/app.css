@@ -1972,6 +1972,14 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 .pick a, .pick__current { display: flex; align-items: center; min-height: var(--tap-min); padding: 0 var(--space-4); }
 .pick__current { font-weight: var(--w-semibold); background: var(--accent-soft); }
 
+/* Период: стрелки и календарь «с — по» (#310, interface-logic п. 3). */
+.period { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.period__form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: 0; }
+.period__field { display: inline-flex; align-items: center; gap: var(--space-2); }
+.period .btn { width: auto; }
+.period__form { flex: 1 1 auto; }
+.period__step { min-width: var(--tap-min); min-height: var(--tap-min); justify-content: center; }
+
 @media (max-width: 767px) {
   .filters__row { flex-direction: column; align-items: flex-start; gap: var(--space-2); }
   .filters__label { flex-basis: auto; }

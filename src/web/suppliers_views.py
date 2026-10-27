@@ -43,6 +43,7 @@ from .dbrefusal import BadInput
 from .directory_views import LEDGER_CODES, _number, _select, _text
 from .format import EMPTY, day, ledger_title, money
 from .i18n import month_title
+from .expenses_views import _period_title
 from .principal import get_current_principal
 from .working_month import working_first
 from .tills_views import visible_tills
@@ -193,6 +194,7 @@ def invoices(request):
         ),
         # Сужен ли отбор — от этого зависит, что говорит пустой список (T160).
         "narrowed": narrowed(chosen, first),
+        "heading_period": _period_title(chosen),
         "add_url": reverse("invoice-new"),
         "payment_url": reverse("payment-new"),
         "inbox_url": reverse("inbox"),

@@ -11296,3 +11296,42 @@ msgstr "obračun od %(at)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "курс вводит администратор платформы"
 msgstr "kurs unosi administrator platforme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Завести статьи расходов"
+msgstr "Dodaj stavke rashoda"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кому и за что"
+msgstr "Kome i za šta"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Расход вносится на статью, а статьи ведёт администратор сети или "
+"бухгалтер. Попросите завести хотя бы одну — и расход можно будет внести."
+msgstr "Rashod se unosi na stavku, a stavke vodi administrator mreže ili računovođa. Zamolite ih da dodaju bar jednu, pa će se rashod moći uneti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Расход вносится на статью. Заведите статьи или загрузите их списком — и "
+"форма заработает."
+msgstr "Rashod se unosi na stavku. Dodajte stavke ili ih učitajte spiskom, pa će obrazac raditi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Справочник статей расходов ещё пуст"
+msgstr "Spisak stavki rashoda je još prazan"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ставка, напечатанная в чеке. Пусто — налог не выделяем: в P&L такая "
+"трата пойдёт полной суммой. С заполненной ставкой в P&L по умолчанию "
+"поедет сумма без НДС."
+msgstr "Stopa odštampana na računu. Prazno znači da se porez ne izdvaja: u P&L ide pun iznos. Sa unetom stopom u P&L po podrazumevanoj postavci ide iznos bez PDV-a."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "по"
+msgstr "do"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "с"
+msgstr "od"

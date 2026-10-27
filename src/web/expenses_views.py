@@ -43,6 +43,7 @@ from core.models import ExpenseItem, Fact, Unit
 from . import allocation, cash, filter_links, papers, receipts
 from .cash_views import expense_fields, parse_expense
 from .directory_views import LEDGER_CODES, BadInput
+from .bank import home_currency
 from .format import EMPTY, ledger_title, money
 from .i18n import month_title
 from .principal import get_current_principal
@@ -71,7 +72,10 @@ def expenses(request):
     rows = rows_for(who, chosen) if not error else []
     total = sum((row["amount"] for row in rows if row["state"] == ACTIVE), Decimal("0"))
     return render(request, "web/cash/expenses.html", {
-        **_control(rows, total),
+        **(control := _control(rows, total)),
+        # Минус у нуля читается как ошибка: ставится только у ненулевой суммы.
+        "cash_signed": Decimal(control["cash_raw"]) != 0,
+        "pnl_signed": Decimal(control["pnl_raw"]) != 0,
         "error": error,
         # Что случилось с расходом до того, как человека увели сюда: удаление
         # (T154) и правка. Оба ответа приезжают признаками в адресе и
@@ -91,7 +95,18 @@ def expenses(request):
         # Сужен ли отбор — от этого зависит, что говорит пустой список (T160).
         "narrowed": narrowed(chosen, first),
         "add_url": reverse("expense-new"),
+        "heading_period": _period_title(chosen),
+        "currency": home_currency(who.tenant_id),
     }, status=status)
+
+
+def _period_title(chosen: dict) -> str:
+    """Месяц для заголовка («Июнь 2026»); произвольный отрезок — «с — по» (#318)."""
+    start, end = chosen["from"], chosen["to"]
+    first, last = filter_links.month_bounds(start)
+    if (start, end) == (first, last):
+        return month_title(first)
+    return f"{start:%d.%m.%Y} — {end:%d.%m.%Y}"
 
 
 def _control(rows: list[dict], total) -> dict:

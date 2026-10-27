@@ -11451,3 +11451,42 @@ msgstr "calculated %(at)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "курс вводит администратор платформы"
 msgstr "the platform administrator enters the rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Завести статьи расходов"
+msgstr "Set up expense items"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кому и за что"
+msgstr "Paid to, and for what"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Расход вносится на статью, а статьи ведёт администратор сети или "
+"бухгалтер. Попросите завести хотя бы одну — и расход можно будет внести."
+msgstr "An expense is entered against an item, and items are maintained by the network administrator or the accountant. Ask them to add at least one, then the expense can be entered."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Расход вносится на статью. Заведите статьи или загрузите их списком — и "
+"форма заработает."
+msgstr "An expense is entered against an item. Add items or upload them as a list, and the form will work."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Справочник статей расходов ещё пуст"
+msgstr "The expense item list is still empty"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ставка, напечатанная в чеке. Пусто — налог не выделяем: в P&L такая "
+"трата пойдёт полной суммой. С заполненной ставкой в P&L по умолчанию "
+"поедет сумма без НДС."
+msgstr "The rate printed on the receipt. Empty means no tax is split out: the P&L takes the full amount. With a rate filled in, the P&L takes the amount without VAT by default."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "по"
+msgstr "to"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "с"
+msgstr "from"

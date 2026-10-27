@@ -21,8 +21,22 @@
 <div class="filters">
   {% for f in filters %}
   <div class="filters__row" data-filter="{{ f.name }}">
-    <span class="filters__label">{% if f.label %}{{ f.label }}{% else %}{% translate "Месяц" %}{% endif %}</span>
-    {% if f.choices %}
+    <span class="filters__label">{% if f.label %}{{ f.label }}{% elif f.calendar %}{% translate "Период" %}{% else %}{% translate "Месяц" %}{% endif %}</span>
+    {% if f.calendar %}
+    {% with c=f.calendar %}
+    <div class="period">
+      <a class="btn period__step" href="{{ c.prev_url }}" rel="prev" aria-label="{{ c.prev_title }}" title="{{ c.prev_title }}">&larr;</a>
+      <form class="period__form" method="get">
+        {% for k, v in c.keep %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+        <label class="period__field"><span class="note">{% translate "с" %}</span> <input type="date" name="from" value="{{ c.from }}" required></label>
+        <span aria-hidden="true">&mdash;</span>
+        <label class="period__field"><span class="note">{% translate "по" %}</span> <input type="date" name="to" value="{{ c.to }}" required></label>
+        <button class="btn" type="submit">{% translate "Показать" %}</button>
+      </form>
+      <a class="btn period__step" href="{{ c.next_url }}" rel="next" aria-label="{{ c.next_title }}" title="{{ c.next_title }}">&rarr;</a>
+    </div>
+    {% endwith %}
+    {% elif f.choices %}
     <nav class="seg" aria-label="{% if f.label %}{{ f.label }}{% else %}{% translate "Месяц" %}{% endif %}">
       {% for item in f.choices %}
       {% if item.selected %}<span class="seg__current" aria-current="true">{{ item.title }}</span>

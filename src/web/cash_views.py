@@ -34,6 +34,7 @@ from core.models import CASH, Unit
 
 from . import cash, receipts
 from .directory_views import LEDGER_CODES, BadInput, _choice, _date, _number, _select, _text
+from .bank import home_currency
 from .format import ledger_title
 from .i18n import month_title
 from .principal import get_current_principal
@@ -138,7 +139,7 @@ def parse_expense(request, who) -> dict:
         "till_id": till_id,
         "ledger": _ledger(request, who, till),
         "vat_rate": _vat_rate(request),
-        "note": _text(request, "note", _("Комментарий"), required=False),
+        "note": _text(request, "note", _("Кому и за что"), required=False),
     }
 
 
@@ -297,7 +298,11 @@ def _context(request, who, entered, *, error: str) -> dict:
         "error": error,
         "notice": _notice(request),
         "entry_key": cash.new_entry_key(),
-        "fields": expense_fields(who, entered),
+        "fields": (fields := expense_fields(who, entered)),
+        # Статей нет — форма не может быть заполнена; экран объясняет, где их взять.
+        "items_empty": not any(f["name"] == "item" for f in fields),
+        "can_manage_items": "directory.manage" in who.permissions,
+        "items_url": reverse("directory-expense-items"),
         # Чек снимается тем же движением, что вносится расход (T184).
         "receipt_accept": receipts.ACCEPT,
     }
@@ -312,11 +317,11 @@ def expense_fields(who, entered) -> list[dict]:
     """
     today = date.today()
     on = _entered_date(entered) or today
-    return [
+    fields = [
         {"kind": "date", "name": "date", "label": _("Дата расхода"), "required": True,
          "value": entered.get("date") or today.isoformat(),
          "help": _("Когда деньги вышли из кассы.") + _closed_hint(who, on)},
-        {"kind": "number", "name": "amount", "label": _("Сумма"), "required": True,
+        {"kind": "number", "name": "amount", "label": _("Сумма") + _currency_suffix(who), "required": True,
          "value": entered.get("amount", ""),
          "help": _("Сумма из чека — с налогом, если он в ней есть.")},
         # Ставка, а не сумма налога (T146, D042): в чеке напечатана ставка, а
@@ -325,7 +330,7 @@ def expense_fields(who, entered) -> list[dict]:
         # не сходится.
         {"kind": "number", "name": "vat_rate", "label": _("Ставка НДС, %"),
          "value": entered.get("vat_rate", ""),
-         "help": _("В Сербии 20 или 10. Пусто — налог не выделяем: в P&L такая "
+         "help": _("Ставка, напечатанная в чеке. Пусто — налог не выделяем: в P&L такая "
                    "трата пойдёт полной суммой. С заполненной ставкой в P&L по "
                    "умолчанию поедет сумма без НДС.")},
         _select(
@@ -357,11 +362,28 @@ def expense_fields(who, entered) -> list[dict]:
             help=_("Пусто — регистр берётся из выбранной кассы; без кассы это "
                    "официальный. Выбранное здесь значение сильнее кассы."),
         ),
-        {"kind": "text", "name": "note", "label": _("Комментарий"),
+        {"kind": "text", "name": "note", "label": _("Кому и за что"),
          "value": entered.get("note", ""),
          "help": _("Зачем потратили. Через месяц это единственное, по чему "
                    "строку узнают.")},
     ]
+    return _without_empty_items(fields)
+
+
+def _currency_suffix(who) -> str:
+    """«, RSD» к подписи суммы: деньги без валюты читаются как неизвестно какие (#311)."""
+    code = home_currency(who.tenant_id)
+    return f", {code}" if code else ""
+
+
+def _without_empty_items(fields: list[dict]) -> list[dict]:
+    """Пустой список статей из формы убирается: вместо него экран говорит, что делать (#311).
+
+    Справочник статей на свежем партнёре пуст намеренно (Q015), и поле выбора без
+    единого варианта — тупик без объяснения. Форма без этого поля показывается
+    вместе с пояснением и входом в справочник (`items_empty` в контексте).
+    """
+    return [f for f in fields if not (f["name"] == "item" and not f["options"])]
 
 
 def _till_field(entered) -> list[dict]:

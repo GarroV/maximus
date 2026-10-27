@@ -107,6 +107,9 @@ def statement(request):
     who, refused = _who(request)
     if refused:
         return refused
+    # Выписки ещё нет — начинать надо с загрузки, а не с пустого сопоставления (#318, модуль 7).
+    if not BankStatement.objects.filter(tenant_id=who.tenant_id).exists():
+        return redirect("statement-upload")
     return _statement_page(request, who, request.GET)
 
 

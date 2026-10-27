@@ -25,6 +25,9 @@ from test_directory import payruns_restored, sql  # noqa: F401
 
 EXPENSES, INVOICES = "/expenses/", "/invoices/"
 JUNE = {"from": "2026-06-01", "to": "2026-06-30"}
+# Рабочий месяц на сиде — июнь (#310): он умолчание и в адрес не пишется. Чтобы
+# проверить, что ссылки несут период, берём месяц, который умолчанием не является.
+MAY = {"from": "2026-05-01", "to": "2026-05-31"}
 
 
 def rows_of(page: str) -> dict[str, str]:
@@ -57,11 +60,15 @@ def page_of(client, path, **params) -> str:
 
 @pytest.mark.parametrize("path", [EXPENSES, INVOICES])
 def test_no_dropdown_and_no_show_button(client, sql, path):  # noqa: F811
-    """На списке нет `<select>` и кнопки «Показать»: нажатая ссылка и есть отбор."""
+    """На списке нет `<select>`; «Показать» — только у календаря периода (#310).
+
+    Остальной отбор — ссылки: нажатая ссылка и есть применённый отбор.
+    """
     login_as(client, "accountant")
     page = page_of(client, path)
     assert "<select" not in page
-    assert "Показать</button>" not in page
+    assert page.count("Показать</button>") == 1
+    assert "Показать</button>" in rows_of(page)["period"]
     assert rows_of(page), "отбор пропал целиком"
 
 
@@ -94,10 +101,10 @@ def test_accountant_is_offered_every_unit_and_ledger(client, sql, units):  # noq
 def test_every_link_keeps_the_rest_of_the_filter(client, sql, units):  # noqa: F811
     """Ссылка меняет одно значение и несёт остальные: месяц и регистр не теряются."""
     login_as(client, "accountant")
-    rows = rows_of(page_of(client, EXPENSES, ledger="official", **JUNE))
+    rows = rows_of(page_of(client, EXPENSES, ledger="official", **MAY))
     for link in links_of(rows["unit"]):
         assert (link.get("ledger"), link.get("from"), link.get("to")) == (
-            "official", JUNE["from"], JUNE["to"],
+            "official", MAY["from"], MAY["to"],
         ), link
     # Выбранное значение — текст, а не ссылка на само себя.
     assert current_of(rows["ledger"]) == ["Официальный"]
@@ -105,19 +112,23 @@ def test_every_link_keeps_the_rest_of_the_filter(client, sql, units):  # noqa: F
     # Месяц: соседние — ссылками с тем же регистром, выбранный — текстом.
     months = links_of(rows["period"])
     assert [(m["from"], m["ledger"]) for m in months] == [
-        ("2026-05-01", "official"), ("2026-07-01", "official"),
+        ("2026-04-01", "official"), ("2026-06-01", "official"),
     ]
-    assert current_of(rows["period"]) == ["Июнь 2026"]
+    # Период — календарь «с — по»: даты в полях, стрелки листают месяц.
+    assert re.search(r'name="from" value="2026-05-01"', rows["period"])
+    assert re.search(r'name="to" value="2026-05-31"', rows["period"])
+    # Остальной отбор уходит с формой скрытым полем, а не теряется.
+    assert re.search(r'type="hidden" name="ledger" value="official"', rows["period"])
 
 
 def test_item_is_picked_on_its_own_page_and_comes_back(client, sql, item):  # noqa: F811
     """Статья выбирается на отдельной странице, и ссылка возвращает весь отбор."""
     login_as(client, "accountant")
-    rows = rows_of(page_of(client, EXPENSES, ledger="official", **JUNE))
+    rows = rows_of(page_of(client, EXPENSES, ledger="official", **MAY))
     (pick,) = [link for link in links_of(rows["item"]) if link["_path"].endswith("/item/")]
     assert pick["ledger"] == "official"
 
-    picker = page_of(client, pick["_path"], ledger="official", **JUNE)
+    picker = page_of(client, pick["_path"], ledger="official", **MAY)
     chosen = [
         link for link in links_of(re.search(r'<ul class="pick">(.*?)</ul>', picker, re.S).group(1))
         if link.get("item") == str(item)
@@ -125,7 +136,7 @@ def test_item_is_picked_on_its_own_page_and_comes_back(client, sql, item):  # no
     assert chosen and chosen[0]["_path"] == EXPENSES
     assert (chosen[0]["ledger"], chosen[0]["from"]) == ("official", JUNE["from"])
 
-    back = rows_of(page_of(client, EXPENSES, item=str(item), ledger="official", **JUNE))
+    back = rows_of(page_of(client, EXPENSES, item=str(item), ledger="official", **MAY))
     assert current_of(back["item"]) == ["Вода"]
 
 
@@ -136,3 +147,16 @@ def test_invoice_state_row_marks_the_choice(client, sql):  # noqa: F811
     assert current_of(rows["state"]) == ["Только неоплаченные"]
     states = [link.get("state") for link in links_of(rows["state"])]
     assert states == [None, "paid"]
+
+
+@pytest.mark.parametrize("path", [EXPENSES, INVOICES])
+def test_list_opens_on_the_working_month_not_on_today(client, sql, path):  # noqa: F811
+    """Без периода в адресе список открывается на последнем заведённом месяце (#310).
+
+    Иначе экран встречает пустым сегодняшним месяцем, а данные лежат в рабочем, и
+    «данных нет» читается как потеря.
+    """
+    login_as(client, "accountant")
+    period = rows_of(page_of(client, path))["period"]
+    assert 'name="from" value="2026-06-01"' in period
+    assert 'name="to" value="2026-06-30"' in period

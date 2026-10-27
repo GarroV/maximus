@@ -25,7 +25,7 @@
 шапки экрана.
 {% endcomment %}
 <div class="head">
-  <h1>{% translate "Расходы" %}</h1>
+  <h1>{% translate "Расходы" %} · {{ heading_period }}</h1>
   <a class="btn primary" href="{{ add_url }}">{% translate "Внести расход" %}</a>
 </div>
 <p class="sub">{% translate "Наличные из кассы точек." %}</p>
@@ -72,7 +72,7 @@
 <div class="control">
   <div class="control__card" data-cash="{{ cash_raw }}">
     <span class="control__label">{% translate "Ушло из кассы" %}</span>
-    <span class="control__num">&minus;{{ cash_text }}</span>
+    <span class="control__num">{% if cash_signed %}&minus;{% endif %}{{ cash_text }}{% if currency %} <small>{{ currency }}</small>{% endif %}</span>
     {% comment %}
     Число расходов набрано без склонения намеренно: «Расходов: 1» читается
     ровно так же понятно, как «1 расход», а множественное число здесь пришлось
@@ -83,12 +83,12 @@
   </div>
   <div class="control__card" data-pnl="{{ pnl_raw }}">
     <span class="control__label">{% translate "Принято в P&L" %}</span>
-    <span class="control__num control__num--ok">&minus;{{ pnl_text }}</span>
+    <span class="control__num control__num--ok">{% if pnl_signed %}&minus;{% endif %}{{ pnl_text }}{% if currency %} <small>{{ currency }}</small>{% endif %}</span>
     <span class="note">{% translate "то, что дойдёт до отчёта за этот же месяц" %}</span>
   </div>
   <div class="control__card{% if gap_reasons %} control__card--gap{% endif %}" data-gap="{{ gap_raw }}">
     <span class="control__label">{% translate "Разрыв" %}</span>
-    <span class="control__num{% if gap_reasons %} control__num--gap{% endif %}">{{ gap_text }}</span>
+    <span class="control__num{% if gap_reasons %} control__num--gap{% endif %}">{{ gap_text }}{% if currency %} <small>{{ currency }}</small>{% endif %}</span>
     {% if gap_reasons %}
     <span class="note">{{ gap_reasons|join:" · " }}</span>
     {% else %}
@@ -125,7 +125,7 @@
       <th>{% translate "Касса" %}</th>
       <th class="num">{% translate "НДС" %}</th>
       <th>{% translate "Регистр" %}</th>
-      <th>{% translate "Комментарий" %}</th>
+      <th>{% translate "Кому и за что" %}</th>
       <th>{% translate "Чек" %}</th>
       <th>{% translate "Состояние" %}</th>
     </tr>
@@ -184,7 +184,6 @@
 {% notice "empty" title=empty %}<span data-total="{{ total_raw }}">{% blocktranslate %}Сюда попадает то, что тратят из кассы на точках: дата, сумма, статья расхода
 и точка. Управляющий вносит расход с телефона за минуту, и строка появляется
 здесь сразу — ждать конца месяца не нужно.{% endblocktranslate %}</span>
-  <a class="btn next" href="{{ add_url }}">{% translate "Внести первый расход" %}</a>
 {% endnotice %}
 {% endif %}
 {% endif %}

@@ -31,7 +31,19 @@
 {% notice "alert" title=not_saved %}{{ error }}{% endnotice %}
 {% endif %}
 
-<form class="card wide" method="post" enctype="multipart/form-data">{% csrf_token %}
+{% if items_empty %}
+{% comment %}
+Справочник статей на свежем партнёре пуст намеренно (Q015): список придёт с файла
+бухгалтера. Пустой выбор без слов — тупик (#311); здесь сказано, где статьи берутся.
+{% endcomment %}
+{% translate "Справочник статей расходов ещё пуст" as empty_items %}
+{% notice "empty" title=empty_items %}
+{% if can_manage_items %}{% translate "Расход вносится на статью. Заведите статьи или загрузите их списком — и форма заработает." %}
+<a class="btn next" href="{{ items_url }}">{% translate "Завести статьи расходов" %}</a>
+{% else %}{% translate "Расход вносится на статью, а статьи ведёт администратор сети или бухгалтер. Попросите завести хотя бы одну — и расход можно будет внести." %}{% endif %}
+{% endnotice %}
+{% endif %}
+{% if not items_empty %}<form class="card wide" method="post" enctype="multipart/form-data">{% csrf_token %}
   <input type="hidden" name="entry_key" value="{{ entry_key }}">
   {% include "web/directory/fields.html" with fields=fields %}
   {% comment %}
@@ -48,5 +60,5 @@
     {% include "web/components/field.html" with id="receipt" name="receipt" label=receipt_label type="file" accept=receipt_accept help=receipt_help %}
   </p>
   <p class="actions"><button type="submit" class="primary">{% translate "Записать расход" %}</button></p>
-</form>
+</form>{% endif %}
 {% endblock %}

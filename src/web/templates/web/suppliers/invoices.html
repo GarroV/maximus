@@ -17,13 +17,16 @@
 {% block title %}{% translate "Счета" %}{% endblock %}
 {% block content %}
 <div class="head">
-  <h1>{% translate "Счета" %}</h1>
+  <h1>{% translate "Счета" %} · {{ heading_period }}</h1>
   <a class="btn primary" href="{{ add_url }}">{% translate "Внести счёт" %}</a>
 </div>
-<p class="sub">{% translate "Что нам выставили поставщики и что из этого оплачено." %}
-  <a href="{{ payment_url }}">{% translate "Оплата без счёта" %}</a> ·
-  <a href="{{ inbox_url }}">{% translate "Инбокс" %}</a> ·
-  <a href="{{ papers_url }}">{% translate "Бумаги с точек" %}</a></p>
+<p class="sub">{% translate "Что нам выставили поставщики и что из этого оплачено." %}</p>
+{% comment %}Соседние входы раздела — кнопками, а не словами в строке подзаголовка (#318).{% endcomment %}
+<p class="actions">
+  <a class="btn" href="{{ payment_url }}">{% translate "Оплата без счёта" %}</a>
+  <a class="btn" href="{{ inbox_url }}">{% translate "Инбокс" %}</a>
+  <a class="btn" href="{{ papers_url }}">{% translate "Бумаги с точек" %}</a>
+</p>
 
 {% if error %}
 {% translate "Не показано." as failed %}

@@ -103,8 +103,24 @@ def months(chosen: dict, *, base: str, query: dict) -> dict:
     def link(bounds):
         return url(base, query, **{"from": bounds[0].isoformat(), "to": bounds[1].isoformat()})
 
+    # Стрелка листает отрезок на его длину, целый месяц — месяцем (#310).
+    if whole:
+        back, forward = before, after
+    else:
+        span = (end - start).days + 1
+        back = (start - timedelta(days=span), start - timedelta(days=1))
+        forward = (end + timedelta(days=1), end + timedelta(days=span))
+    rest = sorted((k, v) for k, v in query.items() if k not in ("from", "to"))
     return {
         "name": "period",
+        # Календарь «с — по»: два поля даты, остальной отбор несут скрытые поля.
+        "calendar": {
+            "from": start.isoformat(), "to": end.isoformat(), "keep": rest,
+            "current": current, "whole": whole,
+            "prev_url": link(back), "next_url": link(forward),
+            "prev_title": month_title(back[0]) if whole else f"{_short(back[0])} — {_short(back[1])}",
+            "next_title": month_title(forward[0]) if whole else f"{_short(forward[0])} — {_short(forward[1])}",
+        },
         "choices": [
             {"title": month_title(before[0]), "selected": False,
              "url": link(before), "rel": "prev"},
