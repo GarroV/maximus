@@ -4920,10 +4920,6 @@ msgstr ""
 "The login page has quick sign-in buttons for seed accounts (DEV_LOGIN=1)"
 
 #: web/templates/web/components/header.html:204
-msgid "Данные и итоги на всех страницах — только по этой точке"
-msgstr "Data and totals on all pages — for this unit only"
-
-#: web/templates/web/components/header.html:204
 #, python-format
 msgid "точка: %(code)s"
 msgstr "unit: %(code)s"
@@ -5875,14 +5871,6 @@ msgstr "Log in"
 #: web/templates/web/login.html:2 web/templates/web/login.html:4
 msgid "Вход"
 msgstr "Login"
-
-#: web/templates/web/login.html:5
-msgid "Логин и пароль выдаёт администратор сети."
-msgstr "The network administrator issues your login and password."
-
-#: web/templates/web/login.html:20
-msgid "Это демо-стенд"
-msgstr "This is a demo environment"
 
 #: web/templates/web/login.html:22
 msgid ""
@@ -8374,14 +8362,6 @@ msgstr "What happened"
 msgid "до %(day)s"
 msgstr "until %(day)s"
 
-#: web/stages.py
-msgid "Доработка"
-msgstr "Refining"
-
-#: web/stages.py
-msgid "Разработка в процессе"
-msgstr "In development"
-
 #: web/navigation.py
 msgid "Отчёты"
 msgstr "Reports"
@@ -8402,22 +8382,6 @@ msgstr "Payouts"
 msgid "Интеграция с Dodo IS"
 msgstr "Dodo IS integration"
 
-#: web/templates/web/planned.html
-msgid "Очередь: %(when)s"
-msgstr "Planned for: %(when)s"
-
-#: web/stages.py
-msgid "Карточки находок, готовность в процентах, подтверждение закрытия"
-msgstr "Finding cards, readiness in percent, closing confirmation"
-
-#: web/stages.py
-msgid "Приглашение человека, история доступов, настраиваемые наборы прав"
-msgstr "Inviting a person, access history, configurable permission sets"
-
-#: web/stages.py
-msgid "Именованные надбавки и вилка ставки должности"
-msgstr "Named allowances and a rate range for the position"
-
 #: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Once payroll is complete"
@@ -8433,26 +8397,6 @@ msgstr "What went to people and when: the payout sheet, transfer marks, the rema
 #: web/stages.py
 msgid "Отработанные часы приезжают из Dodo IS вместо ручного ввода. Механизм подключения уже есть: каждый поток включается отдельно и по умолчанию выключен. Не хватает экрана и самого доступа к API."
 msgstr "Worked hours arrive from Dodo IS instead of manual entry. The connection mechanism already exists: each feed is switched on separately and is off by default. What is missing is the screen and the API access itself."
-
-#: web/stages.py
-msgid "Экрана ещё нет — ниже то, что здесь появится"
-msgstr "The screen does not exist yet — below is what will appear here"
-
-#: web/stages.py
-msgid "Подсказка статьи кнопкой, а не подстановкой в поле"
-msgstr "The article hint as a button, not filled into the field"
-
-#: web/stages.py
-msgid "Касса точки и расход, не дошедший до отчёта без документа"
-msgstr "The unit till and an expense that never reached the report without a document"
-
-#: web/stages.py
-msgid "Версии статьи: правка не меняет закрытый месяц"
-msgstr "Article versions: an edit does not change a closed month"
-
-#: web/stages.py
-msgid "Разбор в две руки: директор разносит, бухгалтер подтверждает"
-msgstr "Sorting in two hands: the director allocates, the accountant confirms"
 
 #: web/templates/web/guide.html
 msgid ""
@@ -8717,10 +8661,6 @@ msgid ""
 msgstr "The value in force is %(value)s, although the rule is set by law (%(source)s). The override was created before the frame, and the calculation uses it — a new version can restore the country value."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Что читает правило, последствия правки и сравнение стран"
-msgstr "What reads the rule, the effect of changing it, and a country comparison"
-
-#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid ""
 "Сейчас действует %(value)s, и сравнить это с рамкой страны (%(source)s) "
@@ -8854,10 +8794,6 @@ msgid ""
 "пор доля ФОТ от выручки показана прочерком: ноль в этой строке читался "
 "бы как посчитанный ответ."
 msgstr "There is no revenue in the product yet — it will arrive with the Dodo IS connector. Until then, payroll cost's share of revenue is shown as a dash: a zero in this row would read as a calculated answer."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Доля ФОТ от выручки: ждёт коннектора Dodo IS"
-msgstr "Payroll cost's share of revenue: waiting for the Dodo IS connector"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Доля в часах месяца"
@@ -10599,11 +10535,6 @@ msgstr "An incoming payment does not pay a supplier invoice."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
-"Правила сопоставления, порог и платёж на несколько счетов с авансом"
-msgstr "Matching rules, the threshold and one payment across several invoices with an advance"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid ""
 "Свободного внесённого платежа на эту сумму в пределах месяца нет."
 msgstr "There is no unmatched entered payment for this amount within a month."
 
@@ -11080,10 +11011,6 @@ msgid "Доля ФОТ"
 msgstr "Payroll share"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Доля строки в выручке и пометка отклонения выше порога"
-msgstr "Line share of revenue and a mark for deviation above the threshold"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Консолидация по сети"
 msgstr "Network consolidation"
 
@@ -11288,3 +11215,283 @@ msgstr "A rate more than a week ahead cannot be entered — check the year."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
 msgstr "not the whole partner is visible: some ledgers or stores are closed to you"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"MAXIMUS собирает первичные данные пиццерий и складывает из них P&L "
+"единого формата."
+msgstr "MAXIMUS collects the primary data of pizzerias and builds a P&L in one common format from it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"MAXIMUS — внутренний сервис Dodo Brands для партнёров: он собирает "
+"первичные данные пиццерий и складывает из них P&L единого формата."
+msgstr "MAXIMUS is an internal Dodo Brands service for partners: it collects the primary data of pizzerias and builds a P&L in one common format from it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "P&L единого формата"
+msgstr "A P&L in one common format"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "P&L по точкам и по сети"
+msgstr "P&L by unit and for the whole network"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Администратор платформы входит через Google только рабочим аккаунтом "
+"компании. Войдите рабочим аккаунтом или логином и паролем."
+msgstr "A platform administrator signs in with Google only using a company work account. Sign in with your work account or with your login and password."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Аккаунт Google отвязан: вход — логином и паролем."
+msgstr "The Google account is unlinked: sign in with your login and password."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Аккаунт Google привязан к этой учётной записи."
+msgstr "A Google account is linked to this user account."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Аккаунт Google привязан: теперь можно входить кнопкой «Войти через "
+"Google»."
+msgstr "The Google account is linked: you can now sign in with the “Sign in with Google” button."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Банковская выписка со сверкой платежей"
+msgstr "Bank statement with payment matching"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Бухгалтер разбирает счета и выписку"
+msgstr "The accountant sorts out invoices and the statement"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ваша учётная запись уже привязана к другому аккаунту Google. Войдите тем "
+"аккаунтом или логином и паролем."
+msgstr "Your user account is already linked to a different Google account. Sign in with that account or with your login and password."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ведомость по сотрудникам"
+msgstr "Payroll sheet by employee"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Войдите учётной записью, которую завёл администратор вашего партнёра, — "
+"паролем или аккаунтом Google."
+msgstr "Sign in with the account your partner's administrator created for you — with a password or a Google account."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Войдите учётной записью, которую завёл администратор вашего партнёра."
+msgstr "Sign in with the account your partner's administrator created for you."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Войти через Google"
+msgstr "Sign in with Google"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Войти через Google не получилось. Попробуйте ещё раз или войдите логином "
+"и паролем."
+msgstr "Signing in with Google did not work. Try again or sign in with your login and password."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вход через Google"
+msgstr "Sign-in with Google"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выгрузки в xlsx"
+msgstr "Exports to xlsx"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Данные партнёра в одном месте"
+msgstr "A partner's data in one place"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ещё"
+msgstr "More"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Забыли пароль — напишите ему же."
+msgstr "Forgot your password? Write to the same person."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Закрытие и утверждение месяца"
+msgstr "Closing and approving the month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата по правилам страны"
+msgstr "Payroll by the country's rules"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата считается по правилам страны"
+msgstr "Payroll is calculated by the country's rules"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Каждый вносит своё: управляющий — часы и расходы своей точки, бухгалтер "
+"— счета поставщиков и банковскую выписку. Что ждёт разбора, видно сразу "
+"у пункта меню."
+msgstr "Everyone enters their own part: the unit manager enters the hours and expenses of their unit, the accountant enters supplier invoices and the bank statement. What is waiting to be sorted out shows right next to the menu item."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как удалить данные"
+msgstr "How to delete data"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кому передаются"
+msgstr "Who it is shared with"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Конфиденциальность"
+msgstr "Privacy"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кто мы"
+msgstr "Who we are"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц партнёра"
+msgstr "A partner's month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц утверждается — и P&L готов"
+msgstr "The month is approved — and the P&L is ready"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Наличные расходы с чеком"
+msgstr "Cash expenses with a receipt"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Начните с первого месяца"
+msgstr "Start with the first month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Никому, кроме инфраструктуры, на которой работает сервис."
+msgstr "With nobody except the infrastructure the service runs on."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отвязать Google"
+msgstr "Unlink Google"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отчёт собирается из внесённого, а не переписывается руками. Три регистра "
+"учёта — официальный, дополнительный и внутренний — видны тем, кому их "
+"положено видеть."
+msgstr "The report is built from what has been entered, not retyped by hand. The three accounting ledgers — official, supplementary and internal — are visible to those who are meant to see them."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Первичка — по ходу месяца, а не в последний день"
+msgstr "Primary data during the month, not on the last day"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"При входе через Google мы получаем ваше имя, адрес почты и идентификатор "
+"аккаунта Google. Они нужны только для того, чтобы узнать уже заведённого "
+"пользователя: новых учётных записей вход через Google не создаёт."
+msgstr "When you sign in with Google we receive your name, e-mail address and Google account ID. They are used only to recognise a user who already exists: signing in with Google never creates new accounts."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Привяжите аккаунт Google, чтобы входить одной кнопкой. Почта аккаунта "
+"может отличаться от почты в учётной записи."
+msgstr "Link a Google account to sign in with one button. The account's e-mail may differ from the e-mail in your user account."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Привязать Google"
+msgstr "Link Google"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Раздел ещё строится."
+msgstr "This section is still being built."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сбор данных и P&L партнёров Dodo"
+msgstr "Data collection and P&L for Dodo partners"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверка с таблицей бухгалтерии"
+msgstr "Reconciliation with the accountant's spreadsheet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сегодня у партнёров всё в Excel и считается руками. Здесь часы, расходы, "
+"счета и выписка вносятся по ходу месяца, а зарплата и P&L собираются из "
+"того, что уже внесено."
+msgstr "Today partners keep everything in Excel and calculate it by hand. Here hours, expenses, invoices and the statement are entered during the month, and payroll and the P&L are built from what has already been entered."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "След расчёта каждой суммы"
+msgstr "A calculation trace for every amount"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ставки, коэффициенты и надбавки живут в правилах с датой действия: новое "
+"правило не меняет закрытый месяц. Любую сумму можно раскрыть до правил, "
+"которые её дали."
+msgstr "Rates, coefficients and allowances live in rules with an effective date: a new rule does not change a closed month. Any amount can be expanded down to the rules that produced it."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счета поставщиков и бумаги с точки"
+msgstr "Supplier invoices and paperwork from the unit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Табель часов по точкам"
+msgstr "Timesheet of hours by unit"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точки вносят часы, расходы из кассы и документы"
+msgstr "Units enter hours, cash expenses and documents"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётную запись заводит администратор вашего партнёра."
+msgstr "Your account is created by your partner's administrator."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Учётные данные пользователей и то, что вносит партнёр: часы, расходы, "
+"счета, документы и другие данные, из которых собирается P&L."
+msgstr "User account details and what the partner enters: hours, expenses, invoices, documents and other data the P&L is built from."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Через администратора вашего партнёра или письмом на <a "
+"href=\"mailto:%(email)s\">%(email)s</a>."
+msgstr "Through your partner's administrator or by writing to <a href=\"mailto:%(email)s\">%(email)s</a>."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Через администратора вашего партнёра."
+msgstr "Through your partner's administrator."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что хранится"
+msgstr "What is stored"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Эта почта указана сразу в нескольких учётных записях, и понять, в какую "
+"входить, нельзя. Войдите логином и паролем и сообщите администратору."
+msgstr "This e-mail is set on several user accounts at once, so it is impossible to tell which one to sign in to. Sign in with your login and password and tell your administrator."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этой почты нет среди учётных записей MAXIMUS. Войдите логином и паролем "
+"или попросите администратора вашего партнёра указать эту почту в вашей "
+"учётной записи."
+msgstr "This e-mail is not on any MAXIMUS user account. Sign in with your login and password or ask your partner's administrator to add this e-mail to your user account."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот аккаунт Google уже привязан к другой учётной записи MAXIMUS. "
+"Привяжите другой аккаунт или попросите администратора разобраться."
+msgstr "This Google account is already linked to another MAXIMUS user account. Link a different account or ask your administrator to sort it out."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "в разработке"
+msgstr "in development"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "или"
+msgstr "or"
