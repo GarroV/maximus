@@ -17,10 +17,11 @@
 main.page--landing { max-width: none; margin: 0; padding: 0; }
 
 .lp {
-  --ink: #1B2028;
-  --ink-2: #5C6672;
-  --ink-3: #5F6874;
-  --lp-line: rgba(27, 32, 40, .14);
+  /* Цвета — только токенами (tokens.css, ядро forma). Белые листы идут за темой
+     (--surface/--ink), бежевые листы и карточки — брендовые и одинаковы в обеих
+     темах, поэтому текст на них — брендовый тёмный (--brand-text). */
+  --lp-line: color-mix(in srgb, currentColor 14%, transparent);
+  --lp-shade: color-mix(in srgb, var(--brand-text) 20%, transparent);
   --lp-wrap: 1240px;
   --lp-gutter: 24px;
   --lp-bar-h: 72px;
@@ -50,11 +51,11 @@ main.page--landing { max-width: none; margin: 0; padding: 0; }
      вёрстки. Свободное место внизу закрывает следующий лист, наезжая при прокрутке. */
   justify-content: flex-start;
   border-radius: 28px 28px 0 0;
-  box-shadow: 0 -14px 36px -10px rgba(27, 32, 40, .2);
+  box-shadow: 0 -14px 36px -10px var(--lp-shade);
 }
-.lp-sheet--white { background: var(--surface); }
+.lp-sheet--paper { background: var(--surface); }
 .lp-sheet--beige { background: var(--brand-beige); }
-.lp-sheet--purple { background: var(--brand-purple-deep); color: #fff; }
+.lp-sheet--purple { background: var(--brand-purple-deep); color: var(--brand-beige-light); }
 .lp-hero { top: var(--lp-bar-h); padding-top: 40px; border-radius: 0; box-shadow: none; }
 .lp-hero > .lp-cols { margin-block: auto; }
 
@@ -76,7 +77,7 @@ main.page--landing { max-width: none; margin: 0; padding: 0; }
   text-overflow: ellipsis;
   border-radius: 14px 14px 0 0;
   background: inherit;
-  box-shadow: 0 -10px 18px -10px rgba(27, 32, 40, .22);
+  box-shadow: 0 -10px 18px -10px var(--lp-shade);
   font-size: 15px;
   font-weight: var(--w-semibold);
   line-height: var(--lp-tab-h);
@@ -125,14 +126,14 @@ main.page--landing { max-width: none; margin: 0; padding: 0; }
 .lp-cta {
   display: inline-flex; align-items: center; justify-content: center;
   height: 56px; padding: 0 30px; border-radius: 14px;
-  background: var(--brand-orange); color: var(--ink);
+  background: var(--brand-orange); color: var(--brand-text);
   font-size: 18px; font-weight: var(--w-semibold); line-height: 1; text-decoration: none; white-space: nowrap;
 }
-.lp-cta:hover { background: color-mix(in srgb, var(--brand-orange) 86%, #fff); }
+.lp-cta:hover { background: color-mix(in srgb, var(--brand-orange) 86%, var(--brand-beige-light)); }
 .lp-cta--sm { height: 40px; padding: 0 18px; border-radius: 10px; font-size: 15px; }
 .lp a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
-.lp-sheet--purple a:focus-visible { outline-color: #fff; }
-.lp-sheet--purple .lp-cta:focus-visible { outline-color: #fff; }
+.lp-sheet--purple a:focus-visible { outline-color: var(--brand-beige-light); }
+.lp-sheet--purple .lp-cta:focus-visible { outline-color: var(--brand-beige-light); }
 
 /* ── Снимки ─────────────────────────────────────────────────────────────── */
 .lp-shot { display: block; width: 100%; height: auto; border: 1px solid var(--lp-line); border-radius: 10px; background: var(--surface); }
@@ -152,7 +153,7 @@ main.page--landing { max-width: none; margin: 0; padding: 0; }
 
 /* ── Последний лист ─────────────────────────────────────────────────────── */
 .lp-copy--final { max-width: 820px; }
-.lp-final .lp-body { color: rgba(255, 255, 255, .84); font-size: 20px; }
+.lp-final .lp-body { color: color-mix(in srgb, var(--brand-beige-light) 84%, transparent); font-size: 20px; }
 .lp-final__login { margin: 28px 0 0; }
 
 /* ── Узкое окно: одна колонка, снимок под текстом ───────────────────────── */
@@ -187,20 +188,21 @@ main.page--landing { max-width: none; margin: 0; padding: 0; }
 }
 
 /* Страница всегда светлая: и в тёмной теме фон под листами — белый. */
-body:has(.lp) { background: #fff; }
-.lp { background: #fff; }
-.lp-sheet--white { background: #fff; }
-.lp-sheet--purple .lp-link { color: #fff; }
-.lp-bar { background: #fff; }
+body:has(.lp) { background: var(--surface); }
+.lp { background: var(--surface); }
+.lp-sheet--purple .lp-link { color: var(--brand-beige-light); }
+.lp-bar { background: var(--surface); }
+.lp-sheet--beige, .lp-card { --ink: var(--brand-text); --ink-2: var(--brand-text-muted); --ink-3: var(--brand-text-muted); color: var(--ink); }
+.lp-tab { --lp-tab-i: 0; }
 .lp-bar .langpill { flex-direction: row; }
 .lp-bar .langpill__item { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
 /* На месте снимка — перечень того, что на экране: строки в рамке листа. */
-.lp-card { box-sizing: border-box; padding: 28px 32px; border: 1px solid var(--lp-line); border-radius: 16px; background: rgba(255, 255, 255, .6); }
+.lp-card { box-sizing: border-box; padding: 28px 32px; border: 1px solid var(--lp-line); border-radius: 16px; background: color-mix(in srgb, var(--brand-beige-light) 60%, transparent); }
 .lp-card .lp-lines li { font-size: 17px; }
 .lp-card__h { margin: 0 0 12px; font-size: 14px; font-weight: var(--w-semibold); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
-.lp-sheet--white .lp-card { background: var(--brand-beige-light, #faf6f0); }
-.lp-foot { padding: 24px var(--lp-side) 32px; background: var(--brand-purple-deep); color: rgba(255, 255, 255, .72); font-size: 14px; }
-.lp-foot a { color: #fff; }
+.lp-sheet--paper .lp-card { background: var(--brand-beige-light); }
+.lp-foot { padding: 24px var(--lp-side) 32px; background: var(--brand-purple-deep); color: color-mix(in srgb, var(--brand-beige-light) 72%, transparent); font-size: 14px; }
+.lp-foot a { color: var(--brand-beige-light); }
 .lp-roles { margin: 20px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--ink-2); font-size: 16px; }
 .lp-roles a { color: var(--ink); font-weight: var(--w-semibold); }
 .lp-tour { counter-reset: tour; }

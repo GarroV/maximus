@@ -152,7 +152,10 @@ def test_the_raise_lives_on_its_own_page_not_on_the_list(client, kitchen):
         listing = body(client.get("/directory/groups/"))
         assert 'href="/directory/groups/raise/"' in listing, "со списка не дойти до индексации"
         assert 'name="percent"' not in listing, "форма индексации осталась на списке групп"
-        assert "<details" not in listing, "на списке групп осталось раскрытие"
+        # Меню учётной записи в каркасе — тоже `<details>` (T241); смотрим только
+        # на сам экран, а не на каркас вокруг него.
+        screen = listing[listing.index('<main'):listing.index('</main>')]
+        assert "<details" not in screen, "на списке групп осталось раскрытие"
 
         page = client.get("/directory/groups/raise/")
         assert page.status_code == 200, body(page)[:300]

@@ -217,7 +217,9 @@ def test_an_inactive_account_does_not_log_in(client, google, owner, monkeypatch)
     assert logged_in_as(client) is None and back["Location"] == "/login/?google=unknown"
 
 
-def test_a_platform_admin_with_a_personal_gmail_is_refused(client, google, owner, monkeypatch, caplog):
+def test_a_platform_admin_with_a_personal_gmail_is_refused(
+    client, google, owner, monkeypatch, caplog,
+):
     """Администратор платформы — только аккаунтом домена компании (`hd`)."""
     set_email(owner, "admin", "boss@dodobrands.io")
     owner.execute("insert into platform_admins (user_id) values (%s)", (user_id_of("admin"),))
@@ -300,7 +302,9 @@ def test_next_never_leads_outside_the_product(client, google, owner, monkeypatch
 def test_next_inside_the_product_is_kept(client, google, owner, monkeypatch):
     set_email(owner, "director", "ana@example.com")
 
-    back = go_through_google(client, monkeypatch, identity(), start="/auth/google/start/?next=/expenses/")
+    back = go_through_google(
+        client, monkeypatch, identity(), start="/auth/google/start/?next=/expenses/",
+    )
 
     assert back["Location"] == "/expenses/"
 

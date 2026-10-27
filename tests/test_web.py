@@ -154,7 +154,16 @@ def test_no_session_wide_set_in_source():
 # --- страницы ----------------------------------------------------------------
 
 
-def test_root_redirects_to_periods(client):
+def test_root_shows_the_landing_to_a_guest(client):
+    """Не вошедший на корне видит посадочную страницу, а не уход на вход (T241)."""
+    response = client.get("/")
+    assert response.status_code == 200
+    assert 'class="lp"' in body(response)
+    assert '<nav class="sidenav' not in body(response), "гостю показано меню продукта"
+
+
+def test_root_redirects_a_signed_in_person_to_periods(client):
+    login_as(client, "director")
     response = client.get("/")
     assert response.status_code == 302
     assert response["Location"] == "/periods/"

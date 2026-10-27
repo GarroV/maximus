@@ -22,7 +22,7 @@
 from __future__ import annotations
 
 import json
-from functools import lru_cache
+from functools import cache, lru_cache
 from pathlib import Path
 
 from django import template
@@ -342,7 +342,7 @@ def is_role_name(name, role_title) -> bool:
 BRAND_DIR = "web/brand/"
 
 
-@lru_cache(maxsize=None)
+@cache
 def _brand_file(name: str) -> bool:
     from django.contrib.staticfiles import finders
 

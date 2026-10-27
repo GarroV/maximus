@@ -28,6 +28,10 @@ STYLESHEETS = (
     # Ядро линейки и слой продукта из `GarroV/forma` (T222): левая панель и
     # остальные общие компоненты описаны там, а не в листе продукта.
     ROOT / "src/web/static/web/dodo-ds.css",
+    # Каркас, вход и посадочная страница (T241) — свои листы поверх app.css.
+    ROOT / "src/web/static/web/shell.css",
+    ROOT / "src/web/static/web/login.css",
+    ROOT / "src/web/static/web/landing.css",
     ROOT / "src/web/static/web/domain.css",
     ROOT / "src/web/static/web/tokens.css",
     # Печатные формы (T187) идут своим листом и намеренно не тянут `app.css`: на
