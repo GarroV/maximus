@@ -3341,10 +3341,6 @@ msgstr "Uloge i prava"
 msgid "1. Часы"
 msgstr "1. Sati"
 
-#: web/onboarding.py:29
-msgid "Внесите отработанные часы в табеле или загрузите их таблицей."
-msgstr "Unesite odrađene sate u evidenciju sati ili ih učitajte tabelom."
-
 #: web/onboarding.py:33
 msgid "2. Расчёт"
 msgstr "2. Obračun"
@@ -5981,14 +5977,6 @@ msgstr "Pre nego što zatvorite"
 #: web/templates/web/period.html:298
 msgid "Всё на месте"
 msgstr "Sve je na mestu"
-
-#: web/templates/web/period.html:299
-msgid ""
-"Часы закрыты, документы разобраны, строк без статьи нет. Месяц можно "
-"утверждать."
-msgstr ""
-"Sati su zatvoreni, dokumenti obrađeni, nema stavki bez kategorije. Mesec se "
-"može odobriti."
 
 #: web/templates/web/period.html:301
 msgid "Это нужно устранить или отложить с причиной"
@@ -11131,3 +11119,93 @@ msgstr "Kurs za datum dalji od nedelju dana unapred se ne unosi — proverite go
 #: новые строки, добавлены tools/apply_translations.py
 msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
 msgstr "ne vidi se ceo partner: deo registara ili objekata je zatvoren"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Блокирующего нет"
+msgstr "Nema blokirajućeg"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Блокирующее"
+msgstr "Blokirajuće"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Внесите часы в табеле или загрузите таблицей, затем закройте их по "
+"точкам."
+msgstr "Unesite sate u evidenciji ili ih učitajte tabelom, pa ih zatvorite po objektima."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Готовность"
+msgstr "Spremnost"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Замечание"
+msgstr "Primedba"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Замечания"
+msgstr "Primedbe"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итого по ведомости"
+msgstr "Ukupno po platnom spisku"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Месяц можно утверждать, но ниже есть то, на что стоит посмотреть до "
+"этого."
+msgstr "Mesec se može odobriti, ali ispod ima nečega što vredi pogledati prvo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отложено"
+msgstr "Odloženo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Подозрительное"
+msgstr "Sumnjivo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Часы по всем точкам закрыты, бумаги разобраны, строк без статьи нет, "
+"отклонений нет. Месяц можно утверждать."
+msgstr "Sati su zatvoreni na svim objektima, papiri su obrađeni, nema stavki bez konta, nema odstupanja. Mesec se može odobriti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "месяц утверждён, часы заморожены"
+msgstr "mesec je odobren, sati su zamrznuti"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ваше дело в этом месяце"
+msgstr "Vaš zadatak ovog meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает "
+"бухгалтер."
+msgstr "Unesite i proverite sate svog objekta. Obračun i odobravanje meseca radi računovođa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть табель"
+msgstr "Otvori evidenciju sati"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "«?» у колонки — правило не подтверждено бухгалтером."
+msgstr "„?“ na koloni znači da pravilo nije potvrdio računovođa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"База взносов — отдельный вход расчёта: по ней считаются взносы и бруто, "
+"она может отличаться от часов."
+msgstr "Osnovica doprinosa je poseban ulaz obračuna: po njoj se računaju doprinosi i bruto, a može se razlikovati od sati."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отработано"
+msgstr "Odrađeno vreme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отсутствие"
+msgstr "Odsustvo"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ч"
+msgstr "h"

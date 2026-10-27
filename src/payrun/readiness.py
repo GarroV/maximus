@@ -30,7 +30,12 @@ from uuid import UUID
 
 from django.utils.translation import gettext as _
 
-__all__ = ["BLOCKING", "SUSPICIOUS", "WARNING", "Finding", "Readiness", "check"]
+__all__ = [
+    "BLOCKING", "CHECKS", "SUSPICIOUS", "WARNING", "Finding", "Readiness", "check",
+]
+
+# Проверки набора: знаменатель «готовности» на странице месяца.
+CHECKS = ("unit_hours", "papers", "inbox", "salary_hours", "variance")
 
 BLOCKING = "blocking"
 WARNING = "warning"

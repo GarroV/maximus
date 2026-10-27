@@ -346,8 +346,13 @@ def test_the_month_list_says_closed_after_approval(client, web_env):
     wipe_payruns(web_env)
 
 
-def test_the_period_page_agrees_with_the_month_list(client, web_env):
-    """Состояние месяца на его странице и в списке — одно и то же состояние."""
+def test_the_period_page_names_the_state_with_one_word(client, web_env):
+    """Состояние на странице месяца названо одним словом (#307).
+
+    Раньше рядом стояли плашка «Утверждён» и строка «Состояние: Закрыт» — два
+    слова об одном. Список месяцев называет то же состояние «Закрыт»; сводить
+    слова между экранами — задача списка, не этой страницы.
+    """
     wipe_payruns(web_env)
     login_as(client, "director")
     url = period_url(client)
@@ -355,7 +360,7 @@ def test_the_period_page_agrees_with_the_month_list(client, web_env):
     client.post(url + "approve/", follow=True)
 
     page = body(client.get(url))
-    assert "Закрыт" in page, "страница периода не называет утверждённый месяц закрытым"
-    assert "Закрыт" in month_row(body(client.get("/periods/")))
+    assert "Утверждён" in page, "страница утверждённого месяца не называет его состояния"
+    assert "<dt>Состояние</dt>" not in page, "то же состояние названо второй раз, другим словом"
 
     wipe_payruns(web_env)

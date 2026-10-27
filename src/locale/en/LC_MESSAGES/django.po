@@ -3397,10 +3397,6 @@ msgstr "Roles and rights"
 msgid "1. Часы"
 msgstr "1. Hours"
 
-#: web/onboarding.py:29
-msgid "Внесите отработанные часы в табеле или загрузите их таблицей."
-msgstr "Enter worked hours in the timesheet or upload them as a table."
-
 #: web/onboarding.py:33
 msgid "2. Расчёт"
 msgstr "2. Calculation"
@@ -6116,14 +6112,6 @@ msgstr "Before you close"
 #: web/templates/web/period.html:298
 msgid "Всё на месте"
 msgstr "Everything is in place"
-
-#: web/templates/web/period.html:299
-msgid ""
-"Часы закрыты, документы разобраны, строк без статьи нет. Месяц можно "
-"утверждать."
-msgstr ""
-"Hours are closed, documents are sorted, there are no lines without an item. "
-"The month can be approved."
 
 #: web/templates/web/period.html:301
 msgid "Это нужно устранить или отложить с причиной"
@@ -11288,3 +11276,93 @@ msgstr "A rate more than a week ahead cannot be entered — check the year."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
 msgstr "not the whole partner is visible: some ledgers or stores are closed to you"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Блокирующего нет"
+msgstr "Nothing blocking"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Блокирующее"
+msgstr "Blocking"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Внесите часы в табеле или загрузите таблицей, затем закройте их по "
+"точкам."
+msgstr "Enter hours in the timesheet or upload a table, then close them per unit."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Готовность"
+msgstr "Readiness"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Замечание"
+msgstr "Remark"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Замечания"
+msgstr "Remarks"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Итого по ведомости"
+msgstr "Payroll total"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Месяц можно утверждать, но ниже есть то, на что стоит посмотреть до "
+"этого."
+msgstr "The month can be approved, but there is something below worth a look first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отложено"
+msgstr "Postponed"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Подозрительное"
+msgstr "Suspicious"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Часы по всем точкам закрыты, бумаги разобраны, строк без статьи нет, "
+"отклонений нет. Месяц можно утверждать."
+msgstr "Hours are closed on every unit, papers are processed, no rows without an item, no deviations. The month can be approved."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "месяц утверждён, часы заморожены"
+msgstr "month approved, hours are frozen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ваше дело в этом месяце"
+msgstr "Your task this month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает "
+"бухгалтер."
+msgstr "Enter and check your unit's hours. The accountant calculates and approves the month."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть табель"
+msgstr "Open the timesheet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "«?» у колонки — правило не подтверждено бухгалтером."
+msgstr "“?” on a column means the rule is not confirmed by the accountant."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"База взносов — отдельный вход расчёта: по ней считаются взносы и бруто, "
+"она может отличаться от часов."
+msgstr "Contribution base is a separate input of the calculation: contributions and gross are computed from it, and it may differ from the hours."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отработано"
+msgstr "Time worked"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отсутствие"
+msgstr "Absence"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "ч"
+msgstr "h"

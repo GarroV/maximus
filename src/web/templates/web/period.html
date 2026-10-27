@@ -21,7 +21,21 @@
 месяц начинается. В отличие от списка периодов, здесь известно, какой месяц и
 что с ним уже сделано, — поэтому текущий шаг выделен.
 {% endcomment %}
-{% include "web/components/steps.html" %}
+{% if not manager_task %}{% include "web/components/steps.html" %}{% endif %}
+
+{% comment %}
+Итог расчёта (#215): раньше он стоял серой подписью к ссылке «Ведомость» в самом
+низу. Это то, ради чего открывают месяц, поэтому он наверху и крупно.
+{% endcomment %}
+{% if has_sheet and not payroll_denied %}
+<div class="stats">
+  <a class="stat" href="{% url 'period-sheet' period.id %}">
+    <div class="stat__label">{% translate "Итого по ведомости" %}</div>
+    <div class="stat__value">{{ total }}</div>
+    <div class="stat__delta">{% blocktranslate with count=sheet_employees %}{{ count }} чел.{% endblocktranslate %}</div>
+  </a>
+</div>
+{% endif %}
 
 {% if error %}
 {% notice "alert" title=error_title %}{{ error }}
@@ -121,7 +135,12 @@
 {% if reopened %}{% notice "ok" %}{% translate "Период открыт заново. Причина и ваше имя записаны в историю." %}{% endnotice %}{% endif %}
 
 <dl class="facts">
-  <dt>{% translate "Состояние" %}</dt><dd>{{ status }}</dd>
+  {% comment %}
+  Одно состояние — одно слово (#307): когда у месяца есть расчёт, его состояние
+  уже стоит плашкой у заголовка, и вторая строка «Закрыт» рядом с «Утверждён»
+  читалась как два разных факта. Строка остаётся только пока расчёта не было.
+  {% endcomment %}
+  {% if not payrun_status %}<dt>{% translate "Состояние" %}</dt><dd>{{ status }}</dd>{% endif %}
   {% comment %}
   Состояние учётного месяца и состояние расчёта зарплаты — разные вещи и стоят
   разными строками намеренно: утверждение зарплаты не закрывает месяц целиком,
@@ -156,6 +175,24 @@
 Стоит она рядом с кнопкой, а не в общей навигации, — там она не знала бы, о
 каком периоде речь.
 {% endcomment %}
+{% if manager_task %}
+{% comment %}
+Роль без прав на расчёт и утверждение (#315). Вместо трёх абзацев отказов —
+одна карточка с её делом на месяц: часы своей точки.
+{% endcomment %}
+<section class="card manager-task">
+  <h2>{% translate "Ваше дело в этом месяце" %}</h2>
+  <p>{% translate "Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает бухгалтер." %}</p>
+  {% for unit in manager_task.units %}
+  <p>
+    <b>{{ unit.code }}</b>
+    {% if unit.closed %}<span class="status status--approved"><i></i>{% translate "Закрыт" %}</span>
+    {% else %}<span class="status status--draft"><i></i>{% translate "Открыт" %}</span>{% endif %}
+  </p>
+  {% endfor %}
+  <a class="btn primary" href="{{ manager_task.url }}">{% translate "Открыть табель" %}</a>
+</section>
+{% else %}
 {% url 'period-calculate' period.id as calculate_url %}
 {% translate "Посчитать период" as calculate_label %}
 <div class="actions">
@@ -235,26 +272,63 @@
 
 {% if readiness and can_approve %}
 {% comment %}
-Готовность к закрытию (#175). Эталон формулирует это как условие, а не как
-справку: «список „прежде чем закрыть“ — не отчёт, который надо открыть, а
-условие, без которого кнопка не нажимается». Поэтому список стоит РЯДОМ с
-кнопкой, а отказ — на самом действии: экран показывает то, что человек открыл,
-а утверждение приходит запросом.
+Готовность к закрытию (#175, #307, #215). Эталон формулирует это как условие, а
+не как справку: список стоит РЯДОМ с кнопкой. Сверху — готовность в процентах и
+счётчики, ниже — карточки находок трёх видов. «Всё на месте» говорится только
+когда находок нет вовсе: раньше фраза была статичной и обещала «часы закрыты» при
+открытых часах на всех точках.
 {% endcomment %}
-<section class="card">
+<section class="card readiness">
   <h2>{% translate "Прежде чем закрыть" %}</h2>
-  {% if readiness.ready %}
+  <div class="stats">
+    <div class="stat{% if not readiness.clean %} stat--flagged{% endif %}">
+      <div class="stat__label">{% translate "Готовность" %}</div>
+      <div class="stat__value">{{ readiness.percent }}<span class="stat__unit">%</span></div>
+      <div class="progress__track" role="img" aria-label="{{ readiness.percent }}%"><div class="progress__bar{% if readiness.clean %} progress__bar--done{% endif %}" style="width: {{ readiness.percent }}%"></div></div>
+    </div>
+    <div class="stat{% if readiness.counts.blocking %} stat--flagged{% endif %}">
+      <div class="stat__label">{% translate "Блокирующее" %}</div>
+      <div class="stat__value">{{ readiness.counts.blocking }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">{% translate "Замечания" %}</div>
+      <div class="stat__value">{{ readiness.counts.warning }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">{% translate "Подозрительное" %}</div>
+      <div class="stat__value">{{ readiness.counts.suspicious }}</div>
+    </div>
+    <div class="stat">
+      <div class="stat__label">{% translate "Отложено" %}</div>
+      <div class="stat__value">{{ readiness.counts.postponed }}</div>
+    </div>
+  </div>
+
+  {% if readiness.clean %}
     {% translate "Всё на месте" as all_set %}
-    {% notice "ok" title=all_set %}{% blocktranslate %}Часы закрыты, документы разобраны, строк без статьи нет. Месяц можно утверждать.{% endblocktranslate %}{% endnotice %}
+    {% notice "ok" title=all_set %}{% blocktranslate %}Часы по всем точкам закрыты, бумаги разобраны, строк без статьи нет, отклонений нет. Месяц можно утверждать.{% endblocktranslate %}{% endnotice %}
+  {% elif readiness.ready %}
+    {% translate "Блокирующего нет" as no_blockers %}
+    {% notice "ok" title=no_blockers %}{% blocktranslate %}Месяц можно утверждать, но ниже есть то, на что стоит посмотреть до этого.{% endblocktranslate %}{% endnotice %}
   {% else %}
     {% translate "Это нужно устранить или отложить с причиной" as blockers_title %}
     {% notice "alert" title=blockers_title %}
       {% blocktranslate %}Из-за этого P&L будет неверным. Отложенное попадёт в протокол закрытия вместе с причиной.{% endblocktranslate %}
     {% endnotice %}
-    {% for found in readiness.blocking %}
-    <div class="note">
-      <p><b>{{ found.title }}</b></p>
-      {% if found.detail %}<p class="note">{{ found.detail }}</p>{% endif %}
+  {% endif %}
+
+  {% for found in readiness.cards %}
+  <div class="note finding finding--{{ found.kind }}">
+    <p>
+      <b>{{ found.title }}</b>
+      {% if found.kind == "blocking" %}{% if found.postponed %}<span class="badge">{% translate "Отложено" %}</span>{% else %}<span class="badge">{% translate "Блокирующее" %}</span>{% endif %}
+      {% elif found.kind == "suspicious" %}<span class="badge">{% translate "Подозрительное" %}</span>
+      {% else %}<span class="badge">{% translate "Замечание" %}</span>{% endif %}
+    </p>
+    {% if found.detail %}<p class="note">{{ found.detail }}</p>{% endif %}
+    {% if found.postponed %}
+      <p class="note">{% blocktranslate with reason=found.postponed %}Отложено: {{ reason }}{% endblocktranslate %}</p>
+    {% elif found.kind == "blocking" %}
       <form method="post" action="{% url 'period-postpone' period.id %}" class="search row">
         {% csrf_token %}
         <input type="hidden" name="finding" value="{{ found.code }}">
@@ -265,23 +339,9 @@
         </p>
         <button type="submit">{% translate "Отложить" %}</button>
       </form>
-    </div>
-    {% endfor %}
-  {% endif %}
-
-  {% for found in readiness.postponed %}
-  <p class="note">{% blocktranslate with reason=found.reason %}Отложено: {{ reason }}{% endblocktranslate %}</p>
+    {% endif %}
+  </div>
   {% endfor %}
-
-  {% if readiness.suspicious %}
-  {% comment %}
-  Подозрительное закрыть не мешает: система не знает, ошибка это или жизнь.
-  Но молчать нельзя — рост вдвое человек обязан увидеть до утверждения.
-  {% endcomment %}
-  {% for found in readiness.suspicious %}
-  <p class="note">{{ found.title }} — {{ found.detail }}</p>
-  {% endfor %}
-  {% endif %}
 </section>
 {% endif %}
 
@@ -305,6 +365,7 @@
   {% include "web/components/action.html" with allowed=can_reopen denied=reopen_denied url=reopen_url label=reopen_label note=reopen_note reason_id="reason" reason_name="reason" reason_label=reopen_reason_label reason_placeholder=reopen_reason_placeholder reason_value=reason_value %}
 </div>
 {% endif %}
+{% endif %}
 
 {% comment %}
 Что в этом месяце (T230, D081). Сводка отвечает на вопрос «где месяц и что
@@ -327,7 +388,7 @@
 {% endcomment %}
 {% if payroll_denied %}
 <p class="note">{{ payroll_denied }}</p>
-{% elif not has_sheet %}
+{% elif not has_sheet and not manager_task %}
 {% comment %}
 Пока ведомости нет, следующий шаг называется словами, а не пустотой (T077).
 Причин пустоты две и требуют разного: часов ещё нет — идти в табель; часы

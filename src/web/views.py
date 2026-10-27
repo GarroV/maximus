@@ -373,12 +373,32 @@ def cut_url(period: Period, code: str) -> str:
 
 
 def _readiness_of(period):
-    """Что мешает закрыть месяц — для показа рядом с кнопкой утверждения."""
+    """Что мешает закрыть месяц — для показа рядом с кнопкой утверждения.
+
+    Находки всех видов (блокирующее, замечание, подозрительное) отдаются одним
+    списком карточек: экран не должен говорить «всё на месте», пока хоть одна
+    из них существует (#307). Готовность — доля проверок набора, не нашедших
+    ничего, а не слово: «80%» читается без пояснений.
+    """
     from payrun import readiness
 
     state = readiness.check(period.tenant_id, period.period)
+    cards = [
+        {
+            "code": found.code, "kind": found.kind, "title": found.title,
+            "detail": found.detail, "postponed": state.postponed.get(found.code, ""),
+        }
+        for found in state.findings
+    ]
+    # Отложенное блокирующее — уже решённый вопрос, готовности оно не мешает.
+    unresolved = [
+        card for card in cards
+        if not (card["kind"] == readiness.BLOCKING and card["postponed"])
+    ]
     return {
         "ready": state.ready,
+        "clean": not unresolved,
+        "cards": cards,
         "blocking": [
             {"code": found.code, "title": found.title, "detail": found.detail}
             for found in state.blocking
@@ -387,6 +407,14 @@ def _readiness_of(period):
             {"code": found.code, "title": found.title, "detail": found.detail}
             for found in state.of_kind(readiness.SUSPICIOUS)
         ],
+        "counts": {
+            "blocking": len(state.blocking),
+            "warning": len(state.of_kind(readiness.WARNING)),
+            "suspicious": len(state.of_kind(readiness.SUSPICIOUS)),
+            "postponed": len(state.postponed),
+        },
+        "hours_open": any(found.code == "unit_hours" for found in state.findings),
+        "percent": percent_ready(len(readiness.CHECKS), len(unresolved)),
         # Отложенное показывается вместе с причиной: месяц закрыт с известной
         # дырой, и через полгода это должно читаться, а не выясняться.
         "postponed": [
@@ -394,6 +422,30 @@ def _readiness_of(period):
             for code, reason in state.postponed.items()
         ],
     }
+
+
+def _manager_task(period, who) -> dict:
+    """Дело роли без прав на месяц: часы её точек — закрыты или нет."""
+    from timesheets.closing import unit_states
+    from timesheets.grid import visible_rows
+
+    rows = list(visible_rows(
+        period.tenant_id, period.period, unit_ids=who.unit_ids if who else None,
+    ))
+    units = unit_states(period.tenant_id, period.period, rows)
+    return {
+        "units": units,
+        "all_closed": bool(units) and all(unit.closed for unit in units),
+        "url": reverse("timesheets", args=[period.id]),
+    }
+
+
+def percent_ready(total_checks: int, unresolved: int) -> int:
+    """Готовность в процентах: какая доля проверок набора ничего не нашла."""
+    if total_checks <= 0:
+        return 100
+    passed = max(0, total_checks - unresolved)
+    return round(100 * passed / total_checks)
 
 
 def period_page(
@@ -519,6 +571,16 @@ def period_page(
         # для очереди и для журнала (T017).
         reopen_denied = reopen_denied or gettext(retro.LOCKED_REFUSAL)
 
+    readiness_state = _readiness_of(period)
+    # Роль без прав на расчёт, утверждение и откат (управляющий точки, #315):
+    # три абзаца отказов ей ничего не дают, её дело — часы своей точки.
+    manager_task = (
+        _manager_task(period, who)
+        if calculate_denied
+        and permissions.explain(who, permissions.PERIOD_APPROVE)
+        and permissions.explain(who, permissions.PERIOD_REOPEN)
+        else None
+    )
     history = lifecycle.history(payrun)
     pages = _period_pages(
         period, sheet=sheet, history_count=len(history), frozen=frozen,
@@ -537,7 +599,8 @@ def period_page(
             # справку. Отказ на самом действии живёт в `lifecycle.approve`:
             # экран показывает то, что человек открыл, а утверждение приходит
             # запросом.
-            "readiness": _readiness_of(period),
+            "readiness": readiness_state,
+            "manager_task": manager_task,
             "pages": pages,
             "payroll_denied": payroll_denied,
             "total": money(sheet.total) if sheet else money(None),
@@ -560,11 +623,14 @@ def period_page(
             # должно, поэтому и `has_hours` берётся из тех же табелей, что
             # считает сводка выше.
             "steps": onboarding.month_steps(
-                has_hours=timesheets.exists(),
+                # «Часы» сделаны, когда они внесены И закрыты по точкам:
+                # внесённые, но открытые часы ещё могут поправить (#307).
+                has_hours=timesheets.exists() and not readiness_state["hours_open"],
                 calculated=payrun is not None,
                 approved=frozen,
             ),
             "has_sheet": bool(sheet.rows),
+            "sheet_employees": sheet.employees,
             "error": error,
             "error_title": error_title or _("Расчёт не выполнен."),
             "details": list(details),
