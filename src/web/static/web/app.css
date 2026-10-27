@@ -143,15 +143,6 @@ main:focus { outline: none; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* Знак продукта. Логотипа-картинки у MAXIMUS нет, а знак нужен: в
-   свёрнутой панели имя уходит, и верх панели остался бы пустым. Буква на
-   акценте — тот же приём, что у значков пространств в Swarm. */
-.sidenav__mark {
-  display: grid; place-items: center;
-  background: var(--accent); color: var(--ink-inverse);
-  font-weight: var(--w-bold); font-size: var(--fs-lead);
-}
-
 /* Пункты области — списком с подписью (`aria-labelledby` на подпись
    группы): диктор называет область и число пунктов, входя в неё. Ядро
    рисует пункты прямо в `.sidenav__list`; список внутри повторяет его

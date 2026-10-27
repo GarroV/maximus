@@ -1,4 +1,4 @@
-{% load ui i18n demo_ui %}{% comment %}
+{% load ui i18n demo_ui static %}{% comment %}
 Левая панель: куда идти, кем вошли и на каком языке читаем (T222, D081).
 
 До 29.09.2026 здесь была верхняя шапка, а разделы собирались областями в
@@ -61,11 +61,11 @@
 <nav class="sidenav" aria-label="{% translate "Основная навигация" %}">
   {% comment %}
   Имя продукта ведёт на первый экран месяца: по имени продукта уходят «в
-  начало», это привычка, а не украшение. Знак `M` — то, что остаётся от марки в
+  начало», это привычка, а не украшение. Знак продукта (`head_icons.html`, #247) — то, что остаётся от марки в
   свёрнутой панели: без него верх панели на планшете был бы пустым.
   {% endcomment %}
   <a class="sidenav__brand" href="{% url 'periods' %}" title="MAXIMUS · P&amp;L">
-    <span class="sidenav__logo sidenav__mark" aria-hidden="true">M</span>
+    <img class="sidenav__logo" src="{% static 'web/mark-small.svg' %}" alt="" width="28" height="28">
     <span class="sidenav__name"><b>MAXIMUS</b><small>P&amp;L</small></span>{% if dev_login %}<span class="badge dot sidenav__dev" title="{% translate "На странице входа есть кнопки быстрого входа учётками сида (DEV_LOGIN=1)" %}">dev</span>{% endif %}
   </a>
   <div class="sidenav__list">

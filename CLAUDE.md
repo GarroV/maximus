@@ -138,7 +138,9 @@ python tools/context.py suppliers
 и живёт в репозитории **GarroV/forma**, папка `dodo/`. Здесь лежат только
 **копии**: `src/web/static/web/dodo-ds.css` (ядро) и
 `src/web/static/web/domain.css` (регистры учёта, состояния периода,
-происхождение числа).
+происхождение числа), а также набор значков `icons.json` и знак продукта
+(`mark-small.svg` и растры `icon-*.png`, `apple-touch-icon.png` — канон в
+`dodo/brand/maximus/`, подключение — `web/components/head_icons.html`).
 
 **Копии не правят.** Первая строка каждого файла несёт штамп с контрольной
 суммой; правка на месте делает прогон красным. Причина: правка, сделанная

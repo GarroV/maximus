@@ -1,0 +1,16 @@
+{% load static %}{% comment %}
+Знак продукта во вкладке, на домашнем экране и в иконке Android (#247).
+
+Знак — «Глитч-мрамор» линейки (D185 MERIDIUS), у MAXIMUS — светлая M на
+зелёной плитке. Канон и геометрия — `GarroV/forma`, `dodo/brand/maximus/`;
+файлы здесь — копии раскатки `tools/spread.py` и на месте не правятся.
+Малый SVG — вкладке и марке левой панели; PNG 32 — браузеру, не знающему SVG;
+apple-touch — плитке iPhone; манифест — иконкам Android.
+
+Одним включением, а не строками в каждом `<head>`: страниц с собственной
+шапкой четыре (продукт, печать, вход в демо, демо на пересборке), и знак,
+заведённый по месту, рано или поздно забыли бы в одной из них.
+{% endcomment %}<link rel="icon" href="{% static 'web/mark-small.svg' %}" type="image/svg+xml">
+<link rel="icon" href="{% static 'web/icon-32.png' %}" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="{% static 'web/apple-touch-icon.png' %}">
+<link rel="manifest" href="{% static 'web/site.webmanifest' %}">

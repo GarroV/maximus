@@ -51,6 +51,7 @@
 Все значения стоят ДО любого `{% block head %}`: правила читают `var(--…)`, и
 лист, приехавший раньше значений, рисовал бы страницу без них.
 {% endcomment %}
+{% include "web/components/head_icons.html" %}
 <link rel="stylesheet" href="{% static 'web/tokens.css' %}">
 <link rel="stylesheet" href="{% static 'web/dodo-ds.css' %}">
 <link rel="stylesheet" href="{% static 'web/domain.css' %}">
