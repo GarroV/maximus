@@ -75,3 +75,20 @@ def test_every_page_of_the_month_is_closed_to_the_anonymous(client, calculated):
     client.logout()
     for tail in ("", "sheet/", "registers/", "history/", "retro/"):
         assert client.get(base + tail).status_code == 302, tail
+
+
+def test_a_manager_sees_their_task_instead_of_refusals(client, web_env):
+    """Управляющему на странице месяца — карточка с табелем, а не отказы (#315)."""
+    from conftest import body, login_as, period_url
+
+    login_as(client, "director")
+    url = period_url(client)
+    login_as(client, "manager")
+    html = body(client.get(url))
+    assert "Открыть табель" in html, "у управляющего нет входа в табель его точки"
+    assert "не входит в права" not in html, "управляющему показан отказ вместо его дела"
+    assert "1. Часы" not in html, "управляющему показан чужой степпер"
+
+    login_as(client, "director")
+    html = body(client.get(url))
+    assert "Открыть табель" not in html, "карточка управляющего показана тому, у кого есть права"

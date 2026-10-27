@@ -11330,3 +11330,17 @@ msgstr "Hours are closed on every unit, papers are processed, no rows without an
 #: новые строки, добавлены tools/apply_translations.py
 msgid "месяц утверждён, часы заморожены"
 msgstr "month approved, hours are frozen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ваше дело в этом месяце"
+msgstr "Your task this month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает "
+"бухгалтер."
+msgstr "Enter and check your unit's hours. The accountant calculates and approves the month."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть табель"
+msgstr "Open the timesheet"

@@ -11173,3 +11173,17 @@ msgstr "Sati su zatvoreni na svim objektima, papiri su obrađeni, nema stavki be
 #: новые строки, добавлены tools/apply_translations.py
 msgid "месяц утверждён, часы заморожены"
 msgstr "mesec je odobren, sati su zamrznuti"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ваше дело в этом месяце"
+msgstr "Vaš zadatak ovog meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает "
+"бухгалтер."
+msgstr "Unesite i proverite sate svog objekta. Obračun i odobravanje meseca radi računovođa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть табель"
+msgstr "Otvori evidenciju sati"

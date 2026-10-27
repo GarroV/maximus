@@ -424,6 +424,22 @@ def _readiness_of(period):
     }
 
 
+def _manager_task(period, who) -> dict:
+    """Дело роли без прав на месяц: часы её точек — закрыты или нет."""
+    from timesheets.closing import unit_states
+    from timesheets.grid import visible_rows
+
+    rows = list(visible_rows(
+        period.tenant_id, period.period, unit_ids=who.unit_ids if who else None,
+    ))
+    units = unit_states(period.tenant_id, period.period, rows)
+    return {
+        "units": units,
+        "all_closed": bool(units) and all(unit.closed for unit in units),
+        "url": reverse("timesheets", args=[period.id]),
+    }
+
+
 def percent_ready(total_checks: int, unresolved: int) -> int:
     """Готовность в процентах: какая доля проверок набора ничего не нашла."""
     if total_checks <= 0:
@@ -556,6 +572,15 @@ def period_page(
         reopen_denied = reopen_denied or gettext(retro.LOCKED_REFUSAL)
 
     readiness_state = _readiness_of(period)
+    # Роль без прав на расчёт, утверждение и откат (управляющий точки, #315):
+    # три абзаца отказов ей ничего не дают, её дело — часы своей точки.
+    manager_task = (
+        _manager_task(period, who)
+        if calculate_denied
+        and permissions.explain(who, permissions.PERIOD_APPROVE)
+        and permissions.explain(who, permissions.PERIOD_REOPEN)
+        else None
+    )
     history = lifecycle.history(payrun)
     pages = _period_pages(
         period, sheet=sheet, history_count=len(history), frozen=frozen,
@@ -575,6 +600,7 @@ def period_page(
             # экран показывает то, что человек открыл, а утверждение приходит
             # запросом.
             "readiness": readiness_state,
+            "manager_task": manager_task,
             "pages": pages,
             "payroll_denied": payroll_denied,
             "total": money(sheet.total) if sheet else money(None),

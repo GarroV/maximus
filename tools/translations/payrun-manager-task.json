@@ -1,0 +1,8 @@
+{
+  "Ваше дело в этом месяце": {"en": "Your task this month", "sr": "Vaš zadatak ovog meseca"},
+  "Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает бухгалтер.": {
+    "en": "Enter and check your unit's hours. The accountant calculates and approves the month.",
+    "sr": "Unesite i proverite sate svog objekta. Obračun i odobravanje meseca radi računovođa."
+  },
+  "Открыть табель": {"en": "Open the timesheet", "sr": "Otvori evidenciju sati"}
+}

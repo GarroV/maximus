@@ -21,7 +21,7 @@
 месяц начинается. В отличие от списка периодов, здесь известно, какой месяц и
 что с ним уже сделано, — поэтому текущий шаг выделен.
 {% endcomment %}
-{% include "web/components/steps.html" %}
+{% if not manager_task %}{% include "web/components/steps.html" %}{% endif %}
 
 {% comment %}
 Итог расчёта (#215): раньше он стоял серой подписью к ссылке «Ведомость» в самом
@@ -175,6 +175,24 @@
 Стоит она рядом с кнопкой, а не в общей навигации, — там она не знала бы, о
 каком периоде речь.
 {% endcomment %}
+{% if manager_task %}
+{% comment %}
+Роль без прав на расчёт и утверждение (#315). Вместо трёх абзацев отказов —
+одна карточка с её делом на месяц: часы своей точки.
+{% endcomment %}
+<section class="card manager-task">
+  <h2>{% translate "Ваше дело в этом месяце" %}</h2>
+  <p>{% translate "Внесите и проверьте часы своей точки. Расчёт и утверждение месяца делает бухгалтер." %}</p>
+  {% for unit in manager_task.units %}
+  <p>
+    <b>{{ unit.code }}</b>
+    {% if unit.closed %}<span class="status status--approved"><i></i>{% translate "Закрыт" %}</span>
+    {% else %}<span class="status status--draft"><i></i>{% translate "Открыт" %}</span>{% endif %}
+  </p>
+  {% endfor %}
+  <a class="btn primary" href="{{ manager_task.url }}">{% translate "Открыть табель" %}</a>
+</section>
+{% else %}
 {% url 'period-calculate' period.id as calculate_url %}
 {% translate "Посчитать период" as calculate_label %}
 <div class="actions">
@@ -346,6 +364,7 @@
   {% endcomment %}
   {% include "web/components/action.html" with allowed=can_reopen denied=reopen_denied url=reopen_url label=reopen_label note=reopen_note reason_id="reason" reason_name="reason" reason_label=reopen_reason_label reason_placeholder=reopen_reason_placeholder reason_value=reason_value %}
 </div>
+{% endif %}
 {% endif %}
 
 {% comment %}
