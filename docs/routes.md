@@ -15,6 +15,8 @@
 |---|---|---|
 | `/` | `index` | `web.views.index` |
 | `/account/` | `account` | `web.account.page` |
+| `/account/google/link/` | `google-link` | `web.google_views.link_start` |
+| `/account/google/unlink/` | `google-unlink` | `web.google_views.unlink` |
 | `/account/password/` | `password-change` | `web.views.password_change` |
 | `/analytics/people/` | `people-analytics` | `web.people_views.analytics` |
 | `/api/expenses/` | `api-expenses` | `web.api.expenses` |
@@ -28,6 +30,8 @@
 | `/api/invoices/<uuid:document_id>/` | `api-invoice` | `web.suppliers_api.invoice` |
 | `/api/invoices/<uuid:document_id>/pay/` | `api-invoice-pay` | `web.suppliers_api.invoice_pay` |
 | `/api/payments/` | `api-payments` | `web.suppliers_api.payments` |
+| `/auth/google/callback` | `google-callback` | `web.google_views.callback` |
+| `/auth/google/start/` | `google-start` | `web.google_views.start` |
 | `/dev/login/` | `dev-login` | `web.views.dev_login` |
 | `/dev/logout/` | `dev-logout` | `web.views.logout_page` |
 | `/directory/` | `directory` | `web.directory_views.index` |
@@ -126,6 +130,7 @@
 | `/platform/<uuid:tenant_id>/roles/` | `platform-member-role` | `web.platform_views.member_role` |
 | `/platform/new/` | `platform-space-create` | `web.platform_views.space_create` |
 | `/platform/rates/` | `platform-rates` | `web.rates_views.rates` |
+| `/privacy/` | `privacy` | `web.views.privacy` |
 | `/reconciliations/findings/<uuid:finding_id>/` | `reconciliation-decide` | `web.reports_views.reconciliation_decide` |
 | `/reports/pnl/` | `reports-pnl` | `web.planned_views.pnl` |
 | `/reports/reconcile/` | `reports-reconcile` | `web.planned_views.reconcile` |
@@ -147,6 +152,7 @@
 | `/statement/lines/<uuid:line_id>/` | `statement-line` | `web.bank_views.statement_line` |
 | `/statement/upload/` | `statement-upload` | `web.bank_views.statement_upload` |
 | `/theme/` | `set-theme` | `web.theme.set_theme` |
+| `/timesheet/` | `timesheet-current` | `web.planned_views.timesheet_current` |
 | `/timesheets/<uuid:period_id>/` | `timesheets` | `timesheets.views.grid` |
 | `/timesheets/<uuid:period_id>/cell/` | `timesheet-cell` | `timesheets.views.cell` |
 | `/timesheets/<uuid:period_id>/close/` | `timesheet-close` | `timesheets.views.close` |

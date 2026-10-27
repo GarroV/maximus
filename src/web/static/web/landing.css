@@ -1,0 +1,213 @@
+/* Посадочная страница: продукт для не вошедшего и демо (T241, D098).
+
+   Перенесено из DECIMUS (`decimus-landing.css`, D524, D525, D546): стопка листов —
+   каждый раздел лист на сплошном фоне, который при прокрутке наезжает на
+   предыдущий (`position: sticky`). Палитра — токены ядра: белый, бежевый
+   бренда, глубокий фиолетовый на последнем листе; оранжевый — только на главной
+   кнопке. Страница всегда светлая.
+
+   Отличия от DECIMUS, и оба сознательные:
+   - без `landing.js`: свой скрипт в продукте живёт только в островке табеля
+     (контракт блока web). Закладки едут со своими листами, а не складываются в
+     полосу, и на узком окне листы не прилипают: лист выше окна прилип бы верхом
+     и обрезал свой низ — в DECIMUS это чинит скрипт;
+   - снимков экрана пока нет (в DECIMUS их делает `make landing-shots`): на
+     месте снимка — перечень того, что на экране. */
+
+main.page--landing { max-width: none; margin: 0; padding: 0; }
+
+.lp {
+  --ink: #1B2028;
+  --ink-2: #5C6672;
+  --ink-3: #5F6874;
+  --lp-line: rgba(27, 32, 40, .14);
+  --lp-wrap: 1240px;
+  --lp-gutter: 24px;
+  --lp-bar-h: 72px;
+  /* Закладки: высота полосы над прилипшими листами, ширина и зазор места в ряду. */
+  --lp-tab-h: 36px;
+  --lp-tab-w: 168px;
+  --lp-tab-gap: 6px;
+  --lp-side: max(var(--lp-gutter), calc((100% - var(--lp-wrap)) / 2));
+  /* Снимок выходит за правое поле листа, но не за край окна. */
+  --lp-bleed: clamp(0px, calc((100vw - 1288px) / 2), 56px);
+  color: var(--ink);
+  font-family: var(--font-ui);
+}
+
+/* ── Лист ───────────────────────────────────────────────────────────────── */
+.lp-sheet {
+  position: sticky;
+  top: calc(var(--lp-bar-h) + var(--lp-tab-h));
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--lp-bar-h));
+  min-height: calc(100svh - var(--lp-bar-h));
+  padding: 80px var(--lp-side) 96px;
+  display: flex;
+  flex-direction: column;
+  /* Содержимое — от верха, к закладке, а не по центру: лист высотой в окно, а текста
+     на нём меньше, и по центру над заголовком висела пустота, похожая на ошибку
+     вёрстки. Свободное место внизу закрывает следующий лист, наезжая при прокрутке. */
+  justify-content: flex-start;
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -14px 36px -10px rgba(27, 32, 40, .2);
+}
+.lp-sheet--white { background: var(--surface); }
+.lp-sheet--beige { background: var(--brand-beige); }
+.lp-sheet--purple { background: var(--brand-purple-deep); color: #fff; }
+.lp-hero { top: var(--lp-bar-h); padding-top: 40px; border-radius: 0; box-shadow: none; }
+.lp-hero > .lp-cols { margin-block: auto; }
+
+/* Закладка — шаг пути, как закладка в папке: того же цвета, что и лист. У каждой своё
+   место в ряду (`--lp-tab-i`): дошедший до верха лист оставляет закладку в полосе под
+   шапкой (`.lp-tabs`), и они складываются слева направо, как папки в стопке; прокрутка
+   вверх разбирает стопку обратно. Полосу ведёт `landing.js` — без него закладки просто
+   едут со своими листами. */
+.lp-tab {
+  position: absolute;
+  top: calc(-1 * var(--lp-tab-h));
+  left: calc(var(--lp-side) + var(--lp-tab-i, 0) * (var(--lp-tab-w) + var(--lp-tab-gap)));
+  box-sizing: border-box;
+  width: var(--lp-tab-w);
+  margin: 0;
+  padding: 0 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: 14px 14px 0 0;
+  background: inherit;
+  box-shadow: 0 -10px 18px -10px rgba(27, 32, 40, .22);
+  font-size: 15px;
+  font-weight: var(--w-semibold);
+  line-height: var(--lp-tab-h);
+}
+.lp-tab__n { margin-right: 10px; color: var(--ink-2); font-weight: var(--w-bold); }
+
+/* ── Шапка: над листами, а не на первом: ярлык листа не наезжает на логотип ──────────────────────────────────────────────── */
+.lp-bar {
+  position: sticky; top: 0; z-index: 20; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  height: var(--lp-bar-h); padding: 0 var(--lp-side); background: var(--surface);
+}
+.lp-bar__brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 18px; font-weight: var(--w-bold); text-decoration: none; }
+.lp-bar__brand img { border-radius: 8px; }
+.lp-bar__acts { display: flex; align-items: center; gap: 20px; }
+
+/* ── Колонки ────────────────────────────────────────────────────────────── */
+.lp-cols { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 40px; align-items: start; }
+.lp-cols > .lp-copy { grid-column: 1 / 6; }
+.lp-cols > .lp-fig { grid-column: 6 / 13; margin-right: calc(-1 * var(--lp-bleed)); }
+.lp-cols--even > .lp-split { grid-column: 7 / 13; }
+.lp-cols--hero { align-items: center; }
+.lp-cols--top { align-items: start; }
+.lp-split--under { margin-top: 40px; }
+.lp-cols--hero > .lp-copy { grid-column: 1 / 8; }
+.lp-cols--hero > .lp-phone { grid-column: 8 / 13; }
+
+/* ── Текст ──────────────────────────────────────────────────────────────── */
+.lp-display, .lp-h2 { margin: 0; font-weight: var(--w-bold); letter-spacing: -.02em; text-wrap: balance; }
+.lp-display { font-size: clamp(44px, 6.4vw, 88px); line-height: 1.02; }
+.lp-display--md { font-size: clamp(40px, 5.6vw, 76px); }
+.lp-h2 { font-size: clamp(30px, 3.3vw, 46px); line-height: 1.08; }
+.lp-sub { max-width: 28em; margin: 20px 0 0; font-size: clamp(20px, 2vw, 26px); font-weight: var(--w-medium); line-height: 1.35; text-wrap: balance; }
+.lp-body { max-width: 62ch; margin: 24px 0 0; color: var(--ink-2); font-size: 18px; line-height: 1.55; }
+.lp-hero .lp-body { font-size: 19px; }
+.lp-note { margin: 0; color: var(--ink-2); font-size: 15px; }
+.lp-copy--wide .lp-h2 { max-width: 20em; }
+.lp-copy--wide .lp-body { max-width: 56ch; }
+
+/* ── Ссылки и главная кнопка ────────────────────────────────────────────── */
+.lp-link { color: inherit; font-size: 16px; font-weight: var(--w-medium); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.lp-link:hover { text-decoration-thickness: 2px; }
+.lp-cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 36px; }
+/* Оранжевый бренда — один на странице. Белый на нём не добирает контраст
+   (около 2,9:1), поэтому подпись цвета ink: 6,2:1. */
+.lp-cta {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 56px; padding: 0 30px; border-radius: 14px;
+  background: var(--brand-orange); color: var(--ink);
+  font-size: 18px; font-weight: var(--w-semibold); line-height: 1; text-decoration: none; white-space: nowrap;
+}
+.lp-cta:hover { background: color-mix(in srgb, var(--brand-orange) 86%, #fff); }
+.lp-cta--sm { height: 40px; padding: 0 18px; border-radius: 10px; font-size: 15px; }
+.lp a:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 6px; }
+.lp-sheet--purple a:focus-visible { outline-color: #fff; }
+.lp-sheet--purple .lp-cta:focus-visible { outline-color: #fff; }
+
+/* ── Снимки ─────────────────────────────────────────────────────────────── */
+.lp-shot { display: block; width: 100%; height: auto; border: 1px solid var(--lp-line); border-radius: 10px; background: var(--surface); }
+.lp-phone { justify-self: center; box-sizing: border-box; width: min(300px, 100%); padding: 9px; border-radius: 40px; background: var(--ink); }
+.lp-phone .lp-shot { border: 0; border-radius: 31px; }
+.lp-fig--full { margin-top: 56px; }
+
+/* ── Человек и машина; перечень «ещё внутри» ────────────────────────────── */
+.lp-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
+.lp-split__h { margin: 0 0 8px; font-size: 20px; font-weight: var(--w-bold); letter-spacing: -.01em; }
+.lp-lines { margin: 0; padding: 0; list-style: none; }
+.lp-lines li { padding: 14px 0; border-top: 1px solid var(--lp-line); font-size: 18px; line-height: 1.4; }
+.lp-lines li:last-child { border-bottom: 1px solid var(--lp-line); }
+.lp-net__more { margin-top: 72px; align-items: start; }
+.lp-net__more > .lp-lines { grid-column: 1 / 6; }
+.lp-net__more > .lp-fig { grid-column: 6 / 13; margin-right: 0; }
+
+/* ── Последний лист ─────────────────────────────────────────────────────── */
+.lp-copy--final { max-width: 820px; }
+.lp-final .lp-body { color: rgba(255, 255, 255, .84); font-size: 20px; }
+.lp-final__login { margin: 28px 0 0; }
+
+/* ── Узкое окно: одна колонка, снимок под текстом ───────────────────────── */
+@media (max-width: 860px) {
+  .lp {
+    --lp-gutter: 16px; --lp-bleed: 0px; --lp-bar-h: 60px;
+    /* Пять закладок в ширину телефона: место делится поровну. */
+    --lp-tab-h: 32px; --lp-tab-gap: 4px;
+    --lp-tab-w: calc((100vw - 2 * var(--lp-gutter) - 4 * var(--lp-tab-gap)) / 5);
+  }
+  .lp-tab { padding: 0 8px; font-size: 12px; border-radius: 10px 10px 0 0; }
+  .lp-tab__n { margin-right: 4px; }
+  .lp-sheet { position: relative; top: auto; min-height: 0; padding-top: 72px; padding-bottom: 56px; border-radius: 22px 22px 0 0; }
+  .lp-hero { padding-top: 24px; }
+  .lp-bar__demo { display: none; }
+  .lp-bar__acts { gap: 14px; }
+  .lp-cols { grid-template-columns: minmax(0, 1fr); row-gap: 36px; align-items: start; }
+  .lp-cols > .lp-copy, .lp-cols > .lp-fig, .lp-cols--even > .lp-split,
+  .lp-cols--hero > .lp-copy, .lp-cols--hero > .lp-phone,
+  .lp-net__more > .lp-lines, .lp-net__more > .lp-fig { grid-column: 1 / -1; }
+  .lp-cta-row { margin-top: 28px; }
+  .lp-cta { width: 100%; }
+  .lp-bar .lp-cta { width: auto; }
+  .lp-body, .lp-hero .lp-body { font-size: 17px; }
+  .lp-fig--full { margin-top: 36px; }
+  .lp-net__more { margin-top: 44px; }
+  .lp-split { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-cta { transition: none; }
+}
+
+/* Страница всегда светлая: и в тёмной теме фон под листами — белый. */
+body:has(.lp) { background: #fff; }
+.lp { background: #fff; }
+.lp-sheet--white { background: #fff; }
+.lp-sheet--purple .lp-link { color: #fff; }
+.lp-bar { background: #fff; }
+.lp-bar .langpill { flex-direction: row; }
+.lp-bar .langpill__item { font-family: var(--font-mono); font-size: 11px; color: var(--ink-2); }
+/* На месте снимка — перечень того, что на экране: строки в рамке листа. */
+.lp-card { box-sizing: border-box; padding: 28px 32px; border: 1px solid var(--lp-line); border-radius: 16px; background: rgba(255, 255, 255, .6); }
+.lp-card .lp-lines li { font-size: 17px; }
+.lp-card__h { margin: 0 0 12px; font-size: 14px; font-weight: var(--w-semibold); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.lp-sheet--white .lp-card { background: var(--brand-beige-light, #faf6f0); }
+.lp-foot { padding: 24px var(--lp-side) 32px; background: var(--brand-purple-deep); color: rgba(255, 255, 255, .72); font-size: 14px; }
+.lp-foot a { color: #fff; }
+.lp-roles { margin: 20px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: var(--ink-2); font-size: 16px; }
+.lp-roles a { color: var(--ink); font-weight: var(--w-semibold); }
+.lp-tour { counter-reset: tour; }
+.lp-tour li { counter-increment: tour; }
+.lp-tour li::before { content: counter(tour) ". "; font-weight: var(--w-bold); color: var(--ink); }
+.lp-tour strong { color: var(--ink); }
+@media (max-width: 860px) {
+  .lp-card { padding: 20px; }
+  .lp-bar .langpill__item { min-width: var(--tap-min); height: var(--tap-min); }
+}

@@ -1,0 +1,56 @@
+{% load ui i18n %}{% comment %}
+Блок учётки и меню учётки (T241, по DECIMUS D468): одно меню, два места.
+
+`menu_place="up"` — внизу левой панели: блок с инициалами, именем и ролью,
+меню раскрывается вверх. `menu_place="down"` — полоса телефона: только аватар,
+меню раскрывается вниз почти во всю ширину. На телефоне левой панели нет, и
+тема, язык и выход доступны только отсюда.
+
+`<details>`, а не всплывающий слой на скрипте, как в DECIMUS: свой JavaScript
+в продукте живёт только в островке табеля (контракт блока web), а `<details>`
+открывается без скрипта, клавиатурой и читалкой.
+
+Что в меню и почему именно это. Кто смотрит: имя, почта, роль, партнёр и —
+только когда человек ею ограничен — точка: один и тот же экран показывает
+разным людям разные числа. Регистры — перечислением видимого (D023). Тема и
+язык — формами с кнопками: смена меняет состояние, по ссылке её прошёл бы
+любой предзагрузчик. Выход — форма, а не ссылка: по ссылке его запустила бы
+картинка на чужой странице.
+{% endcomment %}{% translate "Учётная запись" as account_label %}{% firstof principal.display_name request.user.username as raw_name %}{% comment %}
+У учёток сида имя совпадает с названием роли — на любом из языков продукта
+(фильтр `is_role_name`). Тогда вместо имени — название роли на языке страницы,
+и второй строкой роль не повторяется: иначе на английском стояли бы
+«Администратор сети» и «Network Administrator» рядом (сверка T222).
+{% endcomment %}{% if principal.role_title and raw_name|is_role_name:principal.role_title %}{% firstof principal.role_title as shown_name %}{% else %}{% firstof raw_name as shown_name %}{% endif %}
+<details class="acct acct--{{ menu_place }}">
+  {% if menu_place == "down" %}
+  <summary class="mbar__me" title="{{ account_label }}" aria-label="{{ account_label }}"><span class="avatar" aria-hidden="true">{{ shown_name|initials }}</span></summary>
+  {% else %}
+  <summary class="sidenav__me" title="{{ account_label }}">
+    <span class="avatar" aria-hidden="true">{{ shown_name|initials }}</span>
+    <span class="sidenav__who"><b>{{ shown_name }}</b>{% if principal.role_title and shown_name != principal.role_title %}<small>{{ principal.role_title }}</small>{% endif %}</span>
+    <span class="sidenav__chev" aria-hidden="true">{% icon "cright" %}</span>
+  </summary>
+  {% endif %}
+  <div class="popover acct-menu acct-menu--{{ menu_place }}">
+    <div class="acct-menu__head">
+      <span class="avatar avatar--lg" aria-hidden="true">{{ shown_name|initials }}</span>
+      <div class="acct-menu__who">
+        <b>{{ shown_name }}</b>
+        {% if request.user.email %}<span class="acct-menu__mail">{{ request.user.email }}</span>{% endif %}
+        {% if principal.role_title %}<span>{% role_badge principal.role_title %}</span>{% endif %}
+        <small>{% if principal.tenant_title %}{{ principal.tenant_title }}{% endif %}{% if principal.units_title %} · {% blocktranslate with code=principal.units_title %}точка: {{ code }}{% endblocktranslate %}{% endif %}</small>
+        {% if visible_ledgers %}<span class="acct-menu__ledgers" role="list" aria-label="{% translate "Видимые регистры" %}">{% for name in visible_ledgers %}<span class="sidenav__reg reg--{{ name.code }}" role="listitem">{{ name }}</span>{% endfor %}</span>{% endif %}
+      </div>
+    </div>
+    <div class="acct-menu__line">
+      {% include "web/components/prefs.html" with prefs_id=menu_id|add:"-menu" %}
+    </div>
+    <a class="popover__row acct-menu__row" href="{% url 'account' %}"><span>{{ account_label }}</span>{% icon "cright" %}</a>
+    <div class="popover__foot acct-menu__foot">
+      <form class="acct-menu__logout" method="post" action="{% url 'logout' %}">{% csrf_token %}
+        <button class="acct-menu__out" type="submit">{% icon "arrow" %}<span>{% translate "Выйти" %}</span></button>
+      </form>
+    </div>
+  </div>
+</details>

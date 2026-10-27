@@ -1,0 +1,109 @@
+/* Страницы до входа: «Вход» и «Конфиденциальность» (T241, D098).
+
+   Перенесено из DECIMUS (`decimus-login.css`, D492): одна колонка по центру на
+   всю высоту окна — знак и название, подзаголовок, главная кнопка Google,
+   «или», логин и пароль, две мелкие строки внизу. Только токены ядра
+   (`dodo-ds.css`) — светлая и тёмная темы без правок. Лист продуктовый, как и
+   у DECIMUS; общий вид входа — кандидат в ядро `GarroV/forma`. */
+
+main.page--login {
+  position: relative;
+  display: flex; flex-direction: column;
+  max-width: none;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: var(--space-11) var(--space-7);
+  align-items: center;
+  justify-content: center;
+  /* Спокойный фон: токен фона и едва заметное свечение акцентом сверху. */
+  background:
+    radial-gradient(ellipse 44rem 26rem at 50% -6rem, color-mix(in srgb, var(--accent) 11%, transparent), transparent 100%),
+    var(--canvas);
+}
+
+.login {
+  width: 100%;
+  max-width: 19.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  text-align: center;
+}
+
+/* Знак и название */
+.login__brand { display: flex; flex-direction: column; align-items: center; gap: var(--space-7); }
+.login__mark {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  font-size: 34px;
+  box-shadow: 0 10px 32px -12px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.login__name { margin: 0; font-size: 34px; line-height: 40px; font-weight: var(--w-bold); letter-spacing: -.01em; color: var(--ink); }
+.login__sub { margin: calc(-1 * var(--space-4)) 0 0; font-size: var(--fs-lead); line-height: var(--lh-lead); color: var(--ink-2); }
+
+/* Ошибка — одна мягкая плашка над кнопками */
+.login__note { width: 100%; margin: 0; text-align: center; justify-content: center; }
+.login__note .note__title { font-weight: var(--w-medium); }
+
+/* Блок способов входа */
+.login__block { width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+
+.login__google-btn {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-6);
+  width: 100%; min-height: 52px; padding: 0 var(--space-8);
+  border: 1px solid var(--line-control); border-radius: 16px;
+  background: var(--surface); color: var(--ink);
+  font: var(--w-semibold) 15px / 1 var(--font-ui);
+  box-shadow: var(--sh-card);
+  transition: border-color var(--t-state) var(--ease), box-shadow var(--t-state) var(--ease), transform var(--t-state) var(--ease);
+}
+.login__google-btn:hover { border-color: var(--accent); color: var(--ink); text-decoration: none; }
+.login__google-btn:active { transform: translateY(1px); }
+.login__google-btn:focus-visible { outline: var(--focus-outline); outline-offset: 2px; }
+.login__google-mark { width: 20px; height: 20px; flex: 0 0 auto; }
+
+.login__or { display: flex; align-items: center; gap: var(--space-6); font-size: var(--fs-meta); color: var(--ink-3); }
+.login__or::before, .login__or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+.login__form { display: flex; flex-direction: column; gap: var(--space-5); margin: 0; }
+.login__form .input,
+.login__block .btn { min-height: 44px; border-radius: 12px; font-size: var(--fs-lead); }
+.login__form .input { width: 100%; padding: 0 var(--space-7); }
+.login__block .btn { width: 100%; justify-content: center; }
+.login__form .btn { margin-top: var(--space-2); }
+
+/* Демо и быстрый вход — тихие блоки под формой, не главный путь. */
+.login__extra { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); text-align: left; }
+.login__extra h2 { margin: 0; font-size: var(--fs-dense); color: var(--ink-2); text-align: center; }
+.login__extra table { width: 100%; }
+
+/* Две мелкие строки внизу */
+.login__foot { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-3); }
+.login__foot p { margin: 0; text-wrap: balance; }
+.login__foot a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px; }
+.login__links { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--space-2) var(--space-6); }
+
+/* Язык и тема — в правом верхнем углу */
+.login__prefs {
+  position: absolute; top: calc(var(--space-7) + env(safe-area-inset-top, 0px)); right: var(--space-7); z-index: 2;
+  display: flex; align-items: center; gap: var(--space-4);
+}
+.login__prefs .sidenav__theme { flex-direction: row; margin: 0; padding: 2px; }
+.login__prefs .langpill { flex-direction: row; }
+.login__prefs .langpill__item { min-width: 34px; height: 28px; font-family: var(--font-mono); font-size: 11px; }
+
+/* Политика конфиденциальности — та же колонка, шире и текстом */
+.login--text { max-width: 40rem; text-align: left; align-items: stretch; gap: var(--space-8); }
+.login--text .login__brand { align-items: center; text-align: center; }
+.login--text h2 { margin: 0 0 var(--space-3); font-size: var(--fs-title); line-height: var(--lh-title); }
+.login--text p, .login--text ul { margin: 0 0 var(--space-4); color: var(--ink-2); line-height: var(--lh-body, 1.5); }
+.login--text section { margin: 0; }
+
+@media (max-width: 719px) {
+  main.page--login { padding: var(--space-12) var(--space-6) var(--space-10); }
+  .login { gap: 28px; }
+  .login__prefs { right: var(--space-5); }
+  .login__prefs .langpill__item, .login__prefs .sidenav__theme button { min-width: var(--tap-min); height: var(--tap-min); }
+}

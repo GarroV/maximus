@@ -1,69 +1,110 @@
-{% extends "web/base.html" %}{% load ui i18n %}
+{% extends "web/login_base.html" %}{% load ui i18n %}
 {% block title %}{% translate "Вход" %}{% endblock %}
-{% block content %}
-<h1>{% translate "Вход" %}</h1>
-<p class="sub">{% translate "Логин и пароль выдаёт администратор сети." %}</p>
-
-{% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
-
+{% block login %}
 {% comment %}
-Путь в демо — первым, до формы пароля (T160). Посетитель демо-стенда,
-потерявший `?key=…` в ссылке, попадал сюда и читал «логин и пароль выдаёт
-администратор сети» — то есть тупик, который выглядит как поломка продукта.
+Вход — одна колонка по центру, как в DECIMUS (T241, D098): знак, название,
+подзаголовок; главная кнопка Google, «или», логин и пароль; внизу две мелкие
+строки и ссылки. Пароль остаётся рядом с Google — решение владельца в D098.
 
-Блок рисуется, только когда демо действительно пустит этого посетителя
-(`demo_url` даёт `web.views.login_context`). В продукте переменной нет, и на
-форме входа не остаётся ни слова про демо: дверь, которая «всё равно никуда не
-ведёт», однажды поведёт.
+Кнопки Google нет вовсе, если реквизиты приложения не заданы
+(`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`) и в демо:
+стенд без них работает паролем, а мёртвая кнопка выглядела бы поломкой.
+
+Отказ один на обе причины пароля: «нет такого логина» и «пароль не тот»
+выглядят одинаково, иначе форма сама рассказывала бы, кто здесь заведён.
+Отказ Google назван словами: человеку нужно знать, что его почты нет среди
+учётных записей и к кому идти, а не «что-то пошло не так».
 {% endcomment %}
-{% if demo_url %}
-{% translate "Это демо-стенд" as demo_stand %}
-{% notice "empty" title=demo_stand %}
-  {% blocktranslate %}Учётка здесь не нужна: демо открывается одним кликом и наполнено выдуманной
-  сетью — два юрлица, три точки, тридцать человек и три месяца расчёта.{% endblocktranslate %}
-  <a class="btn next" href="{{ demo_url }}">{% translate "Открыть демо" %}</a>
-{% endnotice %}
-{% endif %}
+<section class="login">
+  <header class="login__brand">
+    {% brand_mark "login__mark" 72 %}
+    <h1 class="login__name">MAXIMUS</h1>
+    <p class="login__sub">{% translate "Сбор данных и P&L партнёров Dodo" %}</p>
+  </header>
 
-<form method="post" action="{% url 'login' %}" class="card card--auth">{% csrf_token %}
-  <input type="hidden" name="next" value="{{ next }}">
-  {% translate "Логин" as login_label %}
-  {% translate "Пароль" as password_label %}
-  <p>{% include "web/components/field.html" with id="id_username" name="username" label=login_label value=username autocomplete="username" autofocus=True required=True stacked=True %}</p>
-  <p>{% include "web/components/field.html" with id="id_password" name="password" label=password_label type="password" autocomplete="current-password" required=True stacked=True %}</p>
-  <p><button class="primary" type="submit">{% translate "Войти" %}</button></p>
-</form>
+  {% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
 
-{% if dev_users %}
-<h2>{% translate "Быстрый вход на время стройки" %}</h2>
-<p class="sub">
-  {% blocktranslate %}Кнопка подставляет пароль учётки тестового сида и идёт тем же путём, что ввод
-  руками — отдельного способа войти у неё нет. Выключается переменной окружения
-  <code>DEV_LOGIN=0</code>; выданные ею сессии при этом перестают действовать.{% endblocktranslate %}
-</p>
-{% comment %}
-Что кому видно — здесь не пишется (T096). Панель стояла открытой любому, кто
-открыл страницу, и перечисляла непредставившемуся названия всех трёх регистров
-учёта и код точки: устройство учёта партнёра — не то, что продукт сообщает до
-входа. Роли достаточно её названия, чтобы выбрать, под кем войти; что ей видно,
-она узнает на своих экранах — там показано ровно то, что видно ей.
-{% endcomment %}
-<table>
-  <thead><tr><th>{% translate "Пользователь" %}</th><th>{% translate "Логин" %}</th><th></th></tr></thead>
-  <tbody>
-    {% for user in dev_users %}
-    <tr>
-      <td>{{ user.title }}</td>
-      <td><code>{{ user.username }}</code></td>
-      <td class="num">
-        <form class="inline" method="post" action="{% url 'dev-login' %}">{% csrf_token %}
-          <input type="hidden" name="user" value="{{ user.code }}">
-          <button type="submit">{% translate "войти" %}</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% endif %}
+  {% comment %}
+  Путь в демо — до формы (T160): посетитель демо-стенда, потерявший `?key=…`,
+  иначе читал бы «логин и пароль выдаёт администратор» — тупик. Рисуется,
+  только когда демо действительно пустит этого посетителя.
+  {% endcomment %}
+  {% if demo_url %}
+  <div class="login__block">
+    <a class="btn primary" href="{{ demo_url }}">{% translate "Открыть демо" %}</a>
+    <p class="login__foot">{% blocktranslate %}Учётка здесь не нужна: демо открывается одним кликом и наполнено выдуманной
+  сетью — два юрлица, три точки, тридцать человек и три месяца расчёта.{% endblocktranslate %}</p>
+    <div class="login__or" aria-hidden="true"><span>{% translate "или" %}</span></div>
+  </div>
+  {% endif %}
+
+  <div class="login__block">
+    {% if google_enabled %}
+    <a class="login__google-btn" href="{% url 'google-start' %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+      <svg class="login__google-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      {% translate "Войти через Google" %}
+    </a>
+    <div class="login__or" aria-hidden="true"><span>{% translate "или" %}</span></div>
+    {% endif %}
+
+    {% comment %}
+    Подписи полей скрыты с экрана, но остаются для чтеца: подсказка внутри
+    поля пропадает при вводе и подписью не считается. Пароль обратно в
+    разметку не подставляется — он уехал бы в кэш браузера.
+    {% endcomment %}
+    <form class="login__form" method="post" action="{% url 'login' %}">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <label class="sr-only" for="id_username">{% translate "Логин" %}</label>
+      <input class="input" id="id_username" name="username" type="text" value="{{ username|default:'' }}" placeholder="{% translate "Логин" %}"
+             autocomplete="username" autocapitalize="none" spellcheck="false"{% if not google_enabled %} autofocus{% endif %} required>
+      <label class="sr-only" for="id_password">{% translate "Пароль" %}</label>
+      <input class="input" id="id_password" name="password" type="password" placeholder="{% translate "Пароль" %}"
+             autocomplete="current-password" required>
+      <button class="btn{% if not google_enabled %} primary{% endif %}" type="submit">{% translate "Войти" %}</button>
+    </form>
+  </div>
+
+  {% if dev_users %}
+  <div class="login__extra">
+    <h2>{% translate "Быстрый вход на время стройки" %}</h2>
+    <p class="login__foot">
+      {% blocktranslate %}Кнопка подставляет пароль учётки тестового сида и идёт тем же путём, что ввод
+      руками — отдельного способа войти у неё нет. Выключается переменной окружения
+      <code>DEV_LOGIN=0</code>; выданные ею сессии при этом перестают действовать.{% endblocktranslate %}
+    </p>
+    {% comment %}
+    Что кому видно — здесь не пишется (T096): устройство учёта партнёра — не то,
+    что продукт сообщает до входа. Роли достаточно её названия.
+    {% endcomment %}
+    <table>
+      <thead><tr><th>{% translate "Пользователь" %}</th><th>{% translate "Логин" %}</th><th></th></tr></thead>
+      <tbody>
+        {% for user in dev_users %}
+        <tr>
+          <td>{{ user.title }}</td>
+          <td><code>{{ user.username }}</code></td>
+          <td class="num">
+            <form class="inline" method="post" action="{% url 'dev-login' %}">{% csrf_token %}
+              <input type="hidden" name="user" value="{{ user.code }}">
+              <button type="submit">{% translate "войти" %}</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <footer class="login__foot">
+    <p>{% translate "Учётную запись заводит администратор вашего партнёра." %}</p>
+    <p>{% translate "Забыли пароль — напишите ему же." %}</p>
+    <p class="login__links"><a href="{% url 'guide' %}">{% translate "Как это работает" %}</a><a href="{% url 'privacy' %}">{% translate "Конфиденциальность" %}</a></p>
+  </footer>
+</section>
 {% endblock %}

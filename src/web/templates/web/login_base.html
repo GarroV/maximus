@@ -1,0 +1,17 @@
+{% extends "web/base.html" %}{% load i18n static %}{% comment %}
+Каркас страниц до входа, как в DECIMUS `login_base.html` (T241, D098): вход,
+политика конфиденциальности. Ни панели, ни шапки: страница на всю высоту
+окна, колонка по центру, язык и тема — в правом верхнем углу. Раскладка и
+фон — `web/login.css`.
+
+Владелец 27.10.2026 — на снимке страницы входа, где не вошедший видел всё меню
+продукта: «приведи внешний вид всех ппанелей, окно входа и лендинг к единому
+виду. все как и в децимусе».
+{% endcomment %}
+{% block head %}<link rel="stylesheet" href="{% static 'web/login.css' %}">{% block login_head %}{% endblock %}{% endblock %}
+{% block body %}
+<main id="content" class="page--login" tabindex="-1">
+  <div class="login__prefs">{% include "web/components/prefs.html" with prefs_id="login" %}</div>
+  {% block login %}{% endblock %}
+</main>
+{% endblock %}

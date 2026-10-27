@@ -333,3 +333,49 @@ def is_role_name(name, role_title) -> bool:
             if name in {str(title) for title in ROLE_TITLES.values()}:
                 return True
     return False
+
+
+# Знак MAXIMUS и значки вкладки браузера (T241, D098). Файлы кладёт владелец в
+# `static/web/brand/` из `GarroV/forma`; пока их нет, вместо картинки — буква
+# на акценте, а значков в `<head>` нет вовсе: ссылка на отсутствующий файл —
+# это 404 на каждой странице и битая картинка в панели.
+BRAND_DIR = "web/brand/"
+
+
+@lru_cache(maxsize=None)
+def _brand_file(name: str) -> bool:
+    from django.contrib.staticfiles import finders
+
+    return bool(finders.find(BRAND_DIR + name))
+
+
+@register.simple_tag
+def brand_ready() -> bool:
+    """Лежит ли знак продукта в статике: `{% brand_ready as has_brand %}`."""
+    return _brand_file("mark-small.svg")
+
+
+@register.simple_tag
+def brand_mark(css_class: str = "sidenav__logo", size: int = 28):
+    """Знак продукта: картинка, если файл есть, иначе буква «M» на акценте."""
+    if _brand_file("mark-small.svg"):
+        from django.templatetags.static import static
+
+        return format_html(
+            '<img class="{}" src="{}" alt="" width="{}" height="{}">',
+            css_class, static(BRAND_DIR + "mark-small.svg"), size, size,
+        )
+    return format_html(
+        '<span class="{} sidenav__mark" aria-hidden="true">M</span>', css_class,
+    )
+
+
+@register.filter("initials")
+def initials(name) -> str:
+    """Две буквы для аватара, как в DECIMUS: первые буквы двух первых слов."""
+    words = str(name or "").split()
+    if not words:
+        return "?"
+    if len(words) == 1:
+        return words[0][:2].upper()
+    return (words[0][0] + words[1][0]).upper()

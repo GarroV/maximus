@@ -1,0 +1,53 @@
+{% extends "web/login_base.html" %}{% load ui i18n %}
+{% block title %}{% translate "Конфиденциальность" %}{% endblock %}
+{% block login %}
+{% comment %}
+Политика конфиденциальности (T241). Нужна Google, чтобы опубликовать вход
+через Google, и открыта без входа. Адрес `/privacy/` вписан владельцем в Google
+и меняться не должен.
+
+Только факты о том, что продукт делает сейчас, без юридических обещаний,
+которых он не выполняет. Почта поддержки — из `SUPPORT_EMAIL`; не задана —
+удаление идёт через администратора партнёра.
+{% endcomment %}
+<article class="login login--text">
+  <header class="login__brand">
+    {% brand_mark "login__mark" 72 %}
+    <h1 class="login__name">{% translate "Конфиденциальность" %}</h1>
+    <p class="login__sub">MAXIMUS</p>
+  </header>
+
+  <section>
+    <h2>{% translate "Кто мы" %}</h2>
+    <p>{% translate "MAXIMUS — внутренний сервис Dodo Brands для партнёров: он собирает первичные данные пиццерий и складывает из них P&L единого формата." %}</p>
+  </section>
+
+  <section>
+    <h2>{% translate "Вход через Google" %}</h2>
+    <p>{% translate "При входе через Google мы получаем ваше имя, адрес почты и идентификатор аккаунта Google. Они нужны только для того, чтобы узнать уже заведённого пользователя: новых учётных записей вход через Google не создаёт." %}</p>
+  </section>
+
+  <section>
+    <h2>{% translate "Что хранится" %}</h2>
+    <p>{% translate "Учётные данные пользователей и то, что вносит партнёр: часы, расходы, счета, документы и другие данные, из которых собирается P&L." %}</p>
+  </section>
+
+  <section>
+    <h2>{% translate "Кому передаются" %}</h2>
+    <p>{% translate "Никому, кроме инфраструктуры, на которой работает сервис." %}</p>
+  </section>
+
+  <section>
+    <h2>{% translate "Как удалить данные" %}</h2>
+    {% if support_email %}
+    <p>{% blocktranslate with email=support_email %}Через администратора вашего партнёра или письмом на <a href="mailto:{{ email }}">{{ email }}</a>.{% endblocktranslate %}</p>
+    {% else %}
+    <p>{% translate "Через администратора вашего партнёра." %}</p>
+    {% endif %}
+  </section>
+
+  <footer class="login__foot">
+    <p class="login__links"><a href="{% url 'index' %}">MAXIMUS</a><a href="{% url 'login' %}">{% translate "Войти" %}</a></p>
+  </footer>
+</article>
+{% endblock %}

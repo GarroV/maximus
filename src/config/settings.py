@@ -15,6 +15,7 @@ from psycopg.conninfo import conninfo_to_dict
 # Модуль без единого импорта Django: настройки читаются раньше, чем поднимаются
 # приложения, поэтому тащить сюда код входа нельзя.
 from web.flags import dev_login_enabled, dev_password
+from web.google_auth import load_google_settings, load_hq_domains
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -159,6 +160,20 @@ if DEMO_MODE:
     # 2026-08-22: он нажал в шапке «Periods» и оказался именно там (issue #116).
     LOGIN_URL = "/demo/"
 
+# --- вход через Google (T241, D098) -------------------------------------------
+# Как в DECIMUS и MERIDIUS: три переменные, без любой из них кнопки нет, и
+# продукт входит паролем, как раньше. Адрес возврата — полный адрес
+# `/auth/google/callback` на фронте (прод: maximus.vasiliy-garro.workers.dev).
+# В демо Google не показывается вовсе: туда входят кнопками ролей.
+GOOGLE_AUTH = None if DEMO_MODE else load_google_settings(os.environ)
+# Домены компании для администратора платформы (`hd` в токене Google). Пусто —
+# dodobrands.io и dodopizza.com; переменная список заменяет, а не дополняет.
+GOOGLE_HQ_DOMAINS = load_hq_domains(os.environ)
+
+# Почта поддержки для страницы конфиденциальности. Пусто — страница отправляет
+# к администратору партнёра.
+SUPPORT_EMAIL = os.environ.get("SUPPORT_EMAIL", "").strip()
+
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
 
@@ -187,10 +202,6 @@ TEMPLATES = [
                 "web.theme.theme",
                 # Чем переключить язык — тоже на каждой странице (T017).
                 "web.i18n.switcher",
-                # Состояние экрана: готов, дорабатывается или ещё не написан
-                # (D064). В каркасе, потому что пометку, которую надо не забыть
-                # дописать в каждый из сорока девяти шаблонов, однажды забудут.
-                "web.stages.current",
             ],
         },
     },

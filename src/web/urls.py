@@ -12,6 +12,7 @@ from . import (
     employee_views,
     expense_items_views,
     expenses_views,
+    google_views,
     guide,
     inbox_split_views,
     papers_views,
@@ -119,6 +120,14 @@ urlpatterns = [
         name="platform-member-role",
     ),
     path("login/", views.login_page, name="login"),
+    # Вход через Google (T241, D098). Адрес возврата вписан владельцем в
+    # приложение Google и меняться не должен: `/auth/google/callback`.
+    path("auth/google/start/", google_views.start, name="google-start"),
+    path("auth/google/callback", google_views.callback, name="google-callback"),
+    path("account/google/link/", google_views.link_start, name="google-link"),
+    path("account/google/unlink/", google_views.unlink, name="google-unlink"),
+    # Политика конфиденциальности — без входа: её адрес вписан в Google (T241).
+    path("privacy/", views.privacy, name="privacy"),
     path("logout/", views.logout_page, name="logout"),
     path("account/", account.page, name="account"),
     path("account/password/", views.password_change, name="password-change"),
@@ -535,6 +544,8 @@ urlpatterns = [
     #  последний заведённый месяц; месяцев нет — в их список, где стоит кнопка
     #  «Завести месяц». Тупика не остаётся ни в одном случае.
     # ─────────────────────────────────────────────────────────
+    # Табель управляющего точки — сразу сетка рабочего месяца (T241, #315).
+    path("timesheet/", planned_views.timesheet_current, name="timesheet-current"),
     path("payroll/sheet/", planned_views.payroll_sheet, name="payroll-sheet"),
     path("payroll/closing/", planned_views.closing, name="month-closing"),
     path("reports/pnl/", planned_views.pnl, name="reports-pnl"),

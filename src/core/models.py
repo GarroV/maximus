@@ -242,6 +242,10 @@ class User(AbstractBaseUser):
     email = models.TextField(db_default="")
     is_active = models.BooleanField(db_default=True)
     created_at = models.DateTimeField(db_default=now_default())
+    # Постоянный номер аккаунта Google (`sub`), которым человек входит (T241,
+    # D098). Почта у аккаунта может смениться или достаться другому, номер —
+    # нет: первый вход по почте записывает его, следующие ищут по нему.
+    google_sub = models.TextField(null=True, blank=True, unique=True)
 
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS: list[str] = []

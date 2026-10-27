@@ -1,72 +1,38 @@
 {% load ui i18n demo_ui %}{% comment %}
-Левая панель: куда идти, кем вошли и на каком языке читаем (T222, D081).
+Левая панель вошедшего человека (T222, D081; вид — по DECIMUS, T241, D098).
 
-До 29.09.2026 здесь была верхняя шапка, а разделы собирались областями в
-раскрывающиеся меню (T207). Владелец снял это дословно: «давай мы переведем
-навигацию в левую сторону, как это сделано в наших других проектах. никаких
-выпадающих списков - одна страница - один функционал.» Меню, которое надо
-раскрыть, прячет разделы: человек не видит, что в системе есть. Поэтому все
-разделы видны сразу, область учёта — подпись над своими пунктами.
+До 29.09.2026 здесь была верхняя шапка с раскрывающимися меню; владелец снял
+её: «никаких выпадающих списков - одна страница - один функционал». Все
+разделы видны сразу, область учёта — подпись над своими пунктами (модуль 10
+эталона). 27.10.2026 владелец велел привести панели к DECIMUS: «все как и в
+децимусе». Отсюда марка со знаком и строкой «Dodo · партнёр», строка темы,
+языка и учётной записи внизу и блок учётки, который открывает меню учётки.
 
-Разметка и оформление — компонент `.sidenav` общего ядра (`dodo-ds.css` из
-`GarroV/forma`, эталон линейки — Swarm Brain): у MAXIMUS, DECIMUS и MERIDIUS одна
-логика интерфейса. Что продукт добавил поверх ядра — в `app.css`, раздел
-«Левая панель», с причинами.
+Рисуется только вошедшему (`base.html`): до входа разделов не видно вовсе —
+неопознанному человеку карта продукта не показывается (D098).
 
-Что панель обязана говорить и почему именно так.
+**Где человек сейчас** — поле `current` пункта (`web.navigation`, #306): на
+самом экране пункт — `span[aria-current=page]`, на вложенном — подсвеченная
+ссылка `aria-current=location`, ведущая в начало раздела, как в DECIMUS.
 
-**Где человек сейчас.** Раздел, в котором он находится, — не ссылка, а
-`span[aria-current]`; см. `components/sidenav_item.html`, там же и почему.
+**Разделов ровно столько, сколько ведёт эта роль**; решает `web/navigation.py`.
+В демо на месте чужого раздела — предложение открыть его ролью, которая его
+ведёт (T163, тег `demo_switch`, класс `nav-offer` — контракт с
+`tests/test_demo_role_switch.py`).
 
-**Разделов ровно столько, сколько ведёт эта роль.** Справочники и правила — два
-разных права, и партнёр вправе развести их по разным людям. Показывать оба тому,
-у кого одно, значило бы обещать раздел, который сам же ответит отказом. Это не
-сокрытие адреса: `/directory/` по-прежнему отвечает отказом словами, проверка
-стоит в представлении и в политиках базы. Область, где роль не ведёт ни одного
-пункта, не рисуется вовсе — решает `web/navigation.py`, а не разметка.
+**Ненаписанный экран** — пункт тише остальных (`is-wip`), без точек и плашек
+стадии (#309): состояние стройки человеку за экраном не нужно.
 
-**В демо на месте чужого раздела — предложение открыть его ролью, которая его
-ведёт** (T163, тег `demo_switch` живёт в приложении демо). Посетитель видит
-продукт впервые и отсутствие раздела читает как отсутствие функциональности.
-Права при этом не меняются ни на копейку. Класс `nav-offer` — контракт между
-тегом и проверкой `tests/test_demo_role_switch.py`.
-
-**Группа — список с подписью.** Пункты области лежат в `<ul>`, который ссылается
-на подпись (`aria-labelledby`): диктор, входя в список, называет область и число
-пунктов в ней. Подпись видна глазу; в свёрнутой панели (720–1099) она уходит, но
-имя списка остаётся — ссылка на скрытый элемент имя даёт.
-
-**Роль и партнёр — всегда, внизу панели.** Один и тот же экран показывает разным
-людям разные числа, и человек должен видеть, чьими глазами смотрит, не нажимая
-ничего. Роль — **одна**: у учётной записи один уровень (решение владельца,
-расхождение с эталоном разбирается в #130 и оформлением не решается).
-
-**Регистры — перечислением того, что видно** (D023): не «регистры: все», а
-названия. Перечисляется только видимое — список названий и есть сообщение о
-том, что регистр существует.
-
-**Точка — только когда человек ею ограничен.** Объяснять надо срезанные данные,
-а не полные.
-
-**Язык и тема — формами с кнопками, а не ссылками.** Смена меняет состояние
-(cookie), и переходом по ссылке её делать нельзя: такую ссылку пройдёт любой
-предзагрузчик. Выбранное — `span[aria-current]`, а не нажимаемая кнопка, по той
-же причине, что и текущий раздел. При закреплённом языке (демо, UI_LANGUAGE)
-список языков пуст, и переключателя нет вовсе: выключенная ручка хуже
-отсутствующей.
-
-**Выход — форма, а не ссылка:** по ссылке его запустила бы картинка на чужой
-странице.
+**Кто смотрит** — блок учётки внизу: инициал, имя, роль. Роль — **одна**: у
+учётной записи один уровень (решение владельца, расхождение с эталоном
+разбирается в #130 и оформлением не решается). Блок открывает меню учётки
+(`components/account_menu.html`): партнёр, точка, регистры, тема, язык,
+«Учётная запись» и «Выйти». Меню — `<details>`: открывается без скрипта.
 {% endcomment %}
 <nav class="sidenav" aria-label="{% translate "Основная навигация" %}">
-  {% comment %}
-  Имя продукта ведёт на первый экран месяца: по имени продукта уходят «в
-  начало», это привычка, а не украшение. Знак `M` — то, что остаётся от марки в
-  свёрнутой панели: без него верх панели на планшете был бы пустым.
-  {% endcomment %}
-  <a class="sidenav__brand" href="{% url 'periods' %}" title="MAXIMUS · P&amp;L">
-    <span class="sidenav__logo sidenav__mark" aria-hidden="true">M</span>
-    <span class="sidenav__name"><b>MAXIMUS</b><small>P&amp;L</small></span>{% if dev_login %}<span class="badge dot sidenav__dev" title="{% translate "На странице входа есть кнопки быстрого входа учётками сида (DEV_LOGIN=1)" %}">dev</span>{% endif %}
+  <a class="sidenav__brand" href="{% url 'periods' %}" title="MAXIMUS{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}">
+    {% brand_mark "sidenav__logo" 28 %}
+    <span class="sidenav__name"><b>MAXIMUS</b><small>Dodo{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}</small></span>{% if dev_login %}<span class="badge dot sidenav__dev" title="{% translate "На странице входа есть кнопки быстрого входа учётками сида (DEV_LOGIN=1)" %}">dev</span>{% endif %}
   </a>
   <div class="sidenav__list">
     {% for area in nav_areas %}
@@ -77,8 +43,8 @@
         {% else %}
           {% for section in area.items %}
             {% if section.allowed %}
-              <li>{% with section_url=section.url section_label=section.title section_waiting=section.waiting section_stage=section.stage section_icon=section.icon %}{% include "web/components/sidenav_item.html" %}{% endwith %}</li>
-            {% elif principal and section.offer %}
+              <li>{% include "web/components/sidenav_item.html" %}</li>
+            {% elif section.offer %}
               <li>{% demo_switch section.needs section.route section.title %}</li>
             {% endif %}
           {% endfor %}
@@ -87,74 +53,20 @@
     {% endfor %}
   </div>
 
+  {% comment %}
+  Низ панели, как в DECIMUS (D470): тема, язык и «Учётная запись» значком одной
+  строкой. Тему ставит сервер в атрибут `<html>` (issue #164).
+  {% endcomment %}
   <div class="sidenav__foot">
-    {% comment %}
-    Легенда цветных точек состояния (issue #268): без неё точка у пункта
-    говорит только тому, кто навёл мышь. Рисуется, только когда точки в панели
-    есть, и только для тех цветов, что есть (`navigation._legend`). Стоит в
-    подвале, а не в конце списка: у администратора список длиннее окна, и
-    легенда в его конце не видна, пока не докрутишь (сверка T223).
-    {% endcomment %}
-    {% if nav_stages %}<ul class="sidenav__legend" aria-label="{% translate "Состояние" %}">{% for stage in nav_stages %}<li><span class="sidenav__stage sidenav__stage--{{ stage.kind }}" aria-hidden="true"></span>{{ stage.label }}</li>{% endfor %}</ul>{% endif %}
-    {% comment %}
-    Один служебный пункт вместо трёх (сверка с эталоном по T222, как
-    «Настройки» в ядре). Пароль и гайд человек открывает редко, а место в
-    панели они занимали постоянно — и выталкивали за нижний край целую область
-    учёта на экране высотой 900. Теперь они на странице учётной записи; гайд
-    до входа остаётся отдельным пунктом: половина вопроса, на который он
-    отвечает, — «кем входить».
-    {% endcomment %}
-    {% if principal %}
+    <div class="sidenav__prefs">
+      {% include "web/components/prefs.html" with prefs_id="nav" %}
       {% url 'account' as account_url %}
       {% translate "Учётная запись" as account_label %}
-      {% with section_url=account_url section_label=account_label section_waiting=0 section_stage=None section_icon="info" %}{% include "web/components/sidenav_item.html" %}{% endwith %}
-    {% else %}
-      {% url 'guide' as guide_url %}
-      {% translate "Как это работает" as guide_label %}
-      {% with section_url=guide_url section_label=guide_label section_waiting=0 section_stage=None section_icon="info" %}{% include "web/components/sidenav_item.html" %}{% endwith %}
-      {% url 'login' as login_url %}
-      {% translate "Войти" as login_label %}
-      {% with section_url=login_url section_label=login_label section_waiting=0 section_stage=None section_icon="arrow" %}{% include "web/components/sidenav_item.html" %}{% endwith %}
-    {% endif %}
-    {% comment %}
-    Тема и язык — одной строкой: обе ручки про то, КАК человек читает продукт,
-    а не про то, что в нём лежит. Подписи «Тема» и «Язык» видит только диктор
-    (группа названа через `aria-labelledby`), глазу хватает самих значков и
-    букв языка — у каждого есть `title`. Тему ставит сервер в атрибут `<html>`:
-    выбранная скриптом, она применялась бы после загрузки, и человек видел бы
-    вспышку светлого перед тёмным (issue #164).
-    {% endcomment %}
-    <div class="sidenav__prefs">{% include "web/components/prefs.html" with prefs_id="nav" %}</div>
-  </div>
-
-  {% if principal %}
-  {% comment %}
-  Кто смотрит и на что — две строки. Первая: имя и плашка роли. У учёток сида
-  имя совпадает с названием роли — на любом из языков продукта (фильтр
-  `is_role_name`), — и тогда имени нет вовсе: иначе на английском рядом
-  стояли бы жирное «Администратор сети» и плашка «Network Administrator».
-  Вторая строка: партнёр · точка. Точка — только когда человек ею ограничен:
-  объяснять надо срезанные данные, а не полные. Третья — регистры словами, с
-  точкой того же цвета, что метки в ведомости. До issue #268 здесь были одни
-  цветные точки: различались только цветом, и перед ними висела «·» — для
-  того, кто цвета не различает, это был ряд одинаковых кружков.
-
-  Выход — значком в той же строке, с названием в `aria-label` и `title`, и
-  формой, а не ссылкой: по ссылке его запустила бы картинка на чужой странице.
-  На телефоне подпись «Выйти» видна словом.
-  {% endcomment %}
-  <div class="sidenav__user">
-    <span class="avatar sidenav__avatar" aria-hidden="true">{{ principal.role_title|first|upper }}</span>
-    <div class="sidenav__who">
-      <span class="sidenav__whoami">{% if not principal.display_name|is_role_name:principal.role_title %}<b>{{ principal.display_name }}</b>{% endif %}{% if principal.role_title %}{% role_badge principal.role_title %}{% endif %}</span>
-      <span class="sidenav__meta">{% if principal.tenant_title %}<span>{{ principal.tenant_title }}</span>{% endif %}{% if principal.units_title %}<span title="{% translate "Данные и итоги на всех страницах — только по этой точке" %}">{% blocktranslate with code=principal.units_title %}точка: {{ code }}{% endblocktranslate %}</span>{% endif %}</span>
+      <a class="sidenav__gear{% if request.path == account_url %} is-current{% endif %}" href="{{ account_url }}" title="{{ account_label }}" aria-label="{{ account_label }}"{% if request.path == account_url %} aria-current="page"{% endif %}>{% icon "info" %}</a>
     </div>
-    <form class="sidenav__form sidenav__logout" method="post" action="{% url 'logout' %}">{% csrf_token %}
-      {% translate "Выйти" as logout_label %}
-      <button class="sidenav__item" type="submit" title="{{ logout_label }}" aria-label="{{ logout_label }}">{% icon "arrow" %}<span class="sidenav__label" aria-hidden="true">{{ logout_label }}</span></button>
-    </form>
-    {% comment %}Регистры — последней строкой во всю ширину подвала, под именем и выходом: в колонке рядом с кнопкой выхода три слова вставали в три строки.{% endcomment %}
-    {% if visible_ledgers %}<span class="sidenav__ledgers" role="list" aria-label="{% translate "Видимые регистры" %}">{% for name in visible_ledgers %}<span class="sidenav__reg reg--{{ name.code }}" role="listitem">{{ name }}</span>{% endfor %}</span>{% endif %}
   </div>
-  {% endif %}
+
+  <div class="sidenav__user">
+    {% include "web/components/account_menu.html" with menu_id="nav" menu_place="up" %}
+  </div>
 </nav>

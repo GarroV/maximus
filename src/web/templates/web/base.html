@@ -6,6 +6,12 @@
 - навигация — левой панелью `components/sidenav.html` (T222, D081): разделы,
   кем вошли, язык, тема и выход. До 29.09.2026 здесь была верхняя шапка с
   раскрывающимися меню; владелец снял её — «никаких выпадающих списков»;
+- каркас — как в DECIMUS (T241, D098, владелец 27.10.2026: «все как и в
+  децимусе»): панель, полоса телефона и вкладки снизу — только вошедшему.
+  Не вошедший видит шапку с маркой, языком, темой и «Войти» — и ни одного
+  раздела продукта: карта разделов — уже сведения о продукте, и до входа
+  каждый раздел всё равно отвечает формой входа. Вход и лендинг рисуют свой
+  каркас целиком (`web/login_base.html`, блок `body`);
 - оформления здесь нет вовсе: ядро линейки `web/dodo-ds.css` и слой продукта
   `web/domain.css` приезжают из `GarroV/forma` (правятся там, не здесь), правила
   продукта — `web/app.css` (T177); порядок листов объяснён ниже.
@@ -20,7 +26,7 @@
 
 Комментарий именно {% comment %}: однострочный {# … #} многострочным не бывает
 и вывалился бы на страницу текстом (проверено в браузере дважды).
-{% endcomment %}{% load i18n static %}{% get_current_language as page_language %}<!doctype html>
+{% endcomment %}{% load i18n static ui %}{% get_current_language as page_language %}<!doctype html>
 <html lang="{{ page_language }}"{% if theme_attr %} data-theme="{{ theme_attr }}"{% endif %}>
 <head>
 <meta charset="utf-8">
@@ -56,22 +62,59 @@
 <link rel="stylesheet" href="{% static 'web/domain.css' %}">
 <link rel="stylesheet" href="{% static 'web/app.css' %}">
 {% comment %}
+`shell.css` — каркас по образцу DECIMUS (T241): панель, меню учётки, полосы
+телефона, шапка до входа. Своим листом, а не в `app.css`: это кандидат на
+переезд в ядро `GarroV/forma`, общее для трёх продуктов.
+
+Знак и значки вкладки (`static/web/brand/`) кладёт владелец из `GarroV/forma`;
+пока их нет, ссылок на них нет: 404 на каждой странице никому не нужен.
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'web/shell.css' %}">
+{% brand_ready as has_brand %}{% if has_brand %}
+<link rel="icon" href="{% static 'web/brand/mark-small.svg' %}" type="image/svg+xml">
+<link rel="icon" href="{% static 'web/brand/icon-32.png' %}" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="{% static 'web/brand/apple-touch-icon.png' %}">
+<link rel="manifest" href="{% static 'web/site.webmanifest' %}">
+{% endif %}
+{% comment %}
 Своя статика страницы. Пусто на всех экранах, кроме табеля: он единственный
 интерактивный (D017), и тащить htmx на список периодов незачем.
 {% endcomment %}
 {% block head %}{% endblock %}
 </head>
 <body>
+{% block body %}
 {% comment %}
-Первая остановка табуляции — «к содержанию». Панель стоит в разметке раньше
+Первая остановка табуляции — «к содержанию»: панель стоит в разметке раньше
 экрана, и без этой ссылки человек с клавиатуры проходил бы два десятка пунктов
-навигации на каждой странице, прежде чем добраться до поля ввода. Видна только
-в фокусе.
+навигации на каждой странице. Видна только в фокусе.
 {% endcomment %}
 <a class="skip-link" href="#content">{% translate "К содержанию" %}</a>
+{% if principal %}
+{% comment %}Полоса телефона (ниже 720px): марка и аватар, открывающий меню учётки.{% endcomment %}
+<header class="mbar">
+  <a class="mbar__brand" href="{% url 'periods' %}">{% brand_mark "topbar__logo" 24 %}<span class="topbar__name">MAXIMUS</span></a>
+  <span class="topbar__spacer"></span>
+  {% include "web/components/account_menu.html" with menu_id="mbar" menu_place="down" %}
+</header>
+{% else %}
+{% comment %}Шапка до входа, как в DECIMUS: марка, язык, тема и «Войти». Разделов нет.{% endcomment %}
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="topbar__brand" href="{% url 'index' %}">{% brand_mark "topbar__logo" 24 %}<span class="topbar__name">MAXIMUS</span><span class="topbar__mark">Dodo</span></a>
+    <span class="topbar__spacer"></span>
+    {% comment %}Гайд открыт до входа: половина его ответа — «кем входить». На самом гайде — не ссылка.{% endcomment %}
+    {% url 'guide' as guide_url %}{% if request.path == guide_url %}<span class="topbar__link" aria-current="page">{% translate "Как это работает" %}</span>{% else %}<a class="topbar__link" href="{{ guide_url }}">{% translate "Как это работает" %}</a>{% endif %}
+    <div class="sidenav__prefs">{% include "web/components/prefs.html" with prefs_id="top" %}</div>
+    <a class="btn btn--sm" href="{% url 'login' %}">{% translate "Войти" %}</a>
+  </div>
+</header>
+{% endif %}
 <div class="shell">
-{% include "web/components/sidenav.html" %}
-<main id="content" tabindex="-1">{% include "web/components/stage_banner.html" %}{% block content %}{% endblock %}</main>
+{% if principal %}{% include "web/components/sidenav.html" %}{% endif %}
+<main id="content" tabindex="-1">{% block content %}{% endblock %}</main>
 </div>
+{% if principal %}{% include "web/components/tabbar.html" %}{% endif %}
+{% endblock %}
 </body>
 </html>

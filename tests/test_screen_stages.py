@@ -9,10 +9,9 @@
 
 Что здесь охраняется и почему именно это.
 
-**Опечатка в имени маршрута молчит.** Пометка ищется по имени маршрута
-(`stages.REFINED`); ошибись в нём — экран просто останется без пометки, ничего
-не упадёт, и узнает об этом снова тот, кому показывают продукт. Поэтому имена
-сверяются с резолвером Django.
+**Плашек стадии на экранах больше нет** (D098, #309, 27.10.2026): каркас
+приведён к DECIMUS, где непостроенный раздел только приглушён в меню.
+Состояние модулей живёт в `docs/product-map.md`.
 
 **Пункт, ведущий в никуда, — та самая беда, которой боялись до D064.** Решение
 её не отменяет: оно требует, чтобы у ненаписанного экрана была страница со
@@ -21,31 +20,6 @@
 from __future__ import annotations
 
 import pytest
-
-
-def test_marked_routes_exist():
-    """Каждое помеченное имя маршрута — настоящее.
-
-    Без этой сверки список пометок тихо расходится с продуктом: переименовали
-    маршрут — пометка осталась висеть на несуществующем, а живой экран её
-    потерял. Оба конца ошибки невидимы глазами.
-    """
-    from django.urls import NoReverseMatch, reverse
-
-    from web import stages
-
-    broken = []
-    for name in stages.REFINED:
-        try:
-            reverse(name)
-        except NoReverseMatch:
-            # Маршруты с параметрами (экран периода, P&L) резолвятся только с
-            # аргументом — для них достаточно, что имя вообще известно.
-            try:
-                reverse(name, args=["00000000-0000-0000-0000-000000000000"])
-            except NoReverseMatch:
-                broken.append(name)
-    assert not broken, f"помечены несуществующие маршруты: {broken}"
 
 
 def test_every_navigation_item_resolves():
@@ -98,14 +72,16 @@ def test_the_reference_menu_is_covered():
     assert not missing, f"пункты эталона, которых нет в шапке: {missing}"
 
 
-# «Аналитика по людям» из этого списка ушла 25.09.2026: экран построен (T167) и
-# помечен доработкой в `stages.REFINED`, а не заглушкой. «Банковская выписка»
-# ушла тем же путём: загрузка и сопоставление построены (T198), доработка —
-# правила и порог. Список набран руками, поэтому он и краснеет при таком
-# переходе — это его работа, а не помеха.
+# «Аналитика по людям» из этого списка ушла 25.09.2026: экран построен (T167).
+# «Банковская выписка» ушла тем же путём (T198). Список набран руками, поэтому
+# он и краснеет при таком переходе — это его работа, а не помеха.
 @pytest.mark.parametrize("code", ["payouts", "dodo-is"])
 def test_a_planned_screen_says_what_it_will_be(client, web_env, code):
-    """Ненаписанный экран отвечает и объясняет себя, а не молчит пустотой."""
+    """Ненаписанный экран отвечает и объясняет себя, а не молчит пустотой.
+
+    Без очереди стройки (#309, D098): «Седьмая очередь; ждёт доступа к API»
+    человеку за экраном ни о чём не говорит.
+    """
     from conftest import body, login_as
     from web import stages
 
@@ -114,32 +90,25 @@ def test_a_planned_screen_says_what_it_will_be(client, web_env, code):
     html = body(client.get(f"/{screen.url}"))
 
     assert str(screen.title) in html, "заглушка не называет сам экран"
-    assert str(stages.LABELS[stages.PLANNED]) in html, (
-        "на ненаписанном экране нет пометки «Разработка в процессе»"
-    )
     assert str(screen.what)[:40] in html, "заглушка не говорит, что здесь будет"
+    assert str(screen.when) not in html, "на экране снова очередь стройки"
 
 
-def test_a_refined_screen_carries_its_mark(client, web_env):
-    """Дорабатываемый экран помечен плашкой, готовый — нет.
+def test_no_screen_carries_a_stage_plate(client, web_env):
+    """Плашек «Доработка» / «Разработка в процессе» на экранах нет (#309, D098).
 
-    Ищется КЛАСС плашки, а не слово «Доработка»: слово законно стоит и в шапке —
-    подписью к точке у пункта меню, — и проверка по тексту прошла бы на любой
-    странице продукта. Поймано первым же прогоном этого теста.
+    До 27.10.2026 над экраном стояла фраза из журнала стройки («Подсказка
+    статьи кнопкой, а не подстановкой в поле»), и бухгалтер читал её как
+    поломку. Как в DECIMUS: состояние модулей — в `docs/product-map.md`, а не
+    на экране. Ищется класс плашки, а не слово.
     """
     from conftest import body, login_as
 
     login_as(client, "director")
-
-    refined = body(client.get("/inbox/"))
-    assert 'class="stage stage--refining"' in refined, (
-        "инбокс дорабатывается (#200, #143), а плашки на нём нет"
-    )
-
-    ready = body(client.get("/periods/"))
-    assert 'class="stage stage--' not in ready, (
-        "табель готов — плашки состояния на нём быть не должно"
-    )
+    for url in ("/inbox/", "/expenses/", "/invoices/", "/rules/", "/payouts/"):
+        html = body(client.get(url))
+        assert 'class="stage stage--' not in html, f"{url}: плашка стадии снова на экране"
+        assert "sidenav__stage" not in html, f"{url}: точка стадии снова у пункта меню"
 
 
 def test_entry_points_lead_into_the_latest_month(client, web_env):
