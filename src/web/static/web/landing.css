@@ -164,7 +164,9 @@ main.page--landing { max-width: none; margin: 0; padding: 0; }
     --lp-tab-h: 32px; --lp-tab-gap: 4px;
     --lp-tab-w: calc((100vw - 2 * var(--lp-gutter) - 4 * var(--lp-tab-gap)) / 5);
   }
-  .lp-tab { padding: 0 8px; font-size: 12px; border-radius: 10px 10px 0 0; }
+  /* Листы на телефоне не прилипают, ряд закладок не складывается — каждая
+     закладка стоит у левого края своего листа и в полную длину подписи. */
+  .lp-tab { left: var(--lp-side); width: auto; max-width: calc(100% - 2 * var(--lp-side)); padding: 0 14px; font-size: 13px; border-radius: 10px 10px 0 0; }
   .lp-tab__n { margin-right: 4px; }
   .lp-sheet { position: relative; top: auto; min-height: 0; padding-top: 72px; padding-bottom: 56px; border-radius: 22px 22px 0 0; }
   .lp-hero { padding-top: 24px; }

@@ -77,7 +77,10 @@ main.page--login {
 /* Демо и быстрый вход — тихие блоки под формой, не главный путь. */
 .login__extra { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); text-align: left; }
 .login__extra h2 { margin: 0; font-size: var(--fs-dense); color: var(--ink-2); text-align: center; }
-.login__extra table { width: 100%; }
+.login__extra table { width: 100%; font-size: var(--fs-dense); }
+/* Логин учётки — одним куском: моноширинный в узкой ячейке рвался по буквам. */
+.login__extra code { white-space: nowrap; }
+.login__note { margin: 0; color: var(--ink-3); font-size: var(--fs-dense); text-align: center; text-wrap: balance; }
 
 /* Две мелкие строки внизу */
 .login__foot { display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--fs-meta); line-height: var(--lh-meta); color: var(--ink-3); }
@@ -102,8 +105,9 @@ main.page--login {
 .login--text section { margin: 0; }
 
 @media (max-width: 719px) {
-  main.page--login { padding: var(--space-12) var(--space-6) var(--space-10); }
+  main.page--login { padding: var(--space-6) var(--space-6) var(--space-10); }
   .login { gap: 28px; }
-  .login__prefs { right: var(--space-5); }
+  /* На телефоне угол занят знаком: язык и тема — строкой над колонкой. */
+  .login__prefs { position: static; align-self: stretch; justify-content: flex-end; flex-wrap: wrap; margin: 0 0 var(--space-6); }
   .login__prefs .langpill__item, .login__prefs .sidenav__theme button { min-width: var(--tap-min); height: var(--tap-min); }
 }
