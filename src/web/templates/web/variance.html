@@ -22,9 +22,8 @@
 {% elif nothing_to_compare %}
 {% translate "Сравнивать не с чем" as nothing_to_compare_title %}
 {% notice "empty" title=nothing_to_compare_title %}
-  {% blocktranslate with previous=previous_title %}Сравнивать не с чем: за {{ previous }} в базе нет ни одной суммы,
-  доступной вашей роли. Отчёт сравнивает месяц с предыдущим, поэтому у первого
-  посчитанного месяца расхождений не бывает по построению.{% endblocktranslate %}
+  {% blocktranslate with previous=previous_title %}За {{ previous }} в базе нет ни одной суммы, доступной вашей роли, а отчёт ставит месяц рядом с предыдущим. Расхождения появятся, когда у вас будут посчитаны два месяца подряд.{% endblocktranslate %}
+  <a class="btn next" href="{{ back_url }}">{% translate "К ведомости" %}</a>
 {% endnotice %}
 {% else %}
 

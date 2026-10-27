@@ -18,10 +18,9 @@
 <div class="reconcile">
 <h1>{% blocktranslate with period_title=title %}Сверка с таблицей бухгалтера · {{ period_title }}{% endblocktranslate %}</h1>
 
-<p class="sub">
-  {% blocktranslate %}Файл сравнивается с расчётом этого периода построчно. Он нигде не
-  сохраняется — ни на диск, ни в базу: ответ живёт только на этой странице.{% endblocktranslate %}
-</p>
+<p class="sub">{% blocktranslate %}Файл сравнивается с расчётом этого периода построчно: где сошлось, где нет, на сколько и почему.{% endblocktranslate %}</p>
+{% translate "Ваш файл ничего не меняет в системе" as harmless_title %}
+{% notice "ok" title=harmless_title %}{% blocktranslate %}Это сверка: мы не импортируем ваши суммы, а сравниваем с ними свои. Ни одна цифра расчёта от загрузки не изменится. Сам файл мы не храним — остаётся только итог сверки.{% endblocktranslate %}{% endnotice %}
 
 {% comment %}
 Зона загрузки — «Модуль 2» дизайн-системы. Экран сверки по замыслу решающий:
@@ -49,6 +48,17 @@
   </div>
   <button type="submit" class="primary">{% translate "Сверить" %}</button>
 </form>
+
+{% if not result %}
+<h2>{% translate "Что будет дальше" %}</h2>
+<ol class="steps-next">
+  <li>{% translate "Мы подберём колонки: имя, часы, к выплате — лишние игнорируются." %}</li>
+  <li>{% translate "Построчно сравним ваши суммы с нашим расчётом этого месяца." %}</li>
+  <li>{% translate "Покажем, где сошлось, где нет, на сколько и по какой причине; у каждой суммы есть след расчёта." %}</li>
+  <li>{% translate "Результат останется в протоколе сверки — через полгода на вопрос «почему так» ответит он." %}</li>
+</ol>
+{% if past %}<p class="note">{% translate "Прошлые сверки этого месяца — ниже на странице." %}</p>{% endif %}
+{% endif %}
 
 {% translate "Сверка не выполнена." as reconcile_failed %}
 {% if error %}{% notice "alert" title=reconcile_failed %}{{ error }}{% endnotice %}{% endif %}

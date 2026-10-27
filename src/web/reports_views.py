@@ -27,6 +27,9 @@ from reports import network as network_report
 from reports import pnl as pnl_report
 from reports.reconcile import reconcile
 from reports.sheet import build_slice
+from core.models import Payrun
+from core.spaces import is_platform_admin
+from payrun import lifecycle
 
 from . import permissions, reconciliation_log, runslice
 from .cash import item_title
@@ -235,7 +238,15 @@ def pnl(request, period_id):
     # просто пропала, а итог читался бы как полный. Поэтому строки называются и
     # закрываются отказом, а итог подписывается как неполный.
     payroll_denied = permissions.sums_denied(get_current_principal(request))
+    # Зарплата попадает в отчёт при утверждении периода (`payrun/posting.py`).
+    # До него отчёт не пуст «по ошибке», а ждёт шага — и человек, только что
+    # нажавший «Посчитать период», должен услышать об этом прямо на экране
+    # (issue #308): иначе строка «Итог 0,00» читается как «расчёт не дошёл».
+    payrun = Payrun.objects.filter(tenant=period.tenant, period=period.period).first()
+    payroll_waits = not payrun or payrun.status != lifecycle.APPROVED
     return render(request, "web/reports/pnl.html", {
+        "payroll_waits": payroll_waits,
+        "payrun_exists": bool(payrun),
         "period": {"id": str(period.id), "title": month_title(period.period)},
         "previous_title": month_title(report.previous_period),
         "lines": [
@@ -282,10 +293,17 @@ def pnl_network(request, period_id):
     """
     period = find_period(period_id)
     net = network_report.build(period.period)
+    who = get_current_principal(request)
+    rows = [_network_row(p, net.currency) for p in net.partners]
     return render(request, "web/reports/pnl_network.html", {
+        "rate_missing": any(not r["same_currency"] and not r["rate"] for r in rows),
+        # Курсы вводит администратор платформы (`rates_views`): ссылку получает
+        # только он, остальным сказано, у кого курс завести, — а не тупик.
+        "can_enter_rates": is_platform_admin(who.user_id if who else None),
+        "rates_url": reverse("platform-rates"),
         "period": {"id": str(period.id), "title": month_title(period.period)},
         "currency": net.currency or "",
-        "partners": [_network_row(p, net.currency) for p in net.partners],
+        "partners": rows,
         "total": {
             "units": net.units,
             "revenue": money(net.revenue),
