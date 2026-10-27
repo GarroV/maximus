@@ -123,7 +123,8 @@ def test_without_the_key_neither_door_is_shown(demo_db):
     `404`, — это тот же тупик, только по кнопке продукта.
     """
     seen = probe(demo_db, DEMO_MODE="1", DEMO_KEY="opensesame")
-    assert seen["root_goes_to"] == "/periods/", seen["root_goes_to"]
+    # Корень без входа — посадочная страница продукта (T241), а не уход куда-то.
+    assert seen["root_status"] == 200 and seen["root_goes_to"] == "", seen
     assert not seen["login_offers_demo"], "кнопка демо показана тому, у кого нет ключа"
 
 
@@ -144,7 +145,8 @@ def test_with_the_key_remembered_both_doors_open(demo_db):
 def test_the_product_has_no_demo_door_at_all(demo_db):
     """`DEMO_MODE=0` — ни перенаправления, ни кнопки, ни слова про демо."""
     seen = probe(demo_db, DEMO_MODE="0")
-    assert seen["root_goes_to"] == "/periods/", seen["root_goes_to"]
+    # Корень без входа — посадочная страница продукта (T241), а не уход куда-то.
+    assert seen["root_status"] == 200 and seen["root_goes_to"] == "", seen
     assert not seen["login_offers_demo"]
     assert not seen["login_says_demo"], "продуктовая форма входа упоминает демо"
 
