@@ -50,8 +50,13 @@ def unit_option(html: str, code: str) -> str:
         r'name="unit" value="([0-9a-f-]+)"[^>]*>\s*<label for="unit_[0-9a-f-]+">([^<]+)</label>',
         html,
     )
+    # Подпись галки — название точки, без кода (issue #313), поэтому код
+    # переводится в название тем же справочником, что показывает экран.
+    from core.models import Unit
+
+    title = Unit.objects.get(code=code).title
     for unit_id, label in found:
-        if label.strip().split(" — ")[0] == code:
+        if label.strip() == title:
             return unit_id
     raise AssertionError(f"точки «{code}» нет в списке: {[n for _, n in found]}")
 

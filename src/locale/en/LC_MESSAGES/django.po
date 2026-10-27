@@ -11451,3 +11451,139 @@ msgstr "calculated %(at)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "курс вводит администратор платформы"
 msgstr "the platform administrator enters the rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s чел. · принято %(hired)s, уволено %(left)s"
+msgstr "%(count)s people · hired %(hired)s, dismissed %(left)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(hours)s ч"
+msgstr "%(hours)s h"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В правилах страны «%(country)s»: %(value)s"
+msgstr "In the rules of the country “%(country)s”: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Год"
+msgstr "Year"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дальше →"
+msgstr "Next →"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Закрыта %(day)s"
+msgstr "Closed %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Каждая роль сохраняется отдельно: кнопка записывает галочки только "
+"своего столбца, остальные роли не меняются. После сохранения над сеткой "
+"появится подтверждение."
+msgstr "Each role is saved separately: a button writes only the ticks of its own column, the other roles stay as they are. A confirmation appears above the grid after saving."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Название правила или его код"
+msgstr "Rule name or its code"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не подключена"
+msgstr "Not connected"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Откроется %(day)s"
+msgstr "Opens %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Переведён"
+msgstr "Transferred"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Персонал"
+msgstr "Staff"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Подключена"
+msgstr "Connected"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Праздничных"
+msgstr "Holidays"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Принят %(day)s"
+msgstr "Hired %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Приняты в этом месяце"
+msgstr "Hired this month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Работает"
+msgstr "Working"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Работает с"
+msgstr "Open since"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Связь с Dodo IS"
+msgstr "Dodo IS link"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сохранить права: %(role)s"
+msgstr "Save rights: %(role)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Статус"
+msgstr "Status"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Страница %(page)s из %(pages)s · правил: %(total)s"
+msgstr "Page %(page)s of %(pages)s · rules: %(total)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы списка правил"
+msgstr "Rule list pages"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Тип оплаты"
+msgstr "Pay type"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Уволен %(day)s"
+msgstr "Dismissed %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Уволены в этом месяце"
+msgstr "Dismissed this month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Условия с"
+msgstr "Terms from"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не проверено"
+msgstr "not verified"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет в календаре"
+msgstr "not in the calendar"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "проверено"
+msgstr "verified"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "← Назад"
+msgstr "← Back"

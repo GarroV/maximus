@@ -1,0 +1,154 @@
+{
+ "Сохранить права: %(role)s": {
+  "en": "Save rights: %(role)s",
+  "sr": "Sačuvaj prava: %(role)s"
+ },
+ "Каждая роль сохраняется отдельно: кнопка записывает галочки только своего столбца, остальные роли не меняются. После сохранения над сеткой появится подтверждение.": {
+  "en": "Each role is saved separately: a button writes only the ticks of its own column, the other roles stay as they are. A confirmation appears above the grid after saving.",
+  "sr": "Svaka uloga se čuva posebno: dugme upisuje samo kvačice svoje kolone, ostale uloge se ne menjaju. Posle čuvanja iznad tabele se pojavljuje potvrda."
+ },
+ "Название правила или его код": {
+  "en": "Rule name or its code",
+  "sr": "Naziv pravila ili njegova šifra"
+ },
+ "Страницы списка правил": {
+  "en": "Rule list pages",
+  "sr": "Stranice liste pravila"
+ },
+ "← Назад": {
+  "en": "← Back",
+  "sr": "← Nazad"
+ },
+ "Дальше →": {
+  "en": "Next →",
+  "sr": "Dalje →"
+ },
+ "Страница %(page)s из %(pages)s · правил: %(total)s": {
+  "en": "Page %(page)s of %(pages)s · rules: %(total)s",
+  "sr": "Strana %(page)s od %(pages)s · pravila: %(total)s"
+ },
+ "да": {
+  "en": "yes",
+  "sr": "da"
+ },
+ "нет": {
+  "en": "no",
+  "sr": "ne"
+ },
+ "не проверено": {
+  "en": "not verified",
+  "sr": "nije provereno"
+ },
+ "проверено": {
+  "en": "verified",
+  "sr": "provereno"
+ },
+ "%(hours)s ч": {
+  "en": "%(hours)s h",
+  "sr": "%(hours)s h"
+ },
+ "В правилах страны «%(country)s»: %(value)s": {
+  "en": "In the rules of the country “%(country)s”: %(value)s",
+  "sr": "U pravilima zemlje „%(country)s“: %(value)s"
+ },
+ "Тип оплаты": {
+  "en": "Pay type",
+  "sr": "Tip plaćanja"
+ },
+ "Условия с": {
+  "en": "Terms from",
+  "sr": "Uslovi od"
+ },
+ "Статус": {
+  "en": "Status",
+  "sr": "Status"
+ },
+ "Работает": {
+  "en": "Working",
+  "sr": "Radi"
+ },
+ "Уволен %(day)s": {
+  "en": "Dismissed %(day)s",
+  "sr": "Otpušten %(day)s"
+ },
+ "Принят %(day)s": {
+  "en": "Hired %(day)s",
+  "sr": "Primljen %(day)s"
+ },
+ "Переведён": {
+  "en": "Transferred",
+  "sr": "Premešten"
+ },
+ "%(count)s чел. · принято %(hired)s, уволено %(left)s": {
+  "en": "%(count)s people · hired %(hired)s, dismissed %(left)s",
+  "sr": "%(count)s osoba · primljeno %(hired)s, otpušteno %(left)s"
+ },
+ "Приняты в этом месяце": {
+  "en": "Hired this month",
+  "sr": "Primljeni ovog meseca"
+ },
+ "Уволены в этом месяце": {
+  "en": "Dismissed this month",
+  "sr": "Otpušteni ovog meseca"
+ },
+ "Людей": {
+  "en": "People",
+  "sr": "Ljudi"
+ },
+ "Персонал": {
+  "en": "Staff",
+  "sr": "Osoblje"
+ },
+ "Работает с": {
+  "en": "Open since",
+  "sr": "Radi od"
+ },
+ "Связь с Dodo IS": {
+  "en": "Dodo IS link",
+  "sr": "Veza sa Dodo IS"
+ },
+ "Подключена": {
+  "en": "Connected",
+  "sr": "Povezana"
+ },
+ "Не подключена": {
+  "en": "Not connected",
+  "sr": "Nije povezana"
+ },
+ "Закрыта %(day)s": {
+  "en": "Closed %(day)s",
+  "sr": "Zatvorena %(day)s"
+ },
+ "Откроется %(day)s": {
+  "en": "Opens %(day)s",
+  "sr": "Otvara se %(day)s"
+ },
+ "Год": {
+  "en": "Year",
+  "sr": "Godina"
+ },
+ "Праздничных": {
+  "en": "Holidays",
+  "sr": "Praznika"
+ },
+ "нет в календаре": {
+  "en": "not in the calendar",
+  "sr": "nema u kalendaru"
+ },
+ "Группы правил": {
+  "en": "Rule groups",
+  "sr": "Grupe pravila"
+ },
+ "Все": {
+  "en": "All",
+  "sr": "Sve"
+ },
+ "Название": {
+  "en": "Name",
+  "sr": "Naziv"
+ },
+ "Код": {
+  "en": "Code",
+  "sr": "Šifra"
+ }
+}

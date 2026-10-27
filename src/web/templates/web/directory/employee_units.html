@@ -37,7 +37,7 @@
   <tbody>
     {% for row in units %}
     <tr data-unit="{{ row.code }}">
-      <td>{{ row.code }} · {{ row.title }}</td>
+      <td>{{ row.title }}</td>
       <td class="{{ row.share|numclass }}">{{ row.share }}</td>
       <td>{{ row.from }}</td>
       <td>{{ row.to }}</td>

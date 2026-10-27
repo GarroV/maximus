@@ -11296,3 +11296,139 @@ msgstr "obračun od %(at)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "курс вводит администратор платформы"
 msgstr "kurs unosi administrator platforme"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(count)s чел. · принято %(hired)s, уволено %(left)s"
+msgstr "%(count)s osoba · primljeno %(hired)s, otpušteno %(left)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "%(hours)s ч"
+msgstr "%(hours)s h"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "В правилах страны «%(country)s»: %(value)s"
+msgstr "U pravilima zemlje „%(country)s“: %(value)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Год"
+msgstr "Godina"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Дальше →"
+msgstr "Dalje →"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Закрыта %(day)s"
+msgstr "Zatvorena %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Каждая роль сохраняется отдельно: кнопка записывает галочки только "
+"своего столбца, остальные роли не меняются. После сохранения над сеткой "
+"появится подтверждение."
+msgstr "Svaka uloga se čuva posebno: dugme upisuje samo kvačice svoje kolone, ostale uloge se ne menjaju. Posle čuvanja iznad tabele se pojavljuje potvrda."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Название правила или его код"
+msgstr "Naziv pravila ili njegova šifra"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Не подключена"
+msgstr "Nije povezana"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Откроется %(day)s"
+msgstr "Otvara se %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Переведён"
+msgstr "Premešten"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Персонал"
+msgstr "Osoblje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Подключена"
+msgstr "Povezana"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Праздничных"
+msgstr "Praznika"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Принят %(day)s"
+msgstr "Primljen %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Приняты в этом месяце"
+msgstr "Primljeni ovog meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Работает"
+msgstr "Radi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Работает с"
+msgstr "Radi od"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Связь с Dodo IS"
+msgstr "Veza sa Dodo IS"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сохранить права: %(role)s"
+msgstr "Sačuvaj prava: %(role)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Статус"
+msgstr "Status"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Страница %(page)s из %(pages)s · правил: %(total)s"
+msgstr "Strana %(page)s od %(pages)s · pravila: %(total)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страницы списка правил"
+msgstr "Stranice liste pravila"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Тип оплаты"
+msgstr "Tip plaćanja"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Уволен %(day)s"
+msgstr "Otpušten %(day)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Уволены в этом месяце"
+msgstr "Otpušteni ovog meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Условия с"
+msgstr "Uslovi od"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "не проверено"
+msgstr "nije provereno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "нет в календаре"
+msgstr "nema u kalendaru"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "проверено"
+msgstr "provereno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "← Назад"
+msgstr "← Nazad"
