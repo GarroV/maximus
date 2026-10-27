@@ -1,0 +1,86 @@
+{
+ "Сотрудников: %(employees)s · регистров: %(registers)s": {
+  "en": "Employees: %(employees)s · ledgers: %(registers)s",
+  "sr": "Zaposlenih: %(employees)s · evidencija: %(registers)s"
+ },
+ "расчёт от %(at)s": {
+  "en": "calculated %(at)s",
+  "sr": "obračun od %(at)s"
+ },
+ "Действия со строкой": {
+  "en": "Row actions",
+  "sr": "Radnje nad redom"
+ },
+ "Сумма в последней колонке — ссылка: по нажатию видно, из чего она получилась.": {
+  "en": "The amount in the last column is a link: click it to see what it is made of.",
+  "sr": "Iznos u poslednjoj koloni je veza: klikom se vidi iz čega je nastao."
+ },
+ "Отчёт неполный: зарплаты в нём пока нет": {
+  "en": "Report incomplete: payroll is not in it yet",
+  "sr": "Izveštaj nepotpun: zarade u njemu još nema"
+ },
+ "Ведомость посчитана, но в отчёт зарплата попадает при утверждении периода — до него расчёт можно пересчитывать, и цифры двигались бы вслед за ним. Утвердите период, и строки ФОТ и налогов появятся здесь.": {
+  "en": "The payroll sheet is calculated, but payroll reaches the report when the period is approved — until then the calculation can be rerun and the figures would keep moving. Approve the period and the payroll cost and tax lines will appear here.",
+  "sr": "Obračun je izračunat, ali zarade ulaze u izveštaj tek kada se period odobri — do tada se obračun može ponavljati i brojke bi se stalno menjale. Odobrite period i redovi troška zarada i poreza pojaviće se ovde."
+ },
+ "Зарплата попадает в отчёт после расчёта и утверждения периода. Сначала посчитайте период.": {
+  "en": "Payroll reaches the report after the period is calculated and approved. Calculate the period first.",
+  "sr": "Zarade ulaze u izveštaj nakon obračuna i odobravanja perioda. Prvo obračunajte period."
+ },
+ "К месяцу": {
+  "en": "To the month",
+  "sr": "Na mesec"
+ },
+ "Ввести курс": {
+  "en": "Enter rate",
+  "sr": "Unesi kurs"
+ },
+ "Ввести курс валюты": {
+  "en": "Enter an exchange rate",
+  "sr": "Unesi kurs valute"
+ },
+ "Курсы валют вводит администратор платформы — без курса партнёр в итог сети не входит.": {
+  "en": "Exchange rates are entered by the platform administrator — a partner without a rate is left out of the network total.",
+  "sr": "Kurseve valuta unosi administrator platforme — partner bez kursa ne ulazi u zbir mreže."
+ },
+ "За %(previous)s в базе нет ни одной суммы, доступной вашей роли, а отчёт ставит месяц рядом с предыдущим. Расхождения появятся, когда у вас будут посчитаны два месяца подряд.": {
+  "en": "There are no amounts for %(previous)s available to your role, and this report puts a month next to the previous one. Differences will appear once two months in a row are calculated.",
+  "sr": "Za %(previous)s nema nijednog iznosa dostupnog vašoj ulozi, a izveštaj stavlja mesec pored prethodnog. Razlike će se pojaviti kada budu obračunata dva meseca zaredom."
+ },
+ "Файл сравнивается с расчётом этого периода построчно: где сошлось, где нет, на сколько и почему.": {
+  "en": "The file is compared with this period's calculation line by line: where it matches, where it does not, by how much and why.",
+  "sr": "Datoteka se poredi sa obračunom ovog perioda red po red: gde se slaže, gde ne, za koliko i zašto."
+ },
+ "Ваш файл ничего не меняет в системе": {
+  "en": "Your file changes nothing in the system",
+  "sr": "Vaša datoteka ništa ne menja u sistemu"
+ },
+ "Это сверка: мы не импортируем ваши суммы, а сравниваем с ними свои. Ни одна цифра расчёта от загрузки не изменится. Сам файл мы не храним — остаётся только итог сверки.": {
+  "en": "This is a reconciliation: we do not import your amounts, we compare ours with them. No figure of the calculation changes because of the upload. We do not keep the file itself — only the result of the reconciliation stays.",
+  "sr": "Ovo je usaglašavanje: ne uvozimo vaše iznose, već poredimo svoje sa njima. Nijedna cifra obračuna se ne menja zbog otpremanja. Samu datoteku ne čuvamo — ostaje samo rezultat usaglašavanja."
+ },
+ "Что будет дальше": {
+  "en": "What happens next",
+  "sr": "Šta sledi"
+ },
+ "Мы подберём колонки: имя, часы, к выплате — лишние игнорируются.": {
+  "en": "We match the columns: name, hours, net pay — extra ones are ignored.",
+  "sr": "Prepoznaćemo kolone: ime, sati, za isplatu — suvišne se ignorišu."
+ },
+ "Построчно сравним ваши суммы с нашим расчётом этого месяца.": {
+  "en": "We compare your amounts with our calculation of this month line by line.",
+  "sr": "Red po red poredićemo vaše iznose sa našim obračunom ovog meseca."
+ },
+ "Покажем, где сошлось, где нет, на сколько и по какой причине; у каждой суммы есть след расчёта.": {
+  "en": "We show where it matches, where not, by how much and for what reason; every amount has a calculation trace.",
+  "sr": "Pokazaćemo gde se slaže, gde ne, za koliko i iz kog razloga; svaki iznos ima trag obračuna."
+ },
+ "Результат останется в протоколе сверки — через полгода на вопрос «почему так» ответит он.": {
+  "en": "The result stays in the reconciliation log — in six months it answers the question “why was it so”.",
+  "sr": "Rezultat ostaje u protokolu usaglašavanja — za šest meseci on odgovara na pitanje „zašto je bilo tako“."
+ },
+ "Прошлые сверки этого месяца — ниже на странице.": {
+  "en": "Earlier reconciliations of this month are below on the page.",
+  "sr": "Ranija usaglašavanja ovog meseca su niže na stranici."
+ }
+}

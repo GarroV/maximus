@@ -16,6 +16,11 @@
 
 {% if sheet.rows %}
 {% comment %}
+Мета-строка (модуль 9 эталона): сколько людей и регистров в ведомости и когда
+она посчитана. Человек видит, что смотрит на свежий расчёт, а не на старый.
+{% endcomment %}
+<p class="sub sheet-meta">{% blocktranslate with employees=sheet.employees registers=registers_count %}Сотрудников: {{ employees }} · регистров: {{ registers }}{% endblocktranslate %}{% if calculated_at %} · {% blocktranslate with at=calculated_at|date:"d.m.Y H:i" %}расчёт от {{ at }}{% endblocktranslate %}{% endif %}</p>
+{% comment %}
 Одна таблица на все регистры с меткой в строке (D023). Строка — пара
 «сотрудник × регистр»: регистр — свойство компонента выплаты, и у одного
 человека часы и надбавка попадают в разные регистры.
@@ -27,6 +32,7 @@
 кнопка со скриптом: он живёт в адресе, и им можно поделиться.
 {% endcomment %}
 {% translate "Разрез ведомости по регистрам" as cuts_label %}
+<div class="sheet-toolbar">
 {% include "web/components/cuts.html" with cuts=cuts label=cuts_label %}
 {% comment %}
 Выгрузки и сверка (T031, T032).
@@ -49,6 +55,7 @@
 {% endcomment %}
 {% url 'period-print-payout' period.id as print_payout_url %}
 {% include "web/components/exports.html" %}
+</div>
 {% scroll %}
 <table class="sheet">
   {% comment %}
@@ -62,7 +69,7 @@
   {% endcomment %}
   <thead>
     <tr>
-      <th rowspan="2">{% translate "Сотрудник" %}</th><th rowspan="2">{% translate "Точка" %}</th><th rowspan="2">{% translate "Регистр" %}</th><th rowspan="2">{% translate "Спор" %}</th>
+      <th rowspan="2">{% translate "Сотрудник" %}</th><th rowspan="2">{% translate "Точка" %}</th><th rowspan="2">{% translate "Регистр" %}</th>
       {% for group in sheet.groups %}<th class="grouphead" colspan="{{ group.span }}">{{ group.title }}</th>{% endfor %}
       <th rowspan="2" class="num">{% translate "Итого" %}</th>
     </tr>
@@ -85,7 +92,27 @@
       невидимой прибавкой к сумме этого месяца.
       {% endcomment %}
       <td>{{ row.employee }}{% if row.is_retro %}
-        <span class="badge-retro">{% blocktranslate with title=row.retro_title %}Перерасчёт за {{ title }}{% endblocktranslate %}</span>{% endif %}</td>
+        <span class="badge-retro">{% blocktranslate with title=row.retro_title %}Перерасчёт за {{ title }}{% endblocktranslate %}</span>{% endif %}
+      {% if row.frozen %}
+        <span class="frozen">{% translate "Заморожена" %}</span>
+        {% if row.show_action %}
+        <span class="hint">{{ row.freeze_reason }}</span>
+        {% if can_freeze %}
+        <details class="rowmenu"><summary title="{% translate "Действия со строкой" %}">{% translate "Снять заморозку" %}</summary>
+        {% url 'payslip-release' row.payslip_id as release_url %}
+        {% translate "Снять заморозку" as release_label %}
+        {% include "web/components/action.html" with allowed=True url=release_url label=release_label primary=False note="" denied="" reason_name="" hidden_name="" %}
+        </details>
+        {% endif %}
+        {% endif %}
+      {% elif row.show_action and can_freeze %}
+        <details class="rowmenu"><summary title="{% translate "Действия со строкой" %}" aria-label="{% translate "Действия со строкой" %}">⋯</summary>
+        {% url 'payslip-freeze' row.payslip_id as freeze_url %}
+        {% translate "Заморозить" as freeze_label %}
+        {% translate "из-за чего спор" as freeze_reason_placeholder %}
+        {% include "web/components/action.html" with allowed=True url=freeze_url label=freeze_label reason_name="reason" reason_id="" reason_label="" reason_placeholder=freeze_reason_placeholder primary=False note="" denied="" %}
+        </details>
+      {% endif %}</td>
       {% comment %}
       Куда идут деньги этого человека (D055, T221): колонка точки говорит, где
       стоит строка ведомости, подпись — между какими точками сумма делится и что
@@ -99,24 +126,6 @@
       в заблуждение. Действие предлагается один раз: заморожена строка
       ведомости целиком, а не её половина.
       {% endcomment %}
-      <td class="freeze">
-        {% if row.frozen %}
-          <span class="frozen">{% translate "Заморожена" %}</span>
-          {% if row.show_action %}
-            <span class="hint">{{ row.freeze_reason }}</span>
-            {% if can_freeze %}
-            {% url 'payslip-release' row.payslip_id as release_url %}
-            {% translate "Снять заморозку" as release_label %}
-            {% include "web/components/action.html" with allowed=True url=release_url label=release_label primary=False note="" denied="" reason_name="" hidden_name="" %}
-            {% endif %}
-          {% endif %}
-        {% elif row.show_action and can_freeze %}
-          {% url 'payslip-freeze' row.payslip_id as freeze_url %}
-          {% translate "Заморозить" as freeze_label %}
-          {% translate "из-за чего спор" as freeze_reason_placeholder %}
-          {% include "web/components/action.html" with allowed=True url=freeze_url label=freeze_label reason_name="reason" reason_id="" reason_label="" reason_placeholder=freeze_reason_placeholder primary=False note="" denied="" %}
-        {% endif %}
-      </td>
       {% for cell in row.cells %}<td class="{{ cell|numclass }}">{{ cell }}</td>{% endfor %}
       {% comment %}
       Итог строки — ссылка на след расчёта (T029): «откуда это число» спрашивают
@@ -131,7 +140,7 @@
   </tbody>
   <tfoot>
     <tr class="grand">
-      <td colspan="4">{% blocktranslate with employees=sheet.employees %}Итого · {{ employees }} чел.{% endblocktranslate %}</td>
+      <td colspan="3">{% blocktranslate with employees=sheet.employees %}Итого · {{ employees }} чел.{% endblocktranslate %}</td>
       {% for cell in sheet.column_totals %}<td class="{{ cell|numclass }} num--total">{{ cell }}</td>{% endfor %}
       <td class="{{ total|numclass }} num--total">{{ total }}</td>
     </tr>
@@ -143,6 +152,7 @@
 <p><a class="btn" href="{% url 'period-registers' period.id %}">{% translate "Итоги по регистрам" %}</a></p>
 {% endif %}
 <p class="note">
+  {% translate "Сумма в последней колонке — ссылка: по нажатию видно, из чего она получилась." %}
   {% translate "Итог посчитан по тому, что видно вашей роли: строки чужих регистров не доезжают до страницы и не входят в сумму." %}
   {% if cut_title %}{% blocktranslate with title=cut_title %}Сейчас показан один регистр — {{ title }};
   итог посчитан по нему.{% endblocktranslate %}{% endif %}

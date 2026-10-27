@@ -149,6 +149,10 @@ def sheet_page(request, period, *, error=None, error_title=None, status=200):
             "title": _("Ведомость") + " · " + head["month"],
             "error": error,
             "error_title": error_title or _("Действие не выполнено."),
+            # Мета-строка над таблицей: из показанных строк, а не из всей
+            # ведомости, — роль без регистра не должна узнать о его существовании.
+            "registers_count": len({row.ledger for row in sheet.rows}),
+            "calculated_at": head["payrun"].calculated_at if head["payrun"] else None,
             "sheet": {
                 "columns": [label(column.code, column.title) for column in sheet.columns],
                 # Ярус групп над колонками (issue #163). Названия переводятся

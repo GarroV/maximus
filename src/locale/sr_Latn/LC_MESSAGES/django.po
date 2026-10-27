@@ -6063,10 +6063,6 @@ msgstr "mimo aplikacije"
 msgid "Разрез ведомости по регистрам"
 msgstr "Prikaz obračunske liste po knjigama"
 
-#: web/templates/web/period.html:442
-msgid "Спор"
-msgstr "Spor"
-
 #: web/templates/web/period.html:467 web/templates/web/person_pay.html:152
 #, python-format
 msgid "Перерасчёт за %(title)s"
@@ -6544,14 +6540,6 @@ msgstr "Usaglašavanje · %(period_title)s"
 #, python-format
 msgid "Сверка с таблицей бухгалтера · %(period_title)s"
 msgstr "Usaglašavanje sa tabelom knjigovođe · %(period_title)s"
-
-#: web/templates/web/reconcile.html:22
-msgid ""
-"Файл сравнивается с расчётом этого периода построчно. Он нигде не\n"
-"  сохраняется — ни на диск, ни в базу: ответ живёт только на этой странице."
-msgstr ""
-"Fajl se poredi sa obračunom ovog perioda red po red. Nigde se ne\n"
-"  čuva — ni na disk, ni u bazu: rezultat postoji samo na ovoj stranici."
 
 #: web/templates/web/reconcile.html:39
 #, python-format
@@ -7674,18 +7662,6 @@ msgstr " · prikaz: %(cut)s"
 #: web/templates/web/variance.html:23
 msgid "Сравнивать не с чем"
 msgstr "Nema sa čim da se poredi"
-
-#: web/templates/web/variance.html:25
-#, python-format
-msgid ""
-"Сравнивать не с чем: за %(previous)s в базе нет ни одной суммы,\n"
-"  доступной вашей роли. Отчёт сравнивает месяц с предыдущим, поэтому у "
-"первого\n"
-"  посчитанного месяца расхождений не бывает по построению."
-msgstr ""
-"Nema sa čim da se poredi: za %(previous)s u bazi nema nijednog iznosa\n"
-"  dostupnog vašoj ulozi. Izveštaj poredi mesec sa prethodnim, zato prvi\n"
-"  obračunati mesec po definiciji nema odstupanja."
 
 #: web/templates/web/variance.html:31
 msgid "Разрез отчёта по регистрам"
@@ -11131,3 +11107,115 @@ msgstr "Kurs za datum dalji od nedelju dana unapred se ne unosi — proverite go
 #: новые строки, добавлены tools/apply_translations.py
 msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
 msgstr "ne vidi se ceo partner: deo registara ili objekata je zatvoren"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ваш файл ничего не меняет в системе"
+msgstr "Vaša datoteka ništa ne menja u sistemu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ввести курс"
+msgstr "Unesi kurs"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ввести курс валюты"
+msgstr "Unesi kurs valute"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ведомость посчитана, но в отчёт зарплата попадает при утверждении "
+"периода — до него расчёт можно пересчитывать, и цифры двигались бы вслед "
+"за ним. Утвердите период, и строки ФОТ и налогов появятся здесь."
+msgstr "Obračun je izračunat, ali zarade ulaze u izveštaj tek kada se period odobri — do tada se obračun može ponavljati i brojke bi se stalno menjale. Odobrite period i redovi troška zarada i poreza pojaviće se ovde."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действия со строкой"
+msgstr "Radnje nad redom"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"За %(previous)s в базе нет ни одной суммы, доступной вашей роли, а отчёт "
+"ставит месяц рядом с предыдущим. Расхождения появятся, когда у вас будут "
+"посчитаны два месяца подряд."
+msgstr "Za %(previous)s nema nijednog iznosa dostupnog vašoj ulozi, a izveštaj stavlja mesec pored prethodnog. Razlike će se pojaviti kada budu obračunata dva meseca zaredom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Зарплата попадает в отчёт после расчёта и утверждения периода. Сначала "
+"посчитайте период."
+msgstr "Zarade ulaze u izveštaj nakon obračuna i odobravanja perioda. Prvo obračunajte period."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К месяцу"
+msgstr "Na mesec"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Курсы валют вводит администратор платформы — без курса партнёр в итог "
+"сети не входит."
+msgstr "Kurseve valuta unosi administrator platforme — partner bez kursa ne ulazi u zbir mreže."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Мы подберём колонки: имя, часы, к выплате — лишние игнорируются."
+msgstr "Prepoznaćemo kolone: ime, sati, za isplatu — suvišne se ignorišu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отчёт неполный: зарплаты в нём пока нет"
+msgstr "Izveštaj nepotpun: zarade u njemu još nema"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Покажем, где сошлось, где нет, на сколько и по какой причине; у каждой "
+"суммы есть след расчёта."
+msgstr "Pokazaćemo gde se slaže, gde ne, za koliko i iz kog razloga; svaki iznos ima trag obračuna."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Построчно сравним ваши суммы с нашим расчётом этого месяца."
+msgstr "Red po red poredićemo vaše iznose sa našim obračunom ovog meseca."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Прошлые сверки этого месяца — ниже на странице."
+msgstr "Ranija usaglašavanja ovog meseca su niže na stranici."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Результат останется в протоколе сверки — через полгода на вопрос «почему "
+"так» ответит он."
+msgstr "Rezultat ostaje u protokolu usaglašavanja — za šest meseci on odgovara na pitanje „zašto je bilo tako“."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сотрудников: %(employees)s · регистров: %(registers)s"
+msgstr "Zaposlenih: %(employees)s · evidencija: %(registers)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сумма в последней колонке — ссылка: по нажатию видно, из чего она "
+"получилась."
+msgstr "Iznos u poslednjoj koloni je veza: klikom se vidi iz čega je nastao."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Файл сравнивается с расчётом этого периода построчно: где сошлось, где "
+"нет, на сколько и почему."
+msgstr "Datoteka se poredi sa obračunom ovog perioda red po red: gde se slaže, gde ne, za koliko i zašto."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что будет дальше"
+msgstr "Šta sledi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Это сверка: мы не импортируем ваши суммы, а сравниваем с ними свои. Ни "
+"одна цифра расчёта от загрузки не изменится. Сам файл мы не храним — "
+"остаётся только итог сверки."
+msgstr "Ovo je usaglašavanje: ne uvozimo vaše iznose, već poredimo svoje sa njima. Nijedna cifra obračuna se ne menja zbog otpremanja. Samu datoteku ne čuvamo — ostaje samo rezultat usaglašavanja."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "расчёт от %(at)s"
+msgstr "obračun od %(at)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "курс вводит администратор платформы"
+msgstr "kurs unosi administrator platforme"

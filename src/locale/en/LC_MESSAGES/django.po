@@ -6198,10 +6198,6 @@ msgstr "outside the app"
 msgid "Разрез ведомости по регистрам"
 msgstr "Payroll sheet view by ledger"
 
-#: web/templates/web/period.html:442
-msgid "Спор"
-msgstr "Dispute"
-
 #: web/templates/web/period.html:467 web/templates/web/person_pay.html:152
 #, python-format
 msgid "Перерасчёт за %(title)s"
@@ -6680,15 +6676,6 @@ msgstr "Reconciliation · %(period_title)s"
 #, python-format
 msgid "Сверка с таблицей бухгалтера · %(period_title)s"
 msgstr "Reconciliation with the accountant's table · %(period_title)s"
-
-#: web/templates/web/reconcile.html:22
-msgid ""
-"Файл сравнивается с расчётом этого периода построчно. Он нигде не\n"
-"  сохраняется — ни на диск, ни в базу: ответ живёт только на этой странице."
-msgstr ""
-"The file is compared to this period's calculation row by row. It is not\n"
-"  saved anywhere — not to disk, not to the database: the result lives only "
-"on this page."
 
 #: web/templates/web/reconcile.html:39
 #, python-format
@@ -7830,19 +7817,6 @@ msgstr " · view: %(cut)s"
 #: web/templates/web/variance.html:23
 msgid "Сравнивать не с чем"
 msgstr "Nothing to compare with"
-
-#: web/templates/web/variance.html:25
-#, python-format
-msgid ""
-"Сравнивать не с чем: за %(previous)s в базе нет ни одной суммы,\n"
-"  доступной вашей роли. Отчёт сравнивает месяц с предыдущим, поэтому у "
-"первого\n"
-"  посчитанного месяца расхождений не бывает по построению."
-msgstr ""
-"Nothing to compare with: for %(previous)s the database has no amount\n"
-"  available to your role. The report compares a month to the previous one, "
-"so the first\n"
-"  calculated month has no discrepancies by design."
 
 #: web/templates/web/variance.html:31
 msgid "Разрез отчёта по регистрам"
@@ -11288,3 +11262,115 @@ msgstr "A rate more than a week ahead cannot be entered — check the year."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "видна не вся сеть партнёра: часть регистров или точек закрыта"
 msgstr "not the whole partner is visible: some ledgers or stores are closed to you"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ваш файл ничего не меняет в системе"
+msgstr "Your file changes nothing in the system"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ввести курс"
+msgstr "Enter rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ввести курс валюты"
+msgstr "Enter an exchange rate"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ведомость посчитана, но в отчёт зарплата попадает при утверждении "
+"периода — до него расчёт можно пересчитывать, и цифры двигались бы вслед "
+"за ним. Утвердите период, и строки ФОТ и налогов появятся здесь."
+msgstr "The payroll sheet is calculated, but payroll reaches the report when the period is approved — until then the calculation can be rerun and the figures would keep moving. Approve the period and the payroll cost and tax lines will appear here."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действия со строкой"
+msgstr "Row actions"
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"За %(previous)s в базе нет ни одной суммы, доступной вашей роли, а отчёт "
+"ставит месяц рядом с предыдущим. Расхождения появятся, когда у вас будут "
+"посчитаны два месяца подряд."
+msgstr "There are no amounts for %(previous)s available to your role, and this report puts a month next to the previous one. Differences will appear once two months in a row are calculated."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Зарплата попадает в отчёт после расчёта и утверждения периода. Сначала "
+"посчитайте период."
+msgstr "Payroll reaches the report after the period is calculated and approved. Calculate the period first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К месяцу"
+msgstr "To the month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Курсы валют вводит администратор платформы — без курса партнёр в итог "
+"сети не входит."
+msgstr "Exchange rates are entered by the platform administrator — a partner without a rate is left out of the network total."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Мы подберём колонки: имя, часы, к выплате — лишние игнорируются."
+msgstr "We match the columns: name, hours, net pay — extra ones are ignored."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отчёт неполный: зарплаты в нём пока нет"
+msgstr "Report incomplete: payroll is not in it yet"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Покажем, где сошлось, где нет, на сколько и по какой причине; у каждой "
+"суммы есть след расчёта."
+msgstr "We show where it matches, where not, by how much and for what reason; every amount has a calculation trace."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Построчно сравним ваши суммы с нашим расчётом этого месяца."
+msgstr "We compare your amounts with our calculation of this month line by line."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Прошлые сверки этого месяца — ниже на странице."
+msgstr "Earlier reconciliations of this month are below on the page."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Результат останется в протоколе сверки — через полгода на вопрос «почему "
+"так» ответит он."
+msgstr "The result stays in the reconciliation log — in six months it answers the question “why was it so”."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Сотрудников: %(employees)s · регистров: %(registers)s"
+msgstr "Employees: %(employees)s · ledgers: %(registers)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сумма в последней колонке — ссылка: по нажатию видно, из чего она "
+"получилась."
+msgstr "The amount in the last column is a link: click it to see what it is made of."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Файл сравнивается с расчётом этого периода построчно: где сошлось, где "
+"нет, на сколько и почему."
+msgstr "The file is compared with this period's calculation line by line: where it matches, where it does not, by how much and why."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что будет дальше"
+msgstr "What happens next"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Это сверка: мы не импортируем ваши суммы, а сравниваем с ними свои. Ни "
+"одна цифра расчёта от загрузки не изменится. Сам файл мы не храним — "
+"остаётся только итог сверки."
+msgstr "This is a reconciliation: we do not import your amounts, we compare ours with them. No figure of the calculation changes because of the upload. We do not keep the file itself — only the result of the reconciliation stays."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "расчёт от %(at)s"
+msgstr "calculated %(at)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "курс вводит администратор платформы"
+msgstr "the platform administrator enters the rate"

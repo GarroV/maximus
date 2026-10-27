@@ -1021,6 +1021,11 @@ nav.exports .file::before { content: "↓"; margin-right: var(--space-3); opacit
 /* Сверка — не файл и не разрез: это отдельный экран. Стоит в том же ряду по
    смыслу (всё про «что дальше с этой ведомостью»), но выглядит ссылкой на
    страницу, а не кнопкой скачивания. */
+/* `.page` — ещё и класс страницы в ядре дизайн-системы (ширина и центровка):
+   без этого сброса три ссылки на экраны растягивались на всю ширину ряда
+   (обход T240, issue #317). Класс не переименован — на нём держится проверка
+   «экран не похож на файл». */
+nav.exports a.page { width: auto; max-width: none; margin: 0; }
 nav.exports .page::before { content: "→"; margin-right: var(--space-3); opacity: .7; }
 
 /* ── Формы ───────────────────────────────────────────────────── */
@@ -1299,6 +1304,9 @@ table.sheet thead th { height: auto; padding: var(--space-3) var(--space-4); }
    ничего: длинное слово в обычном начертании читается легче. */
 table.sheet th {
   white-space: normal; vertical-align: bottom;
+  /* Слово не рвётся посреди: «Топли оброк и регрес» с переносом внутри слова
+     читалось как опечатка (issue #317). Переносим только по пробелам. */
+  overflow-wrap: normal; word-break: normal; hyphens: manual;
   text-transform: none; letter-spacing: 0; font-size: var(--fs-micro);
   background: var(--surface-head);
   /* Шапка держится при прокрутке — раздел «Сетка и плотность» эталона.
@@ -1320,7 +1328,8 @@ table.sheet thead { position: sticky; top: 0; z-index: 3; }
    спорить с ними за внимание. Отсюда мелкий кегль вразрядку и фон на тон
    темнее шапки. */
 table.sheet th.grouphead {
-  height: 21px; padding: 0 var(--space-4);
+  height: auto; min-height: 21px; padding: var(--space-2) var(--space-4);
+  white-space: nowrap;
   background: var(--surface-3);
   font-size: var(--fs-micro); font-weight: var(--w-bold);
   letter-spacing: var(--tracking-micro); text-transform: uppercase;
@@ -1374,43 +1383,40 @@ table.sheet th:first-child { background: var(--surface-head); z-index: 4; }
 table.sheet tbody tr:hover td:first-child { background: var(--surface-2); }
 table.sheet tfoot td:first-child { z-index: 6; background: var(--surface-total); }
 
-/* Причина спора набирается редко, а место занимает в каждой строке. Поле
-   узкое по умолчанию и раскрывается, когда в него встали: подсказка нужна
-   тому, кто пишет, а не всем шестидесяти строкам сразу. */
-table.sheet td.freeze input {
+/* Заморозка спорной строки живёт в меню строки, а не отдельной колонкой:
+   колонка «Спор» была пустой в 35 строках из 35, а кнопка «Заморозить»
+   повторялась в каждой без пояснения (обход T240, issue #317). Меню закрыто,
+   пока не нужно, и стоит под именем — в липкой колонке, которая всегда на
+   виду. Форма внутри остаётся обычной формой: действие и права те же. */
+table.sheet details.rowmenu { display: inline-block; margin-left: var(--space-3); }
+table.sheet details.rowmenu > summary {
+  display: inline-block; cursor: pointer; list-style: none;
+  color: var(--ink-3); padding: 0 var(--space-3); border-radius: var(--r-control);
+}
+table.sheet details.rowmenu > summary::-webkit-details-marker { display: none; }
+table.sheet details.rowmenu > summary:hover,
+table.sheet details.rowmenu[open] > summary { color: var(--accent); background: var(--accent-soft); }
+table.sheet details.rowmenu[open] {
+  position: absolute; z-index: 7; left: var(--space-4); top: calc(100% - 4px);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface); border: 1px solid var(--line-control);
+  border-radius: var(--r-control); box-shadow: var(--sh-pop);
+}
+table.sheet details.rowmenu input[name=reason] {
   font: var(--w-regular) var(--fs-dense) / 1 var(--font-ui);
-  width: 92px; padding: var(--space-2) var(--space-3);
-  border: 1px solid transparent; border-radius: var(--r-control);
-  background: transparent; color: var(--ink-2);
-  transition: width var(--t-pop) var(--ease);
+  width: 200px; padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-control); border-radius: var(--r-control);
+  background: var(--canvas); color: var(--ink);
 }
-/* Рамка появляется, когда поле нужно, — на наведении и в фокусе. Тридцать
-   пять рамок с обрезанным текстом внутри читались как поломка таблицы, а не
-   как поле ввода: причину спора набирают в одной строке из тридцати пяти. */
-table.sheet tr:hover td.freeze input,
-table.sheet td.freeze input:focus {
-  border-color: var(--line-control); background: var(--canvas); color: var(--ink);
-}
-table.sheet td.freeze input:focus { width: 220px; }
-/* Подсказка внутри поля тоже молчит, пока к строке не подошли: обрезанная
-   фраза, повторённая шестьдесят раз, читается как сломанный текст, а не как
-   приглашение к вводу. Полностью она всё равно не помещается — место под неё
-   появляется только в фокусе, когда поле раскрывается. */
-table.sheet td.freeze input::placeholder { color: transparent; }
-table.sheet tr:hover td.freeze input::placeholder,
-table.sheet td.freeze input:focus::placeholder { color: var(--ink-3); }
-/* Кнопка внутри ведомости набрана мельче самих чисел: действие на строке
-   помогает, но спорить с суммами за внимание не должно. Заодно это те
-   последние два десятка пикселей, без которых таблица директора не влезала
-   в 1440. */
-table.sheet td.freeze button {
-  font-size: var(--fs-meta); padding: var(--space-2) var(--space-4);
-  color: var(--ink-2); border-color: transparent; background: transparent;
-}
-table.sheet tr:hover td.freeze button,
-table.sheet td.freeze button:focus-visible {
-  color: var(--accent); border-color: var(--line-control); background: var(--surface);
-}
+
+/* Панель над таблицей: разрез слева, выгрузки справа, в один ряд — иначе
+   первая строка ведомости уезжала за первый экран (issue #317). */
+.sheet-toolbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-3) var(--space-8); margin: 0 0 var(--space-5); }
+.sheet-toolbar nav.cuts, .sheet-toolbar nav.exports { margin: 0; }
+.sheet-toolbar nav.exports { flex: 1 1 0; min-width: 0; justify-content: flex-end; gap: var(--space-2); }
+.sheet-toolbar nav.exports .cut { padding: 0 var(--space-4); }
+.sheet-toolbar > .hint { flex: 1 0 100%; margin: 0; }
+.sheet-meta { margin: 0 0 var(--space-4); }
 
 /* Экран следа расчёта. Сумма строки ведомости — ссылка, а не отдельная
    колонка: колонка стоила бы ширины, которой у ведомости нет (её едва
@@ -1981,3 +1987,8 @@ table.sheet.person td .hint { display: block; margin-top: var(--space-1); }
 table.pages { border-collapse: collapse; margin: 0 0 var(--space-4); }
 table.pages td { padding: var(--space-2) var(--space-4) var(--space-2) 0; vertical-align: baseline; }
 table.pages td.hint { color: var(--ink-2); font-size: var(--fs-meta); }
+
+/* Шаги сверки — «Что будет дальше» модуля 2 эталона: нумерация цифрами
+   в плотном списке, без отбивок между пунктами. */
+ol.steps-next { margin: 0 0 var(--space-6); padding-left: var(--space-8); color: var(--ink-2); }
+ol.steps-next li { margin: 0 0 var(--space-3); }

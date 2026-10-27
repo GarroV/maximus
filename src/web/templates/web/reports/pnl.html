@@ -22,6 +22,15 @@
 <h1>{% translate "P&L" %} · {{ period.title }}</h1>
 {% include "web/reports/pnl_tabs.html" %}
 
+{% if payroll_waits and not payroll_denied %}
+{% translate "Отчёт неполный: зарплаты в нём пока нет" as waits_title %}
+{% notice "empty" title=waits_title %}
+  {% if payrun_exists %}{% blocktranslate %}Ведомость посчитана, но в отчёт зарплата попадает при утверждении периода — до него расчёт можно пересчитывать, и цифры двигались бы вслед за ним. Утвердите период, и строки ФОТ и налогов появятся здесь.{% endblocktranslate %}
+  {% else %}{% blocktranslate %}Зарплата попадает в отчёт после расчёта и утверждения периода. Сначала посчитайте период.{% endblocktranslate %}{% endif %}
+  <a class="btn next" href="{{ back_url }}">{% translate "К месяцу" %}</a>
+{% endnotice %}
+{% endif %}
+
 {% if has_missing %}
 {% translate "Отчёт неполный" as incomplete %}
 {% notice "alert" title=incomplete %}{% blocktranslate with amount=missing counter=missing_facts %}{{ amount }} не попали в отчёт: строк без статьи {{ counter }}.{% endblocktranslate %}
