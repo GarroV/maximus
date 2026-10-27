@@ -75,7 +75,7 @@ main.page--login {
 .login__form .btn { margin-top: var(--space-2); }
 
 /* Демо и быстрый вход — тихие блоки под формой, не главный путь. */
-.login__extra { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); text-align: left; }
+.login__extra { width: 100%; overflow-x: auto; display: flex; flex-direction: column; gap: var(--space-4); text-align: left; }
 .login__extra h2 { margin: 0; font-size: var(--fs-dense); color: var(--ink-2); text-align: center; }
 .login__extra table { width: 100%; font-size: var(--fs-dense); }
 /* Логин учётки — одним куском: моноширинный в узкой ячейке рвался по буквам. */

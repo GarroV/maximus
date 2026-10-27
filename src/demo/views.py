@@ -104,6 +104,8 @@ def landing(request):
             "roles": roles,
             "default_role": DEFAULT_ROLE,
             "reconcile_period": RECONCILE_PERIOD,
+            # Как посадочная страница продукта — всегда светлая (T241).
+            "theme_attr": "light",
         },
     )
 

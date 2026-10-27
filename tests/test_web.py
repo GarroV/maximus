@@ -160,6 +160,8 @@ def test_root_shows_the_landing_to_a_guest(client):
     assert response.status_code == 200
     assert 'class="lp"' in body(response)
     assert '<nav class="sidenav' not in body(response), "гостю показано меню продукта"
+    # Посадочная всегда светлая, как у DECIMUS: брендовые листы одинаковы в обеих темах.
+    assert '<html lang="ru" data-theme="light">' in body(response)
 
 
 def test_root_redirects_a_signed_in_person_to_periods(client):

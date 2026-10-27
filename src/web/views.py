@@ -109,7 +109,10 @@ def index(request):
     # DECIMUS): что это и зачем, и одну дверь — «Войти». До T241 корень вёл на
     # `/periods/`, а оттуда на голую форму пароля без единого слова о продукте.
     if get_current_principal(request) is None:
-        return render(request, "web/landing.html", login_context(request))
+        # Посадочная страница — всегда светлая, как у DECIMUS: брендовые бежевые
+        # и фиолетовые листы одинаковы в обеих темах, и тёмные листы между ними
+        # читались бы как поломка. Выбор темы человека от этого не меняется.
+        return render(request, "web/landing.html", {**login_context(request), "theme_attr": "light"})
     return redirect("periods")
 
 
