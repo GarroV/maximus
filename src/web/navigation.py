@@ -22,8 +22,19 @@ dictionary.py` механически сверяет его со словами 
 Цена прежнего правила выяснилась на показе: владелец открыл демо и решил, что
 половины продукта нет, — при том что P&L, сверка и выгрузки были построены и
 отвечали `200`, но в шапку не попали (#218). Скрытый пункт читается как
-отсутствующий замысел, помеченный — как запланированная работа. Что помечено и
-как — `web/stages.py`.
+отсутствующий замысел, помеченный — как запланированная работа.
+
+Как помечен ненаписанный экран — по образцу DECIMUS (D098, #309): пункт тише
+остальных и в подсказке «в разработке», без цветных точек и плашек. До
+27.10.2026 у пунктов стояли точки стадии, а на экранах — плашки с фразами из
+журнала стройки («Разбор в две руки…»); бухгалтер читал их как поломку.
+Состояние модулей теперь живёт только в `docs/product-map.md`.
+
+**Где человек сейчас — по имени маршрута, а не по корню адреса** (#306). У
+табеля, ведомости, закрытия, P&L и сверки общий корень `/periods/`, и по корню
+подсвечивался всегда «Табель»: человек нажимал «Ведомость» и видел выделенным
+другой пункт. Чей экран — решает `OWNER_OF_ROUTE`; для остальных маршрутов
+корень адреса по-прежнему работает (`templatetags/ui.py`, `in_section`).
 
 **Группы — подписями левой панели, а счётчик показывает ждущую работу**
 (T222, D081). До 29.09.2026 область учёта была раскрывающимся меню в верхней
@@ -70,6 +81,46 @@ OUR_OWN = {
     # совпадать (сверка T224, issue #268).
     "Счета",
 }
+
+
+# Чей пункт панели подсвечен на экране, который живёт внутри месяца (#306).
+# Ключ — имя маршрута экрана, значение — имя маршрута пункта. Не попавшие сюда
+# маршруты решаются корнем адреса: у экранов вне месяца он однозначен.
+OWNER_OF_ROUTE = {
+    # Месяц целиком — закрытие: на этой странице готовность и подтверждение.
+    "period": "month-closing",
+    "period-calculate": "month-closing",
+    "period-approve": "month-closing",
+    "period-postpone": "month-closing",
+    "period-reopen": "month-closing",
+    "period-variance": "month-closing",
+    "period-registers": "month-closing",
+    "period-history": "month-closing",
+    "period-retro": "month-closing",
+    "period-export": "month-closing",
+    # Ведомость и всё, что открывается из её строки.
+    "period-sheet": "payroll-sheet",
+    "payslip-trace": "payroll-sheet",
+    "payslip-freeze": "payroll-sheet",
+    "payslip-release": "payroll-sheet",
+    # Отчёты месяца.
+    "period-pnl": "reports-pnl",
+    "period-pnl-network": "reports-pnl",
+    "period-pnl-line": "reports-pnl",
+    "period-reconcile": "reports-reconcile",
+    "reconciliation-decide": "reports-reconcile",
+    # Табель — список месяцев и сетка часов.
+    "periods": "periods",
+    "period-open": "periods",
+    "timesheets": "periods",
+}
+
+
+def owner_of(request) -> str:
+    """Имя маршрута пункта, чей это экран; пусто — решает корень адреса."""
+    match = getattr(request, "resolver_match", None)
+    name = getattr(match, "url_name", "") if match else ""
+    return OWNER_OF_ROUTE.get(name or "", "")
 
 
 def inbox_waiting(who) -> int:
@@ -231,14 +282,13 @@ def sections(request) -> dict:
       стоит предложение открыть раздел подходящей ролью (T163), и без области
       оно было бы негде.
 
-    Где человек сейчас, решает сам пункт (`components/sidenav_item.html`,
-    фильтр `in_section`): области своей пометки больше не нужно — она не
-    спрятана в меню, и открытый пункт виден внутри неё сразу.
+    Где человек сейчас — поле `current` пункта (`_current`, #306): по имени
+    маршрута для экранов внутри месяца, по корню адреса для остальных.
     """
     from django.conf import settings
     from django.urls import reverse
 
-    from . import permissions, stages
+    from . import permissions
     from .principal import get_current_principal
 
     who = get_current_principal(request)
@@ -252,6 +302,11 @@ def sections(request) -> dict:
     # контекста партнёра ничего не значит.
     counting = who is not None and who.tenant_id is not None
     demo = bool(getattr(settings, "DEMO_MODE", False))
+    owner = owner_of(request)
+    path = request.path
+    # Управляющий точки ведёт часы своей точки: «Табель» ведёт его сразу в
+    # сетку рабочего месяца, минуя список месяцев и страницу расчёта (#315).
+    unit_bound = bool(getattr(who, "unit_ids", None))
 
     areas = []
     for number, group in enumerate(GROUPS, start=1):
@@ -261,7 +316,9 @@ def sections(request) -> dict:
                 (not item.needs or permissions.has(who, item.needs))
                 and (not item.without or not permissions.has(who, item.without))
             )
-            url = reverse(item.route)
+            url = reverse(
+                "timesheet-current" if unit_bound and item.route == "periods" else item.route
+            )
             items.append({
                 "title": item.title,
                 "url": url,
@@ -276,10 +333,9 @@ def sections(request) -> dict:
                 # панель получала бы пустой пункт списка, который диктор
                 # объявляет пунктом без названия.
                 "offer": demo and bool(item.needs) and not allowed,
-                # Состояние — из `web.stages`, а не своим списком рядом: два
-                # списка разъехались бы молча, и в меню стояла бы пометка,
-                # которой на самом экране нет.
-                "stage": stages.for_route(item.route),
+                # Экрана ещё нет — пункт тише остальных (как `is-wip` в DECIMUS).
+                "wip": item.route.startswith("planned-"),
+                "current": _current(item.route, url, owner, path),
                 "waiting": (
                     item.waiting(who)
                     if allowed and counting and item.waiting is not None
@@ -307,23 +363,45 @@ def sections(request) -> dict:
                 "needs": offers[0]["needs"], "route": offers[0]["route"],
             },
         })
-    return {"nav_areas": areas, "nav_stages": _legend(areas)}
+    return {"nav_areas": areas, "nav_tabs": _tabs(areas)}
 
 
-def _legend(areas: list[dict]) -> list[dict]:
-    """Какие состояния экранов стоят в панели этого человека — для легенды.
+def _current(route: str, url: str, owner: str, path: str) -> str:
+    """Где человек относительно пункта: `page` — на нём самом, `location` —
+    внутри его раздела, пусто — в другом месте.
 
-    Цветная точка у пункта без слов ничего не говорит глазу (issue #268):
-    наведение называет состояние, но на планшете и с клавиатуры наведения нет.
-    Поэтому под списком разделов — подпись к каждому цвету, который в панели
-    есть. Только к тем, что есть: легенда к цвету, которого человек не видит,
-    — ещё одна строка шума в панели, где на счету каждые двадцать пикселей.
+    Различие как в DECIMUS: на самом экране пункт — не ссылка (переход в никуда),
+    на вложенном — подсвеченная ссылка, которая ведёт в начало раздела.
     """
-    seen: dict[str, dict] = {}
-    for area in areas:
-        for item in area["items"]:
-            stage = item["stage"]
-            if item["allowed"] and stage is not None and stage.kind not in seen:
-                seen[stage.kind] = {"kind": stage.kind, "label": stage.label}
-    return list(seen.values())
+    if path == url:
+        return "page"
+    if owner:
+        return "location" if owner == route else ""
+    from .templatetags.ui import in_section
 
+    return "location" if in_section(path, url) else ""
+
+
+# Сколько пунктов помещается в нижнюю полосу телефона (как в DECIMUS, D518):
+# больше — подписи режутся. Сверх пяти — четыре пункта и «Ещё» со списком.
+TABBAR_MAX = 5
+
+
+def _tabs(areas: list[dict]) -> dict:
+    """Пункты нижней полосы телефона: основные и те, что под «Ещё».
+
+    В полосу идут только разделы человека и только построенные: ненаписанный
+    экран в пяти местах под большим пальцем занял бы место рабочего.
+    """
+    mine = [
+        item for area in areas for item in area["items"]
+        if item["allowed"] and not item["wip"]
+    ]
+    if len(mine) <= TABBAR_MAX:
+        return {"main": mine, "more": [], "more_current": False}
+    main, more = mine[:TABBAR_MAX - 1], mine[TABBAR_MAX - 1:]
+    return {
+        "main": main,
+        "more": more,
+        "more_current": any(item["current"] for item in more),
+    }

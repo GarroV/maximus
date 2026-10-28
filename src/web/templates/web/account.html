@@ -28,6 +28,24 @@
 шапки над содержимым. Шапка ведёт сюда пунктом «Учётная запись».
 {% endcomment %}
 <div class="account__prefs sidenav__prefs">{% include "web/components/prefs.html" with prefs_id="account" %}</div>
+{% if google_enabled %}
+{% comment %}
+Вход через Google (T241, D098). Привязать можно только свою учётку и только
+отсюда, вошедшим: Google подтверждает владение почтой, а не право на чужую
+учётку. Привязка и отвязка — формами: смена состояния по ссылке запускалась
+бы картинкой на чужой странице.
+{% endcomment %}
+<h2>{% translate "Вход через Google" %}</h2>
+{% if google_done %}{% notice "ok" %}{{ google_done }}{% endnotice %}{% endif %}
+{% if google_refused %}{% notice "alert" %}{{ google_refused }}{% endnotice %}{% endif %}
+{% if google_linked %}
+<p>{% translate "Аккаунт Google привязан к этой учётной записи." %}</p>
+<form method="post" action="{% url 'google-unlink' %}">{% csrf_token %}<button type="submit">{% translate "Отвязать Google" %}</button></form>
+{% else %}
+<p>{% translate "Привяжите аккаунт Google, чтобы входить одной кнопкой. Почта аккаунта может отличаться от почты в учётной записи." %}</p>
+<form method="post" action="{% url 'google-link' %}">{% csrf_token %}<button class="primary" type="submit">{% translate "Привязать Google" %}</button></form>
+{% endif %}
+{% endif %}
 <ul class="account__links">
   <li><a href="{% url 'password-change' %}">{% translate "Сменить пароль" %}</a></li>
   <li><a href="{% url 'guide' %}">{% translate "Как это работает" %}</a></li>

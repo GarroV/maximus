@@ -4830,10 +4830,6 @@ msgstr ""
 "Stranica za prijavu ima dugmad za brzu prijavu sa seed nalozima (DEV_LOGIN=1)"
 
 #: web/templates/web/components/header.html:204
-msgid "Данные и итоги на всех страницах — только по этой точке"
-msgstr "Podaci i zbirovi na svim stranicama — samo za ovaj objekat"
-
-#: web/templates/web/components/header.html:204
 #, python-format
 msgid "точка: %(code)s"
 msgstr "objekat: %(code)s"
@@ -5742,14 +5738,6 @@ msgstr "Prijavi se"
 #: web/templates/web/login.html:2 web/templates/web/login.html:4
 msgid "Вход"
 msgstr "Prijava"
-
-#: web/templates/web/login.html:5
-msgid "Логин и пароль выдаёт администратор сети."
-msgstr "Administrator mreže izdaje login i lozinku."
-
-#: web/templates/web/login.html:20
-msgid "Это демо-стенд"
-msgstr "Ovo je demo okruženje"
 
 #: web/templates/web/login.html:22
 msgid ""
@@ -8175,14 +8163,6 @@ msgstr "Šta se dogodilo"
 msgid "до %(day)s"
 msgstr "do %(day)s"
 
-#: web/stages.py
-msgid "Доработка"
-msgstr "Dorada"
-
-#: web/stages.py
-msgid "Разработка в процессе"
-msgstr "U izradi"
-
 #: web/navigation.py
 msgid "Отчёты"
 msgstr "Izveštaji"
@@ -8203,22 +8183,6 @@ msgstr "Isplate"
 msgid "Интеграция с Dodo IS"
 msgstr "Integracija sa Dodo IS"
 
-#: web/templates/web/planned.html
-msgid "Очередь: %(when)s"
-msgstr "Planirano za: %(when)s"
-
-#: web/stages.py
-msgid "Карточки находок, готовность в процентах, подтверждение закрытия"
-msgstr "Kartice nalaza, spremnost u procentima, potvrda zatvaranja"
-
-#: web/stages.py
-msgid "Приглашение человека, история доступов, настраиваемые наборы прав"
-msgstr "Pozivanje osobe, istorija pristupa, podesivi skupovi prava"
-
-#: web/stages.py
-msgid "Именованные надбавки и вилка ставки должности"
-msgstr "Imenovani dodaci i raspon stope radnog mesta"
-
 #: web/stages.py
 msgid "После того, как оплата труда закроется целиком"
 msgstr "Nakon što se obračun zarada završi u celini"
@@ -8234,26 +8198,6 @@ msgstr "Šta je i kada isplaćeno ljudima: spisak za isplatu, oznake o prenosu, 
 #: web/stages.py
 msgid "Отработанные часы приезжают из Dodo IS вместо ручного ввода. Механизм подключения уже есть: каждый поток включается отдельно и по умолчанию выключен. Не хватает экрана и самого доступа к API."
 msgstr "Odrađeni sati stižu iz Dodo IS umesto ručnog unosa. Mehanizam povezivanja već postoji: svaki tok se uključuje zasebno i podrazumevano je isključen. Nedostaje ekran i sam pristup API-ju."
-
-#: web/stages.py
-msgid "Экрана ещё нет — ниже то, что здесь появится"
-msgstr "Ekran još ne postoji — ispod je ono što će se ovde pojaviti"
-
-#: web/stages.py
-msgid "Подсказка статьи кнопкой, а не подстановкой в поле"
-msgstr "Predlog stavke dugmetom, a ne upisom u polje"
-
-#: web/stages.py
-msgid "Касса точки и расход, не дошедший до отчёта без документа"
-msgstr "Kasa objekta i trošak koji bez dokumenta nije stigao u izveštaj"
-
-#: web/stages.py
-msgid "Версии статьи: правка не меняет закрытый месяц"
-msgstr "Verzije stavke: izmena ne menja zatvoreni mesec"
-
-#: web/stages.py
-msgid "Разбор в две руки: директор разносит, бухгалтер подтверждает"
-msgstr "Razvrstavanje u dve ruke: direktor raspoređuje, knjigovođa potvrđuje"
 
 #: web/templates/web/guide.html
 msgid ""
@@ -8517,10 +8461,6 @@ msgid ""
 msgstr "Sada važi %(value)s, iako pravilo zadaje zakon (%(source)s). Izmena je uneta pre okvira i obračun uzima baš nju — vrednost zemlje se vraća novom verzijom."
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Что читает правило, последствия правки и сравнение стран"
-msgstr "Šta čita pravilo, posledice izmene i poređenje zemalja"
-
-#: новые строки, добавлены tools/apply_translations.py
 #, python-format
 msgid ""
 "Сейчас действует %(value)s, и сравнить это с рамкой страны (%(source)s) "
@@ -8654,10 +8594,6 @@ msgid ""
 "пор доля ФОТ от выручки показана прочерком: ноль в этой строке читался "
 "бы как посчитанный ответ."
 msgstr "Prihoda u proizvodu još nema — stiže sa konektorom Dodo IS. Do tada je udeo fonda zarada u prihodu prikazan crticom: nula u ovom redu bi izgledala kao izračunat odgovor."
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Доля ФОТ от выручки: ждёт коннектора Dodo IS"
-msgstr "Udeo fonda zarada u prihodu: čeka konektor Dodo IS"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Доля в часах месяца"
@@ -10401,11 +10337,6 @@ msgstr "Priliv ne plaća fakturu dobavljača."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
-"Правила сопоставления, порог и платёж на несколько счетов с авансом"
-msgstr "Pravila uparivanja, prag i jedno plaćanje na više faktura sa avansom"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid ""
 "Свободного внесённого платежа на эту сумму в пределах месяца нет."
 msgstr "Nema neuparenog unetog plaćanja na ovaj iznos u roku od mesec dana."
 
@@ -10887,10 +10818,6 @@ msgid "Доля ФОТ"
 msgstr "Udeo fonda zarada"
 
 #: новые строки, добавлены tools/apply_translations.py
-msgid "Доля строки в выручке и пометка отклонения выше порога"
-msgstr "Udeo stavke u prihodu i oznaka odstupanja iznad praga"
-
-#: новые строки, добавлены tools/apply_translations.py
 msgid "Консолидация по сети"
 msgstr "Konsolidacija mreže"
 
@@ -11296,3 +11223,283 @@ msgstr "obračun od %(at)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "курс вводит администратор платформы"
 msgstr "kurs unosi administrator platforme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"MAXIMUS собирает первичные данные пиццерий и складывает из них P&L "
+"единого формата."
+msgstr "MAXIMUS prikuplja primarne podatke picerija i od njih sastavlja P&L jedinstvenog formata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"MAXIMUS — внутренний сервис Dodo Brands для партнёров: он собирает "
+"первичные данные пиццерий и складывает из них P&L единого формата."
+msgstr "MAXIMUS je interni servis kompanije Dodo Brands za partnere: prikuplja primarne podatke picerija i od njih sastavlja P&L jedinstvenog formata."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "P&L единого формата"
+msgstr "P&L jedinstvenog formata"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "P&L по точкам и по сети"
+msgstr "P&L po objektima i za celu mrežu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Администратор платформы входит через Google только рабочим аккаунтом "
+"компании. Войдите рабочим аккаунтом или логином и паролем."
+msgstr "Administrator platforme se prijavljuje preko Google-a samo poslovnim nalogom kompanije. Prijavite se poslovnim nalogom ili korisničkim imenom i lozinkom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Аккаунт Google отвязан: вход — логином и паролем."
+msgstr "Google nalog je odvezan: prijava je korisničkim imenom i lozinkom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Аккаунт Google привязан к этой учётной записи."
+msgstr "Google nalog je povezan sa ovim korisničkim nalogom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Аккаунт Google привязан: теперь можно входить кнопкой «Войти через "
+"Google»."
+msgstr "Google nalog je povezan: sada možete da se prijavite dugmetom „Prijavi se preko Google-a“."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Банковская выписка со сверкой платежей"
+msgstr "Izvod iz banke sa usklađivanjem plaćanja"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Бухгалтер разбирает счета и выписку"
+msgstr "Knjigovođa razvrstava račune i izvod"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ваша учётная запись уже привязана к другому аккаунту Google. Войдите тем "
+"аккаунтом или логином и паролем."
+msgstr "Vaš korisnički nalog je već povezan sa drugim Google nalogom. Prijavite se tim nalogom ili korisničkim imenom i lozinkom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ведомость по сотрудникам"
+msgstr "Platni spisak po zaposlenima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Войдите учётной записью, которую завёл администратор вашего партнёра, — "
+"паролем или аккаунтом Google."
+msgstr "Prijavite se nalogom koji vam je otvorio administrator vašeg partnera — lozinkom ili Google nalogom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Войдите учётной записью, которую завёл администратор вашего партнёра."
+msgstr "Prijavite se nalogom koji vam je otvorio administrator vašeg partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Войти через Google"
+msgstr "Prijavi se preko Google-a"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Войти через Google не получилось. Попробуйте ещё раз или войдите логином "
+"и паролем."
+msgstr "Prijava preko Google-a nije uspela. Pokušajte ponovo ili se prijavite korisničkim imenom i lozinkom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Вход через Google"
+msgstr "Prijava preko Google-a"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выгрузки в xlsx"
+msgstr "Izvoz u xlsx"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Данные партнёра в одном месте"
+msgstr "Podaci partnera na jednom mestu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ещё"
+msgstr "Još"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Забыли пароль — напишите ему же."
+msgstr "Zaboravili ste lozinku? Pišite istoj osobi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Закрытие и утверждение месяца"
+msgstr "Zatvaranje i odobravanje meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата по правилам страны"
+msgstr "Zarade po pravilima zemlje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Зарплата считается по правилам страны"
+msgstr "Zarade se obračunavaju po pravilima zemlje"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Каждый вносит своё: управляющий — часы и расходы своей точки, бухгалтер "
+"— счета поставщиков и банковскую выписку. Что ждёт разбора, видно сразу "
+"у пункта меню."
+msgstr "Svako unosi svoje: menadžer objekta unosi sate i troškove svog objekta, knjigovođa račune dobavljača i izvod iz banke. Ono što čeka razvrstavanje vidi se odmah pored stavke menija."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Как удалить данные"
+msgstr "Kako obrisati podatke"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кому передаются"
+msgstr "Kome se prosleđuju"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Конфиденциальность"
+msgstr "Privatnost"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Кто мы"
+msgstr "Ko smo mi"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц партнёра"
+msgstr "Mesec partnera"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц утверждается — и P&L готов"
+msgstr "Mesec se odobrava — i P&L je spreman"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Наличные расходы с чеком"
+msgstr "Gotovinski troškovi sa računom"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Начните с первого месяца"
+msgstr "Počnite od prvog meseca"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Никому, кроме инфраструктуры, на которой работает сервис."
+msgstr "Nikome, osim infrastrukturi na kojoj servis radi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отвязать Google"
+msgstr "Odveži Google"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отчёт собирается из внесённого, а не переписывается руками. Три регистра "
+"учёта — официальный, дополнительный и внутренний — видны тем, кому их "
+"положено видеть."
+msgstr "Izveštaj se sastavlja iz unetog, a ne prepisuje ručno. Tri registra knjiženja — zvanični, dopunski i interni — vide oni kojima je to namenjeno."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Первичка — по ходу месяца, а не в последний день"
+msgstr "Primarni podaci tokom meseca, a ne poslednjeg dana"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"При входе через Google мы получаем ваше имя, адрес почты и идентификатор "
+"аккаунта Google. Они нужны только для того, чтобы узнать уже заведённого "
+"пользователя: новых учётных записей вход через Google не создаёт."
+msgstr "Pri prijavi preko Google-a dobijamo vaše ime, adresu e-pošte i identifikator Google naloga. Oni služe samo da prepoznamo već otvorenog korisnika: prijava preko Google-a ne otvara nove naloge."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Привяжите аккаунт Google, чтобы входить одной кнопкой. Почта аккаунта "
+"может отличаться от почты в учётной записи."
+msgstr "Povežite Google nalog da biste se prijavljivali jednim dugmetom. E-pošta naloga može da se razlikuje od e-pošte u korisničkom nalogu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Привязать Google"
+msgstr "Poveži Google"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Раздел ещё строится."
+msgstr "Ovaj odeljak se još gradi."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сбор данных и P&L партнёров Dodo"
+msgstr "Prikupljanje podataka i P&L za Dodo partnere"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сверка с таблицей бухгалтерии"
+msgstr "Usklađivanje sa tabelom knjigovodstva"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сегодня у партнёров всё в Excel и считается руками. Здесь часы, расходы, "
+"счета и выписка вносятся по ходу месяца, а зарплата и P&L собираются из "
+"того, что уже внесено."
+msgstr "Danas partneri sve vode u Excel-u i računaju ručno. Ovde se sati, troškovi, računi i izvod unose tokom meseca, a zarade i P&L se sastavljaju iz onoga što je već uneto."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "След расчёта каждой суммы"
+msgstr "Trag obračuna za svaki iznos"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Ставки, коэффициенты и надбавки живут в правилах с датой действия: новое "
+"правило не меняет закрытый месяц. Любую сумму можно раскрыть до правил, "
+"которые её дали."
+msgstr "Stope, koeficijenti i dodaci žive u pravilima sa datumom važenja: novo pravilo ne menja zatvoren mesec. Svaki iznos može da se razloži do pravila koja su ga dala."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Счета поставщиков и бумаги с точки"
+msgstr "Računi dobavljača i papiri iz objekta"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Табель часов по точкам"
+msgstr "Evidencija sati po objektima"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Точки вносят часы, расходы из кассы и документы"
+msgstr "Objekti unose sate, troškove iz kase i dokumenta"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётную запись заводит администратор вашего партнёра."
+msgstr "Nalog vam otvara administrator vašeg partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Учётные данные пользователей и то, что вносит партнёр: часы, расходы, "
+"счета, документы и другие данные, из которых собирается P&L."
+msgstr "Podaci korisničkih naloga i ono što partner unosi: sati, troškovi, računi, dokumenta i drugi podaci iz kojih se sastavlja P&L."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid ""
+"Через администратора вашего партнёра или письмом на <a "
+"href=\"mailto:%(email)s\">%(email)s</a>."
+msgstr "Preko administratora vašeg partnera ili pismom na <a href=\"mailto:%(email)s\">%(email)s</a>."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Через администратора вашего партнёра."
+msgstr "Preko administratora vašeg partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Что хранится"
+msgstr "Šta se čuva"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Эта почта указана сразу в нескольких учётных записях, и понять, в какую "
+"входить, нельзя. Войдите логином и паролем и сообщите администратору."
+msgstr "Ova e-pošta je navedena u više korisničkih naloga odjednom, pa se ne može znati u koji se prijaviti. Prijavite se korisničkim imenom i lozinkom i obavestite administratora."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этой почты нет среди учётных записей MAXIMUS. Войдите логином и паролем "
+"или попросите администратора вашего партнёра указать эту почту в вашей "
+"учётной записи."
+msgstr "Ove e-pošte nema ni u jednom MAXIMUS nalogu. Prijavite se korisničkim imenom i lozinkom ili zamolite administratora vašeg partnera da ovu e-poštu upiše u vaš nalog."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот аккаунт Google уже привязан к другой учётной записи MAXIMUS. "
+"Привяжите другой аккаунт или попросите администратора разобраться."
+msgstr "Ovaj Google nalog je već povezan sa drugim MAXIMUS nalogom. Povežite drugi nalog ili zamolite administratora da to reši."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "в разработке"
+msgstr "u razvoju"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "или"
+msgstr "ili"

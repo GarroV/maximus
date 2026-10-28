@@ -9,10 +9,28 @@
 """
 from __future__ import annotations
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
+
+# Что сказать после привязки или отвязки Google (T241). Ключ — в адресе,
+# текст — здесь: текст в адресе подменялся бы ссылкой.
+GOOGLE_DONE = {
+    "linked": _("Аккаунт Google привязан: теперь можно входить кнопкой «Войти через Google»."),
+    "unlinked": _("Аккаунт Google отвязан: вход — логином и паролем."),
+}
 
 
 @login_required
 def page(request):
-    return render(request, "web/account.html")
+    from .google_login import REFUSALS
+
+    shown = request.GET.get("google", "")
+    return render(request, "web/account.html", {
+        # Раздел Google — только когда вход через Google настроен (T241, D098).
+        "google_enabled": getattr(settings, "GOOGLE_AUTH", None) is not None,
+        "google_linked": bool(getattr(request.user, "google_sub", None)),
+        "google_done": GOOGLE_DONE.get(shown, ""),
+        "google_refused": REFUSALS.get(shown, "") if shown not in GOOGLE_DONE else "",
+    })

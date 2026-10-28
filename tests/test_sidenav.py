@@ -18,6 +18,10 @@
 настоящей странице: карта `NAV_BELONGS` может быть верной, а панель — собранной
 мимо неё.
 
+**Каркас — как в DECIMUS (T241, D098).** До входа нет ни панели, ни разделов;
+меню учётки внизу панели открывает партнёра, точку, регистры, тему, язык и
+выход; на телефоне — полоса сверху и не больше пяти вкладок снизу.
+
 **Роль — одна плашка, внизу панели, вместе с партнёром, регистрами и точкой.**
 Решение владельца — у человека один уровень (расхождение с эталоном — #130).
 
@@ -28,7 +32,7 @@
 
 **Всё видно и на планшете, ничего не режется** (сверка с эталоном по T222):
 панель от 720 до 1099 остаётся полной, подписи переносятся, а не обрезаются
-многоточием, у точки состояния есть название, служебное собрано в один пункт.
+многоточием, служебное собрано в один пункт.
 Что все разделы влезают в экран 1440×900 и у каждого пункта есть имя для
 диктора, проверяется живым прогоном (`tools/smoke_sidenav.mjs`): это
 измеряется в браузере, а не в листе.
@@ -49,6 +53,7 @@ ROOT = Path(__file__).resolve().parent.parent
 STATIC = ROOT / "src" / "web" / "static" / "web"
 APP_CSS = STATIC / "app.css"
 CORE_CSS = STATIC / "dodo-ds.css"
+SHELL_CSS = STATIC / "shell.css"
 
 
 def rules(css: str) -> str:
@@ -94,15 +99,18 @@ def sections_of(page: str) -> str:
 
 @pytest.mark.parametrize("role", ["director", "manager"])
 def test_no_section_hides_behind_a_dropdown(client, web_env, role):
-    """В навигации нет раскрывающихся меню и выпадающих списков (D081)."""
-    login_as(client, role)
-    nav = nav_of(body(client.get("/periods/")))
+    """Разделы не прячутся за раскрытием (D081).
 
-    assert "<details" not in nav and "<select" not in nav, (
+    Раскрывается только меню учётки — как в DECIMUS (D098): тема, язык и выход
+    там же, где кто вошёл. Разделов в нём нет.
+    """
+    login_as(client, role)
+    listed = sections_of(body(client.get("/periods/")))
+
+    assert "<details" not in listed and "<select" not in listed, (
         "раздел снова спрятан за раскрытием — владелец снял это 29.09.2026"
     )
-    # Все пункты роли — ссылки прямо в панели: ни один не ждёт раскрытия.
-    assert 'href="/expenses/"' in nav and 'href="/inbox/"' in nav
+    assert 'href="/expenses/"' in listed and 'href="/inbox/"' in listed
 
 
 def test_the_old_header_is_gone(client, web_env):
@@ -133,25 +141,28 @@ def test_the_current_section_is_not_a_link(client, web_env):
 
 
 def test_a_nested_screen_keeps_its_section_highlighted(client, web_env):
-    """Карточка платежа лежит под своим корнем адреса, а раздел — счета."""
+    """Карточка платежа лежит под своим корнем адреса, а раздел — счета.
+
+    На вложенном экране пункт подсвечен и остаётся ссылкой в начало раздела
+    (`aria-current="location"`), как в DECIMUS.
+    """
     login_as(client, "accountant")
     nav = sections_of(body(client.get("/payments/new/")))
 
-    assert 'class="sidenav__item" href="/invoices/"' not in nav, (
-        "на вложенном экране раздел снова стал ссылкой"
+    assert '<a class="sidenav__current" href="/invoices/" aria-current="location"' in nav, (
+        "на вложенном экране раздел не подсвечен"
     )
-    assert '<span class="sidenav__current" aria-current="page"' in nav
 
 
 def test_the_section_of_another_root_is_not_highlighted(client, web_env):
     """Выделен один раздел, а не все с похожим адресом."""
     login_as(client, "accountant")
-    page = body(client.get("/expenses/"))
+    nav = sections_of(body(client.get("/expenses/")))
 
-    assert page.count('aria-current="page"') == 1, (
-        "выделенных разделов не один: " + str(page.count('aria-current="page"'))
+    assert nav.count('aria-current=') == 1, (
+        "выделенных разделов не один: " + str(nav.count('aria-current='))
     )
-    assert 'class="sidenav__item" href="/periods/"' in page
+    assert 'class="sidenav__item" href="/periods/"' in nav
 
 
 # --- фильтр «человек в этом разделе» -----------------------------------------
@@ -193,13 +204,12 @@ def test_in_section_compares_roots_not_whole_addresses(path, section, same):
 def test_the_header_shows_exactly_one_role(client, web_env, role):
     """Плашка роли одна: решение владельца — у человека один уровень.
 
-    Считается по началу атрибута, а не по строке целиком: у плашки теперь есть
-    ещё и класс цвета роли (`role role--ops`), и точное совпадение проверяло бы
-    оформление вместо количества.
+    Считается в левой панели: на телефоне то же меню учётки стоит в верхней
+    полосе, и в разметке страницы оно повторено (видна одна из двух копий).
     """
     login_as(client, role)
-    page = body(client.get("/periods/"))
-    badges = len(re.findall(r'class="role(?: |")', page))
+    nav = nav_of(body(client.get("/periods/")))
+    badges = len(re.findall(r'class="role(?: |")', nav))
 
     assert badges == 1, f"{role}: плашек роли {badges}, а должна быть одна"
 
@@ -242,22 +252,20 @@ def test_the_panel_says_whose_eyes_these_numbers_are(client, web_env):
 
 
 def test_language_and_logout_live_in_the_foot_of_the_panel(client, web_env):
-    """Язык, тема и выход — низ панели; выход — форма, а не ссылка."""
+    """Язык и тема — низ панели; выход — в меню учётки, формой, а не ссылкой."""
     login_as(client, "accountant")
     nav = nav_of(body(client.get("/periods/")))
-    foot = nav[nav.index('class="sidenav__foot"'):]
+    foot = nav[nav.index('class="sidenav__foot"'):nav.index('class="sidenav__user"')]
+    user = nav[nav.index('class="sidenav__user"'):]
 
     assert 'action="/i18n/setlang/"' in foot, "переключателя языка нет в подвале"
     assert 'action="/theme/"' in foot, "переключателя темы нет в подвале"
     logout = re.search(
-        r'<form class="sidenav__form sidenav__logout" method="post" action="/logout/.*?</form>',
-        foot, flags=re.S,
+        r'<form class="acct-menu__logout" method="post" action="/logout/">.*?</form>',
+        user, flags=re.S,
     )
     assert logout, "выход не формой: его запустила бы картинка на чужой странице"
-    # Выход — значком, поэтому название обязано быть у самой кнопки.
-    assert 'aria-label="Выйти"' in logout.group(0), "у кнопки выхода нет названия"
-    # Разметка — как у ядра: капсула темы radiogroup, язык — langpill; выбранный
-    # — кнопка без отправки формы (type=button), а не ещё одна цель нажатия.
+    assert "Выйти" in logout.group(0), "у кнопки выхода нет названия"
     assert 'role="radiogroup"' in foot and 'class="langpill"' in foot
     assert re.search(
         r'<button type="button" class="langpill__item"[^>]*aria-pressed="true"[^>]*lang="ru"', foot
@@ -297,23 +305,34 @@ def test_the_account_page_is_behind_the_login(client, web_env):
     assert response.status_code == 302 and "/login/" in response["Location"]
 
 
-def test_a_guest_still_finds_the_guide_in_the_panel(client, web_env):
-    """До входа гайд остаётся пунктом: половина его ответа — «кем входить»."""
-    nav = nav_of(body(client.get("/guide/")))
+def test_a_guest_finds_the_guide_from_the_login_page(client, web_env):
+    """До входа гайд доступен со страницы входа: половина его ответа — «кем входить»."""
+    page = body(client.get("/login/"))
 
-    assert 'aria-current="page"' in nav and 'href="/login/"' in nav
+    assert 'href="/guide/"' in page, "со страницы входа не дойти до гайда"
+    guide = body(client.get("/guide/"))
+    assert 'href="/login/"' in guide, "с гайда до входа не дойти"
 
 
-def test_a_guest_sees_no_sections_before_the_login(client, web_env):
-    """До входа в панели только гайд и вход: разделы гостю всё равно ответят формой входа."""
-    nav = nav_of(body(client.get("/login/")))
+@pytest.mark.parametrize("url", ["/login/", "/guide/"])
+def test_a_guest_sees_no_sections_before_the_login(client, web_env, url):
+    """До входа нет ни панели, ни полос телефона (D098, как в DECIMUS).
 
-    assert "sidenav__group" not in nav, "гостю показаны области учёта"
-    listed = nav.split("sidenav__list", 1)[1].split("sidenav__foot", 1)[0]
-    assert 'href="/periods/"' not in listed, (
-        "гостю показаны разделы продукта"
-    )
-    assert 'href="/guide/"' in nav and 'aria-current="page"' in nav, "до входа нет гайда или входа"
+    Карта разделов — уже сведения о продукте, и каждый раздел гостю всё равно
+    ответит формой входа. Владелец 27.10.2026 — на снимке страницы входа, где
+    не вошедший видит всё меню: «приведи … окно входа … к единому виду. все как
+    и в децимусе».
+    """
+    page = body(client.get(url))
+
+    assert '<nav class="sidenav"' not in page, "гостю показана левая панель"
+    assert 'class="tabbar"' not in page and 'class="mbar"' not in page
+    assert "sidenav__group" not in page, "гостю показаны области учёта"
+    if url == "/login/":
+        # Гайд сам рассказывает о разделах словами и ссылками — это его
+        # содержание, а не меню; на форме входа разделов нет вовсе.
+        for section in ("/periods/", "/expenses/", "/inbox/", "/payroll/sheet/"):
+            assert f'href="{section}"' not in page, f"гостю показан раздел {section}"
 
 
 def test_the_role_is_named_once_and_in_the_page_language(client, web_env):
@@ -326,8 +345,6 @@ def test_the_role_is_named_once_and_in_the_page_language(client, web_env):
 
     login_as(client, "admin")
     client.cookies["django_language"] = "en"
-    # Запрос включает английский в потоке теста и там его оставляет; без
-    # `override` соседние тесты читали бы названия разделов по-английски.
     with translation.override(None):
         try:
             who = nav_of(body(client.get("/periods/")))
@@ -336,7 +353,10 @@ def test_the_role_is_named_once_and_in_the_page_language(client, web_env):
     who = who[who.index('class="sidenav__user"'):]
 
     assert "Администратор" not in who, "роль по-русски на английской странице"
-    assert "<b>" not in who, "имя повторяет роль: одно и то же сказано дважды"
+    summary = who[:who.index("</summary>")]
+    assert summary.count("Network Administrator") == 1, (
+        "имя повторяет роль: одно и то же сказано дважды"
+    )
     assert len(re.findall(r'class="role(?: |")', who)) == 1
 
 
@@ -397,13 +417,14 @@ def test_the_page_asks_for_the_stylesheets_that_carry_all_this():
     """Правило в неподключённом листе не действует; порядок листов — смысловой.
 
     Ядро идёт после `tokens.css` (оно перекрывает прежние значения, а не
-    наоборот) и до `app.css` (продукт уточняет ядро).
+    наоборот) и до `app.css` (продукт уточняет ядро); каркас `shell.css` —
+    последним.
     """
     from django.template.loader import render_to_string
 
     page = render_to_string("web/base.html")
     order = [page.index(f"web/{name}") for name in
-             ("tokens.css", "dodo-ds.css", "domain.css", "app.css")]
+             ("tokens.css", "dodo-ds.css", "domain.css", "app.css", "shell.css")]
     assert order == sorted(order), "листы подключены не в том порядке"
 
 
@@ -437,15 +458,13 @@ def test_the_tablet_keeps_the_full_panel():
     """От 720 до 1099 панель остаётся полной, а не значками.
 
     Ядро сворачивает её здесь до 56 пикселей. Сверка по T222 это сняла: на 900
-    не видно ни роли, ни партнёра, ни границ между группами, а подпись у значка
-    есть только в наведении. Проверяется, что продукт перекрывает каждое
-    правило свёртки, которое прятало смысл.
+    не видно ни роли, ни партнёра, ни границ между группами.
     """
     core = rules(CORE_CSS.read_text(encoding="utf-8"))
     assert ".sidenav__label" in media(core, "@media (max-width: 1099px)"), (
         "ядро больше не сворачивает панель — проверка не о том"
     )
-    tablet = media(rules(APP_CSS.read_text(encoding="utf-8")),
+    tablet = media(rules(SHELL_CSS.read_text(encoding="utf-8")),
                    "@media (min-width: 720px) and (max-width: 1099px)")
     assert "width: 216px" in block(tablet, ".sidenav"), "панель на планшете снова узкая"
     shown = block(tablet, ".sidenav__label, .sidenav__group")
@@ -457,7 +476,7 @@ def test_the_tablet_keeps_the_full_panel():
 
 def test_section_names_wrap_instead_of_ending_in_an_ellipsis():
     """«Инбокс докуме…» — не название. Подпись переносится, пункт растёт вниз."""
-    css = rules(APP_CSS.read_text(encoding="utf-8"))
+    css = rules(SHELL_CSS.read_text(encoding="utf-8"))
     item = block(css, ".sidenav__item, .sidenav__current")
     label = block(css, ".sidenav__label")
 
@@ -466,64 +485,62 @@ def test_section_names_wrap_instead_of_ending_in_an_ellipsis():
     assert "text-overflow: clip" in label, "подпись снова режется многоточием"
 
 
-def test_the_stage_of_a_screen_is_named_on_hover(client, web_env):
-    """Цветная точка состояния без слов глазу ничего не говорит."""
-    login_as(client, "admin")
-    nav = sections_of(body(client.get("/periods/")))
+def test_an_unbuilt_screen_is_quieter_and_says_so(client, web_env):
+    """Ненаписанный экран — приглушённый пункт с подсказкой, без точек и плашек.
 
-    staged = re.findall(r'<a class="sidenav__item" href="[^"]*" title="([^"]*)">'
-                        r'(?:(?!</a>).)*sidenav__stage--', nav, flags=re.S)
-    assert staged, "у разделов нет состояния — проверка не о том"
-    assert all(" · " in title for title in staged), (
-        f"состояние экрана не названо в подсказке: {staged}"
-    )
-
-
-def test_the_phone_scrolls_the_bar_and_not_the_page():
-    """Телефон: разделы — полосой у нижнего края, она прокручивается сама.
-
-    Ядро ниже 720 панели не рисует и оставляет это продукту. У управляющего
-    разделов больше, чем влезает в 375, — спрятать часть значило бы сделать их
-    с телефона недостижимыми, а прокрутить вбок всю страницу — «рассыпалось».
+    Как в DECIMUS (D098, #309): плашки «Доработка» с фразами из журнала стройки
+    бухгалтер читал как поломку. Состояние модулей — в `docs/product-map.md`.
     """
-    css = rules(APP_CSS.read_text(encoding="utf-8"))
-    phone = media(css, "@media (max-width: 719px)")
-    bar = block(phone, ".sidenav__list")
+    login_as(client, "admin")
+    page = body(client.get("/periods/"))
+    nav = sections_of(page)
 
+    wip = re.findall(r'<a class="sidenav__item is-wip" href="([^"]*)"[^>]*title="([^"]*)"', nav)
+    assert wip, "у ненаписанных разделов нет приглушения — проверка не о том"
+    assert all(href.startswith(("/payouts/", "/settings/")) for href, _ in wip), wip
+    assert all(" · " in title for _, title in wip), f"не сказано, что раздел строится: {wip}"
+    assert "sidenav__stage" not in page and 'class="stage' not in page, (
+        "точки или плашки стадии снова на экране"
+    )
+    assert "sidenav__legend" not in page
+
+
+def test_the_phone_gets_a_top_bar_and_five_tabs(client, web_env):
+    """Телефон, как в DECIMUS: сверху марка и аватар, снизу не больше пяти вкладок.
+
+    До T241 разделы ехали лентой с прокруткой вбок, и подписи на 390 резались
+    посередине слова. Сверх пяти — четыре вкладки и «Ещё» со списком.
+    """
+    css = rules(SHELL_CSS.read_text(encoding="utf-8"))
+    phone = media(css, "@media (max-width: 719px)")
+    assert "display: none" in block(phone, ".shell > .sidenav")
+    bar = block(phone, ".tabbar")
     assert "position: fixed" in bar and "bottom: 0" in bar
-    assert "overflow-x: auto" in bar, "полоса разделов не прокручивается сама"
-    assert "min-width" not in block(css, "html, body"), (
+    assert "overflow-x" not in bar, "полоса снова прокручивается вбок"
+    assert "padding-bottom" in block(phone, "main"), "низ страницы спрятан под полосой"
+    app = rules(APP_CSS.read_text(encoding="utf-8"))
+    assert "min-width" not in block(app, "html, body"), (
         "у body появилась фиксированная ширина — страница поедет вбок целиком"
     )
-    # Слой продукта из склада ставит body ширину эталона (1280). Если он её
-    # ставит, лист продукта обязан её снять — иначе на планшете страница едет
-    # вбок целиком (поймано живой проверкой на 900: +380 пикселей).
-    domain = rules((STATIC / "domain.css").read_text(encoding="utf-8"))
-    if re.search(r"body\s*\{[^}]*min-width", domain):
-        own = re.search(r"(?m)^body\s*\{([^}]*)\}", css)
-        assert own and "min-width: 0" in own.group(1), (
-            "domain.css фиксирует ширину body, а продукт её не снимает"
-        )
-    assert "padding-bottom" in block(phone, "body"), (
-        "низ страницы спрятан под полосой разделов"
-    )
+
+    login_as(client, "admin")
+    page = body(client.get("/periods/"))
+    tabbar = page[page.index('<nav class="tabbar"'):]
+    tabbar = tabbar[:tabbar.index("</nav>")]
+    shown = re.findall(r'class="tabbar__item', tabbar)
+    assert len(shown) <= 5, f"во вкладках {len(shown)} пунктов"
+    assert 'class="tabbar__more"' in tabbar, "у администратора разделов больше пяти, а «Ещё» нет"
+    assert "is-wip" not in tabbar and "/payouts/" not in tabbar, "ненаписанный экран во вкладках"
+    assert 'class="mbar"' in page and 'class="mbar__me"' in page
 
 
 def test_the_tap_targets_of_the_unit_manager_are_finger_sized():
-    """Сценарии управляющего — телефон 375: всё нажимаемое не меньше 44 пикселей."""
-    phone = media(rules(APP_CSS.read_text(encoding="utf-8")), "@media (max-width: 719px)")
+    """Сценарии управляющего — телефон 375: всё нажимаемое не меньше пальца."""
+    phone = media(rules(SHELL_CSS.read_text(encoding="utf-8")), "@media (max-width: 719px)")
 
-    item = block(phone, ".sidenav__list .sidenav__item, .sidenav__list .sidenav__current")
-    height = re.search(r"min-height:\s*(\d+)px", item)
-    assert height and int(height.group(1)) >= 44, "пункт полосы меньше пальца"
-    assert "var(--tap-min)" in block(
-        phone,
-        ".sidenav__foot .sidenav__item, .sidenav__foot .sidenav__current,\n"
-        "  .sidenav__logout .sidenav__item",
-    ), "учётная запись и выход на телефоне меньше пальца"
-    assert "var(--tap-min)" in block(phone, ".sidenav__theme button"), (
-        "язык и тема на телефоне меньше пальца"
-    )
+    assert "var(--tap-min)" in block(phone, ".tabbar__item"), "вкладка меньше пальца"
+    assert "var(--tap-min)" in block(phone, ".tabbar__row"), "строка «Ещё» меньше пальца"
+    assert "var(--tap-min)" in block(phone, ".mbar__me"), "аватар меню учётки меньше пальца"
 
 
 # --- общие правила листа, найденные сверкой блока reports (T222) -------------
@@ -546,3 +563,56 @@ def test_the_segment_switch_wraps_instead_of_leaving_the_screen():
     seg = block(rules(APP_CSS.read_text(encoding="utf-8")), ".seg")
 
     assert "flex-wrap: wrap" in seg and "max-width: 100%" in seg
+
+
+# --- экраны внутри месяца: чей пункт подсвечен (#306) ------------------------
+
+
+@pytest.mark.parametrize(
+    ("suffix", "owner"),
+    [("sheet/", "/payroll/sheet/"), ("", "/payroll/closing/"),
+     ("pnl/", "/reports/pnl/"), ("reconcile/", "/reports/reconcile/")],
+)
+def test_a_screen_inside_the_month_highlights_its_own_item(client, web_env, suffix, owner):
+    """Ведомость, закрытие, P&L и сверка — свои пункты, а не всегда «Табель».
+
+    У всех общий корень `/periods/`, и по корню подсвечивался «Табель»: человек
+    нажимал «Ведомость» и видел выделенным другой пункт (#306). Чей экран —
+    решает имя маршрута (`web.navigation.OWNER_OF_ROUTE`).
+    """
+    login_as(client, "accountant")
+    month = client.get("/payroll/sheet/")["Location"].split("/")[2]
+    nav = sections_of(body(client.get(f"/periods/{month}/{suffix}")))
+
+    current = re.findall(r'class="sidenav__current"[^>]*href="([^"]*)"', nav)
+    assert current == [owner], f"/periods/…/{suffix}: подсвечен {current}, а не {owner}"
+
+
+def test_the_sheet_item_opens_the_sheet_and_not_the_month(client, web_env):
+    """«Ведомость» ведёт на ведомость месяца, а не на ту же страницу, что «Закрытие» (#306)."""
+    login_as(client, "accountant")
+
+    sheet = client.get("/payroll/sheet/")["Location"]
+    closing = client.get("/payroll/closing/")["Location"]
+    assert sheet.endswith("/sheet/"), sheet
+    assert closing.split("#")[0] != sheet
+
+
+def test_the_unit_manager_goes_straight_to_the_timesheet(client, web_env):
+    """У управляющего точки «Табель» — сразу сетка часов рабочего месяца (#315)."""
+    login_as(client, "manager")
+    nav = sections_of(body(client.get("/expenses/")))
+
+    assert 'href="/timesheet/"' in nav and 'href="/periods/"' not in nav
+    target = client.get("/timesheet/")["Location"]
+    assert target.startswith("/timesheets/"), target
+    grid = sections_of(body(client.get(target)))
+    assert '<a class="sidenav__current" href="/timesheet/" aria-current="location"' in grid
+
+
+def test_the_director_still_opens_the_list_of_months(client, web_env):
+    """Без ограничения точкой «Табель» — список месяцев, как прежде."""
+    login_as(client, "director")
+    nav = sections_of(body(client.get("/expenses/")))
+
+    assert 'href="/periods/"' in nav and 'href="/timesheet/"' not in nav

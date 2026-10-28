@@ -1,0 +1,117 @@
+{% extends "web/base.html" %}{% load i18n static ui %}
+{% comment %}
+Посадочная страница продукта (T241, D098): не вошедший человек на корне видит,
+что это за продукт и зачем он, и одну дверь — «Войти». Вид — как у DECIMUS
+(`landing.html`, D524–D546): стопка листов, наезжающих друг на друга при
+прокрутке; стили — `web/landing.css`. Своя шапка: общая шапка до входа здесь
+не нужна.
+
+Кнопки демо здесь нет: демо — отдельный стенд со своим адресом и ключом, а
+ключ в публичной странице перестал бы быть даже спидбампом. У демо свой
+лендинг (`demo/landing.html`) того же вида.
+
+Каждая фраза — о том, что в продукте уже есть: лендинг, обещающий то, чего
+человек после входа не найдёт, хуже его отсутствия.
+{% endcomment %}
+{% block title %}{% translate "Сбор данных и P&L партнёров Dodo" %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'web/landing.css' %}">{% endblock %}
+{% block body %}
+<main id="content" class="page--landing" tabindex="-1">
+<div class="lp">
+  <header class="lp-bar">
+    <a class="lp-bar__brand" href="{% url 'index' %}">{% brand_mark "lp-bar__logo sidenav__logo" 28 %}<span>MAXIMUS</span></a>
+    <div class="lp-bar__acts">
+      {% include "web/components/langpick.html" %}
+      <a class="lp-cta lp-cta--sm" href="{% url 'login' %}">{% translate "Войти" %}</a>
+    </div>
+  </header>
+
+  <section class="lp-sheet lp-sheet--paper lp-hero" aria-labelledby="lp-h1">
+    <div class="lp-cols lp-cols--hero">
+      <div class="lp-copy">
+        <h1 class="lp-display" id="lp-h1">{% translate "Данные партнёра в одном месте" %}</h1>
+        <p class="lp-sub">{% translate "MAXIMUS собирает первичные данные пиццерий и складывает из них P&L единого формата." %}</p>
+        <p class="lp-body">{% translate "Сегодня у партнёров всё в Excel и считается руками. Здесь часы, расходы, счета и выписка вносятся по ходу месяца, а зарплата и P&L собираются из того, что уже внесено." %}</p>
+        <div class="lp-cta-row">
+          <a class="lp-cta" href="{% url 'login' %}">{% translate "Войти" %}</a>
+          <p class="lp-note">{% translate "Учётную запись заводит администратор вашего партнёра." %}</p>
+        </div>
+      </div>
+      <div class="lp-fig lp-card">
+        <p class="lp-card__h">{% translate "Месяц партнёра" %}</p>
+        <ul class="lp-lines">
+          <li>{% translate "Точки вносят часы, расходы из кассы и документы" %}</li>
+          <li>{% translate "Бухгалтер разбирает счета и выписку" %}</li>
+          <li>{% translate "Зарплата считается по правилам страны" %}</li>
+          <li>{% translate "Месяц утверждается — и P&L готов" %}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-sheet lp-sheet--beige" aria-labelledby="lp-collect">
+    <p class="lp-tab" style="--lp-tab-i: 0"><span class="lp-tab__n">1</span>{% translate "Сбор данных" %}</p>
+    <div class="lp-cols">
+      <div class="lp-copy">
+        <h2 class="lp-h2" id="lp-collect">{% translate "Первичка — по ходу месяца, а не в последний день" %}</h2>
+        <p class="lp-body">{% translate "Каждый вносит своё: управляющий — часы и расходы своей точки, бухгалтер — счета поставщиков и банковскую выписку. Что ждёт разбора, видно сразу у пункта меню." %}</p>
+      </div>
+      <div class="lp-fig lp-card">
+        <ul class="lp-lines">
+          <li>{% translate "Табель часов по точкам" %}</li>
+          <li>{% translate "Наличные расходы с чеком" %}</li>
+          <li>{% translate "Счета поставщиков и бумаги с точки" %}</li>
+          <li>{% translate "Банковская выписка со сверкой платежей" %}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-sheet lp-sheet--paper" aria-labelledby="lp-pay">
+    <p class="lp-tab" style="--lp-tab-i: 1"><span class="lp-tab__n">2</span>{% translate "Расчёт" %}</p>
+    <div class="lp-cols">
+      <div class="lp-copy">
+        <h2 class="lp-h2" id="lp-pay">{% translate "Зарплата по правилам страны" %}</h2>
+        <p class="lp-body">{% translate "Ставки, коэффициенты и надбавки живут в правилах с датой действия: новое правило не меняет закрытый месяц. Любую сумму можно раскрыть до правил, которые её дали." %}</p>
+      </div>
+      <div class="lp-fig lp-card">
+        <ul class="lp-lines">
+          <li>{% translate "Ведомость по сотрудникам" %}</li>
+          <li>{% translate "След расчёта каждой суммы" %}</li>
+          <li>{% translate "Закрытие и утверждение месяца" %}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-sheet lp-sheet--beige" aria-labelledby="lp-report">
+    <p class="lp-tab" style="--lp-tab-i: 2"><span class="lp-tab__n">3</span>{% translate "Отчёты" %}</p>
+    <div class="lp-cols">
+      <div class="lp-copy">
+        <h2 class="lp-h2" id="lp-report">{% translate "P&L единого формата" %}</h2>
+        <p class="lp-body">{% translate "Отчёт собирается из внесённого, а не переписывается руками. Три регистра учёта — официальный, дополнительный и внутренний — видны тем, кому их положено видеть." %}</p>
+      </div>
+      <div class="lp-fig lp-card">
+        <ul class="lp-lines">
+          <li>{% translate "P&L по точкам и по сети" %}</li>
+          <li>{% translate "Сверка с таблицей бухгалтерии" %}</li>
+          <li>{% translate "Выгрузки в xlsx" %}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-sheet lp-sheet--purple lp-final" aria-labelledby="lp-final">
+    <div class="lp-copy lp-copy--final">
+      <h2 class="lp-display lp-display--md" id="lp-final">{% translate "Начните с первого месяца" %}</h2>
+      <p class="lp-body">{% if google_enabled %}{% translate "Войдите учётной записью, которую завёл администратор вашего партнёра, — паролем или аккаунтом Google." %}{% else %}{% translate "Войдите учётной записью, которую завёл администратор вашего партнёра." %}{% endif %}</p>
+      <div class="lp-cta-row"><a class="lp-cta" href="{% url 'login' %}">{% translate "Войти" %}</a></div>
+    </div>
+  </section>
+
+  <footer class="lp-foot">
+    <a href="{% url 'guide' %}">{% translate "Как это работает" %}</a> · <a href="{% url 'privacy' %}">{% translate "Конфиденциальность" %}</a>
+  </footer>
+</div>
+</main>
+{% endblock %}

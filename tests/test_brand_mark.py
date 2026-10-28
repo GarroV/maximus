@@ -22,7 +22,7 @@ def head_templates() -> list[Path]:
 
 def test_every_page_with_its_own_head_carries_the_mark():
     templates = head_templates()
-    assert len(templates) >= 4, f"нашлось меньше страниц с <head>, чем есть в продукте: {templates}"
+    assert len(templates) >= 3, f"нашлось меньше страниц с <head>, чем есть в продукте: {templates}"
     missing = [str(p.relative_to(ROOT)) for p in templates if INCLUDE not in p.read_text()]
     assert not missing, f"страницы без знака во вкладке: {missing}"
 

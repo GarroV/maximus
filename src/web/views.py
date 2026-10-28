@@ -100,11 +100,31 @@ def index(request):
     Спрашивается не «включено ли демо», а «ведёт ли дверь внутрь для ЭТОГО
     посетителя» (`demo.access.reachable`): со включённым ключом гость без ключа
     получил бы `404`, то есть тупик поменялся бы на другой. Ключ остаётся
-    спидбампом — такого гостя корень по-прежнему ведёт к периодам.
+    спидбампом — такой гость, как и всякий не вошедший, видит посадочную
+    страницу продукта (T241), вошедший уходит к периодам.
     """
     if demo_access.reachable(request):
         return redirect(demo_access.URL)
+    # Не вошедший видит посадочную страницу продукта (T241, D098, как в
+    # DECIMUS): что это и зачем, и одну дверь — «Войти». До T241 корень вёл на
+    # `/periods/`, а оттуда на голую форму пароля без единого слова о продукте.
+    if get_current_principal(request) is None:
+        # Посадочная страница — всегда светлая, как у DECIMUS: брендовые бежевые
+        # и фиолетовые листы одинаковы в обеих темах, и тёмные листы между ними
+        # читались бы как поломка. Выбор темы человека от этого не меняется.
+        return render(request, "web/landing.html", {**login_context(request), "theme_attr": "light"})
     return redirect("periods")
+
+
+def privacy(request):
+    """Политика конфиденциальности — открыта без входа (T241).
+
+    Нужна Google для публикации входа через Google; адрес `/privacy/` вписан
+    владельцем в его консоль. Почта поддержки — из `SUPPORT_EMAIL`.
+    """
+    return render(request, "web/privacy.html", {
+        "support_email": getattr(settings, "SUPPORT_EMAIL", ""),
+    })
 
 
 @login_required
@@ -1576,8 +1596,25 @@ def variance_cut_url(period: Period, code: str) -> str:
 
 def safe_next(request) -> str:
     """Куда вернуться после входа. Только внутрь продукта, без чужих адресов."""
-    target = request.POST.get("next") or request.GET.get("next") or ""
-    if target.startswith("/") and not target.startswith("//"):
+    return safe_next_value(request.POST.get("next") or request.GET.get("next") or "")
+
+
+def safe_next_value(target: str) -> str:
+    """Адрес возврата, если он внутри продукта; иначе — список месяцев.
+
+    Только путь от корня и без хоста. `//чужой.сайт` и `/\\чужой.сайт` браузер
+    читает как адрес другого сайта, поэтому проверка — штатная функция Django,
+    которая знает эти обходы, а не «начинается с `/`» (T241: вход через Google
+    хранит этот адрес в сессии на всё время ухода к Google).
+    """
+    from django.utils.http import url_has_allowed_host_and_scheme
+
+    target = str(target or "")
+    if (
+        target.startswith("/")
+        and not target.startswith(("//", "/\\"))
+        and url_has_allowed_host_and_scheme(target, allowed_hosts=None)
+    ):
         return target
     return reverse("periods")
 
@@ -1591,6 +1628,8 @@ def login_context(request) -> dict:
     демо ровно тогда, когда он ему и нужен.
     """
     return {
+        # Кнопка Google — только при заданных реквизитах и не в демо (T241).
+        "google_enabled": getattr(settings, "GOOGLE_AUTH", None) is not None,
         "dev_users": auth.DEV_USERS.values() if auth.dev_login_is_enabled() else [],
         # Путь в демо — только на стенде и только тому, кого демо пустит
         # (T160). Не «включено ли демо»: со включённым ключом гость без ключа
@@ -1621,10 +1660,15 @@ def login_page(request):
             status=200,
         )
 
+    # Отказ Google приходит ключом в адресе (`?google=unknown`), а текст берётся
+    # из словаря: текст в адресе подменялся бы ссылкой.
+    from .google_login import REFUSALS
+
+    refusal = REFUSALS.get(request.GET.get("google", ""))
     return render(
         request,
         "web/login.html",
-        {"next": safe_next(request), **login_context(request)},
+        {"next": safe_next(request), "error": refusal or "", **login_context(request)},
     )
 
 

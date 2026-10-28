@@ -1,0 +1,25 @@
+{% load ui i18n %}{% comment %}
+Нижняя полоса телефона (T241, по DECIMUS D518): ниже 720px левой панели нет,
+и разделы достаются большим пальцем снизу. Не больше пяти пунктов: сверх
+пяти — первые четыре и «Ещё» со списком остальных (`web.navigation._tabs`).
+До T241 здесь была лента всех разделов с прокруткой вбок, и подписи на 390
+обрезались посередине слова (открыто в T224).
+
+Ненаписанных экранов в полосе нет: пять мест под пальцем — для рабочих
+разделов. «Ещё» — `<details>`: открывается без скрипта.
+{% endcomment %}{% translate "ждёт работы" as waiting_hint %}
+<nav class="tabbar" aria-label="{% translate "Основная навигация" %}">
+  {% for section in nav_tabs.main %}
+  <a class="tabbar__item{% if section.current %} is-current{% endif %}" href="{{ section.url }}"{% if section.current %} aria-current="{{ section.current }}"{% endif %} title="{{ section.title }}">{% icon section.icon %}<span>{{ section.title }}</span>{% if section.waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section.waiting }}</span>{% endif %}</a>
+  {% endfor %}
+  {% if nav_tabs.more %}
+  <details class="tabbar__more">
+    <summary class="tabbar__item{% if nav_tabs.more_current %} is-current{% endif %}">{% icon "dots" %}<span>{% translate "Ещё" %}</span></summary>
+    <div class="tabbar__sheet">
+      {% for section in nav_tabs.more %}
+      <a class="tabbar__row{% if section.current %} is-current{% endif %}" href="{{ section.url }}"{% if section.current %} aria-current="{{ section.current }}"{% endif %}>{% icon section.icon %}<span>{{ section.title }}</span>{% if section.waiting %}<span class="sidenav__count" title="{{ waiting_hint }}"><span class="sr-only">{{ waiting_hint }}: </span>{{ section.waiting }}</span>{% endif %}</a>
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+</nav>

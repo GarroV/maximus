@@ -1,0 +1,256 @@
+/* ── Каркас: левая панель, меню учётки, полосы телефона (T241, D098) ──────
+
+   Владелец 27.10.2026: «приведи внешний вид всех панелей, окно входа и лендинг
+   к единому виду. все как и в децимусе». Образец — DECIMUS (`decimus-web.css`,
+   разделы «КАРКАС» и «Меню учётки»); сама панель — компонент `.sidenav` ядра
+   линейки (`dodo-ds.css` из `GarroV/forma`). Здесь то, чего ядро не знает:
+   раскладка каркаса, блок учётки с меню, полоса телефона сверху и вкладки
+   снизу. Всё это в DECIMUS тоже живёт в продуктовом листе, а не в ядре, — и
+   кандидат на переезд в ядро, чтобы у трёх продуктов был один каркас (список —
+   в отчёте T241 и в `docs/furca/blocks/web.md`).
+
+   Отличие от DECIMUS одно и сознательное: меню учётки — `<details>`, а не
+   всплывающий слой на скрипте. Свой JavaScript в продукте живёт только в
+   островке табеля (контракт блока web), а `<details>` открывается без скрипта,
+   клавиатурой и читалкой. */
+
+/* Панель слева во всю высоту окна и не уезжает при прокрутке: ведомость на
+   шестьдесят строк прокручивается, а навигация остаётся под рукой. */
+.shell { display: flex; align-items: stretch; min-height: 100vh; min-height: 100dvh; }
+.shell > .sidenav { position: sticky; top: 0; height: 100vh; height: 100dvh; }
+.shell > main { flex: 1 1 auto; min-width: 0; }
+main:focus { outline: none; }
+
+/* «К содержанию» — первая остановка табуляции, видна только в фокусе. */
+.skip-link {
+  position: absolute; left: var(--space-5); top: var(--space-5); z-index: 80;
+  padding: var(--space-3) var(--space-6);
+  background: var(--surface); color: var(--accent);
+  border: 1px solid var(--accent-line); border-radius: var(--r-control);
+  box-shadow: var(--sh-pop);
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; text-decoration: none; }
+
+/* Видно только диктору. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ── Список разделов ───────────────────────────────────────────── */
+
+/* Пункты области — списком с подписью (`aria-labelledby`): диктор называет
+   область и число пунктов, входя в неё. */
+.sidenav__set { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+
+/* Подписи переносятся, а не режутся многоточием: «Инбокс докуме…» — загадка. */
+.sidenav__item, .sidenav__current {
+  height: auto; min-height: 34px; padding-top: var(--space-2); padding-bottom: var(--space-2);
+  white-space: normal; line-height: 1.25;
+}
+.sidenav__label { overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+
+/* Плотность: у администратора и бухгалтера все разделы влезают в 1440×900. */
+.sidenav__group { padding-top: var(--space-2); }
+.sidenav__list, .sidenav__set { gap: 0; }
+.sidenav__brand { padding-top: var(--space-5); padding-bottom: var(--space-5); }
+.sidenav__list { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+
+/* Тень у края списка, когда за краем ещё есть разделы (issue #268): приём
+   «тени прокрутки» без скрипта. */
+.sidenav__list {
+  background:
+    linear-gradient(var(--surface-2) 30%, transparent) center top / 100% 32px no-repeat local,
+    linear-gradient(transparent, var(--surface-2) 70%) center bottom / 100% 32px no-repeat local,
+    linear-gradient(color-mix(in srgb, var(--ink) 10%, transparent), transparent) center top / 100% 10px no-repeat scroll,
+    linear-gradient(transparent, color-mix(in srgb, var(--ink) 10%, transparent)) center bottom / 100% 10px no-repeat scroll;
+}
+
+/* Как в DECIMUS: вложенный экран раздела — пункт подсвечен, но это ссылка в
+   начало раздела (#306). */
+a.sidenav__current { cursor: pointer; }
+a.sidenav__current:hover { text-decoration: none; color: var(--accent); }
+
+/* Непостроенный раздел — тише остальных, но открывается (DECIMUS `is-wip`).
+   Ни точек, ни плашек: состояние стройки человеку за экраном не нужно (#309). */
+.sidenav__item.is-wip { color: var(--ink-empty); }
+.sidenav__item.is-wip:hover { color: var(--ink-3); }
+
+/* Раздел, который ведёт другая роль, в демо (T163): пунктир — это не раздел
+   человека, а предложение посмотреть продукт чужими глазами. */
+.sidenav .nav-offer {
+  display: flex; align-items: center; width: 100%; min-height: 34px;
+  padding: var(--space-2) var(--space-5); border: 1px dashed var(--line-strong);
+  border-radius: var(--r-control); color: var(--ink-3);
+  font-size: 13px; line-height: 1.25;
+}
+.sidenav .nav-offer:hover { color: var(--accent); border-color: var(--accent-line); text-decoration: none; }
+.sidenav .nav-offer:hover::after { content: " →"; opacity: .6; }
+
+/* ── Низ панели: тема, язык, настройки — одной строкой (DECIMUS D470) ── */
+
+.sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 0 var(--space-2); margin-bottom: 0; }
+.sidenav__prefs .sidenav__theme { margin: 0; padding: 0; }
+.sidenav__theme button, .langpill__item { font-family: var(--font-mono); font-size: 11px; }
+.sidenav__prefs .langpill__item { min-width: 28px; padding: 0 var(--space-2); }
+.sidenav__form { margin: 0; }
+.sidenav__dev { margin-left: auto; }
+
+.sidenav__gear { display: inline-grid; place-items: center; width: 30px; height: 30px; flex: none; border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface); color: var(--ink-3); transition: background var(--t-state) var(--ease), color var(--t-state) var(--ease); }
+.sidenav__gear:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
+.sidenav__gear.is-current { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.sidenav__gear svg { width: 15px; height: 15px; }
+
+/* ── Блок учётки и меню учётки (DECIMUS D468) ──────────────────── */
+
+.sidenav__user { position: relative; padding: var(--space-4) var(--space-5); }
+.acct { position: relative; flex: 1; min-width: 0; }
+.acct > summary { list-style: none; cursor: pointer; }
+.acct > summary::-webkit-details-marker { display: none; }
+.sidenav__me { display: flex; align-items: center; gap: var(--space-4); min-width: 0; padding: var(--space-2); border-radius: var(--r-control); color: inherit; }
+.sidenav__me:hover b { color: var(--accent); }
+.sidenav__me:focus-visible, .mbar__me:focus-visible { outline: var(--focus-outline); outline-offset: 2px; }
+.sidenav__who b { white-space: normal; overflow-wrap: anywhere; }
+.sidenav__chev { display: inline-flex; margin-left: auto; color: var(--ink-3); }
+.sidenav__chev svg { width: 14px; height: 14px; transform: rotate(-90deg); transition: transform var(--t-state) var(--ease); }
+.acct[open] .sidenav__chev svg { transform: rotate(90deg); }
+
+.avatar--lg { width: 36px; height: 36px; font-size: 12px; }
+
+/* Меню — `.popover` ядра. Над блоком учётки внизу панели (`--up`) или под
+   аватаром в полосе телефона (`--down`). */
+.acct-menu { position: absolute; z-index: 70; width: min(320px, calc(100vw - 2 * var(--space-4))); max-height: calc(100vh - var(--space-9)); overflow-y: auto; overscroll-behavior: contain; }
+.acct-menu--up { left: 0; bottom: calc(100% + var(--space-3)); }
+.acct-menu--down { right: 0; top: calc(100% + var(--space-3)); }
+.acct-menu__head { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-6); border-bottom: 1px solid var(--line); }
+.acct-menu__who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.acct-menu__who b { font-size: var(--fs-dense); line-height: 18px; font-weight: var(--w-semibold); color: var(--ink); overflow-wrap: anywhere; }
+.acct-menu__mail { font-size: 12px; line-height: 16px; color: var(--ink-2); overflow-wrap: anywhere; }
+.acct-menu__who small { font-family: var(--font-mono); font-size: 10px; line-height: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); overflow-wrap: anywhere; }
+.acct-menu__line { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 40px; margin: 0 var(--space-3); padding: 0 var(--space-5); }
+.acct-menu__label { font-size: var(--fs-dense); color: var(--ink-2); }
+.acct-menu__line .sidenav__theme { flex-direction: row; margin: 0; padding: 2px; }
+.acct-menu__line .langpill { flex-direction: row; }
+.acct-menu__row { justify-content: space-between; margin-top: var(--space-2); color: var(--ink); text-decoration: none; }
+.acct-menu__row:hover { text-decoration: none; color: var(--ink); }
+.acct-menu__row svg { width: 14px; height: 14px; flex: none; color: var(--ink-3); }
+.acct-menu__foot { margin-top: var(--space-3); padding: var(--space-3); }
+.acct-menu__logout { margin: 0; }
+.acct-menu__out { display: flex; align-items: center; gap: var(--space-4); width: 100%; height: 32px; padding: 0 var(--space-5); border: 0; border-radius: var(--r-control); background: transparent; font: inherit; font-size: var(--fs-dense); color: var(--ink); text-align: left; cursor: pointer; }
+.acct-menu__out:hover { background: var(--surface); }
+.acct-menu__out svg { width: 15px; height: 15px; color: var(--ink-3); }
+/* Регистры — словами, с точкой того же цвета, что метки в ведомости (D023). */
+.acct-menu__ledgers { display: flex; flex-wrap: wrap; gap: 0 var(--space-4); margin-top: var(--space-1); }
+.sidenav__reg { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--fs-micro); color: var(--ink-2); }
+.sidenav__reg::before { content: ""; flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.sidenav__reg.reg--official::before { background: var(--reg-official); }
+.sidenav__reg.reg--supplementary::before { background: var(--reg-supp); }
+.sidenav__reg.reg--internal::before { background: var(--reg-internal); }
+
+/* ── Шапка до входа: марка, язык, тема и «Войти» (DECIMUS `.topbar`) ── */
+
+.topbar { position: sticky; top: 0; z-index: 40; background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.topbar__inner { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3) var(--space-5); padding: var(--space-3) var(--space-7); }
+.topbar__brand { display: inline-flex; align-items: center; gap: var(--space-4); color: var(--ink); }
+.topbar__brand:hover { color: var(--ink); text-decoration: none; }
+.topbar__logo { width: 24px; height: 24px; flex: none; border-radius: var(--r-control); font-size: 13px; }
+.topbar__name { font-weight: var(--w-bold); letter-spacing: .04em; }
+.topbar__mark { font-size: var(--fs-meta); color: var(--ink-3); }
+.topbar__spacer { flex: 1; min-width: .5rem; }
+.topbar .sidenav__prefs { padding: 0; gap: var(--space-4); }
+.topbar .sidenav__theme { flex-direction: row; margin: 0; }
+
+/* Планшет, 720–1099. Ядро сворачивает здесь панель до значков; сверка T222
+   это сняла — роль, партнёр и границы групп пропадали. Панель остаётся полной. */
+@media (min-width: 720px) and (max-width: 1099px) {
+  .sidenav { width: 216px; }
+  .sidenav__brand { justify-content: flex-start; padding-left: var(--space-7); padding-right: var(--space-7); }
+  .sidenav__name, .sidenav__who { display: flex; }
+  .sidenav__label, .sidenav__group { display: block; }
+  .sidenav__item, .sidenav__current { justify-content: flex-start; padding-left: var(--space-5); padding-right: var(--space-5); }
+  .sidenav__count { position: static; font-size: 11px; }
+  .sidenav__theme { flex-direction: row; }
+  .sidenav__prefs { flex-direction: row; padding: 0 var(--space-2); }
+  .sidenav__lang { flex-direction: row; }
+  .sidenav__lang .langpill { flex-direction: row; }
+  .sidenav__user { justify-content: flex-start; padding-left: var(--space-5); }
+}
+
+/* ── Телефон, до 720: полоса сверху и вкладки снизу (DECIMUS `.mbar`, `.tabbar`) ── */
+
+.mbar, .tabbar { display: none; }
+
+@media (max-width: 719px) {
+  .shell { display: block; }
+  .shell > .sidenav { display: none; }
+  main { padding-bottom: calc(var(--space-12) + var(--tap-min)); }
+
+  .mbar {
+    position: sticky; top: 0; z-index: 40;
+    display: flex; align-items: center; gap: var(--space-4);
+    padding: var(--space-3) var(--space-6);
+    padding-top: calc(var(--space-3) + env(safe-area-inset-top, 0px));
+    background: var(--surface-2); border-bottom: 1px solid var(--line);
+  }
+  .mbar__brand { display: inline-flex; align-items: center; gap: var(--space-4); color: var(--ink); }
+  .mbar__brand:hover { color: var(--ink); text-decoration: none; }
+  .mbar .acct { flex: none; }
+  .mbar__me { display: inline-flex; align-items: center; min-width: var(--tap-min); min-height: var(--tap-min); justify-content: center; }
+  .acct-menu--down { position: fixed; left: var(--space-4); right: var(--space-4); top: 60px; width: auto; max-height: calc(100vh - 60px - var(--space-9)); }
+
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: flex; gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+    background: var(--surface-2); border-top: 1px solid var(--line);
+  }
+  /* Не больше пяти пунктов (DECIMUS D518): сверх — «Ещё» со списком, поэтому
+     прокрутки у полосы нет, а подписи не режутся посередине слова. */
+  .tabbar__item {
+    position: relative; flex: 1 1 0; min-width: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    min-height: var(--tap-min); padding: var(--space-2) var(--space-1);
+    border-radius: var(--r-control);
+    font-size: var(--fs-micro); font-weight: var(--w-medium); color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .tabbar__item svg { width: 18px; height: 18px; flex: none; }
+  /* Подпись вкладки — до двух строк: «Наличные расходы» обрезанной не читается. */
+  .tabbar__item > span { max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; white-space: normal; text-align: center; line-height: 1.15; }
+  .tabbar__item:hover { text-decoration: none; color: var(--ink); }
+  .tabbar__item.is-current { background: var(--accent-soft); color: var(--accent); }
+  .tabbar__item .sidenav__count, .tabbar__row .sidenav__count { position: absolute; top: 2px; right: 8px; }
+  .tabbar__more { position: static; flex: 1 1 0; min-width: 0; display: flex; }
+  .tabbar__more > summary { list-style: none; cursor: pointer; }
+  .tabbar__more > summary::-webkit-details-marker { display: none; }
+  .tabbar__more[open] > summary { color: var(--ink); }
+  .tabbar__sheet {
+    position: absolute; right: var(--space-3); bottom: calc(100% + var(--space-2));
+    min-width: 240px; max-height: 70vh; overflow-y: auto;
+    display: flex; flex-direction: column; padding: var(--space-2);
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-block); box-shadow: var(--sh-pop);
+  }
+  .tabbar__row {
+    position: relative; display: flex; align-items: center; gap: var(--space-3);
+    min-height: var(--tap-min); padding: 0 var(--space-3);
+    border-radius: var(--r-control); color: var(--ink-2); font-weight: var(--w-medium);
+  }
+  .tabbar__row svg { width: 18px; height: 18px; flex: none; }
+  .tabbar__row:hover { text-decoration: none; color: var(--ink); background: var(--surface-2); }
+  .tabbar__row.is-current { background: var(--accent-soft); color: var(--accent); }
+  .tabbar__row .sidenav__count { position: static; margin-left: auto; }
+
+  .topbar__inner { padding: var(--space-3) var(--space-6); }
+  .topbar .sidenav__theme button { width: var(--tap-min); height: var(--tap-min); }
+  .topbar .langpill__item { min-width: var(--tap-min); height: var(--tap-min); }
+}
+
+@media print {
+  .mbar, .tabbar, .topbar { display: none; }
+}
+
+/* Гайд в шапке до входа — тихой ссылкой; на самом гайде — подписью. */
+.topbar__link { font-size: var(--fs-dense); color: var(--ink-2); }
+.topbar__link[aria-current] { color: var(--ink); font-weight: var(--w-semibold); }

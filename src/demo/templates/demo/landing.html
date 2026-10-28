@@ -1,95 +1,70 @@
-{% comment %}
+{% extends "web/base.html" %}{% load static ui %}{% comment %}
 Титульная страница демо. Единственный экран блока со своими словами.
 
    По-английски целиком и без вариантов: демо показывают заказчику и кладут в
    портфолио, и язык здесь не зависит от языка продукта (правило владельца).
 
-   Страница намеренно не наследует шаблон продукта: посетитель ещё не вошёл, и
-   шапка с «кто вы» и ссылкой на выход на этом экране бессмысленна. Стили
-   встроены — внешних файлов и CDN в этом продукте нет нигде (D017).
+   Вид — как у посадочной страницы продукта и DECIMUS (T241, D098): стопка
+   листов, стили `web/landing.css`. Каркас продукта здесь не рисуется вовсе
+   (блок `body` целиком свой): посетитель ещё не вошёл, и панель с «кто вы»
+   на этом экране бессмысленна. Внешних файлов и CDN в продукте нет (D017).
 {% endcomment %}
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}live demo{% endblock %}
+{% block head %}
   {# Демо не должно попадать в поисковую выдачу: это стенд, а не продукт. #}
   <meta name="robots" content="noindex, nofollow">
-  <title>MAXIMUS — live demo</title>
-  {% load static %}
-  {% include "web/components/head_icons.html" %}
-  <link rel="stylesheet" href="{% static 'web/tokens.css' %}">
-  <link rel="stylesheet" href="{% static 'web/app.css' %}">
-  <style>
-    /* Только раскладка этой страницы. Цвета, шрифты, отбивки и радиусы —
-       из дизайн-системы продукта: до переноса здесь жила ВТОРАЯ палитра
-       (красный акцент, системный шрифт, свои радиусы), и первое, что видел
-       гость демо, было сделано не по эталону (issue #153). */
-    .wrap { max-width: 52rem; margin: 0 auto; padding: var(--space-10) var(--gutter); }
-    header p.kicker {
-      margin: 0 0 var(--space-4);
-      text-transform: uppercase; letter-spacing: var(--tracking-micro);
-      font-size: var(--fs-micro); color: var(--accent); font-weight: var(--w-bold);
-    }
-    h1 {
-      margin: 0 0 var(--space-6);
-      font-size: var(--fs-display); line-height: var(--lh-display);
-      font-weight: var(--w-semibold); letter-spacing: -.015em;
-    }
-    .lede { margin: 0 0 var(--space-10); font-size: var(--fs-lead); color: var(--ink-2); max-width: 42rem; }
-    .card {
-      background: var(--surface); border: 1px solid var(--line-strong);
-      border-radius: var(--r-block); padding: var(--space-9);
-      margin-bottom: var(--space-7); box-shadow: var(--sh-xs);
-    }
-    .card h2 { margin: 0 0 var(--space-6); font-size: var(--fs-title); line-height: var(--lh-title); font-weight: var(--w-semibold); }
-    .note { color: var(--ink-2); font-size: var(--fs-body); }
-    /* Главное действие страницы — кнопка продукта, а не своя. */
-    .go { height: 40px; padding: 0 var(--space-9); font-size: var(--fs-lead); }
-    .roles { list-style: none; margin: var(--space-7) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-4); }
-    .roles li { font-size: var(--fs-body); color: var(--ink-2); }
-    .roles a { font-weight: var(--w-semibold); }
-    .tour { margin: 0; padding-left: var(--space-9); display: flex; flex-direction: column; gap: var(--space-4); color: var(--ink-2); }
-    .tour strong { color: var(--ink); }
-    footer { margin-top: var(--space-10); color: var(--ink-3); font-size: var(--fs-meta); }
-  </style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <p class="kicker">Dodo Brands · internal product</p>
-    <h1>P&amp;L service — live demo</h1>
-    <p class="lede">
-      A payroll and P&amp;L service for Dodo partners. This demo is filled with a
-      complete network: two legal entities, three units, thirty people, three
-      accounting ledgers and three months of payroll — two of them already
-      closed. Everyone here is invented; no partner data ever reaches this stand.
-    </p>
+  <link rel="stylesheet" href="{% static 'web/landing.css' %}">
+{% endblock %}
+{% block body %}
+<main id="content" class="page--landing" tabindex="-1">
+<div class="lp">
+  <header class="lp-bar">
+    <span class="lp-bar__brand">{% brand_mark "lp-bar__logo sidenav__logo" 28 %}<span>MAXIMUS</span></span>
+    <div class="lp-bar__acts">
+      <a class="lp-cta lp-cta--sm" href="{% url 'demo-enter-as' default_role %}">Enter the demo</a>
+    </div>
   </header>
 
-  <div class="card">
-    <h2>Open the demo</h2>
-    <p class="note">
-      One click, no sign-up. You start as the operations director, who sees every
-      unit and all three ledgers.
-    </p>
-    <p style="margin:1rem 0 0">
-      <a class="btn primary go" href="{% url 'demo-enter-as' default_role %}">Enter the demo →</a>
-    </p>
-
-    <ul class="roles">
+  <section class="lp-sheet lp-sheet--paper lp-hero" aria-labelledby="lp-h1">
+    <div class="lp-cols lp-cols--hero">
+      <div class="lp-copy">
+        <h1 class="lp-display" id="lp-h1">P&amp;L service — live demo</h1>
+        <p class="lp-sub">Dodo Brands · internal product</p>
+        <p class="lp-body">
+          A payroll and P&amp;L service for Dodo partners. This demo is filled with a
+          complete network: two legal entities, three units, thirty people, three
+          accounting ledgers and three months of payroll — two of them already
+          closed. Everyone here is invented; no partner data ever reaches this stand.
+        </p>
+        <div class="lp-cta-row">
+          <a class="lp-cta" href="{% url 'demo-enter-as' default_role %}">Enter the demo →</a>
+          <p class="lp-note">One click, no sign-up. You start as the operations director, who sees every unit and all three ledgers.</p>
+        </div>
+      </div>
+      <div class="lp-fig lp-card">
+        <p class="lp-card__h">Or enter as</p>
+        <ul class="roles lp-roles">
       {% for role in roles %}
         {% if role.code != default_role %}
-          <li>
+            <li>
             <a href="{% url 'demo-enter-as' role.code %}">Enter as {{ role.title }}</a>
             <span>
               — sees {{ role.ledgers|join:", " }}
               {% if role.units|length == 1 %}· one unit only ({{ role.units.0 }}){% elif role.units %}· several units ({{ role.units|join:", " }}){% else %}· all units{% endif %}
             </span>
-          </li>
+            </li>
         {% endif %}
       {% endfor %}
-    </ul>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-sheet lp-sheet--beige" aria-labelledby="lp-roles">
+    <p class="lp-tab" style="--lp-tab-i: 0"><span class="lp-tab__n">1</span>Roles</p>
+    <div class="lp-cols">
+      <div class="lp-copy">
+        <h2 class="lp-h2" id="lp-roles">Switch roles — the numbers change</h2>
     {% comment %}
     Роль, названная в этом абзаце, обязана быть той, у которой набор регистров
     действительно неполный (T117). До D036 здесь стоял бухгалтер — «an
@@ -103,16 +78,22 @@
     развалилось бы. Согласие с кодом держит `tests/test_demo_landing_claims.py`:
     он краснеет, если проза назовёт ограниченной роль, у которой все регистры.
     {% endcomment %}
-    <p class="note" style="margin-bottom:0">
-      Switching roles is the point: the unit manager sees one unit and two of the
-      three ledgers, and the numbers on screen are recomputed for what that role
-      may see — the hidden part cannot be recovered by subtracting.
-    </p>
-  </div>
+        <p class="lp-body">
+          Switching roles is the point: the unit manager sees one unit and two of the
+          three ledgers, and the numbers on screen are recomputed for what that role
+          may see — the hidden part cannot be recovered by subtracting.
+        </p>
+      </div>
+    </div>
+  </section>
 
-  <div class="card">
-    <h2>What to look at</h2>
-    <ol class="tour">
+  <section class="lp-sheet lp-sheet--paper" aria-labelledby="lp-tour">
+    <p class="lp-tab" style="--lp-tab-i: 1"><span class="lp-tab__n">2</span>What to look at</p>
+    <div class="lp-copy lp-copy--wide">
+      <h2 class="lp-h2" id="lp-tour">What to look at</h2>
+    </div>
+    <div class="lp-fig lp-fig--full lp-card">
+      <ol class="lp-lines lp-tour">
       <li><strong>Periods</strong> — three months: June and July are approved, August is still open.</li>
       <li><strong>Payroll sheet</strong> — one row per person, one column per component, with a ledger filter.</li>
       <li><strong>Trace</strong> — open any amount and see which rules produced it, with which inputs and which version of the rate.</li>
@@ -124,28 +105,38 @@
       <li><strong>Unallocated</strong> — one network-wide amount is still waiting to be split across the units, and the product says so instead of hiding it.</li>
       <li><strong>Exports</strong> — payout sheet, P&amp;L lines (payroll, cash expenses and supplier invoices side by side) and the accountant's own layout, all as xlsx.</li>
     </ol>
-  </div>
+    </div>
+  </section>
 
-  <div class="card">
-    <h2>Trying the reconciliation screen</h2>
-    <p class="note">
-      Reconciliation needs a file: it compares the service against the spreadsheet
-      the accountant keeps by hand. Download the demo spreadsheet for
-      {{ reconcile_period|date:"F Y" }} and upload it on the reconciliation screen
-      of that period. It is generated from this demo's own payroll and carries
-      three deliberate discrepancies — one real, one rounding, and one person who
-      left but stayed in the file.
-    </p>
-    <p style="margin-bottom:0">
-      <a href="{% url 'demo-accountant-table' %}">Download accountant's spreadsheet ({{ reconcile_period|date:"F Y" }}) →</a>
-    </p>
-  </div>
+  <section class="lp-sheet lp-sheet--beige" aria-labelledby="lp-recon">
+    <p class="lp-tab" style="--lp-tab-i: 2"><span class="lp-tab__n">3</span>Reconciliation</p>
+    <div class="lp-cols">
+      <div class="lp-copy">
+        <h2 class="lp-h2" id="lp-recon">Trying the reconciliation screen</h2>
+        <p class="lp-body">
+          Reconciliation needs a file: it compares the service against the spreadsheet
+          the accountant keeps by hand. Download the demo spreadsheet for
+          {{ reconcile_period|date:"F Y" }} and upload it on the reconciliation screen
+          of that period. It is generated from this demo's own payroll and carries
+          three deliberate discrepancies — one real, one rounding, and one person who
+          left but stayed in the file.
+        </p>
+        <p class="lp-body"><a class="lp-link" href="{% url 'demo-accountant-table' %}">Download accountant's spreadsheet ({{ reconcile_period|date:"F Y" }}) →</a></p>
+      </div>
+    </div>
+  </section>
 
-  <p class="note">
-    The stand resets itself on a schedule: whatever you change here goes away, and
-    the demo comes back exactly as you found it. It runs on its own database — no
-    write made here can reach live data.
-  </p>
+  <section class="lp-sheet lp-sheet--purple lp-final" aria-labelledby="lp-final">
+    <div class="lp-copy lp-copy--final">
+      <h2 class="lp-display lp-display--md" id="lp-final">Change anything</h2>
+      <p class="lp-body">
+        The stand resets itself on a schedule: whatever you change here goes away, and
+        the demo comes back exactly as you found it. It runs on its own database — no
+        write made here can reach live data.
+      </p>
+      <div class="lp-cta-row"><a class="lp-cta" href="{% url 'demo-enter-as' default_role %}">Enter the demo →</a></div>
+    </div>
+  </section>
 </div>
-</body>
-</html>
+</main>
+{% endblock %}

@@ -28,7 +28,7 @@ from django.urls import reverse
 
 from . import stages
 
-__all__ = ["closing", "payroll_sheet", "planned", "pnl", "reconcile"]
+__all__ = ["closing", "payroll_sheet", "planned", "pnl", "reconcile", "timesheet_current"]
 
 
 @login_required
@@ -63,17 +63,21 @@ def _inside_latest(route: str, anchor: str = ""):
 
 @login_required
 def payroll_sheet(request):
-    """«Ведомость» из шапки — расчёт последнего месяца."""
-    return redirect(_inside_latest("period"))
+    """«Ведомость» из шапки — ведомость по сотрудникам последнего месяца.
+
+    До T241 вела на страницу месяца, туда же, куда «Закрытие месяца», и два
+    пункта меню открывали одно и то же (#306): человек нажимал «Ведомость» и
+    видел степпер месяца. Ведомость — свой экран (модуль 9 эталона).
+    """
+    return redirect(_inside_latest("period-sheet"))
 
 
 @login_required
 def closing(request):
     """«Закрытие месяца» из шапки.
 
-    Ведёт на тот же экран периода, что и ведомость, но с якорем на блок
-    готовности: у нас эти два модуля эталона (4 и 9) живут одной страницей, и
-    без якоря два пункта меню молча вели бы в одно и то же место.
+    Ведёт на страницу месяца с якорем на блок готовности: закрытие (модуль 4
+    эталона) живёт на ней. Ведомость — отдельный экран (`payroll_sheet`).
     """
     return redirect(_inside_latest("period", "#closing"))
 
@@ -88,3 +92,28 @@ def pnl(request):
 def reconcile(request):
     """«Сверка с таблицей» из шапки — сверка последнего месяца."""
     return redirect(_inside_latest("period-reconcile"))
+
+
+def _working_period():
+    """Рабочий месяц: последний открытый, а если открытых нет — последний."""
+    from core.models import Period
+
+    return (
+        Period.objects.filter(status="open").order_by("-period").first()
+        or _latest_period()
+    )
+
+
+@login_required
+def timesheet_current(request):
+    """«Табель» управляющего точки — сразу сетка часов рабочего месяца (#315).
+
+    Дело управляющего — часы своей точки, а не выбор месяца из списка: список
+    месяцев ведёт на страницу расчёта, где ему нечего делать, кроме как читать
+    отказы по правам. Точку срезает база (D014), поэтому адрес у всех один.
+    Месяцев нет — список месяцев, где сказано, кто их заводит.
+    """
+    period = _working_period()
+    if period is None:
+        return redirect("periods")
+    return redirect(reverse("timesheets", args=[period.id]))

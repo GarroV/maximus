@@ -178,9 +178,13 @@ def test_the_current_page_is_marked_inside_its_area(client, web_env):
     """
     login_as(client, "director")
     page = body(client.get("/expenses/"))
+    # Считается в левой панели: нижняя полоса телефона повторяет пункты и
+    # пометку, но на широком экране её нет вовсе (`display: none`, T241).
+    nav = page[page.index('<nav class="sidenav"'):]
+    nav = nav[:nav.index("</nav>")]
 
-    assert page.count('aria-current="page"') == 1, (
-        "пометка текущей страницы удвоилась: " + str(page.count('aria-current="page"'))
+    assert nav.count('aria-current="page"') == 1, (
+        "пометка текущей страницы удвоилась: " + str(nav.count('aria-current="page"'))
     )
     assert 'aria-current="page"' in areas_of(page)["Сбор данных"]
 

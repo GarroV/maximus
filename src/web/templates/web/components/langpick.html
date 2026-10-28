@@ -1,0 +1,10 @@
+{% load i18n %}{% comment %}
+Только язык, без темы — для страниц, которые всегда светлые (лендинг). Та же
+разметка, что у языка в `prefs.html`: форма с кнопками, выбранный — кнопка без
+отправки. При закреплённом языке (демо, `UI_LANGUAGE`) списка нет — и формы нет.
+{% endcomment %}{% if languages %}<form class="sidenav__lang" method="post" action="{% url 'set_language' %}">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <div class="langpill" role="group" aria-label="{% translate "Язык" %}">
+  {% for language in languages %}<button type="{% if language.current %}button{% else %}submit{% endif %}" class="langpill__item" name="language" value="{{ language.code }}" aria-pressed="{% if language.current %}true{% else %}false{% endif %}" lang="{{ language.code }}" title="{{ language.title }}">{{ language.short }}</button>{% endfor %}
+  </div>
+</form>{% endif %}

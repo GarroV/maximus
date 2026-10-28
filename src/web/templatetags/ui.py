@@ -333,3 +333,27 @@ def is_role_name(name, role_title) -> bool:
             if name in {str(title) for title in ROLE_TITLES.values()}:
                 return True
     return False
+
+
+# Знак MAXIMUS (T241, D098; #247). Файл — копия из `GarroV/forma`
+# (`dodo/brand/maximus/`), значки вкладки подключает `components/head_icons.html`.
+@register.simple_tag
+def brand_mark(css_class: str = "sidenav__logo", size: int = 28):
+    """Знак продукта картинкой нужного размера."""
+    from django.templatetags.static import static
+
+    return format_html(
+        '<img class="{}" src="{}" alt="" width="{}" height="{}">',
+        css_class, static("web/mark-small.svg"), size, size,
+    )
+
+
+@register.filter("initials")
+def initials(name) -> str:
+    """Две буквы для аватара, как в DECIMUS: первые буквы двух первых слов."""
+    words = str(name or "").split()
+    if not words:
+        return "?"
+    if len(words) == 1:
+        return words[0][:2].upper()
+    return (words[0][0] + words[1][0]).upper()
