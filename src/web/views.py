@@ -449,6 +449,8 @@ def _manager_task(period, who) -> dict:
     from timesheets.closing import unit_states
     from timesheets.grid import visible_rows
 
+    # Срез по точкам управляющего — пока в приложении, а не в политиках базы
+    # (T022, см. `visible_rows`): та же оговорка, что у табеля.
     rows = list(visible_rows(
         period.tenant_id, period.period, who.unit_ids if who else None,
     ))
