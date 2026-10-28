@@ -107,6 +107,7 @@ FastAPI-Users (в maintenance mode), Handsontable (платная лицензи
 | `stands` | стенды и доставка формы ролей до поднятой базы | [blocks/stands.md](blocks/stands.md) |
 | `hygiene` | техдолг и хозяйство стройки | [blocks/hygiene.md](blocks/hygiene.md) |
 | `polish` | накопившиеся дефекты интерфейса, найденные другими блоками | [blocks/polish.md](blocks/polish.md) |
+| `directory` | справочники, правила и роли до эталона: названия вместо сырых кодов, раскладка экранов | журнал заводит сам блок (`blocks/directory.md`) |
 
 
 Журналы сверок со спекой (`converge6`, `converge7`, `converge8`) лежат отдельно —

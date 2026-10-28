@@ -352,11 +352,11 @@ def test_manager_still_edits_a_cell(client, web_env):
 # серверным проверкам: они остаются на месте, и тесты выше их и стерегут.
 
 
-@pytest.mark.parametrize("code", ["admin", "manager"])
 def test_a_role_without_the_right_does_not_see_the_calculate_button(
-    client, admin_without_month_rights, code
+    client, admin_without_month_rights
 ):
-    login_as(client, code)
+    # Управляющему вместо отказов — его дело (#315): `test_period_pages.py`.
+    login_as(client, "admin")
     html = body(client.get(period_url(client)))
 
     assert "Посчитать период" not in html, "кнопка предлагает действие, которое даст 403"

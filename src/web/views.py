@@ -430,7 +430,7 @@ def _manager_task(period, who) -> dict:
     from timesheets.grid import visible_rows
 
     rows = list(visible_rows(
-        period.tenant_id, period.period, unit_ids=who.unit_ids if who else None,
+        period.tenant_id, period.period, who.unit_ids if who else None,
     ))
     units = unit_states(period.tenant_id, period.period, rows)
     return {
@@ -573,10 +573,12 @@ def period_page(
 
     readiness_state = _readiness_of(period)
     # Роль без прав на расчёт, утверждение и откат (управляющий точки, #315):
-    # три абзаца отказов ей ничего не дают, её дело — часы своей точки.
+    # три абзаца отказов ей ничего не дают, её дело — часы своей точки. Кто ведёт
+    # роли, карточку не получает: ему отказ говорит, где выдать право (T172).
     manager_task = (
         _manager_task(period, who)
         if calculate_denied
+        and not (who and permissions.ROLES_MANAGE in (who.permissions or []))
         and permissions.explain(who, permissions.PERIOD_APPROVE)
         and permissions.explain(who, permissions.PERIOD_REOPEN)
         else None

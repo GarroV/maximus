@@ -19,7 +19,7 @@
 Мета-строка (модуль 9 эталона): сколько людей и регистров в ведомости и когда
 она посчитана. Человек видит, что смотрит на свежий расчёт, а не на старый.
 {% endcomment %}
-<p class="sub sheet-meta">{% blocktranslate with employees=sheet.employees registers=registers_count %}Сотрудников: {{ employees }} · регистров: {{ registers }}{% endblocktranslate %}{% if calculated_at %} · {% blocktranslate with at=calculated_at|date:"d.m.Y H:i" %}расчёт от {{ at }}{% endblocktranslate %}{% endif %}</p>
+<p class="sub sheet-meta">{% blocktranslate with employees=sheet.employees registers=registers_count %}Сотрудников: {{ employees }} · регистров: {{ registers }}{% endblocktranslate %}{% if calculated_at %} · {% blocktranslate with at=calculated_at|date:"SHORT_DATETIME_FORMAT" %}расчёт от {{ at }}{% endblocktranslate %}{% endif %}</p>
 {% comment %}
 Одна таблица на все регистры с меткой в строке (D023). Строка — пара
 «сотрудник × регистр»: регистр — свойство компонента выплаты, и у одного
