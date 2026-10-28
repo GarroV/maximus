@@ -96,7 +96,10 @@ def test_the_administrator_grants_the_right_to_calculate(client, web_env):
 
     login_as(client, "manager")
     before = body(client.get(period_url(client)))
-    assert "Расчёт периода не входит в права вашей роли" in before
+    # Без прав на месяц вместо кнопки — карточка с делом точки (#315); отказ
+    # теми же словами живёт на самом действии, его стережёт тест ниже.
+    assert "Посчитать период" not in before
+    assert "Открыть табель" in before
 
     login_as(client, "admin")
     saved = client.post(
@@ -111,7 +114,7 @@ def test_the_administrator_grants_the_right_to_calculate(client, web_env):
 
     login_as(client, "manager")
     after = body(client.get(period_url(client)))
-    assert "Расчёт периода не входит в права вашей роли" not in after
+    assert "Посчитать период" in after
 
     # Вернуть как было: набор прав управляющего — часть доводов D031 и D033, и
     # оставить его расширенным значило бы менять условия соседних проверок.
@@ -211,7 +214,9 @@ def test_the_refusal_shows_the_way_out_to_the_one_who_leads_roles(
 def test_the_refusal_stays_plain_for_everyone_else(client, web_env):
     """А тому, кто роли не ведёт, обещать нечего: он права себе не выдаст."""
     login_as(client, "manager")
-    refusal = body(client.get(period_url(client)))
+    # Управляющему страница месяца показывает его дело, а не отказ (#315), —
+    # слова отказа он получает на самом действии.
+    refusal = body(client.post(period_url(client) + "calculate/"))
     assert "Попросите того, у кого это право есть" in refusal
     assert "Роли и права" not in refusal
 

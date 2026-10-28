@@ -261,10 +261,12 @@ def test_the_director_approves_from_the_page(client, clean_payruns):
     assert "Утверждён" in body(response)
 
 
-def test_a_role_without_the_right_sees_no_button_but_an_explanation(client, clean_payruns):
+def test_a_role_without_the_right_sees_no_button_but_an_explanation(
+    client, clean_payruns, admin_without_month_rights
+):
     """Кнопка не пропадает молча: на её месте тот же текст, которым ответит отказ."""
     calculated_period(client, clean_payruns)
-    login_as(client, "manager")
+    login_as(client, "admin")
 
     page = body(client.get(period_url(client)))
     assert "approve/" not in page
@@ -324,12 +326,15 @@ def test_a_reopened_period_is_not_approved_again_without_a_recalculation(client,
     assert payrun_status(clean_payruns) == "reopened"
 
 
-def test_the_reopen_button_belongs_to_the_reopen_right(client, clean_payruns):
+def test_the_reopen_button_belongs_to_the_reopen_right(
+    client, clean_payruns, admin_without_month_rights
+):
     """Кнопка отката — у права отката, и мимо экрана он тоже закрыт.
 
-    Роль — управляющий точки: право `period.reopen` проверяется отдельно от
-    состояния периода, и утверждённый период у него на экране такой же, как у
-    всех. Раньше здесь стоял бухгалтер, у которого было право утверждать и не
+    Роль — администратор с суженным набором: право `period.reopen`
+    проверяется отдельно от состояния периода, и утверждённый период у него на
+    экране такой же, как у всех. Управляющему страница месяца вместо отказов
+    показывает его дело (#315), поэтому проверка идёт не на нём. Раньше здесь стоял бухгалтер, у которого было право утверждать и не
     было права откатывать; с T115 (D036) откат у него есть. Пара «утверждать
     умею, откатывать нет» никуда не делась — она проверяется на роли фикстуры,
     где условие создаётся явно (`test_reopening_requires_its_own_right`).
@@ -338,7 +343,7 @@ def test_the_reopen_button_belongs_to_the_reopen_right(client, clean_payruns):
     client.post(url + "approve/", follow=True)
     assert payrun_status(clean_payruns) == "approved"
 
-    login_as(client, "manager")
+    login_as(client, "admin")
     page = body(client.get(url))
     assert "reopen/" not in page
     assert "Откат периода" in page
