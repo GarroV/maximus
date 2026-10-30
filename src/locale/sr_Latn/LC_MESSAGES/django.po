@@ -6292,15 +6292,6 @@ msgstr "Još nema nijednog prostora."
 msgid "Завести пространство"
 msgstr "Otvori prostor"
 
-#: web/templates/web/platform/index.html:56
-msgid ""
-"Вместе с пространством заводятся его роли и первый человек — иначе войти в "
-"него будет некому. Точки, юрлица и статьи расходов партнёр заводит сам."
-msgstr ""
-"Prostor se otvara zajedno sa svojim ulogama i prvom osobom — inače ne bi "
-"imao ko da se prijavi. Objekte, pravna lica i stavke troškova partner unosi "
-"sam."
-
 #: web/templates/web/platform/index.html:62
 msgid "Валюта отчёта"
 msgstr "Valuta izveštaja"

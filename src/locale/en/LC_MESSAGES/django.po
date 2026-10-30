@@ -6427,15 +6427,6 @@ msgstr "No spaces yet."
 msgid "Завести пространство"
 msgstr "Create a space"
 
-#: web/templates/web/platform/index.html:56
-msgid ""
-"Вместе с пространством заводятся его роли и первый человек — иначе войти в "
-"него будет некому. Точки, юрлица и статьи расходов партнёр заводит сам."
-msgstr ""
-"A space is created together with its roles and its first person — otherwise "
-"there would be nobody to sign in. Units, legal entities and expense items "
-"the partner sets up themselves."
-
 #: web/templates/web/platform/index.html:62
 msgid "Валюта отчёта"
 msgstr "Reporting currency"
