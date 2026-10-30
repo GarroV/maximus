@@ -140,3 +140,21 @@ def test_several_roles_are_one_person_and_last_admin_cannot_expire(client):
                                 "until": "2027-12-31", "reason": "Expiry check"})
     assert response.status_code == 400
     assert Membership.objects.get(tenant=space, user_id=user.pk, role=admin).expires_at is None
+
+
+@pytest.mark.parametrize("action", ["disable", "password", "profile"])
+def test_another_platform_administrator_is_protected(client, action):
+    from core.models import PlatformAdmin, User
+    login_as(client, "admin")
+    peer = User.objects.create_user(username="console-peer", password="only-for-test")
+    PlatformAdmin.objects.create(user=peer, note="Second test operator")
+    old_password, old_email = peer.password, peer.email
+    response = client.post(f"/platform/users/{peer.pk}/", {
+        "action": action, "reason": "Peer protection check",
+        "email": "changed@example.org", "full_name": "Changed peer",
+    })
+    assert response.status_code == 400
+    peer.refresh_from_db()
+    assert peer.is_active
+    assert peer.password == old_password
+    assert peer.email == old_email

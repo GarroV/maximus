@@ -11840,3 +11840,7 @@ msgid ""
 "Вместе с пространством заводятся роли и первый пользователь. Затем можно "
 "добавить организации и остальных людей."
 msgstr "Uloge i prvi korisnik prave se zajedno sa radnim prostorom. Zatim možete dodati organizacije i druge ljude."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Данные другого администратора платформы меняются им самим."
+msgstr "Drugi administratori platforme sami menjaju podatke svog naloga."

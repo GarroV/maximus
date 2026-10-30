@@ -11995,3 +11995,7 @@ msgid ""
 "Вместе с пространством заводятся роли и первый пользователь. Затем можно "
 "добавить организации и остальных людей."
 msgstr "Roles and the first user are created with the workspace. You can then add organizations and other people."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Данные другого администратора платформы меняются им самим."
+msgstr "Other platform administrators manage their own account details."

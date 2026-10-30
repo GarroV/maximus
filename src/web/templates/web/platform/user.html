@@ -7,10 +7,10 @@
 <h2>{% translate 'Назначения доступа' %}</h2>
 {% scroll %}<table class="stack"><thead><tr><th>{% translate 'Пространство' %}</th><th>{% translate 'Роль' %}</th><th>{% translate 'Срок' %}</th></tr></thead><tbody>{% for member in memberships %}<tr><td data-label="{% translate 'Пространство' %}"><a href="{% url 'platform-space' tenant_id=member.tenant_id %}">{{ member.tenant.title }}</a></td><td data-label="{% translate 'Роль' %}">{{ member.role.title }}</td><td data-label="{% translate 'Срок' %}">{{ member.expires_at|date:'SHORT_DATE_FORMAT'|default:'—' }}</td></tr>{% empty %}<tr><td colspan="3">{% translate 'Назначений нет.' %}</td></tr>{% endfor %}</tbody></table>{% endscroll %}
 <h2>{% translate 'Учётная запись' %}</h2>
-<form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="profile">
+{% if can_edit_profile %}<form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="profile">
 <label class="field">{% translate 'Имя' %}<input name="full_name" value="{{ person.full_name }}" required></label>
 <label class="field">{% translate 'Почта' %}<input type="email" name="email" value="{{ person.email }}" required></label>
-<label class="field">{% translate 'Причина' %}<input name="reason" required></label><button class="primary">{% translate 'Сохранить' %}</button></form>
+<label class="field">{% translate 'Причина' %}<input name="reason" required></label><button class="primary">{% translate 'Сохранить' %}</button></form>{% endif %}
 <h2>{% translate 'Управление входом' %}</h2><p class="note">{% translate 'Отключение учётной записи прекращает все её сеансы. Рабочие документы и расчёты сохраняются.' %}</p>
 {% if not protected_account %}<form method="post" class="card">{% csrf_token %}<label class="field">{% translate 'Причина' %}<input name="reason" required></label><div class="actions">
 {% if person.is_active %}<button name="action" value="disable">{% translate 'Отключить учётную запись' %}</button>{% else %}<button name="action" value="enable">{% translate 'Включить учётную запись' %}</button>{% endif %}

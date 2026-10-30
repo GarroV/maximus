@@ -338,5 +338,9 @@
   "Вместе с пространством заводятся роли и первый пользователь. Затем можно добавить организации и остальных людей.": {
     "en": "Roles and the first user are created with the workspace. You can then add organizations and other people.",
     "sr": "Uloge i prvi korisnik prave se zajedno sa radnim prostorom. Zatim možete dodati organizacije i druge ljude."
+  },
+  "Данные другого администратора платформы меняются им самим.": {
+    "en": "Other platform administrators manage their own account details.",
+    "sr": "Drugi administratori platforme sami menjaju podatke svog naloga."
   }
 }

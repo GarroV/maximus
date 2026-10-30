@@ -426,7 +426,7 @@ def user_detail(request, user_id):
                         platform.lock_email(platform.email_value(request.POST.get("email")))
                     user = User.objects.select_for_update().get(pk=user_id)
                     if action == "password":
-                        if is_platform_admin(user.pk):
+                        if platform.protected_account(user.pk):
                             raise SpaceRefused(_(
                                 "Пароль администратора платформы меняется им самим."))
                         password = secrets.token_urlsafe(18)
@@ -435,6 +435,9 @@ def user_detail(request, user_id):
                         platform.event(request.user.pk, _("Пароль заменён"), user.username,
                                        reason=reason)
                     elif action == "profile":
+                        if user.pk != request.user.pk and platform.protected_account(user.pk):
+                            raise SpaceRefused(_(
+                                "Данные другого администратора платформы меняются им самим."))
                         email = platform.email_value(request.POST.get("email"))
                         if User.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
                             raise SpaceRefused(_(
@@ -456,8 +459,11 @@ def user_detail(request, user_id):
         except SpaceRefused as refusal:
             error = refusal.message
     memberships = Membership.objects.filter(user_id=user.pk).select_related("tenant", "role")
+    protected = platform.protected_account(user.pk)
     return _page(request, "user", {"person": user, "memberships": memberships,
-                                    "protected_account": is_platform_admin(user.pk)},
+                                    "protected_account": protected,
+                                    "can_edit_profile": not protected or (
+                                        user.pk == request.user.pk)},
                  error=error, status=400 if error else 200)
 
 

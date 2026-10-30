@@ -15,6 +15,14 @@ def require_admin(actor):
         raise SpaceRefused(_("Управлять платформой может только администратор платформы."))
 
 
+def protected_account(user_id):
+    # Bootstrap rows stay self-only under RLS. Ask only for the protection bit;
+    # the database independently checks the caller's platform right.
+    with connection.cursor() as cursor:
+        cursor.execute("select app_platform_account_protected(%s)", [user_id])
+        return cursor.fetchone()[0]
+
+
 def email_value(value):
     value = (value or "").strip().lower()
     try:
@@ -151,7 +159,7 @@ def set_active(actor, user_id, enabled, reason):
     tenants = list(Tenant.objects.select_for_update().filter(pk__in=tenant_ids).order_by("pk"))
     user = User.objects.select_for_update().get(pk=user_id)
     if not enabled:
-        if is_platform_admin(user.pk):
+        if protected_account(user.pk):
             raise SpaceRefused(_(
                 "Платформенного администратора нельзя отключить из этого кабинета."))
         for tenant in tenants:

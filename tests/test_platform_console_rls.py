@@ -18,6 +18,8 @@ def test_metadata_access_is_narrow_and_events_are_append_only(db, platform_admin
                (unit, T2))
     try:
         with as_app_user(db, platform_admin) as conn:
+            assert conn.execute("select app_platform_account_protected(%s)",
+                                (platform_admin,)).fetchone()[0]
             assert conn.execute("select id from legal_entities where id=%s", (entity,)).fetchone()
             assert conn.execute("select id from units where id=%s", (unit,)).fetchone()
             assert conn.execute("select count(*) from employees where tenant_id=%s",
@@ -28,6 +30,8 @@ def test_metadata_access_is_narrow_and_events_are_append_only(db, platform_admin
                 "values (%s,'test','metadata') returning id", (platform_admin,),
             ).fetchone()[0]
         with as_app_user(db, USER_ACCOUNTANT) as conn:
+            assert not conn.execute("select app_platform_account_protected(%s)",
+                                    (platform_admin,)).fetchone()[0]
             assert not conn.execute("select id from legal_entities where id=%s",
                                     (entity,)).fetchone()
             assert not conn.execute("select id from platform_events where id=%s",
