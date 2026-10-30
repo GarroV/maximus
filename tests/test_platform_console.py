@@ -38,6 +38,8 @@ def test_new_partner_email_org_and_working_user(client):
     assert response.status_code == 302
     assert LegalEntity.objects.filter(tenant=space, title="Example company").exists()
     role = Role.objects.get(tenant=space, code="accountant")
+    english = body(client.get(f"/platform/{space.pk}/people/new/", HTTP_ACCEPT_LANGUAGE="en"))
+    assert "Accountant" in english and "Бухгалтер" not in english
     response = client.post(f"/platform/{space.pk}/people/new/", {
         "email": "new-person@example.org", "full_name": "Example person",
         "role_id": str(role.pk), "reason": "Подключение бухгалтера",

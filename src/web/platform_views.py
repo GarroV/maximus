@@ -458,7 +458,9 @@ def user_detail(request, user_id):
             return redirect("platform-user", user_id=user.pk)
         except SpaceRefused as refusal:
             error = refusal.message
-    memberships = Membership.objects.filter(user_id=user.pk).select_related("tenant", "role")
+    memberships = list(Membership.objects.filter(user_id=user.pk).select_related("tenant", "role"))
+    for membership in memberships:
+        membership.shown_role = shown_role_title(membership.role.title, membership.role.code)
     protected = platform.protected_account(user.pk)
     return _page(request, "user", {"person": user, "memberships": memberships,
                                     "protected_account": protected,
@@ -501,7 +503,8 @@ def person_create(request, tenant_id):
                      else _("Учётка уже существует."))
     return _page(request, "person_new", {
         "space": found, "filled": request.POST,
-        "roles": Role.objects.filter(tenant=found).order_by("title"),
+        "roles": [{"pk": role.pk, "title": shown_role_title(role.title, role.code)}
+                  for role in Role.objects.filter(tenant=found).order_by("title")],
         "unit_options": Unit.objects.filter(tenant=found).order_by("code"),
         "picked_units": request.POST.getlist("unit"),
     }, error=error, status=400 if error else 200)

@@ -2,7 +2,7 @@
 {% block title %}{% translate 'Пользователи' %}{% endblock %}
 {% block content %}<h1>{% translate 'Пользователи' %}</h1>
 <p class="sub">{% translate 'Учётные записи сервиса. Доступ к данным определяется назначениями внутри пространства.' %}</p>
-<form method="get" class="inline"><label for="q">{% translate 'Поиск' %}</label><input id="q" name="q" value="{{ query }}" placeholder="Имя, почта или логин"><button>{% translate 'Найти' %}</button></form>
+<form method="get" class="inline"><label for="q">{% translate 'Поиск' %}</label><input id="q" name="q" value="{{ query }}"><button>{% translate 'Найти' %}</button></form>
 {% scroll %}<table class="stack"><thead><tr><th>{% translate 'Человек' %}</th><th>{% translate 'Почта' %}</th><th>{% translate 'Состояние' %}</th><th>{% translate 'Последний вход' %}</th></tr></thead><tbody>
 {% for person in users %}<tr><td data-label="{% translate 'Человек' %}"><a href="{% url 'platform-user' user_id=person.pk %}">{% firstof person.full_name person.username %}</a><br><small>{{ person.username }}</small></td><td data-label="{% translate 'Почта' %}">{{ person.email|default:'—' }}</td><td data-label="{% translate 'Состояние' %}">{% if person.is_active %}{% translate 'Действует' %}{% else %}{% translate 'Отключён' %}{% endif %}</td><td data-label="{% translate 'Последний вход' %}">{{ person.last_login|date:'SHORT_DATETIME_FORMAT'|default:'—' }}</td></tr>
 {% empty %}<tr><td colspan="4">{% translate 'Никого не найдено.' %}</td></tr>{% endfor %}</tbody></table>{% endscroll %}
