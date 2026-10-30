@@ -25,6 +25,8 @@
 
 <p><a class="btn primary" href="{% url 'platform-space-create' %}">{% translate "Завести пространство" %}</a> <a class="btn" href="{% url 'platform-rates' %}">{% translate "Курсы валют" %}</a></p>
 
+<form method="get" class="inline"><label for="q">{% translate 'Поиск' %}</label><input id="q" name="q" value="{{ request.GET.q }}"><button>{% translate 'Найти' %}</button></form>
+<p class="note">{% translate 'Последний вход — вход учётной записи, не посещение конкретного пространства.' %}</p>
 {% scroll %}<table class="stack">
   <thead>
     <tr>

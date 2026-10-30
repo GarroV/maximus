@@ -366,6 +366,21 @@ class AccessLogEntry(models.Model):
         indexes = [models.Index(models.F("tenant"), models.F("at"), name="access_log_recent")]
 
 
+class PlatformEvent(models.Model):
+    """Append-only administrative metadata history, visible only to platform operators."""
+
+    id = uuid_pk()
+    at = models.DateTimeField(db_default=now_default())
+    actor_user_id = models.UUIDField()
+    tenant = models.ForeignKey(Tenant, null=True, on_delete=models.CASCADE)
+    action = models.TextField()
+    target = models.TextField()
+    reason = models.TextField(db_default="")
+
+    class Meta:
+        db_table = "platform_events"
+
+
 class Reconciliation(models.Model):
     """Протокол сверки с таблицей бухгалтера (#172).
 

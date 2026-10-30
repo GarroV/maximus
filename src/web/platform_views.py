@@ -1,47 +1,23 @@
-"""Платформенная админка: пространства партнёров, их люди и роли (D065, issue #193).
+"""Platform console: workspaces, organizations, accounts, assignments and history.
 
-Отдельная поверхность, а не раздел админки партнёра, и это решение владельца
-после двух моих попыток свести их вместе. Довод, который я упускал: дублируются
-кнопки, а не инструмент. Обзор над всеми пространствами и статистика по ним в
-партнёрской админке отсутствуют **по определению** — она заперта в одном тенанте.
-
-Граница между поверхностями:
-
-| | здесь | админка партнёра (`roles_views`, модуль 11) |
-|---|---|---|
-| кто | администратор платформы | администратор партнёра |
-| что ведёт | сами пространства и людей в любом из них | своих людей, точки, юрлица |
-| видит | все пространства | только своё |
-
-**Право — не роль.** Оно лежит в `platform_admins`, куда продукт не пишет вовсе
-(`0248`), и спрашивается одной функцией `core.spaces.is_platform_admin`. Роль
-партнёра, даже самая полная, платформенной не делает никогда.
-
-**Одна страница — одна функция** (T225, D081, D087): список пространств —
-`/platform/`, заведение нового — `/platform/new/`, люди пространства —
-`/platform/<id>/`, выдача роли — `/platform/<id>/roles/`. Прежде форма
-заведения стояла под списком, а выдача роли — под людьми, и отказ формы
-возвращался через сессию на экран списка, далеко от поля, которое надо
-поправить. Теперь отказ показывается на странице самой формы, с тем, что уже
-набрано (кроме пароля).
-
-**Финансов партнёров здесь нет и не будет.** Миграция `0261` открыла ровно четыре
-таблицы — пространства, люди, членства, справочник ролей. Зарплаты, табели и
-факты остаются невидимы, и это проверяется тестом на настоящих данных
-(`test_platform_admin_access`). Управление доступом — не повод читать чужие
-деньги.
+The separate platform right (D065/D099) opens administrative metadata only.
+Tenant financial isolation remains in RLS; narrow additions live in migration0280.
+Generated credentials appear only in a no-store POST response, never in a session.
 """
 from __future__ import annotations
 
+import secrets
 from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import IntegrityError, transaction
 from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
 
-from core.models import Membership, Role, Tenant, Unit, User
+from core import platform
+from core.models import LegalEntity, Membership, PlatformEvent, Role, Tenant, Unit, User
 from core.roles import DEFAULT_TITLES, ROLE_ORDER
 from core.spaces import SpaceRefused, create_space, is_platform_admin
 
@@ -89,7 +65,9 @@ def _spaces():
     каждого.
     """
     spaces = list(
-        Tenant.objects.annotate(people=Count("membership", distinct=True)).order_by("title")
+        Tenant.objects.annotate(
+            people=Count("membership__user_id", distinct=True),
+        ).order_by("title")
     )
 
     who_where: dict = {}
@@ -135,7 +113,8 @@ def index(request):
         request,
         "web/platform/index.html",
         {
-            "spaces": _spaces(),
+            "spaces": [s for s in _spaces() if not request.GET.get("q") or
+                       request.GET["q"].casefold() in (s.title + " " + s.code).casefold()],
             "notice": request.session.pop("platform_notice", ""),
             "error": request.session.pop("platform_error", ""),
         },
@@ -147,7 +126,7 @@ def index(request):
 # её коде и в истории браузера.
 _SPACE_FIELDS = (
     "title", "code", "country_code", "base_currency", "report_currency",
-    "admin_username", "admin_full_name",
+    "admin_username", "admin_full_name", "admin_email",
 )
 _SPACE_DEFAULTS = {"country_code": "RS", "base_currency": "RSD", "report_currency": "EUR"}
 
@@ -177,26 +156,39 @@ def space_create(request):
     if request.method != "POST":
         return _space_form(request)
 
+    password = request.POST.get("admin_password") or secrets.token_urlsafe(18)
     try:
-        space = create_space(
-            code=request.POST.get("code", ""),
-            title=request.POST.get("title", ""),
-            country_code=request.POST.get("country_code", "RS"),
-            base_currency=request.POST.get("base_currency", "RSD"),
-            report_currency=request.POST.get("report_currency", "EUR"),
-            admin_username=request.POST.get("admin_username", ""),
-            admin_password=request.POST.get("admin_password", ""),
-            admin_full_name=request.POST.get("admin_full_name", ""),
-            role_code=request.POST.get("role_code", "admin"),
-        )
-    except SpaceRefused as refusal:
+        with transaction.atomic():
+            space = create_space(
+                code=request.POST.get("code", ""),
+                title=request.POST.get("title", ""),
+                country_code=request.POST.get("country_code", "RS"),
+                base_currency=request.POST.get("base_currency", "RSD"),
+                report_currency=request.POST.get("report_currency", "EUR"),
+                admin_username=request.POST.get("admin_username", ""),
+                admin_password=password,
+                admin_full_name=request.POST.get("admin_full_name", ""),
+                admin_email=platform.email_value(request.POST.get("admin_email", "")),
+                role_code=request.POST.get("role_code", "admin"),
+            )
+            platform.event(who.user_id, _("Пространство создано"), request.POST.get("title", ""),
+                           tenant=Tenant.objects.get(pk=space.tenant_id))
+    except (SpaceRefused, IntegrityError) as refusal:
         # Отказ — на странице формы и с тем, что человек уже набрал: форма
         # длинная, и причина должна стоять рядом с ней, а не на другом экране.
-        return _space_form(request, error=refusal.message, status=400)
+        return _space_form(request, error=(refusal.message if isinstance(refusal, SpaceRefused)
+                                           else _("Код пространства или логин уже занят.")),
+                           status=400)
 
     request.session["platform_notice"] = _(
         "Пространство «%(title)s» заведено. Первый человек может входить."
     ) % {"title": request.POST.get("title", "").strip()}
+    if not request.POST.get("admin_password"):
+        return _page(request, "created", {
+            "space": Tenant.objects.get(pk=space.tenant_id),
+            "credentials": {"username": request.POST.get("admin_username", "").strip(),
+                            "password": password},
+        })
     return redirect("platform-space", tenant_id=space.tenant_id)
 
 
@@ -216,12 +208,14 @@ def _people(tenant_id):
         row = found.setdefault(
             membership.user_id, {"user_id": membership.user_id, "roles": [], "name": ""}
         )
-        row["roles"].append(role_choice(membership.role))
+        row["roles"].append({**role_choice(membership.role),
+                             "until": membership.expires_at, "membership": membership.pk})
 
     for user in User.objects.filter(pk__in=found):
         found[user.pk]["name"] = user.full_name or user.username
         found[user.pk]["username"] = user.username
         found[user.pk]["is_active"] = user.is_active
+        found[user.pk]["email"] = user.email
 
     return sorted(found.values(), key=lambda row: row["name"])
 
@@ -253,6 +247,8 @@ def space(request, tenant_id):
         {
             "space": found,
             "people": _people(tenant_id),
+            "organizations_count": LegalEntity.objects.filter(tenant=found).count(),
+            "credentials": None,
             "notice": request.session.pop("platform_notice", ""),
             "error": request.session.pop("platform_error", ""),
         },
@@ -260,16 +256,28 @@ def space(request, tenant_id):
 
 
 def _grant_form(request, found, *, error: str = "", status: int = 200):
-    chosen = request.POST.get("role_id") or ""
+    chosen = request.POST.get("role_id") or request.GET.get("role") or ""
+    user_id = request.POST.get("user_id") or request.GET.get("user") or ""
+    member = Membership.objects.filter(
+        tenant=found, user_id=_as_uuid(user_id), role_id=_as_uuid(chosen),
+    ).first()
+    picked_units = request.POST.getlist("unit") if request.method == "POST" else (
+        [str(unit) for unit in (member.unit_ids or [])] if member else []
+    )
     return render(
         request,
         "web/platform/grant.html",
         {
             "space": found,
-            "user_id": (request.POST.get("user_id") or "").strip(),
+            "user_id": user_id,
+            "people_options": _people(found.pk),
+            "until": request.POST.get("until", "") if request.method == "POST" else (
+                member.expires_at.isoformat() if member and member.expires_at else ""
+            ),
             "unit_options": list(Unit.objects.filter(tenant_id=found.pk).order_by("code")),
-            "picked_units": request.POST.getlist("unit"),
-            "role_options": [
+            "picked_units": picked_units,
+            "role_options": [{"code": "", "title": _("Выберите роль"),
+                              "selected": not chosen}] + [
                 {"code": str(role.pk), "title": shown_role_title(role.title, role.code),
                  "selected": str(role.pk) == chosen}
                 for role in Role.objects.filter(tenant_id=found.pk).order_by("title")
@@ -292,26 +300,16 @@ def _as_uuid(raw: str):
 
 
 def _revoke(request, tenant_id, user_id, role):
-    """Снять роль. Отказ — словами на странице людей пространства.
-
-    Человек ищется среди людей ЭТОГО пространства: снятие у чужого или
-    несуществующего не должно выглядеть как «роли и не было» — это разные
-    ответы на разные вопросы.
-    """
-    back = redirect("platform-space", tenant_id=tenant_id)
-    members = Membership.objects.filter(tenant_id=tenant_id, user_id=user_id) if user_id else None
-    if members is None or not members.exists():
-        request.session["platform_error"] = _("Такого человека в этом пространстве нет.")
-        return back
-    if role is None:
-        request.session["platform_error"] = _("Такой роли в этом пространстве нет.")
-        return back
-    removed, _ignored = members.filter(role=role).delete()
-    if not removed:
-        request.session["platform_error"] = _("Этой роли у человека и не было.")
-        return back
-    request.session["platform_notice"] = _("Роль снята.")
-    return back
+    try:
+        if (user_id is None or role is None or not Membership.objects.filter(
+                tenant_id=tenant_id, user_id=user_id).exists()):
+            raise SpaceRefused(_("Такого человека в этом пространстве нет."))
+        platform.assign(request.user.pk, tenant_id, user_id, role.pk,
+                        remove=True, reason=request.POST.get("reason") or _("Снятие роли"))
+        request.session["platform_notice"] = _("Роль снята.")
+    except SpaceRefused as refusal:
+        request.session["platform_error"] = refusal.message
+    return redirect("platform-space", tenant_id=tenant_id)
 
 
 @login_required
@@ -365,8 +363,203 @@ def member_role(request, tenant_id):
     if refused_unit:
         return _grant_form(request, found, error=refused_unit, status=400)
 
-    _created = Membership.objects.get_or_create(
-        tenant_id=tenant_id, user_id=user_id, role=role, defaults={"unit_ids": unit_ids},
-    )
-    request.session["platform_notice"] = _("Роль выдана.")
+    try:
+        platform.assign(who.user_id, tenant_id, _as_uuid(user_id), role.pk,
+                        unit_ids=unit_ids, until=platform.expiry(request.POST.get("until")),
+                        reason=request.POST.get("reason") or _("Выдача роли"))
+    except SpaceRefused as refusal:
+        return _grant_form(request, found, error=refusal.message, status=400)
+    request.session["platform_notice"] = _("Доступ сохранён.")
     return redirect("platform-space", tenant_id=tenant_id)
+
+
+def _operator(view):
+    from functools import wraps
+
+    @login_required
+    @wraps(view)
+    def guarded(request, *args, **kwargs):
+        if not is_platform_admin(request.user.pk):
+            return _refuse(request)
+        return view(request, *args, **kwargs)
+    return guarded
+
+
+def _page(request, template, context=None, *, error="", status=200):
+    response = render(request, "web/platform/" + template + ".html", {
+        "credentials": None,
+        **(context or {}), "error": error,
+        "notice": request.session.pop("platform_notice", ""),
+    }, status=status)
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@_operator
+def users(request):
+    query = request.GET.get("q", "").strip()
+    found = User.objects.all().order_by("full_name", "username")
+    if query:
+        from django.db.models import Q
+        found = found.filter(Q(full_name__icontains=query) | Q(email__icontains=query) |
+                             Q(username__icontains=query))
+    return _page(request, "users", {"users": found[:200], "query": query})
+
+
+@_operator
+def user_detail(request, user_id):
+    user = User.objects.filter(pk=user_id).first()
+    if user is None:
+        return _no_space(request)
+    error = ""
+    if request.method == "POST":
+        try:
+            reason = request.POST.get("reason", "").strip()
+            if not reason:
+                raise SpaceRefused(_("Укажите причину изменения."))
+            action = request.POST.get("action", "profile")
+            if action in ("disable", "enable"):
+                platform.set_active(request.user.pk, user.pk, action == "enable", reason)
+            else:
+                with transaction.atomic():
+                    if action == "profile":
+                        platform.lock_email(platform.email_value(request.POST.get("email")))
+                    user = User.objects.select_for_update().get(pk=user_id)
+                    if action == "password":
+                        if is_platform_admin(user.pk):
+                            raise SpaceRefused(_(
+                                "Пароль администратора платформы меняется им самим."))
+                        password = secrets.token_urlsafe(18)
+                        user.set_password(password)
+                        user.save(update_fields=["password"])
+                        platform.event(request.user.pk, _("Пароль заменён"), user.username,
+                                       reason=reason)
+                    elif action == "profile":
+                        email = platform.email_value(request.POST.get("email"))
+                        if User.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+                            raise SpaceRefused(_(
+                                "Эта почта уже принадлежит другой учётной записи."))
+                        user.email = email
+                        user.full_name = request.POST.get("full_name", "").strip()
+                        user.save(update_fields=["email", "full_name"])
+                        platform.event(request.user.pk, _("Профиль изменён"), user.username,
+                                       reason=reason)
+                    else:
+                        raise SpaceRefused(_("Неизвестное действие."))
+            if action == "password":
+                return _page(request, "created", {
+                    "credentials": {"username": user.username, "password": password},
+                    "person": user,
+                })
+            request.session["platform_notice"] = _("Изменения сохранены.")
+            return redirect("platform-user", user_id=user.pk)
+        except SpaceRefused as refusal:
+            error = refusal.message
+    memberships = Membership.objects.filter(user_id=user.pk).select_related("tenant", "role")
+    return _page(request, "user", {"person": user, "memberships": memberships,
+                                    "protected_account": is_platform_admin(user.pk)},
+                 error=error, status=400 if error else 200)
+
+
+@_operator
+def person_create(request, tenant_id):
+    found = _space_or_none(tenant_id)
+    if found is None:
+        return _no_space(request)
+    error = ""
+    if request.method == "POST":
+        try:
+            role = Role.objects.filter(pk=_as_uuid(request.POST.get("role_id")),
+                                       tenant=found).first()
+            if role is None:
+                raise SpaceRefused(_("Выберите роль этого пространства."))
+            units, error = membership_units(request.POST.getlist("unit"), tenant_id, role)
+            if error:
+                raise SpaceRefused(error)
+            password = secrets.token_urlsafe(18)
+            user, created = platform.add_person(
+                request.user.pk, tenant_id, email=request.POST.get("email"),
+                full_name=request.POST.get("full_name"), password=password, role_id=role.pk,
+                unit_ids=units, until=platform.expiry(request.POST.get("until")),
+                reason=request.POST.get("reason"),
+            )
+            if created:
+                return _page(request, "created", {
+                    "space": found,
+                    "credentials": {"username": user.username, "password": password},
+                })
+            request.session["platform_notice"] = _("Пользователь добавлен. Доступ действует.")
+            return redirect("platform-space", tenant_id=tenant_id)
+        except (SpaceRefused, IntegrityError) as refusal:
+            error = (refusal.message if isinstance(refusal, SpaceRefused)
+                     else _("Учётка уже существует."))
+    return _page(request, "person_new", {
+        "space": found, "filled": request.POST,
+        "roles": Role.objects.filter(tenant=found).order_by("title"),
+        "unit_options": Unit.objects.filter(tenant=found).order_by("code"),
+        "picked_units": request.POST.getlist("unit"),
+    }, error=error, status=400 if error else 200)
+
+
+@_operator
+def organizations(request, tenant_id):
+    found = _space_or_none(tenant_id)
+    if found is None:
+        return _no_space(request)
+    if request.method == "POST":
+        return organization_edit(request, tenant_id)
+    return _page(request, "organizations", {
+        "space": found, "organizations": LegalEntity.objects.filter(tenant=found).order_by("title"),
+    })
+
+
+@_operator
+def organization_edit(request, tenant_id, organization_id=None):
+    found = _space_or_none(tenant_id)
+    if found is None:
+        return _no_space(request)
+    organization = LegalEntity.objects.filter(pk=organization_id, tenant=found).first()
+    if organization_id and organization is None:
+        return _no_space(request)
+    error = ""
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        tax = request.POST.get("tax_number", "").strip()
+        if not title:
+            error = _("Укажите название организации.")
+        else:
+            with transaction.atomic():
+                if organization is None:
+                    organization = LegalEntity.objects.create(tenant=found, title=title,
+                                                               tax_number=tax or None)
+                    action = _("Организация создана")
+                else:
+                    organization.title, organization.tax_number = title, tax or None
+                    organization.save(update_fields=["title", "tax_number"])
+                    action = _("Организация изменена")
+                platform.event(request.user.pk, action, title, tenant=found)
+            request.session["platform_notice"] = _("Организация сохранена.")
+            return redirect("platform-organizations", tenant_id=tenant_id)
+    return _page(request, "organization", {
+        "space": found, "organization": organization, "filled": request.POST,
+    }, error=error, status=400 if error else 200)
+
+
+@_operator
+def history(request):
+    events = PlatformEvent.objects.select_related("tenant").order_by("-at")
+    tenant_id = _as_uuid(request.GET.get("space", ""))
+    if tenant_id:
+        events = events.filter(tenant_id=tenant_id)
+    entries = list(events[:100])
+    names = {str(u.pk): u.full_name or u.username for u in User.objects.filter(
+        pk__in=[e.actor_user_id for e in entries],
+    )}
+    for entry in entries:
+        entry.actor_name = names.get(str(entry.actor_user_id), _("Администратор"))
+    return _page(request, "history", {"events": entries})
+
+
+@_operator
+def settings(request):
+    return _page(request, "settings", {"spaces": Tenant.objects.all().order_by("country_code")})

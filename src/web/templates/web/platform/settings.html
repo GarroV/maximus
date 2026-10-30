@@ -1,0 +1,6 @@
+{% extends 'web/base.html' %}{% load i18n %}
+{% block title %}{% translate 'Настройки платформы' %}{% endblock %}
+{% block content %}<h1>{% translate 'Настройки платформы' %}</h1>
+<section class="card"><h2>{% translate 'Курсы валют' %}</h2><p>{% translate 'Общий справочник курсов для консолидации.' %}</p><a class="btn" href="{% url 'platform-rates' %}">{% translate 'Открыть' %}</a></section>
+<section class="card"><h2>{% translate 'Страны подключённых пространств' %}</h2><ul>{% for space in spaces %}<li><a href="{% url 'platform-space' tenant_id=space.pk %}">{{ space.title }}</a> · {{ space.country_code }} · {{ space.base_currency }} / {{ space.report_currency }}</li>{% empty %}<li>{% translate 'Ни одного пространства ещё нет.' %}</li>{% endfor %}</ul></section>
+{% endblock %}

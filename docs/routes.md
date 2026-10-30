@@ -127,9 +127,17 @@
 | `/periods/open/` | `period-open` | `web.views.open_month` |
 | `/platform/` | `platform-index` | `web.platform_views.index` |
 | `/platform/<uuid:tenant_id>/` | `platform-space` | `web.platform_views.space` |
+| `/platform/<uuid:tenant_id>/organizations/` | `platform-organizations` | `web.platform_views.organizations` |
+| `/platform/<uuid:tenant_id>/organizations/<uuid:organization_id>/` | `platform-organization` | `web.platform_views.organization_edit` |
+| `/platform/<uuid:tenant_id>/organizations/new/` | `platform-organization-create` | `web.platform_views.organization_edit` |
+| `/platform/<uuid:tenant_id>/people/new/` | `platform-person-create` | `web.platform_views.person_create` |
 | `/platform/<uuid:tenant_id>/roles/` | `platform-member-role` | `web.platform_views.member_role` |
+| `/platform/history/` | `platform-history` | `web.platform_views.history` |
 | `/platform/new/` | `platform-space-create` | `web.platform_views.space_create` |
 | `/platform/rates/` | `platform-rates` | `web.rates_views.rates` |
+| `/platform/settings/` | `platform-settings` | `web.platform_views.settings` |
+| `/platform/users/` | `platform-users` | `web.platform_views.users` |
+| `/platform/users/<uuid:user_id>/` | `platform-user` | `web.platform_views.user_detail` |
 | `/privacy/` | `privacy` | `web.views.privacy` |
 | `/reconciliations/findings/<uuid:finding_id>/` | `reconciliation-decide` | `web.reports_views.reconciliation_decide` |
 | `/reports/pnl/` | `reports-pnl` | `web.planned_views.pnl` |

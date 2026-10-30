@@ -9,7 +9,7 @@
 {% block content %}
 <p class="note"><a href="{% url 'platform-index' %}">{% translate "← Все пространства" %}</a></p>
 <h1>{% translate "Завести пространство" %}</h1>
-<p class="sub">{% blocktranslate %}Вместе с пространством заводятся его роли и первый человек — иначе войти в него будет некому. Точки, юрлица и статьи расходов партнёр заводит сам.{% endblocktranslate %}</p>
+<p class="sub">{% blocktranslate %}Вместе с пространством заводятся роли и первый пользователь. Затем можно добавить организации и остальных людей.{% endblocktranslate %}</p>
 
 {% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
 
@@ -25,7 +25,10 @@
   {% translate "Логин первого человека" as f_login %}{% translate "Как его зовут" as f_name %}{% translate "Пароль" as f_pass %}
   {% include "web/components/field.html" with id="id_login" name="admin_username" label=f_login value=filled.admin_username required=1 stacked=1 %}
   {% include "web/components/field.html" with id="id_name" name="admin_full_name" label=f_name value=filled.admin_full_name stacked=1 %}
-  {% include "web/components/field.html" with id="id_pass" name="admin_password" label=f_pass type="password" required=1 stacked=1 %}
+  {% translate 'Почта первого человека' as f_email %}
+  {% include "web/components/field.html" with id="id_email" name="admin_email" label=f_email type="email" value=filled.admin_email required=1 stacked=1 %}
+  {% include "web/components/field.html" with id="id_pass" name="admin_password" label=f_pass type="password" stacked=1 %}
+  <p class="note">{% translate 'Оставьте пароль пустым, чтобы сгенерировать его автоматически.' %}</p>
   {% translate "Его роль" as f_role %}
   {% include "web/components/select.html" with id="id_role" name="role_code" label=f_role options=role_options stacked=1 %}
   <button type="submit" class="primary">{% translate "Завести пространство" %}</button>

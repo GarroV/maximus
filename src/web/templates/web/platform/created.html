@@ -1,0 +1,4 @@
+{% extends 'web/base.html' %}{% load i18n %}
+{% block title %}{% translate 'Доступ создан' %}{% endblock %}
+{% block content %}{% include 'web/platform/_credentials.html' %}
+{% if space %}<a class="btn primary" href="{% url 'platform-space' tenant_id=space.pk %}">{% translate 'Открыть пространство' %}</a>{% elif person %}<a class="btn primary" href="{% url 'platform-user' user_id=person.pk %}">{% translate 'Открыть пользователя' %}</a>{% endif %}{% endblock %}

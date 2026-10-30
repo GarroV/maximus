@@ -68,18 +68,18 @@ OUR_OWN = {
     # навигации (в его меню стоят «Доступы» — то же самое другими словами).
     # Наше имя оставлено, потому что оно совпадает с названием экрана, на
     # который ведёт, и с языком решений (D033, D052).
-    "Роли и права",
+    _("Роли и права"),
     # Аналитика по людям: в словаре модуля 10 она одним пунктом, а по D081
     # разобрана на три страницы (T226). Названия — не наши выдумки, а подписи
     # вкладок модуля 12 эталона, дословно.
-    "Стоимость труда",
-    "Кто уходит",
-    "Часы и переработки",
+    _("Стоимость труда"),
+    _("Кто уходит"),
+    _("Часы и переработки"),
     # Счета поставщиков: в словаре модуля 10 их нет, прототип эталона держит
     # тот же экран в «Сбор данных» под именем «Разнесение накладных». Наше имя
     # — заголовок самой страницы: подпись пункта и то, что открылось, обязаны
     # совпадать (сверка T224, issue #268).
-    "Счета",
+    _("Счета"),
 }
 
 
@@ -298,6 +298,28 @@ def sections(request) -> dict:
     # в подвале панели и от этого не зависят.
     if who is None:
         return {"nav_areas": []}
+    from core.spaces import is_platform_admin
+
+    if request.path.startswith("/platform/") and is_platform_admin(who.user_id):
+        items = []
+        for route, title, icon in (
+            ("platform-index", _("Пространства"), "home"),
+            ("platform-users", _("Пользователи"), "team"),
+            ("platform-history", _("Журнал изменений"), "timeline"),
+            ("platform-settings", _("Настройки платформы"), "sliders"),
+        ):
+            url = reverse(route)
+            current = "page" if request.path == url else ""
+            if route == "platform-index" and not any(
+                request.path.startswith(reverse(r)) for r in (
+                    "platform-users", "platform-history", "platform-settings", "platform-rates",
+                )
+            ):
+                current = current or "location"
+            items.append({"url": url, "title": title, "icon": icon, "current": current,
+                          "allowed": True, "route": route, "wip": False})
+        areas = [{"number": 1, "title": _("Управление платформой"), "items": items}]
+        return {"nav_areas": areas, "nav_tabs": _tabs(areas)}
     # Считать очередь есть смысл только у вошедшего: запрос в базу без
     # контекста партнёра ничего не значит.
     counting = who is not None and who.tenant_id is not None
@@ -363,6 +385,12 @@ def sections(request) -> dict:
                 "needs": offers[0]["needs"], "route": offers[0]["route"],
             },
         })
+    if is_platform_admin(who.user_id):
+        url = reverse("platform-index")
+        areas.append({"number": len(GROUPS) + 1, "title": _("Управление платформой"),
+                      "items": [{"title": _("Управление платформой"), "url": url,
+                                 "route": "platform-index", "icon": "sliders",
+                                 "allowed": True, "wip": False, "current": ""}]})
     return {"nav_areas": areas, "nav_tabs": _tabs(areas)}
 
 

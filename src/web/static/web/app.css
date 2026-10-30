@@ -548,7 +548,7 @@ dl.abilities dd { margin: 0; }
    только вторая, вертикальная прокрутка внутри страницы. */
 @media (max-width: 719px) {
   .scroll:has(> table.stack) { overflow: visible; max-height: none; }
-  table.stack thead {
+  .scroll > table.stack > thead {
     position: absolute; width: 1px; height: 1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap;
   }

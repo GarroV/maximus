@@ -208,10 +208,15 @@ def _units_title(unit_ids: list) -> str:
 
 def principal(request) -> dict:
     """Контекст-процессор: шапка на каждой странице показывает, кем вошли."""
+    from core.spaces import is_platform_admin
+
     from .auth import dev_login_is_enabled
 
     who = get_current_principal(request)
+    operator = is_platform_admin(who.user_id if who else None)
     return {
+        "platform_admin": operator,
+        "platform_mode": operator and request.path.startswith("/platform/"),
         "principal": who,
         "visible_ledgers_title": (
             ", ".join(ledger_title(name) for name in who.visible_ledgers) if who else ""

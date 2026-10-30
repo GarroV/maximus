@@ -113,6 +113,18 @@ urlpatterns = [
     path("platform/new/", platform_views.space_create, name="platform-space-create"),
     # Курсы для консолидации сети (T209): справочник общий, ведёт платформа.
     path("platform/rates/", rates_views.rates, name="platform-rates"),
+    path("platform/users/", platform_views.users, name="platform-users"),
+    path("platform/users/<uuid:user_id>/", platform_views.user_detail, name="platform-user"),
+    path("platform/history/", platform_views.history, name="platform-history"),
+    path("platform/settings/", platform_views.settings, name="platform-settings"),
+    path("platform/<uuid:tenant_id>/people/new/", platform_views.person_create,
+         name="platform-person-create"),
+    path("platform/<uuid:tenant_id>/organizations/", platform_views.organizations,
+         name="platform-organizations"),
+    path("platform/<uuid:tenant_id>/organizations/new/", platform_views.organization_edit,
+         name="platform-organization-create"),
+    path("platform/<uuid:tenant_id>/organizations/<uuid:organization_id>/",
+         platform_views.organization_edit, name="platform-organization"),
     path("platform/<uuid:tenant_id>/", platform_views.space, name="platform-space"),
     path(
         "platform/<uuid:tenant_id>/roles/",

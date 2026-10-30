@@ -47,6 +47,8 @@
       {% include "web/components/prefs.html" with prefs_id=menu_id|add:"-menu" %}
     </div>
     <a class="popover__row acct-menu__row" href="{% url 'account' %}"><span>{{ account_label }}</span>{% icon "cright" %}</a>
+    {% if platform_admin %}<a class="popover__row acct-menu__row" href="{% url 'platform-index' %}">{% translate "Управление платформой" %}</a>{% endif %}
+    {% if platform_mode and principal.tenant_id %}<a class="popover__row acct-menu__row" href="{% url 'periods' %}">{% translate "Работа партнёра" %}</a>{% endif %}
     <div class="popover__foot acct-menu__foot">
       <form class="acct-menu__logout" method="post" action="{% url 'logout' %}">{% csrf_token %}
         <button class="acct-menu__out" type="submit">{% icon "arrow" %}<span>{% translate "Выйти" %}</span></button>

@@ -1,0 +1,342 @@
+{
+  "Управлять платформой может только администратор платформы.": {
+    "en": "Only a platform administrator can manage the platform.",
+    "sr": "Platformom može upravljati samo administrator platforme."
+  },
+  "Укажите действительный адрес электронной почты.": {
+    "en": "Enter a valid email address.",
+    "sr": "Unesite važeću adresu e-pošte."
+  },
+  "Укажите срок в формате ГГГГ-ММ-ДД.": {
+    "en": "Enter the end date as YYYY-MM-DD.",
+    "sr": "Unesite datum isteka u formatu GGGG-MM-DD."
+  },
+  "Срок доступа не может быть в прошлом.": {
+    "en": "Access cannot expire in the past.",
+    "sr": "Pristup ne može isteći u prošlosti."
+  },
+  "Укажите причину изменения доступа.": {
+    "en": "Enter the reason for changing access.",
+    "sr": "Unesite razlog promene pristupa."
+  },
+  "Нельзя убрать последнего действующего бессрочного администратора. Сначала назначьте другого человека с правом управления доступом.": {
+    "en": "The last active permanent administrator must remain. Assign another person who can manage access first.",
+    "sr": "Poslednji aktivni administrator bez roka mora ostati. Prvo dodelite drugoj osobi pravo upravljanja pristupom."
+  },
+  "Учётная запись отключена. Сначала включите её.": {
+    "en": "This account is disabled. Enable it first.",
+    "sr": "Ovaj nalog je isključen. Prvo ga uključite."
+  },
+  "У человека уже есть другое рабочее пространство. Сначала снимите прежнее членство.": {
+    "en": "This person already belongs to another workspace. Remove the previous membership first.",
+    "sr": "Ova osoba već pripada drugom radnom prostoru. Prvo uklonite prethodno članstvo."
+  },
+  "Роль снята": {
+    "en": "Role revoked",
+    "sr": "Uloga opozvana"
+  },
+  "Доступ изменён": {
+    "en": "Access changed",
+    "sr": "Pristup promenjen"
+  },
+  "Роль выдана": {
+    "en": "Role granted",
+    "sr": "Uloga dodeljena"
+  },
+  "У этой почты несколько учётных записей. Сначала уточните их почту.": {
+    "en": "Several accounts use this email. Correct their email addresses first.",
+    "sr": "Više naloga koristi ovu adresu. Prvo ispravite njihove adrese e-pošte."
+  },
+  "Этот логин уже занят. Уточните почту существующей учётной записи.": {
+    "en": "This username is taken. Check the existing account's email.",
+    "sr": "Ovo korisničko ime je zauzeto. Proverite adresu postojećeg naloga."
+  },
+  "Платформенного администратора нельзя отключить из этого кабинета.": {
+    "en": "A platform administrator cannot be disabled from this console.",
+    "sr": "Administrator platforme ne može se isključiti iz ove konzole."
+  },
+  "Нельзя отключить последнего администратора пространства.": {
+    "en": "The last workspace administrator cannot be disabled.",
+    "sr": "Poslednji administrator radnog prostora ne može se isključiti."
+  },
+  "Учётная запись включена": {
+    "en": "Account enabled",
+    "sr": "Nalog uključen"
+  },
+  "Учётная запись отключена": {
+    "en": "Account disabled",
+    "sr": "Nalog isključen"
+  },
+  "Эта почта уже принадлежит учётной записи.": {
+    "en": "This email already belongs to an account.",
+    "sr": "Ova adresa već pripada nekom nalogu."
+  },
+  "Пользователи": {
+    "en": "Users",
+    "sr": "Korisnici"
+  },
+  "Журнал изменений": {
+    "en": "Change log",
+    "sr": "Dnevnik promena"
+  },
+  "Настройки платформы": {
+    "en": "Platform settings",
+    "sr": "Podešavanja platforme"
+  },
+  "Управление платформой": {
+    "en": "Platform management",
+    "sr": "Upravljanje platformom"
+  },
+  "Пространство создано": {
+    "en": "Workspace created",
+    "sr": "Radni prostor napravljen"
+  },
+  "Код пространства или логин уже занят.": {
+    "en": "The workspace code or username is already taken.",
+    "sr": "Šifra radnog prostora ili korisničko ime je već zauzeto."
+  },
+  "Снятие роли": {
+    "en": "Role revocation",
+    "sr": "Opoziv uloge"
+  },
+  "Выдача роли": {
+    "en": "Role assignment",
+    "sr": "Dodela uloge"
+  },
+  "Доступ сохранён.": {
+    "en": "Access saved.",
+    "sr": "Pristup je sačuvan."
+  },
+  "Укажите причину изменения.": {
+    "en": "Enter the reason for this change.",
+    "sr": "Unesite razlog ove promene."
+  },
+  "Пароль администратора платформы меняется им самим.": {
+    "en": "Platform administrators change their own passwords.",
+    "sr": "Administratori platforme sami menjaju svoje lozinke."
+  },
+  "Пароль заменён": {
+    "en": "Password replaced",
+    "sr": "Lozinka zamenjena"
+  },
+  "Эта почта уже принадлежит другой учётной записи.": {
+    "en": "This email belongs to another account.",
+    "sr": "Ova adresa pripada drugom nalogu."
+  },
+  "Профиль изменён": {
+    "en": "Profile changed",
+    "sr": "Profil promenjen"
+  },
+  "Неизвестное действие.": {
+    "en": "Unrecognized action.",
+    "sr": "Neprepoznata radnja."
+  },
+  "Изменения сохранены.": {
+    "en": "Changes saved.",
+    "sr": "Promene su sačuvane."
+  },
+  "Выберите роль этого пространства.": {
+    "en": "Choose a role from this workspace.",
+    "sr": "Izaberite ulogu iz ovog radnog prostora."
+  },
+  "Пользователь добавлен. Доступ действует.": {
+    "en": "User added. Access is active.",
+    "sr": "Korisnik je dodat. Pristup je aktivan."
+  },
+  "Учётка уже существует.": {
+    "en": "This account already exists.",
+    "sr": "Ovaj nalog već postoji."
+  },
+  "Укажите название организации.": {
+    "en": "Enter the organization name.",
+    "sr": "Unesite naziv organizacije."
+  },
+  "Организация создана": {
+    "en": "Organization created",
+    "sr": "Organizacija napravljena"
+  },
+  "Организация изменена": {
+    "en": "Organization changed",
+    "sr": "Organizacija promenjena"
+  },
+  "Организация сохранена.": {
+    "en": "Organization saved.",
+    "sr": "Organizacija je sačuvana."
+  },
+  "Администратор": {
+    "en": "Administrator",
+    "sr": "Administrator"
+  },
+  "Работа партнёра": {
+    "en": "Partner workspace",
+    "sr": "Rad partnera"
+  },
+  "Платформа": {
+    "en": "Platform",
+    "sr": "Platforma"
+  },
+  "Доступ создан": {
+    "en": "Access created",
+    "sr": "Pristup napravljen"
+  },
+  "Сохраните пароль сейчас: повторно он не показывается. Передайте его пользователю безопасным способом.": {
+    "en": "Save this password now: it will not be shown again. Share it with the user securely.",
+    "sr": "Sačuvajte ovu lozinku sada: neće ponovo biti prikazana. Bezbedno je prosledite korisniku."
+  },
+  "Люди и доступы": {
+    "en": "People and access",
+    "sr": "Ljudi i pristup"
+  },
+  "Организации": {
+    "en": "Organizations",
+    "sr": "Organizacije"
+  },
+  "Открыть пространство": {
+    "en": "Open workspace",
+    "sr": "Otvori radni prostor"
+  },
+  "Открыть пользователя": {
+    "en": "Open user account",
+    "sr": "Otvori korisnički nalog"
+  },
+  "Выберите человека и роль. Для нового пользователя сначала откройте «Добавить пользователя» в пространстве.": {
+    "en": "Choose a person and a role. For a new user, open Add user in the workspace first.",
+    "sr": "Izaberite osobu i ulogu. Za novog korisnika prvo otvorite Dodaj korisnika u radnom prostoru."
+  },
+  "Выберите человека": {
+    "en": "Choose a person",
+    "sr": "Izaberite osobu"
+  },
+  "Доступ до": {
+    "en": "Access until",
+    "sr": "Pristup do"
+  },
+  "Последние 100 административных операций. Пароли и токены не записываются.": {
+    "en": "The latest 100 administrative operations. Passwords and tokens are never recorded.",
+    "sr": "Poslednjih 100 administrativnih radnji. Lozinke i tokeni se ne beleže."
+  },
+  "Объект": {
+    "en": "Object",
+    "sr": "Predmet izmene"
+  },
+  "Изменений пока нет.": {
+    "en": "No changes yet.",
+    "sr": "Još nema promena."
+  },
+  "Поиск": {
+    "en": "Search query",
+    "sr": "Pojam za pretragu"
+  },
+  "Последний вход — вход учётной записи, не посещение конкретного пространства.": {
+    "en": "Last login refers to the account, not a visit to a specific workspace.",
+    "sr": "Poslednja prijava se odnosi na nalog, a ne na posetu određenom radnom prostoru."
+  },
+  "Почта первого человека": {
+    "en": "First user's email",
+    "sr": "E-pošta prvog korisnika"
+  },
+  "Оставьте пароль пустым, чтобы сгенерировать его автоматически.": {
+    "en": "Leave the password blank to generate one automatically.",
+    "sr": "Ostavite lozinku praznom da se automatski generiše."
+  },
+  "Организация": {
+    "en": "Organization",
+    "sr": "Organizacija"
+  },
+  "Добавить организацию": {
+    "en": "Add organization",
+    "sr": "Dodaj organizaciju"
+  },
+  "Юридические лица внутри выбранного пространства партнёра.": {
+    "en": "Legal entities within the selected partner workspace.",
+    "sr": "Pravna lica u izabranom radnom prostoru partnera."
+  },
+  "Организаций пока нет. Добавьте первое юридическое лицо.": {
+    "en": "No organizations yet. Add the first legal entity.",
+    "sr": "Još nema organizacija. Dodajte prvo pravno lice."
+  },
+  "Добавить пользователя": {
+    "en": "Add user",
+    "sr": "Dodaj korisnika"
+  },
+  "Найдём учётку по почте или создадим новую. Пароль нового пользователя будет показан один раз; для существующего пароль сохраняется.": {
+    "en": "We will find an account by email or create one. A new user's password is shown once; an existing user's password stays unchanged.",
+    "sr": "Pronaći ćemo nalog po adresi e-pošte ili napraviti novi. Lozinka novog korisnika prikazuje se jednom; lozinka postojećeg ostaje ista."
+  },
+  "Выберите роль": {
+    "en": "Choose a role",
+    "sr": "Izaberite ulogu"
+  },
+  "Без даты — бессрочно.": {
+    "en": "No date means permanent access.",
+    "sr": "Bez datuma pristup je trajan."
+  },
+  "Общий справочник курсов для консолидации.": {
+    "en": "Shared exchange rates for consolidation.",
+    "sr": "Zajednički devizni kursevi za konsolidaciju."
+  },
+  "Открыть": {
+    "en": "Open section",
+    "sr": "Otvori"
+  },
+  "Страны подключённых пространств": {
+    "en": "Countries of connected workspaces",
+    "sr": "Zemlje povezanih radnih prostora"
+  },
+  "Действует": {
+    "en": "Account active",
+    "sr": "Aktivan"
+  },
+  "Отключён": {
+    "en": "Disabled",
+    "sr": "Isključen"
+  },
+  "Назначения доступа": {
+    "en": "Access assignments",
+    "sr": "Dodele pristupa"
+  },
+  "Срок": {
+    "en": "End date",
+    "sr": "Datum isteka"
+  },
+  "Назначений нет.": {
+    "en": "No access assignments.",
+    "sr": "Nema dodeljenog pristupa."
+  },
+  "Управление входом": {
+    "en": "Sign-in management",
+    "sr": "Upravljanje prijavom"
+  },
+  "Отключение учётной записи прекращает все её сеансы. Рабочие документы и расчёты сохраняются.": {
+    "en": "Disabling an account ends all its sessions. Work documents and calculations are preserved.",
+    "sr": "Isključivanje naloga prekida sve njegove sesije. Radni dokumenti i obračuni se čuvaju."
+  },
+  "Отключить учётную запись": {
+    "en": "Disable account",
+    "sr": "Isključi nalog"
+  },
+  "Включить учётную запись": {
+    "en": "Enable account",
+    "sr": "Uključi nalog"
+  },
+  "Сгенерировать новый пароль": {
+    "en": "Generate new password",
+    "sr": "Generiši novu lozinku"
+  },
+  "Учётные записи сервиса. Доступ к данным определяется назначениями внутри пространства.": {
+    "en": "Service accounts. Access to data is determined by assignments within a workspace.",
+    "sr": "Nalozi servisa. Pristup podacima određuju dodele u radnom prostoru."
+  },
+  "Никого не найдено.": {
+    "en": "No people found.",
+    "sr": "Nijedna osoba nije pronađena."
+  },
+  "Показаны первые 200 записей. Для уточнения используйте поиск.": {
+    "en": "Showing the first 200 records. Use search to narrow the results.",
+    "sr": "Prikazano je prvih 200 zapisa. Koristite pretragu da suzite rezultate."
+  },
+  "Вместе с пространством заводятся роли и первый пользователь. Затем можно добавить организации и остальных людей.": {
+    "en": "Roles and the first user are created with the workspace. You can then add organizations and other people.",
+    "sr": "Uloge i prvi korisnik prave se zajedno sa radnim prostorom. Zatim možete dodati organizacije i druge ljude."
+  }
+}

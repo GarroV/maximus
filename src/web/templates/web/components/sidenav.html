@@ -30,9 +30,9 @@
 «Учётная запись» и «Выйти». Меню — `<details>`: открывается без скрипта.
 {% endcomment %}
 <nav class="sidenav" aria-label="{% translate "Основная навигация" %}">
-  <a class="sidenav__brand" href="{% url 'periods' %}" title="MAXIMUS{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}">
+  <a class="sidenav__brand" href="{% if platform_mode %}{% url 'platform-index' %}{% else %}{% url 'periods' %}{% endif %}" title="MAXIMUS{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}">
     {% brand_mark "sidenav__logo" 28 %}
-    <span class="sidenav__name"><b>MAXIMUS</b><small>{% if principal.tenant_title|lower|slice:":5" == "dodo " %}{{ principal.tenant_title }}{% else %}Dodo{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}{% endif %}</small></span>{% if dev_login %}<span class="badge dot sidenav__dev" title="{% translate "На странице входа есть кнопки быстрого входа учётками сида (DEV_LOGIN=1)" %}">dev</span>{% endif %}
+    <span class="sidenav__name"><b>MAXIMUS</b><small>{% if platform_mode %}{% translate "Платформа" %}{% elif principal.tenant_title|lower|slice:":5" == "dodo " %}{{ principal.tenant_title }}{% else %}Dodo{% if principal.tenant_title %} · {{ principal.tenant_title }}{% endif %}{% endif %}</small></span>{% if dev_login %}<span class="badge dot sidenav__dev" title="{% translate "На странице входа есть кнопки быстрого входа учётками сида (DEV_LOGIN=1)" %}">dev</span>{% endif %}
   </a>
   <div class="sidenav__list">
     {% for area in nav_areas %}

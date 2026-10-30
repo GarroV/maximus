@@ -1,0 +1,5 @@
+{% load i18n %}<nav class="cuts" aria-label="{% translate 'Пространство' %}">
+<a class="cut" href="{% url 'platform-space' tenant_id=space.pk %}">{% translate 'Люди и доступы' %}</a>
+<a class="cut" href="{% url 'platform-organizations' tenant_id=space.pk %}">{% translate 'Организации' %}</a>
+<a class="cut" href="{% url 'platform-history' %}?space={{ space.pk }}">{% translate 'История' %}</a>
+</nav>

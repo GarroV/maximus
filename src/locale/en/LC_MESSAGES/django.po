@@ -3775,17 +3775,9 @@ msgstr "There is no such role in this space."
 msgid "Роль снята."
 msgstr "Role revoked."
 
-#: web/platform_views.py:242
-msgid "Этой роли у человека и не было."
-msgstr "The person did not have that role anyway."
-
 #: web/platform_views.py:247
 msgid "Такого человека нет."
 msgstr "There is no such person."
-
-#: web/platform_views.py:253
-msgid "Роль выдана."
-msgstr "Role granted."
 
 #: web/positions_views.py:76
 msgid ""
@@ -6504,15 +6496,6 @@ msgstr "There is nobody in this space yet."
 msgid "Выдать роль"
 msgstr "Grant a role"
 
-#: web/templates/web/platform/space.html:57
-msgid ""
-"Логин человека должен уже существовать: одной учёткой можно работать у "
-"нескольких партнёров. Нового человека партнёр заводит сам на своём экране "
-"ролей."
-msgstr ""
-"The person's login must already exist: one account can work for several "
-"partners. A new person the partner adds themselves on their own roles screen."
-
 #: web/templates/web/platform/space.html:61
 msgid "Идентификатор человека"
 msgstr "Person identifier"
@@ -9027,10 +9010,6 @@ msgstr "← All people"
 #, python-format
 msgid "← Люди пространства «%(title)s»"
 msgstr "← People in the space “%(title)s”"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Такого человека в этом пространстве нет."
-msgstr "There is no such person in this space."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
@@ -11658,3 +11637,370 @@ msgstr "in development"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "или"
 msgstr "or"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Администратор"
+msgstr "Administrator"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без даты — бессрочно."
+msgstr "No date means permanent access."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Включить учётную запись"
+msgstr "Enable account"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите роль"
+msgstr "Choose a role"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите роль этого пространства."
+msgstr "Choose a role from this workspace."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите человека"
+msgstr "Choose a person"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выберите человека и роль. Для нового пользователя сначала откройте "
+"«Добавить пользователя» в пространстве."
+msgstr "Choose a person and a role. For a new user, open Add user in the workspace first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выдача роли"
+msgstr "Role assignment"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действует"
+msgstr "Account active"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Добавить организацию"
+msgstr "Add organization"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Добавить пользователя"
+msgstr "Add user"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ до"
+msgstr "Access until"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ изменён"
+msgstr "Access changed"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ создан"
+msgstr "Access created"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ сохранён."
+msgstr "Access saved."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Журнал изменений"
+msgstr "Change log"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Изменений пока нет."
+msgstr "No changes yet."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Изменения сохранены."
+msgstr "Changes saved."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код пространства или логин уже занят."
+msgstr "The workspace code or username is already taken."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Люди и доступы"
+msgstr "People and access"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Назначений нет."
+msgstr "No access assignments."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Назначения доступа"
+msgstr "Access assignments"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Найдём учётку по почте или создадим новую. Пароль нового пользователя "
+"будет показан один раз; для существующего пароль сохраняется."
+msgstr "We will find an account by email or create one. A new user's password is shown once; an existing user's password stays unchanged."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Настройки платформы"
+msgstr "Platform settings"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Неизвестное действие."
+msgstr "Unrecognized action."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Нельзя отключить последнего администратора пространства."
+msgstr "The last workspace administrator cannot be disabled."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Нельзя убрать последнего действующего бессрочного администратора. "
+"Сначала назначьте другого человека с правом управления доступом."
+msgstr "The last active permanent administrator must remain. Assign another person who can manage access first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Никого не найдено."
+msgstr "No people found."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Общий справочник курсов для консолидации."
+msgstr "Shared exchange rates for consolidation."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Объект"
+msgstr "Object"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организации"
+msgstr "Organizations"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организаций пока нет. Добавьте первое юридическое лицо."
+msgstr "No organizations yet. Add the first legal entity."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация"
+msgstr "Organization"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация изменена"
+msgstr "Organization changed"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация создана"
+msgstr "Organization created"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация сохранена."
+msgstr "Organization saved."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Оставьте пароль пустым, чтобы сгенерировать его автоматически."
+msgstr "Leave the password blank to generate one automatically."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отключение учётной записи прекращает все её сеансы. Рабочие документы и "
+"расчёты сохраняются."
+msgstr "Disabling an account ends all its sessions. Work documents and calculations are preserved."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отключить учётную запись"
+msgstr "Disable account"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отключён"
+msgstr "Disabled"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть"
+msgstr "Open section"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть пользователя"
+msgstr "Open user account"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть пространство"
+msgstr "Open workspace"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пароль администратора платформы меняется им самим."
+msgstr "Platform administrators change their own passwords."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пароль заменён"
+msgstr "Password replaced"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Платформа"
+msgstr "Platform"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Платформенного администратора нельзя отключить из этого кабинета."
+msgstr "A platform administrator cannot be disabled from this console."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поиск"
+msgstr "Search query"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Показаны первые 200 записей. Для уточнения используйте поиск."
+msgstr "Showing the first 200 records. Use search to narrow the results."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пользователи"
+msgstr "Users"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пользователь добавлен. Доступ действует."
+msgstr "User added. Access is active."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Последние 100 административных операций. Пароли и токены не "
+"записываются."
+msgstr "The latest 100 administrative operations. Passwords and tokens are never recorded."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Последний вход — вход учётной записи, не посещение конкретного "
+"пространства."
+msgstr "Last login refers to the account, not a visit to a specific workspace."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Почта первого человека"
+msgstr "First user's email"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пространство создано"
+msgstr "Workspace created"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Профиль изменён"
+msgstr "Profile changed"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Работа партнёра"
+msgstr "Partner workspace"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Роль выдана"
+msgstr "Role granted"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Роль снята"
+msgstr "Role revoked"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сгенерировать новый пароль"
+msgstr "Generate new password"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Снятие роли"
+msgstr "Role revocation"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сохраните пароль сейчас: повторно он не показывается. Передайте его "
+"пользователю безопасным способом."
+msgstr "Save this password now: it will not be shown again. Share it with the user securely."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срок"
+msgstr "End date"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срок доступа не может быть в прошлом."
+msgstr "Access cannot expire in the past."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страны подключённых пространств"
+msgstr "Countries of connected workspaces"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У человека уже есть другое рабочее пространство. Сначала снимите прежнее "
+"членство."
+msgstr "This person already belongs to another workspace. Remove the previous membership first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У этой почты несколько учётных записей. Сначала уточните их почту."
+msgstr "Several accounts use this email. Correct their email addresses first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите действительный адрес электронной почты."
+msgstr "Enter a valid email address."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите название организации."
+msgstr "Enter the organization name."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите причину изменения доступа."
+msgstr "Enter the reason for changing access."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите причину изменения."
+msgstr "Enter the reason for this change."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите срок в формате ГГГГ-ММ-ДД."
+msgstr "Enter the end date as YYYY-MM-DD."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Управление входом"
+msgstr "Sign-in management"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Управление платформой"
+msgstr "Platform management"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Управлять платформой может только администратор платформы."
+msgstr "Only a platform administrator can manage the platform."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётка уже существует."
+msgstr "This account already exists."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётная запись включена"
+msgstr "Account enabled"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётная запись отключена"
+msgstr "Account disabled"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётная запись отключена. Сначала включите её."
+msgstr "This account is disabled. Enable it first."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Учётные записи сервиса. Доступ к данным определяется назначениями внутри "
+"пространства."
+msgstr "Service accounts. Access to data is determined by assignments within a workspace."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта почта уже принадлежит другой учётной записи."
+msgstr "This email belongs to another account."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта почта уже принадлежит учётной записи."
+msgstr "This email already belongs to an account."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот логин уже занят. Уточните почту существующей учётной записи."
+msgstr "This username is taken. Check the existing account's email."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Юридические лица внутри выбранного пространства партнёра."
+msgstr "Legal entities within the selected partner workspace."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека в этом пространстве нет."
+msgstr "There is no such person in this space."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Вместе с пространством заводятся роли и первый пользователь. Затем можно "
+"добавить организации и остальных людей."
+msgstr "Roles and the first user are created with the workspace. You can then add organizations and other people."

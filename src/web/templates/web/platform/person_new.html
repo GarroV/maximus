@@ -1,0 +1,13 @@
+{% extends 'web/base.html' %}{% load i18n ui %}
+{% block title %}{% translate 'Добавить пользователя' %}{% endblock %}
+{% block content %}<p><a href="{% url 'platform-space' tenant_id=space.pk %}">← {{ space.title }}</a></p><h1>{% translate 'Добавить пользователя' %}</h1>
+<p class="sub">{% translate 'Найдём учётку по почте или создадим новую. Пароль нового пользователя будет показан один раз; для существующего пароль сохраняется.' %}</p>
+{% if error %}{% notice 'alert' %}{{ error }}{% endnotice %}{% endif %}
+<form method="post" class="card">{% csrf_token %}
+<label class="field">{% translate 'Почта' %}<input type="email" name="email" value="{{ filled.email }}" required autocomplete="off"></label>
+<label class="field">{% translate 'Имя' %}<input name="full_name" value="{{ filled.full_name }}"></label>
+<label class="field">{% translate 'Роль' %}<select name="role_id" required><option value="">{% translate 'Выберите роль' %}</option>{% for role in roles %}<option value="{{ role.pk }}"{% if filled.role_id == role.pk|stringformat:'s' %} selected{% endif %}>{{ role.title }}</option>{% endfor %}</select></label>
+{% include 'web/roles/unit_picks.html' with units=unit_options picked=picked_units %}
+<label class="field">{% translate 'Доступ до' %}<input type="date" name="until" value="{{ filled.until }}"></label><p class="note">{% translate 'Без даты — бессрочно.' %}</p>
+<label class="field">{% translate 'Причина' %}<input name="reason" value="{{ filled.reason }}" required></label>
+<button class="primary">{% translate 'Добавить пользователя' %}</button></form>{% endblock %}

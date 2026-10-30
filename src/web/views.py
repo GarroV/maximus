@@ -115,7 +115,10 @@ def index(request):
         return render(
             request, "web/landing.html", {**login_context(request), "theme_attr": "light"},
         )
-    return redirect("periods")
+    from core.spaces import is_platform_admin
+
+    who = get_current_principal(request)
+    return redirect("platform-index" if is_platform_admin(who.user_id) else "periods")
 
 
 def privacy(request):
@@ -131,6 +134,11 @@ def privacy(request):
 
 @login_required
 def periods(request):
+    from core.spaces import is_platform_admin
+
+    who = get_current_principal(request)
+    if who and who.tenant_id is None and is_platform_admin(who.user_id):
+        return redirect("platform-index")
     rows = _period_rows()
     return render(
         request,

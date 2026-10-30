@@ -1,0 +1,7 @@
+{% extends 'web/base.html' %}{% load i18n ui %}
+{% block title %}{% translate 'Организации' %} · {{ space.title }}{% endblock %}
+{% block content %}<p><a href="{% url 'platform-index' %}">← {% translate 'Пространства' %}</a></p><h1>{{ space.title }}</h1>{% include 'web/platform/_space_nav.html' %}
+<h2>{% translate 'Организации' %}</h2><p class="sub">{% translate 'Юридические лица внутри выбранного пространства партнёра.' %}</p>
+{% if notice %}{% notice 'ok' %}{{ notice }}{% endnotice %}{% endif %}
+<p><a class="btn primary" href="{% url 'platform-organization-create' tenant_id=space.pk %}">{% translate 'Добавить организацию' %}</a></p>
+{% scroll %}<table class="stack"><thead><tr><th>{% translate 'Название' %}</th><th>{% translate 'Налоговый номер' %}</th></tr></thead><tbody>{% for org in organizations %}<tr><td data-label="{% translate 'Название' %}"><a href="{% url 'platform-organization' tenant_id=space.pk organization_id=org.pk %}">{{ org.title }}</a></td><td data-label="{% translate 'Налоговый номер' %}">{{ org.tax_number|default:'—' }}</td></tr>{% empty %}<tr><td colspan="2">{% translate 'Организаций пока нет. Добавьте первое юридическое лицо.' %}</td></tr>{% endfor %}</tbody></table>{% endscroll %}{% endblock %}

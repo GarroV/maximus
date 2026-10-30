@@ -7,7 +7,7 @@
 {% block content %}
 <p class="note"><a href="{% url 'platform-space' tenant_id=space.id %}">{% blocktranslate with title=space.title %}← Люди пространства «{{ title }}»{% endblocktranslate %}</a></p>
 <h1>{% translate "Выдать роль" %}</h1>
-<p class="sub">{% blocktranslate %}Логин человека должен уже существовать: одной учёткой можно работать у нескольких партнёров. Нового человека партнёр заводит сам на своём экране ролей.{% endblocktranslate %}</p>
+<p class="sub">{% blocktranslate %}Выберите человека и роль. Для нового пользователя сначала откройте «Добавить пользователя» в пространстве.{% endblocktranslate %}</p>
 
 {% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
 
@@ -15,9 +15,11 @@
   {% csrf_token %}
   <input type="hidden" name="action" value="grant">
   {% translate "Идентификатор человека" as f_person %}{% translate "Роль" as f_role %}
-  {% include "web/components/field.html" with id="id_person" name="user_id" label=f_person value=user_id required=1 stacked=1 %}
+  <label class="field">{% translate 'Человек' %}<select id="id_person" name="user_id" required><option value="">{% translate 'Выберите человека' %}</option>{% for person in people_options %}<option value="{{ person.user_id }}"{% if user_id == person.user_id|stringformat:'s' %} selected{% endif %}>{{ person.name }} · {{ person.email }}</option>{% endfor %}</select></label>
   {% include "web/components/select.html" with id="id_grant_role" name="role_id" label=f_role options=role_options stacked=1 %}
   {% include "web/roles/unit_picks.html" with units=unit_options picked=picked_units %}
+  <label class="field">{% translate 'Доступ до' %}<input type="date" name="until" value="{{ until }}"></label>
+  <label class="field">{% translate 'Причина' %}<input name="reason" value="{{ request.POST.reason }}" required></label>
   <button type="submit" class="primary">{% translate "Выдать" %}</button>
 </form>
 {% endblock %}

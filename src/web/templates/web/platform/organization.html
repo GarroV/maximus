@@ -1,0 +1,5 @@
+{% extends 'web/base.html' %}{% load i18n ui %}
+{% block title %}{% translate 'Организация' %} · {{ space.title }}{% endblock %}
+{% block content %}<p><a href="{% url 'platform-organizations' tenant_id=space.pk %}">← {{ space.title }} · {% translate 'Организации' %}</a></p><h1>{% if organization %}{{ organization.title }}{% else %}{% translate 'Добавить организацию' %}{% endif %}</h1>
+{% if error %}{% notice 'alert' %}{{ error }}{% endnotice %}{% endif %}
+<form method="post" class="card">{% csrf_token %}<label class="field">{% translate 'Название' %}<input name="title" value="{% firstof filled.title organization.title %}" required></label><label class="field">{% translate 'Налоговый номер' %}<input name="tax_number" value="{% firstof filled.tax_number organization.tax_number %}"></label><button class="primary">{% translate 'Сохранить' %}</button></form>{% endblock %}

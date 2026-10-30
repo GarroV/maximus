@@ -23,7 +23,10 @@
 {% if notice %}{% notice "ok" %}{{ notice }}{% endnotice %}{% endif %}
 {% if error %}{% notice "alert" %}{{ error }}{% endnotice %}{% endif %}
 
+{% include 'web/platform/_space_nav.html' %}
+{% include 'web/platform/_credentials.html' %}
 <h2>{% translate "Люди пространства" %}</h2>
+<p><a class="btn primary" href="{% url 'platform-person-create' tenant_id=space.pk %}">{% translate 'Добавить пользователя' %}</a></p>
 <p><a class="btn" href="{% url 'platform-member-role' tenant_id=space.id %}">{% translate "Выдать роль" %}</a></p>
 {% scroll %}<table class="stack">
   <thead>
@@ -36,15 +39,15 @@
   <tbody>
     {% for person in people %}
     <tr>
-      <td data-label="{% translate "Человек" %}">{{ person.name }}{% if not person.is_active %} <span class="muted">{% translate "(отключён)" %}</span>{% endif %}</td>
-      <td data-label="{% translate "Логин" %}">{{ person.username }}</td>
+      <td data-label="{% translate "Человек" %}"><a href="{% url 'platform-user' user_id=person.user_id %}">{{ person.name }}</a>{% if not person.is_active %} <span class="muted">{% translate "(отключён)" %}</span>{% endif %}</td>
+      <td data-label="{% translate "Логин" %}">{{ person.username }}<br><small>{{ person.email }}</small></td>
       <td data-label="{% translate "Роли" %}">{% for role in person.roles %}
         <form method="post" action="{% url 'platform-member-role' tenant_id=space.id %}" class="inline">
           {% csrf_token %}
           <input type="hidden" name="user_id" value="{{ person.user_id }}">
           <input type="hidden" name="role_id" value="{{ role.id }}">
           <input type="hidden" name="action" value="revoke">
-          <span class="chip">{{ role.title }}
+          <span class="chip"><a href="{% url 'platform-member-role' tenant_id=space.id %}?user={{ person.user_id }}&amp;role={{ role.id }}">{{ role.title }}</a>{% if role.until %} · {{ role.until|date:"SHORT_DATE_FORMAT" }}{% endif %}
             <button type="submit" class="link" title="{% translate "Снять роль" %}" aria-label="{% blocktranslate with role=role.title %}Снять роль «{{ role }}»{% endblocktranslate %}">×</button>
           </span>
         </form>

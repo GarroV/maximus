@@ -87,6 +87,7 @@ def create_space(
     admin_username: str,
     admin_password: str,
     admin_full_name: str = "",
+    admin_email: str = "",
     role_code: str = "admin",
 ) -> NewSpace:
     """Завести партнёра: пространство, его роли и первого человека.
@@ -148,7 +149,16 @@ def create_space(
             % {"login": admin_username}
         )
 
+    # Compatibility for existing command callers; console requires a separate email field.
+    if admin_email:
+        from .platform import email_value, lock_email
+        admin_email = email_value(admin_email)
+
     with transaction.atomic():
+        if admin_email:
+            lock_email(admin_email)
+            if User.objects.filter(email__iexact=admin_email).exists():
+                raise SpaceRefused(_("Эта почта уже принадлежит учётной записи."))
         tenant = Tenant.objects.create(
             code=code,
             title=title,
@@ -181,6 +191,7 @@ def create_space(
             username=admin_username,
             password=admin_password,
             full_name=admin_full_name or admin_username,
+            email=admin_email,
         )
         Membership.objects.create(
             tenant=tenant,

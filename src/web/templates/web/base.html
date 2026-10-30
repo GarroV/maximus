@@ -85,7 +85,7 @@
 {% if principal %}
 {% comment %}Полоса телефона (ниже 720px): марка и аватар, открывающий меню учётки.{% endcomment %}
 <header class="mbar">
-  <a class="mbar__brand" href="{% url 'periods' %}">{% brand_mark "topbar__logo" 24 %}<span class="topbar__name">MAXIMUS</span></a>
+  <a class="mbar__brand" href="{% if platform_mode %}{% url 'platform-index' %}{% else %}{% url 'periods' %}{% endif %}">{% brand_mark "topbar__logo" 24 %}<span class="topbar__name">MAXIMUS</span></a>
   <span class="topbar__spacer"></span>
   {% include "web/components/account_menu.html" with menu_id="mbar" menu_place="down" %}
 </header>

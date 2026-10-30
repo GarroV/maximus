@@ -3713,17 +3713,9 @@ msgstr "Takva uloga ne postoji u ovom prostoru."
 msgid "Роль снята."
 msgstr "Uloga je uklonjena."
 
-#: web/platform_views.py:242
-msgid "Этой роли у человека и не было."
-msgstr "Osoba ionako nije imala tu ulogu."
-
 #: web/platform_views.py:247
 msgid "Такого человека нет."
 msgstr "Takva osoba ne postoji."
-
-#: web/platform_views.py:253
-msgid "Роль выдана."
-msgstr "Uloga je dodeljena."
 
 #: web/positions_views.py:76
 msgid ""
@@ -6369,15 +6361,6 @@ msgstr "U ovom prostoru još nema nijedne osobe."
 msgid "Выдать роль"
 msgstr "Dodeli ulogu"
 
-#: web/templates/web/platform/space.html:57
-msgid ""
-"Логин человека должен уже существовать: одной учёткой можно работать у "
-"нескольких партнёров. Нового человека партнёр заводит сам на своём экране "
-"ролей."
-msgstr ""
-"Prijava osobe mora već postojati: jednim nalogom može se raditi kod više "
-"partnera. Novu osobu partner dodaje sam na svom ekranu uloga."
-
 #: web/templates/web/platform/space.html:61
 msgid "Идентификатор человека"
 msgstr "Identifikator osobe"
@@ -8865,10 +8848,6 @@ msgstr "← Svi ljudi"
 #, python-format
 msgid "← Люди пространства «%(title)s»"
 msgstr "← Ljudi u prostoru „%(title)s“"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Такого человека в этом пространстве нет."
-msgstr "U ovom prostoru nema takve osobe."
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""
@@ -11503,3 +11482,370 @@ msgstr "u razvoju"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "или"
 msgstr "ili"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Администратор"
+msgstr "Administrator"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Без даты — бессрочно."
+msgstr "Bez datuma pristup je trajan."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Включить учётную запись"
+msgstr "Uključi nalog"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите роль"
+msgstr "Izaberite ulogu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите роль этого пространства."
+msgstr "Izaberite ulogu iz ovog radnog prostora."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выберите человека"
+msgstr "Izaberite osobu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Выберите человека и роль. Для нового пользователя сначала откройте "
+"«Добавить пользователя» в пространстве."
+msgstr "Izaberite osobu i ulogu. Za novog korisnika prvo otvorite Dodaj korisnika u radnom prostoru."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Выдача роли"
+msgstr "Dodela uloge"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Действует"
+msgstr "Aktivan"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Добавить организацию"
+msgstr "Dodaj organizaciju"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Добавить пользователя"
+msgstr "Dodaj korisnika"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ до"
+msgstr "Pristup do"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ изменён"
+msgstr "Pristup promenjen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ создан"
+msgstr "Pristup napravljen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Доступ сохранён."
+msgstr "Pristup je sačuvan."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Журнал изменений"
+msgstr "Dnevnik promena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Изменений пока нет."
+msgstr "Još nema promena."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Изменения сохранены."
+msgstr "Promene su sačuvane."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Код пространства или логин уже занят."
+msgstr "Šifra radnog prostora ili korisničko ime je već zauzeto."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Люди и доступы"
+msgstr "Ljudi i pristup"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Назначений нет."
+msgstr "Nema dodeljenog pristupa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Назначения доступа"
+msgstr "Dodele pristupa"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Найдём учётку по почте или создадим новую. Пароль нового пользователя "
+"будет показан один раз; для существующего пароль сохраняется."
+msgstr "Pronaći ćemo nalog po adresi e-pošte ili napraviti novi. Lozinka novog korisnika prikazuje se jednom; lozinka postojećeg ostaje ista."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Настройки платформы"
+msgstr "Podešavanja platforme"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Неизвестное действие."
+msgstr "Neprepoznata radnja."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Нельзя отключить последнего администратора пространства."
+msgstr "Poslednji administrator radnog prostora ne može se isključiti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Нельзя убрать последнего действующего бессрочного администратора. "
+"Сначала назначьте другого человека с правом управления доступом."
+msgstr "Poslednji aktivni administrator bez roka mora ostati. Prvo dodelite drugoj osobi pravo upravljanja pristupom."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Никого не найдено."
+msgstr "Nijedna osoba nije pronađena."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Общий справочник курсов для консолидации."
+msgstr "Zajednički devizni kursevi za konsolidaciju."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Объект"
+msgstr "Predmet izmene"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организации"
+msgstr "Organizacije"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организаций пока нет. Добавьте первое юридическое лицо."
+msgstr "Još nema organizacija. Dodajte prvo pravno lice."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация"
+msgstr "Organizacija"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация изменена"
+msgstr "Organizacija promenjena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация создана"
+msgstr "Organizacija napravljena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Организация сохранена."
+msgstr "Organizacija je sačuvana."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Оставьте пароль пустым, чтобы сгенерировать его автоматически."
+msgstr "Ostavite lozinku praznom da se automatski generiše."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Отключение учётной записи прекращает все её сеансы. Рабочие документы и "
+"расчёты сохраняются."
+msgstr "Isključivanje naloga prekida sve njegove sesije. Radni dokumenti i obračuni se čuvaju."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отключить учётную запись"
+msgstr "Isključi nalog"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Отключён"
+msgstr "Isključen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть"
+msgstr "Otvori"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть пользователя"
+msgstr "Otvori korisnički nalog"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Открыть пространство"
+msgstr "Otvori radni prostor"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пароль администратора платформы меняется им самим."
+msgstr "Administratori platforme sami menjaju svoje lozinke."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пароль заменён"
+msgstr "Lozinka zamenjena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Платформа"
+msgstr "Platforma"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Платформенного администратора нельзя отключить из этого кабинета."
+msgstr "Administrator platforme ne može se isključiti iz ove konzole."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Поиск"
+msgstr "Pojam za pretragu"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Показаны первые 200 записей. Для уточнения используйте поиск."
+msgstr "Prikazano je prvih 200 zapisa. Koristite pretragu da suzite rezultate."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пользователи"
+msgstr "Korisnici"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пользователь добавлен. Доступ действует."
+msgstr "Korisnik je dodat. Pristup je aktivan."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Последние 100 административных операций. Пароли и токены не "
+"записываются."
+msgstr "Poslednjih 100 administrativnih radnji. Lozinke i tokeni se ne beleže."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Последний вход — вход учётной записи, не посещение конкретного "
+"пространства."
+msgstr "Poslednja prijava se odnosi na nalog, a ne na posetu određenom radnom prostoru."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Почта первого человека"
+msgstr "E-pošta prvog korisnika"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Пространство создано"
+msgstr "Radni prostor napravljen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Профиль изменён"
+msgstr "Profil promenjen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Работа партнёра"
+msgstr "Rad partnera"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Роль выдана"
+msgstr "Uloga dodeljena"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Роль снята"
+msgstr "Uloga opozvana"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сгенерировать новый пароль"
+msgstr "Generiši novu lozinku"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Снятие роли"
+msgstr "Opoziv uloge"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Сохраните пароль сейчас: повторно он не показывается. Передайте его "
+"пользователю безопасным способом."
+msgstr "Sačuvajte ovu lozinku sada: neće ponovo biti prikazana. Bezbedno je prosledite korisniku."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срок"
+msgstr "Datum isteka"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Срок доступа не может быть в прошлом."
+msgstr "Pristup ne može isteći u prošlosti."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Страны подключённых пространств"
+msgstr "Zemlje povezanih radnih prostora"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У человека уже есть другое рабочее пространство. Сначала снимите прежнее "
+"членство."
+msgstr "Ova osoba već pripada drugom radnom prostoru. Prvo uklonite prethodno članstvo."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"У этой почты несколько учётных записей. Сначала уточните их почту."
+msgstr "Više naloga koristi ovu adresu. Prvo ispravite njihove adrese e-pošte."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите действительный адрес электронной почты."
+msgstr "Unesite važeću adresu e-pošte."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите название организации."
+msgstr "Unesite naziv organizacije."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите причину изменения доступа."
+msgstr "Unesite razlog promene pristupa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите причину изменения."
+msgstr "Unesite razlog ove promene."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Укажите срок в формате ГГГГ-ММ-ДД."
+msgstr "Unesite datum isteka u formatu GGGG-MM-DD."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Управление входом"
+msgstr "Upravljanje prijavom"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Управление платформой"
+msgstr "Upravljanje platformom"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Управлять платформой может только администратор платформы."
+msgstr "Platformom može upravljati samo administrator platforme."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётка уже существует."
+msgstr "Ovaj nalog već postoji."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётная запись включена"
+msgstr "Nalog uključen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётная запись отключена"
+msgstr "Nalog isključen"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Учётная запись отключена. Сначала включите её."
+msgstr "Ovaj nalog je isključen. Prvo ga uključite."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Учётные записи сервиса. Доступ к данным определяется назначениями внутри "
+"пространства."
+msgstr "Nalozi servisa. Pristup podacima određuju dodele u radnom prostoru."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта почта уже принадлежит другой учётной записи."
+msgstr "Ova adresa pripada drugom nalogu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Эта почта уже принадлежит учётной записи."
+msgstr "Ova adresa već pripada nekom nalogu."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Этот логин уже занят. Уточните почту существующей учётной записи."
+msgstr "Ovo korisničko ime je zauzeto. Proverite adresu postojećeg naloga."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Юридические лица внутри выбранного пространства партнёра."
+msgstr "Pravna lica u izabranom radnom prostoru partnera."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Такого человека в этом пространстве нет."
+msgstr "U ovom prostoru nema takve osobe."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Вместе с пространством заводятся роли и первый пользователь. Затем можно "
+"добавить организации и остальных людей."
+msgstr "Uloge i prvi korisnik prave se zajedno sa radnim prostorom. Zatim možete dodati organizacije i druge ljude."

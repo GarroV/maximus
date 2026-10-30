@@ -101,7 +101,8 @@ def test_creating_a_space_gives_a_working_partner(client, platform_admin, spaces
     response = client.post("/platform/new/", {
         "title": "Dodo Hrvatska", "code": "hr-dodo",
         "country_code": "HR", "base_currency": "EUR", "report_currency": "EUR",
-        "admin_username": "hr-boss", "admin_full_name": "Первый человек",
+        "admin_username": "hr-boss",
+        "admin_email": "hr-boss@example.org", "admin_full_name": "Первый человек",
         "admin_password": "very-secret-1", "role_code": "admin",
     })
     assert response.status_code == 302, "после заведения должно перекинуть внутрь пространства"
@@ -125,12 +126,14 @@ def test_a_duplicate_code_is_refused_in_words(client, platform_admin, spaces_res
     client.post("/platform/new/", {
         "title": "Первый", "code": "dup-code", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "dup-one", "admin_password": "secret-1",
+        "admin_username": "dup-one",
+        "admin_email": "dup-one@example.org", "admin_password": "secret-1",
     })
     response = client.post("/platform/new/", {
         "title": "Второй", "code": "dup-code", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "dup-two", "admin_password": "secret-2",
+        "admin_username": "dup-two",
+        "admin_email": "dup-two@example.org", "admin_password": "secret-2",
     })
     # Отказ — на странице самой формы, с набранным, а не на экране списка (T225).
     assert response.status_code == 400
@@ -148,7 +151,8 @@ def test_a_space_without_a_first_person_is_refused(client, platform_admin, space
     response = client.post("/platform/new/", {
         "title": "Ничей", "code": "nobody", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "", "admin_password": "",
+        "admin_username": "",
+        "admin_email": "blank@example.org", "admin_password": "",
     })
     assert not Tenant.objects.filter(code="nobody").exists(), (
         "пространство завелось без первого человека — войти в него некому"
@@ -209,7 +213,8 @@ def test_a_role_of_another_space_cannot_be_granted(client, platform_admin, space
     client.post("/platform/new/", {
         "title": "Сосед", "code": "neighbour", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "neighbour-boss", "admin_password": "secret-1",
+        "admin_username": "neighbour-boss",
+        "admin_email": "neighbour-boss@example.org", "admin_password": "secret-1",
     })
     other = Tenant.objects.get(code="neighbour")
     alien_role = Role.objects.filter(tenant=other).first()
@@ -249,7 +254,8 @@ def test_a_space_nobody_entered_says_so_in_words(client, platform_admin, spaces_
     client.post("/platform/new/", {
         "title": "Тихий", "code": "quiet", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "quiet-boss", "admin_password": "secret-1",
+        "admin_username": "quiet-boss",
+        "admin_email": "quiet-boss@example.org", "admin_password": "secret-1",
     })
     html = body(client.get("/platform/"))
     assert "не входили" in html
@@ -263,7 +269,8 @@ def test_the_counters_are_honest(client, platform_admin, spaces_restored):
     client.post("/platform/new/", {
         "title": "Считалка", "code": "counted", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "counted-boss", "admin_password": "secret-1",
+        "admin_username": "counted-boss",
+        "admin_email": "counted-boss@example.org", "admin_password": "secret-1",
     })
     space = Tenant.objects.get(code="counted")
     from web.platform_views import _spaces
@@ -406,7 +413,8 @@ def test_a_new_space_does_not_start_with_a_unit_manager(client, platform_admin, 
     response = client.post("/platform/new/", {
         "title": "Точечный", "code": "unit-first", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "unit-first-boss", "admin_password": "secret-1",
+        "admin_username": "unit-first-boss",
+        "admin_email": "unit-first-boss@example.org", "admin_password": "secret-1",
         "role_code": "manager",
     })
     assert response.status_code == 400
@@ -425,7 +433,8 @@ def test_country_and_currencies_are_checked(client, platform_admin, spaces_resto
     payload = {
         "title": "Проверка", "code": "l1-check", "country_code": "RS",
         "base_currency": "RSD", "report_currency": "EUR",
-        "admin_username": "l1-boss", "admin_password": "secret-1",
+        "admin_username": "l1-boss",
+        "admin_email": "l1-boss@example.org", "admin_password": "secret-1",
     }
     payload[field] = value
     login_as(client, "admin")
