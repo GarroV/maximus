@@ -90,7 +90,7 @@ def status_title(code: str) -> str:
 
 
 def index(request):
-    """Корень. На демо-стенде — в демо, в продукте — к периодам.
+    """Корень: открытый лендинг, после входа — к периодам; демо — в демо.
 
     T160: на стенде корень уводил на `/periods/`, оттуда `@login_required` на
     форму входа, а форма предлагала пароль от продукта, которого у гостя нет.
@@ -1646,7 +1646,7 @@ def login_context(request) -> dict:
 
 
 def login_page(request):
-    """Вход по логину и паролю — единственный способ доказать личность."""
+    """Страница входа: пароль и Google, если его реквизиты заданы."""
     if request.method == "POST":
         username = (request.POST.get("username") or "").strip()
         password = request.POST.get("password") or ""
