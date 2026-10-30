@@ -221,7 +221,14 @@ services:
         # Не «база жива», а «схема накатана»: без этого приложение поднялось бы
         # на старой схеме и падало бы на отсутствующих колонках.
         condition: service_completed_successfully
-    environment: *app-env
+    environment:
+      <<: *app-env
+      # Google нужен только продукту: ни очередь, ни миграции, ни демо
+      # реквизиты входа не получают. Сам .env в контейнер не передаётся.
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI-}
+      GOOGLE_HQ_DOMAINS: ${GOOGLE_HQ_DOMAINS-}
     ports:
       # Слева порт на хосте (APP_PORT), справа — всегда 8000 внутри контейнера.
       - "${APP_PORT:?задайте APP_PORT в .env}:8000"

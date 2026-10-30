@@ -25,15 +25,30 @@ import base64
 import json
 import time
 from contextlib import contextmanager
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import psycopg
 import pytest
+import yaml
 from django.test import override_settings
 
 from conftest import as_app_user, body, login_as
 
 CLIENT = "client-id.apps.googleusercontent.com"
+
+
+def test_compose_passes_google_settings_only_to_the_product():
+    """Запись реквизитов в .env доходит до app, но не до демо и очереди."""
+    root = Path(__file__).resolve().parents[1]
+    compose = yaml.safe_load((root / "docker-compose.yml").read_text())
+    keys = {
+        "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REDIRECT_URI", "GOOGLE_HQ_DOMAINS",
+    }
+    for key in keys:
+        assert compose["services"]["app"]["environment"][key] == "${" + key + "-}"
+    for service in ("worker", "migrate", "demo", "demo-init", "demo-reset"):
+        assert keys.isdisjoint(compose["services"][service]["environment"])
 
 
 def user_id_of(code: str):
