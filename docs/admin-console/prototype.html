@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MAXIMUS · Макет управления платформой</title>
+  <link rel="icon" href="../../src/web/static/web/mark-small.svg">
+  <link rel="stylesheet" href="../../src/web/static/web/tokens.css">
+  <link rel="stylesheet" href="../../src/web/static/web/dodo-ds.css">
+  <style>
+    *{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--canvas);color:var(--ink)}
+    .prototype{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+    .rail{padding:28px 20px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:30px;background:var(--surface)}
+    .brand{display:flex;gap:12px;align-items:center}.brand img{width:42px;height:42px}.brand b{font-size:21px;letter-spacing:.02em}.brand small{display:block;color:var(--ink-2);font-size:12px}
+    nav{display:grid;gap:7px}nav a{padding:12px 14px;border-radius:10px;color:var(--ink-2);text-decoration:none}nav a[aria-current]{color:var(--accent);background:var(--accent-bg);font-weight:700;box-shadow:inset 3px 0 var(--accent)}
+    .rail-foot{margin-top:auto;font-size:13px;color:var(--ink-2)}.rail-foot strong{display:block;color:var(--ink);margin-bottom:8px}
+    .workspace{min-width:0}.draft{padding:10px 32px;background:var(--surface-head);color:var(--ink-2);font-size:12px;border-bottom:1px solid var(--line)}
+    main{max-width:1180px;margin:0 auto;padding:36px 42px 60px}h1{font-size:32px;letter-spacing:-.035em;line-height:1.1;margin:12px 0}h2{font-size:20px;margin:0 0 16px}p{max-width:78ch}.lede{color:var(--ink-2);margin:0 0 26px}
+    .page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:24px}.crumb{font-size:13px;color:var(--ink-2)}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.stat,.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}.stat span{display:block;color:var(--ink-2);font-size:12px}.stat strong{font-size:28px;font-variant-numeric:tabular-nums}
+    .toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 16px}.toolbar input{flex:1;min-width:180px}.toolbar select{width:auto;min-width:160px}input,select{font:inherit;width:100%;padding:11px 12px;border:1px solid var(--line-control);border-radius:9px;background:var(--surface);color:var(--ink)}
+    button,.button{font:inherit;cursor:pointer;padding:10px 15px;border:1px solid var(--line-control);border-radius:9px;background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;text-decoration:none;white-space:normal}.primary{background:var(--accent);color:var(--ink-inverse);border-color:var(--accent)}button:hover,.button:hover{filter:brightness(.97)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+    .proto-table{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;color:var(--ink-2);background:var(--surface-2);font-size:12px;font-weight:600}th,td{padding:16px 18px;border-bottom:1px solid var(--line);vertical-align:middle}tr:last-child td{border-bottom:0}td a{font-weight:650;color:var(--accent)}td small{display:block;color:var(--ink-2);margin-top:5px}.status{display:inline-block;padding:4px 9px;border-radius:6px;background:var(--surface-head);font-size:12px;color:var(--ink-2)}
+    .cuts{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin:22px 0}.cuts a{color:var(--ink-2);padding:8px 10px;text-decoration:none}.cuts a[aria-current]{color:var(--accent);font-weight:700;border-bottom:2px solid var(--accent)}
+    .two-col{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}.facts{display:grid;grid-template-columns:minmax(120px,1fr) 1.5fr;gap:12px;font-size:14px}.facts dt{color:var(--ink-2)}.facts dd{margin:0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.empty{padding:35px;text-align:center;color:var(--ink-2)}.note{color:var(--ink-2);font-size:13px}.notice{padding:14px 18px;border:1px solid var(--line-strong);background:var(--surface-2);border-radius:10px;margin-bottom:20px}
+    dialog{border:1px solid var(--line-strong);border-radius:16px;padding:28px;width:min(560px,calc(100vw - 32px));background:var(--surface);color:var(--ink);max-height:90vh;overflow:auto}dialog::backdrop{background:rgba(27,32,40,.35)}dialog label{display:grid;gap:7px;margin:16px 0;font-size:14px}dialog h2{margin-top:0}.dialog-head{display:flex;justify-content:space-between;gap:12px}.dialog-head button{padding:4px 10px}.reason{border-left:3px solid var(--accent);padding:10px 14px;background:var(--surface-2);font-size:13px}.form-error{color:var(--ink);font-weight:600}.mode{margin-top:24px;display:flex;gap:8px}.theme-btn{padding:6px 10px;font-size:12px}
+    @media(max-width:800px){.prototype{display:block}.rail{padding:15px 18px;gap:16px;border-right:0;border-bottom:1px solid var(--line)}.rail nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.rail nav a{padding:9px;font-size:13px;white-space:nowrap}.rail-foot{margin-top:0}.rail-description{display:none}.rail-foot .mode{margin-top:0}.brand img{width:32px;height:32px}.brand b{font-size:18px}.brand small{display:inline;margin-left:8px}.draft{padding:9px 18px}main{padding:22px 18px}h1{font-size:27px}.page-head{display:block}.page-head>.button{margin-top:16px}.stats{gap:7px}.stat{padding:12px}.stat strong{font-size:23px}.stat span{font-size:11px}.two-col{grid-template-columns:1fr}table thead{display:none}table tbody tr{display:block;padding:12px 16px;border-bottom:1px solid var(--line)}td{display:flex;justify-content:space-between;gap:16px;border:0;padding:7px 0;font-size:13px}td:before{content:attr(data-label);color:var(--ink-2);font-weight:400;flex:0 0 95px}td:first-child{display:block}td:first-child:before{display:none}.toolbar{align-items:stretch}.toolbar select{flex:1}.toolbar input{width:100%;flex-basis:100%}.card{padding:18px}}
+  </style>
+</head>
+<body>
+<div class="prototype">
+  <aside class="rail">
+    <div class="brand"><img src="../../src/web/static/web/mark-small.svg" alt=""><div><b>MAXIMUS</b><small>Управление платформой</small></div></div>
+    <nav aria-label="Платформа"><a href="#spaces" data-nav="spaces">Пространства</a><a href="#users" data-nav="users">Пользователи</a><a href="#history" data-nav="history">Журнал изменений</a><a href="#settings" data-nav="settings">Настройки платформы</a></nav>
+    <div class="rail-foot"><div class="rail-description"><strong>Администратор платформы</strong>Управление подключением и доступами.<br>Данные расчёта остаются в рабочих пространствах.</div><div class="mode"><button class="theme-btn" data-set-theme="light">Светлая</button><button class="theme-btn" data-set-theme="dark">Тёмная</button></div></div>
+  </aside>
+  <div class="workspace"><div class="draft">Макет для обсуждения · вымышленные данные · действия не отправляются в продукт</div><main id="app"></main></div>
+</div>
+<dialog id="editor" aria-labelledby="dialog-title"></dialog>
+<script>
+  'use strict';
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const spaces = [
+    {id:'serbia',name:'Учебная сеть Сербия',country:'Сербия',currency:'RSD → EUR',status:'Активно',orgs:[{name:'Учебная компания А',registration:'DEMO-001'}],people:[{id:1,name:'Первый администратор',email:'admin@example.org',role:'Администратор пространства'},{id:2,name:'Учебный бухгалтер',email:'accountant@example.org',role:'Бухгалтер'}]},
+    {id:'turkey',name:'Тестовый партнёр Турция',country:'Турция',currency:'TRY → EUR',status:'Настройка',orgs:[],people:[{id:3,name:'Администратор партнёра',email:'partner@example.org',role:'Администратор пространства'}]}
+  ];
+  const events = [{action:'Создано пространство',object:'Учебная сеть Сербия',actor:'Администратор платформы',time:'Сегодня, 10:30'},{action:'Назначен первый администратор',object:'Тестовый партнёр Турция',actor:'Администратор платформы',time:'Сегодня, 11:15'}];
+  let notice = '', query = '', status = '';
+  const route = () => (location.hash.slice(1) || 'spaces').split('/');
+  const app = document.querySelector('#app'), editor = document.querySelector('#editor');
+  const table = (headers,rows) => `<div class="proto-table"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(cells=>`<tr>${cells.map((c,i)=>`<td data-label="${esc(headers[i])}">${c}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${headers.length}" class="empty">Записей не найдено. Измените поиск или добавьте первую запись.</td></tr>`}</tbody></table></div>`;
+  const head = (title,lede,action='') => `<div class="page-head"><div><h1 tabindex="-1">${esc(title)}</h1><p class="lede">${esc(lede)}</p></div>${action}</div>`;
+  const addButton = (label,action) => `<button class="primary" data-action="${action}">${esc(label)}</button>`;
+  const visibleSpaces=()=>spaces.filter(s=>(!query||s.name.toLowerCase().includes(query.toLowerCase()))&&(!status||s.status===status));
+  function rowsForSpaces(){return visibleSpaces().map(s=>[`<a href="#space/${s.id}/overview">${esc(s.name)}</a><small>${esc(s.country)} · ${esc(s.currency)}</small>`,`<span class="status">${esc(s.status)}</span>`,String(s.orgs.length),String(s.people.length),s.people.some(p=>p.role==='Администратор пространства')?'Назначен':'Не назначен']);}
+  function render(){
+    const [page,id,cut='overview']=route(), space=spaces.find(s=>s.id===id);
+    document.querySelectorAll('[data-nav]').forEach(a=>{a.removeAttribute('aria-current');if(a.dataset.nav===(page==='space'?'spaces':page))a.setAttribute('aria-current','page');});
+    const alerts=notice?`<div class="notice" role="status">${esc(notice)}</div>`:'';
+    if(page==='spaces'&&id==='new'){
+      app.innerHTML=`<a class="crumb" href="#spaces">← Пространства</a>`+head('Создание пространства','Подключите партнёра и первого администратора.')+`<section class="card" id="page-editor"></section>`;
+      showForm('space',undefined,true);return;
+    }
+    if(page==='space'&&space&&cut==='access'){
+      app.innerHTML=`<a class="crumb" href="#space/${space.id}/people">← Люди пространства</a>`+head('Изменение доступа',space.name)+`<section class="card" id="page-editor"></section>`;
+      const target=Number(route()[3]);
+      if(!space.people.some(p=>p.id===target)){location.hash='space/'+space.id+'/people';return;}
+      showForm('role',target,true);return;
+    }
+    if(page==='spaces'){
+      app.innerHTML=alerts+head('Пространства','Подключение партнёров и управление доступом.',addButton('Создать пространство','space'))+`<div class="stats"><div class="stat"><strong>${spaces.length}</strong><span>Пространств</span></div><div class="stat"><strong>${spaces.filter(s=>s.status==='Активно').length}</strong><span>Активных</span></div><div class="stat"><strong>${spaces.filter(s=>s.status==='Настройка').length}</strong><span>На настройке</span></div></div><div class="toolbar"><input id="search" aria-label="Поиск пространства" placeholder="Название пространства" value="${esc(query)}"><select id="status" aria-label="Состояние"><option value="">Все состояния</option><option ${status==='Активно'?'selected':''}>Активно</option><option ${status==='Настройка'?'selected':''}>Настройка</option></select></div><div id="space-list">${table(['Пространство','Состояние','Организаций','Людей','Администратор'],rowsForSpaces())}</div>`;
+      const refresh=()=>{document.querySelector('#space-list').innerHTML=table(['Пространство','Состояние','Организаций','Людей','Администратор'],rowsForSpaces());const shown=visibleSpaces();[shown.length,shown.filter(s=>s.status==='Активно').length,shown.filter(s=>s.status==='Настройка').length].forEach((n,i)=>document.querySelectorAll('.stat strong')[i].textContent=n);};refresh();
+      document.querySelector('#search').oninput=e=>{query=e.target.value;refresh();};
+      document.querySelector('#status').onchange=e=>{status=e.target.value;render();};
+    }else if(page==='space'&&space){
+      const cuts=[['overview','Обзор'],['organizations','Организации'],['people','Люди и доступ'],['settings','Настройки']];
+      app.innerHTML=alerts+`<a class="crumb" href="#spaces">← Пространства</a>`+head(space.name,`${space.country} · ${space.currency}`)+`<div class="cuts" aria-label="Пространство">${cuts.map(([key,label])=>`<a href="#space/${space.id}/${key}" ${cut===key?'aria-current="page"':''}>${label}</a>`).join('')}</div>`;
+      if(cut==='overview')app.innerHTML+=`<div class="two-col"><section class="card"><h2>Подключение партнёра</h2><dl class="facts"><dt>Пространство</dt><dd>${esc(space.status)}</dd><dt>Первый администратор</dt><dd>Назначен</dd><dt>Организации</dt><dd>${space.orgs.length?space.orgs.length+' добавлена':'Ещё не добавлены'}</dd><dt>Людей с доступом</dt><dd>${space.people.length}</dd></dl><div class="actions"><a class="button primary" href="#space/${space.id}/people">Управлять доступом</a><a class="button" href="#space/${space.id}/organizations">Организации</a></div></section><section class="card"><h2>Следующий шаг</h2><p>${space.orgs.length?'Проверьте, кто будет вести данные партнёра, и назначьте нужные роли.':'Добавьте первое юридическое лицо. После него администратор пространства сможет настроить точки.'}</p><p class="note">Платформенная роль управляет подключением. Для работы с расчётами нужен отдельный доступ в пространстве.</p></section></div>`;
+      else if(cut==='organizations')app.innerHTML+=`<div class="toolbar"><h2>Организации пространства</h2>${addButton('Добавить организацию','organization')}</div><p class="note">Юридические лица внутри этого пространства. Пространство остаётся границей данных.</p>`+table(['Организация','Страна','Регистрационный номер'],space.orgs.map(org=>[esc(org.name),esc(space.country),esc(org.registration||'Не указан')]));
+      else if(cut==='people')app.innerHTML+=`<div class="toolbar"><h2>Люди и доступ</h2>${addButton('Добавить пользователя','person')}</div><p class="note">В продукте у человека может быть несколько ролей. Здесь показан один пример назначения; изменение относится к нему.</p>`+table(['Пользователь','Роль в пространстве','Действие'],space.people.map(p=>[`${esc(p.name)}<small>${esc(p.email)}</small>`,`${esc(p.role)}<small>${p.scope==='one'?'Учебная точка №1':p.scope==='two'?'Учебная точка №2':'В пределах пространства'} · ${p.until?'До '+esc(p.until):'Без срока'}</small>`,`<button data-role="${p.id}">Изменить доступ</button>`]));
+      else app.innerHTML+=`<section class="card"><h2>Настройки пространства</h2><dl class="facts"><dt>Страна</dt><dd>${esc(space.country)}</dd><dt>Валюты</dt><dd>${esc(space.currency)}</dd><dt>Состояние</dt><dd>${esc(space.status)}</dd></dl><p class="note">Изменения страны и валют требуют проверки влияния на уже заведённые данные.</p></section>`;
+    }else if(page==='users'){
+      const people=spaces.flatMap(s=>s.people.map(p=>({...p,space:s})));
+      app.innerHTML=alerts+head('Пользователи','Учётные записи и назначения в пространствах.')+table(['Пользователь','Пространство','Доступ'],people.map(p=>[`${esc(p.name)}<small>${esc(p.email)}</small>`,`<a href="#space/${p.space.id}/people">${esc(p.space.name)}</a>`,esc(p.role)]))+`<p class="note">Учётная запись даёт возможность войти. Роль определяет, что человек может делать в выбранном пространстве. Пользователь сервиса и сотрудник в зарплатном учёте — разные сущности.</p>`;
+    }else if(page==='history')app.innerHTML=head('Журнал изменений','Кто изменил подключение, настройки и доступ.')+table(['Действие','Объект','Кто','Когда','Причина'],[...events].reverse().map(e=>[esc(e.action),esc(e.object),esc(e.actor),esc(e.time),esc(e.reason||'Подключение партнёра (пример)')]));
+    else if(page==='settings')app.innerHTML=head('Настройки платформы','Общие правила и административные документы.')+`<div class="two-col"><section class="card"><h2>Общие справочники</h2><p>Курсы валют и правила стран.</p><p class="note">В рабочем продукте это существующие разделы. В этом макете переходы наружу не выполняются.</p></section><section class="card"><h2>Юридические документы</h2><p>Версии политики конфиденциальности и документов сервиса.</p><p class="note">Отдельная задача #321. Публикация документа — явное действие после согласования текста.</p></section></div>`;
+    else {location.hash='spaces';return;}
+    bind();
+  }
+  function bind(){
+    document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{if(b.dataset.action==='space')location.hash='spaces/new';else showForm(b.dataset.action);});
+    document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{location.hash='space/'+route()[1]+'/access/'+b.dataset.role;});
+  }
+  function field(label,name,type='text',required=true,value=''){return `<label>${esc(label)}<input name="${name}" type="${type}" ${required?'required':''} value="${esc(value)}"></label>`;}
+  function showForm(kind,personId,onPage=false){
+    const editor=onPage?document.querySelector('#page-editor'):document.querySelector('#editor');
+    const finish=()=>{if(onPage)location.hash=kind==='space'?'spaces':'space/'+route()[1]+'/people';else editor.close();};
+    const [,id]=route(), space=spaces.find(s=>s.id===id), person=space?.people.find(p=>p.id===personId);
+    const titles={space:'Новое пространство',organization:'Новая организация',person:'Доступ пользователю',role:'Изменение доступа'};
+    let fields='';
+    if(kind==='space')fields=field('Название пространства','name')+field('Код пространства','code')+`<label>Страна<select name="country"><option>Сербия</option><option>Турция</option></select></label>`+field('Имя первого администратора','person')+field('Почта первого администратора','email','email')+`<p class="reason">В результате появятся пространство и первый административный доступ. Следующим шагом добавляется организация. В макете вход и приглашение не создаются.</p>`;
+    if(kind==='organization')fields=`<p class="reason">Пространство: ${esc(space.name)}</p>`+field('Название юридического лица','name')+field('Регистрационный / налоговый номер','registration','text',false);
+    if(kind==='person'||kind==='role')fields=`<p class="reason">Пространство: ${esc(space.name)}</p>`+(kind==='person'?field('Имя','name')+field('Почта','email','email'):`<p>${esc(person.name)} · ${esc(person.email)}</p>`)+`<label>Роль<select name="role" required><option value="" disabled ${!person?'selected':''}>Выберите роль</option><option ${person?.role==='Администратор пространства'?'selected':''}>Администратор пространства</option><option ${person?.role==='Бухгалтер'?'selected':''}>Бухгалтер</option><option ${person?.role==='Управляющий точки'?'selected':''}>Управляющий точки</option><option ${person?.role==='Оперативный директор'?'selected':''}>Оперативный директор</option></select></label><label id="scope-field" hidden>Область точек<select name="scope"><option value="">Выберите точку</option><option value="one" ${person?.scope==='one'?'selected':''}>Учебная точка №1</option><option value="two" ${person?.scope==='two'?'selected':''}>Учебная точка №2</option></select></label><div class="reason" id="preview"></div>`+field('Доступ до (необязательно)','until','date',false,person?.until||'')+field('Причина изменения','reason');
+    editor.innerHTML=`<div class="dialog-head"><h2 id="dialog-title">${titles[kind]}</h2><button type="button" id="close-dialog" aria-label="Закрыть">×</button></div><form id="edit-form">${fields}<p id="error" class="form-error" role="alert"></p><div class="actions"><button class="primary" type="submit">${kind==='space'?'Создать пространство':kind==='organization'?'Добавить организацию':'Сохранить доступ'}</button><button type="button" id="cancel">Отмена</button></div></form>`;
+    editor.querySelector('#close-dialog').onclick=finish;editor.querySelector('#cancel').onclick=finish;
+    const form=editor.querySelector('form'), role=form.elements.role;
+    if(role){const preview=()=>{if(!role.value){editor.querySelector('#scope-field').hidden=true;form.elements.scope.required=false;editor.querySelector('#preview').textContent='Выберите роль, чтобы увидеть область доступа.';return;}const manager=role.value==='Управляющий точки';editor.querySelector('#scope-field').hidden=!manager;form.elements.scope.required=manager;form.elements.scope.disabled=!manager;editor.querySelector('#preview').textContent='Будет выдан доступ: '+role.value+' · '+space.name+(manager?' · выбранная точка':'. Другие пространства не затрагиваются.');};role.onchange=preview;preview();}
+    form.onsubmit=e=>{
+      e.preventDefault();const values=Object.fromEntries(new FormData(form)), error=editor.querySelector('#error');error.textContent='';
+      if(values.role!=='Управляющий точки')values.scope='';
+      const today=new Date().toISOString().slice(0,10);
+      if(values.until&&values.until<today){error.textContent='Срок доступа не может быть в прошлом.';return;}
+      if(kind==='role'){const after=space.people.map(p=>p.id===person.id?{...p,role:values.role,until:values.until}:p);if(!after.some(p=>p.role==='Администратор пространства'&&!p.until)){error.textContent='Должен остаться хотя бы один бессрочный администратор. Сначала назначьте другого администратора.';return;}}
+      if(kind==='space'){if(spaces.some(s=>s.id===values.code)){error.textContent='Такой код пространства уже используется.';return;}if(!/^[a-z0-9-]+$/.test(values.code)){error.textContent='Код: латинские буквы в нижнем регистре, цифры и дефис.';return;}spaces.push({id:values.code,name:values.name,country:values.country,currency:values.country==='Сербия'?'RSD → EUR':'TRY → EUR',status:'Настройка',orgs:[],people:[{id:Date.now(),name:values.person,email:values.email,role:'Администратор пространства'}]});notice='В макете создано пространство и добавлен первый администратор. Следующий шаг — организация.';events.push({action:'Создано пространство',object:values.name,actor:'Администратор платформы',time:'Только что',reason:values.reason||'Подключение партнёра'});location.hash='space/'+values.code+'/overview';}
+      if(kind==='organization'){space.orgs.push({name:values.name,registration:values.registration});notice='Организация добавлена в макет выбранного пространства.';events.push({action:'Добавлена организация',object:values.name,actor:'Администратор платформы',time:'Только что',reason:values.reason||'Подключение партнёра'});}
+      if(kind==='person'){if(spaces.some(s=>s.people.some(p=>p.email.toLowerCase()===values.email.toLowerCase()))){error.textContent='Такая учётка уже есть. Нужен отдельный выбор существующего пользователя; дубликат не создаётся.';return;}space.people.push({id:Date.now(),name:values.name,email:values.email,role:values.role,scope:values.scope,until:values.until});notice='В макете добавлен пользователь с выбранной ролью. Действительный вход не создавался.';events.push({action:'Добавлен пользователь',object:values.email,actor:'Администратор платформы',time:'Только что',reason:values.reason||'Подключение партнёра'});}
+      if(kind==='role'){person.role=values.role;person.scope=values.scope;person.until=values.until;notice='Доступ изменён в макете. Другие пространства не затронуты.';events.push({action:'Изменена роль: '+values.role,object:person.email,actor:'Администратор платформы',time:'Только что',reason:values.reason||'Подключение партнёра'});}
+      if(!onPage)editor.close();else if(kind==='role')location.hash='space/'+id+'/people';render();
+    };
+    if(!onPage)editor.showModal();
+  }
+  document.querySelectorAll('[data-set-theme]').forEach(b=>b.onclick=()=>document.documentElement.dataset.theme=b.dataset.setTheme);
+  document.addEventListener('click',event=>{if(event.target.closest('a[href^="#"]'))notice='';});
+  addEventListener('hashchange',()=>{render();document.querySelector('h1')?.focus();});
+  render();
+</script>
+</body>
+</html>
