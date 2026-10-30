@@ -95,7 +95,7 @@ const employeeHref = await (async () => {
 })();
 
 const traceHref = await (async () => {
-  await goto(`/periods/${periodId}/`);
+  await goto(`/periods/${periodId}/sheet/`);
   return await evalIn(`(() => {
     const a = document.querySelector('a[href*="/trace/"]');
     return a ? a.getAttribute('href') : '';

@@ -249,14 +249,18 @@ async function ensureCalculatedAndApproved() {
     return periodId;
   }
 
-  const calculated = await evalIn(`!!document.querySelector("table.sheet")`);
+  // Ведомость живёт на своей странице (T230). На сводке расчёт подтверждает
+  // карточка-ссылка с суммой, а не таблица, которую отсюда уже убрали.
+  const sheetSelector = `a.stat[href="/periods/${periodId}/sheet/"]`;
+  const calculated = await evalIn(`!!document.querySelector(${JSON.stringify(sheetSelector)})`);
   if (!calculated) {
     await submitForm(`form[action="/periods/${periodId}/calculate/"]`);
     let done = false;
     for (let i = 0; i < 90 && !done; i++) {
       await goto(`/periods/${periodId}/`);
       const body = await text();
-      done = !body.includes("Идёт расчёт") && await evalIn(`!!document.querySelector("table.sheet")`);
+      done = !body.includes("Идёт расчёт")
+        && await evalIn(`!!document.querySelector(${JSON.stringify(sheetSelector)})`);
       if (!done) await sleep(1000);
     }
     if (!done) {

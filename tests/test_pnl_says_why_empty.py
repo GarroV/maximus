@@ -19,9 +19,14 @@ def calculated(client, web_env):
     wipe_payruns(web_env)
     login_as(client, "director")
     url = period_url(client)
-    assert client.post(url + "calculate/", follow=True).status_code == 200
-    yield url
-    client.post("/logout/")
+    try:
+        assert client.post(url + "calculate/", follow=True).status_code == 200
+        yield url
+    finally:
+        client.post("/logout/")
+        # Утверждение закрывает месяц триггером. Следующий модуль не должен
+        # наследовать ни расчёт, ни закрытый июнь вместо месяца для предпросчёта.
+        wipe_payruns(web_env)
 
 
 def test_report_before_approval_names_the_missing_payroll(client, calculated):
