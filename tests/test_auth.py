@@ -41,7 +41,10 @@ def test_cookie_security_follows_the_environment(debug, secure):
             "import json; from django.conf import settings; "
             "print(json.dumps([settings.SESSION_COOKIE_SECURE, settings.CSRF_COOKIE_SECURE]))"
         )],
-        env={**os.environ, "DJANGO_DEBUG": debug}, text=True,
+        env={
+            **os.environ, "DJANGO_DEBUG": debug,
+            "PYTHONPATH": str(Path(__file__).resolve().parents[1] / "src"),
+        }, text=True,
     )
     assert json.loads(result) == [secure, secure]
 
