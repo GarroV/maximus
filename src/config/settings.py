@@ -107,6 +107,10 @@ MIDDLEWARE = [
 # «разлогинить всех» — это смена SECRET_KEY, а одного человека — смена его
 # пароля (Django кладёт в сессию хэш пароля и сверяет его на каждом запросе).
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+# На площадке вход идёт по HTTPS через фронт; cookie входа и CSRF не должны
+# уходить по HTTP. Локальный HTTP остаётся доступен только в режиме отладки.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Учётка своя (D013): один uuid на человека — он же уходит в контекст базы и
 # лежит в memberships.user_id.

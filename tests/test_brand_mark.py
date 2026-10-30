@@ -17,7 +17,10 @@ HEAD = re.compile(r"^\s*<head>", re.M)
 
 
 def head_templates() -> list[Path]:
-    return [p for p in sorted((ROOT / "src").rglob("templates/**/*.html")) if HEAD.search(p.read_text())]
+    return [
+        p for p in sorted((ROOT / "src").rglob("templates/**/*.html"))
+        if HEAD.search(p.read_text())
+    ]
 
 
 def test_every_page_with_its_own_head_carries_the_mark():

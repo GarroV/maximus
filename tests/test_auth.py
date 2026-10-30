@@ -17,8 +17,12 @@ Postgres пропускаются вместе с остальными тест�
 """
 from __future__ import annotations
 
+import json
 import logging
+import os
 import re
+import subprocess
+import sys
 from decimal import Decimal
 from pathlib import Path
 
@@ -27,6 +31,19 @@ import pytest
 from conftest import body, login_as, period_url, wipe_payruns
 
 JUNE = "2026-06-01"
+
+
+@pytest.mark.parametrize("debug,secure", [("0", True), ("1", False)])
+def test_cookie_security_follows_the_environment(debug, secure):
+    """Прод отправляет cookie входа только по HTTPS; отладка работает по HTTP."""
+    result = subprocess.check_output(
+        [sys.executable, "-c", (
+            "import json; from django.conf import settings; "
+            "print(json.dumps([settings.SESSION_COOKIE_SECURE, settings.CSRF_COOKIE_SECURE]))"
+        )],
+        env={**os.environ, "DJANGO_DEBUG": debug}, text=True,
+    )
+    assert json.loads(result) == [secure, secure]
 
 # Суммы разные и круглые: в HTML их нельзя спутать друг с другом.
 AMOUNT_OFFICIAL = Decimal("111000.00")

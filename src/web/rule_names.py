@@ -161,7 +161,8 @@ def name_of(preset: dict, path: str) -> str:
         if not field and rest.startswith("allowance_prorate."):
             allowance = _titled(preset, "allowances", rest.split(".", 1)[1])
             if allowance:
-                field = f"{_('пропорция надбавки')}: {allowance}"
+                title = _("пропорция надбавки")
+                field = f"{title}: {allowance}"
         noun = SUBJECT_NOUNS.get(section)
         if noun is not None:
             subject = f"{noun()}: {subject}"

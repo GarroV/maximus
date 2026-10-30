@@ -112,7 +112,9 @@ def index(request):
         # Посадочная страница — всегда светлая, как у DECIMUS: брендовые бежевые
         # и фиолетовые листы одинаковы в обеих темах, и тёмные листы между ними
         # читались бы как поломка. Выбор темы человека от этого не меняется.
-        return render(request, "web/landing.html", {**login_context(request), "theme_attr": "light"})
+        return render(
+            request, "web/landing.html", {**login_context(request), "theme_attr": "light"},
+        )
     return redirect("periods")
 
 
