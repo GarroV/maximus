@@ -242,14 +242,16 @@ def wrap(prefix: str, text: str, width: int = 72) -> str:
     if len(text) + len(prefix) + 3 <= width and "\n" not in text:
         return f"{prefix} {quote(text)}"
     parts: list[str] = []
-    line = ""
+    # Empty words carry spaces too. None means "no word yet"; an empty line
+    # already contains a word and must keep the next separator (#296).
+    line: str | None = None
     for word in text.split(" "):
-        if line and len(line) + len(word) + 1 > width:
+        if line is not None and len(line) + len(word) + 1 > width:
             parts.append(line + " ")
             line = word
         else:
-            line = f"{line} {word}" if line else word
-    parts.append(line)
+            line = f"{line} {word}" if line is not None else word
+    parts.append(line if line is not None else "")
     body = "\n".join(quote(part) for part in parts)
     return f'{prefix} ""\n{body}'
 
