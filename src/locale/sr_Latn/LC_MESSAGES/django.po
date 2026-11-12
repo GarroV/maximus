@@ -1472,15 +1472,6 @@ msgstr "Iznos sa računa — sa porezom, ako ga račun sadrži."
 msgid "Ставка НДС, %"
 msgstr "Stopa PDV-a, %"
 
-#: web/cash_views.py:328
-msgid ""
-"В Сербии 20 или 10. Пусто — налог не выделяем: в P&L такая трата пойдёт "
-"полной суммой. С заполненной ставкой в P&L по умолчанию поедет сумма без НДС."
-msgstr ""
-"U Srbiji je 20 ili 10. Prazno — porez se ne izdvaja: trošak u P&L ide u "
-"punom iznosu. Sa popunjenom stopom u P&L po podrazumevanoj vrednosti ide "
-"iznos bez PDV-a."
-
 #: web/cash_views.py:345
 msgid ""
 "Статьи ведёт администратор сети. Нужной нет — попросите завести: выдумывать "
@@ -1501,11 +1492,6 @@ msgid ""
 msgstr ""
 "Prazno — knjiga se uzima iz izabrane kase; bez kase je to zvanična. Vrednost "
 "izabrana ovde jača je od kase."
-
-#: web/cash_views.py:362
-msgid "Зачем потратили. Через месяц это единственное, по чему строку узнают."
-msgstr ""
-"Zašto je potrošeno. Za mesec dana to je jedino po čemu će se red prepoznati."
 
 #: web/cash_views.py:390 web/suppliers_views.py:928
 #: web/templates/web/cash/expenses.html:129
@@ -4442,8 +4428,8 @@ msgid "Внести расход"
 msgstr "Unesi trošak"
 
 #: web/templates/web/cash/expense.html:22
-msgid "Расход попадёт в P&L строкой своей статьи."
-msgstr "Trošak ulazi u P&L kao stavka svoje kategorije."
+msgid "Чек и сумма — главное. Без статьи расход разнесёт бухгалтер."
+msgstr "Račun i iznos su najvažniji. Bez stavke, trošak će razvrstati računovođa."
 
 #: web/templates/web/cash/expense.html:25
 msgid "Записано."
@@ -4462,9 +4448,51 @@ msgid ""
 msgstr ""
 "Fotografija papirića. Trošak se beleži i bez nje — novac je već predat."
 
-#: web/templates/web/cash/expense.html:51
-msgid "Записать расход"
+#: web/templates/web/cash/expense.html
+msgid "Сфотографировать"
+msgstr "Fotografiši"
+
+#: web/templates/web/cash/expense.html
+msgid "Из галереи"
+msgstr "Iz galerije"
+
+#: web/templates/web/cash/expense.html
+msgid "Заменить"
+msgstr "Zameni"
+
+#: web/templates/web/cash/expense.html
+msgid "Убрать"
+msgstr "Ukloni"
+
+#: web/templates/web/cash/expense.html
+msgid "Ещё поля"
+msgstr "Još polja"
+
+#: web/templates/web/cash/expense.html
+msgid "Сохранить расход"
 msgstr "Sačuvaj trošak"
+
+#: web/templates/web/cash/expense.html
+msgid "Кому и за что"
+msgstr "Kome i za šta"
+
+#: web/templates/web/cash/expense.html
+msgid "Через месяц это единственное, по чему строку узнают."
+msgstr "Za mesec dana to je jedino po čemu će se red prepoznati."
+
+#: web/templates/web/cash/expense.html
+msgid "Не нашли статью — оставьте пустой, бухгалтер разнесёт."
+msgstr "Ne nalazite stavku? Ostavite prazno, računovođa će je razvrstati."
+
+#: web/templates/web/cash/expense.html
+msgid ""
+"Ставка, напечатанная в чеке. Пусто — налог не выделяем: в P&L такая "
+"трата пойдёт полной суммой. С заполненной ставкой в P&L по умолчанию "
+"поедет сумма без НДС."
+msgstr ""
+"Stopa odštampana na računu. Prazno — porez se ne izdvaja: trošak u P&L"
+" ide u punom iznosu. Sa popunjenom stopom u P&L po podrazumevanoj "
+"vrednosti ide iznos bez PDV-a."
 
 #: web/templates/web/cash/expense_edit.html:28
 #: web/templates/web/cash/unallocated.html:15

@@ -1681,3 +1681,46 @@ table.pages td.hint { color: var(--ink-2); font-size: var(--fs-meta); }
    в плотном списке, без отбивок между пунктами. */
 ol.steps-next { margin: 0 0 var(--space-6); padding-left: var(--space-8); color: var(--ink-2); }
 ol.steps-next li { margin: 0 0 var(--space-3); }
+
+/* ── Форма «Внести расход» под телефон (#311, #336) ─────────────
+   Образец — «Добавить» в Lanx: две крупные плитки для чека, поля в 46px и 16px
+   шрифта (iOS не приближает страницу при фокусе), главная кнопка во всю ширину.
+   Плитки — подписанные поля выбора файла, а не кнопки со скриптом: без
+   скриптов форма работает так же. Поле файла прячется визуально, а не
+   `display:none`, чтобы оставаться достижимым с клавиатуры. */
+form.card.expense-form { max-width: 560px; }
+.expense-form input, .expense-form select { height: 46px; font-size: 16px; }
+.expense-form .field > label { font-size: var(--fs-body); font-weight: var(--w-semibold); color: var(--ink-2); }
+
+.shots { margin: 0 0 var(--space-7); }
+.shots__tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin: 0 0 var(--space-4); }
+.shot-tile {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--space-3); min-height: 96px; padding: var(--space-6);
+  border: 1px dashed var(--accent-line); border-radius: var(--r-block);
+  background: var(--accent-soft); color: var(--accent); cursor: pointer; text-align: center;
+}
+.expense-form .shot-tile { font-size: var(--fs-lead); font-weight: var(--w-semibold); }
+.shot-tile:hover { border-color: var(--accent); }
+.shot-tile:focus-within { outline: none; box-shadow: 0 0 0 3px var(--focus-soft); border-color: var(--accent); }
+.shot-tile input[type="file"] {
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0;
+  opacity: 0; cursor: pointer; border: 0;
+}
+.shot-preview { margin: 0 0 var(--space-4); }
+.shot-preview[hidden], .shot-preview [hidden], .shots__tiles[hidden] { display: none; }
+.shot-preview img { display: block; max-width: 100%; max-height: 220px; border-radius: var(--r-block); border: 1px solid var(--line-strong); }
+.shot-preview__name { margin: var(--space-3) 0; color: var(--ink-2); font-size: var(--fs-meta); overflow-wrap: anywhere; }
+.shot-preview__actions { display: flex; gap: var(--space-5); margin: 0; }
+.shot-preview__actions button { min-height: var(--tap-min); }
+
+/* Сумма: валюта партнёра рядом с полем, а не в подписи. */
+.amount { display: flex; align-items: center; gap: var(--space-5); }
+.expense-form .amount input { flex: 1; width: auto; font-variant-numeric: tabular-nums; }
+.amount__cur { font-weight: var(--w-semibold); color: var(--ink-2); }
+
+/* Служебное свёрнуто: управляющему оно не нужно. Раскрыто — те же поля. */
+.expense-form .more { margin: 0 0 var(--space-7); border-top: 1px solid var(--line); padding-top: var(--space-5); }
+.expense-form .more > summary { min-height: var(--tap-min); display: flex; align-items: center; cursor: pointer; color: var(--accent); font-weight: var(--w-semibold); }
+.expense-form .more[open] > summary { margin-bottom: var(--space-4); }
+.expense-form .actions button.primary { width: 100%; height: 48px; font-size: var(--fs-lead); }

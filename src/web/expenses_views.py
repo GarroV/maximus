@@ -1049,7 +1049,9 @@ def _save(request, who, fact) -> str:
         raise BadInput(
             _("Эта строка уже заменена: правьте ту, что действует.")
         )
-    entered = parse_expense(request, who)
+    # Расход, внесённый без статьи (#311), правится и дальше без неё; у расхода
+    # со статьёй она остаётся обязательной — снять её правкой нельзя.
+    entered = parse_expense(request, who, item_required=bool(fact.expense_item_id))
     recorded = cash.revise_expense(who, fact, **entered)
     landed = reverse("expenses") + f"?saved={recorded.landing.period:%Y-%m}"
     if recorded.landing.moved_from is not None:

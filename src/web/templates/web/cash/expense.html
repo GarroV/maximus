@@ -15,11 +15,18 @@
 
 Введённое остаётся в полях после отказа: набирать заново из-за одной опечатки
 человек не должен — то же правило, что у формы справочника.
+
+Порядок (#311, #336): чек, сумма, статья, «кому и за что», дата — и одна большая
+кнопка. Всё служебное — под «Ещё поля»: управляющему оно не нужно, а у
+бухгалтера и директора раскрывашка открыта (`cash_views.expense_form`).
+
+Форма работает и без скриптов: плитки — обычные поля выбора файла, превью —
+надстройка. «Сфотографировать» — поле с `capture`: на телефоне сразу камера.
 {% endcomment %}
 {% block title %}{% translate "Внести расход" %}{% endblock %}
 {% block content %}
 <h1>{% translate "Внести расход" %}</h1>
-<p class="sub">{% translate "Расход попадёт в P&L строкой своей статьи." %}</p>
+<p class="sub">{% translate "Чек и сумма — главное. Без статьи расход разнесёт бухгалтер." %}</p>
 
 {% if notice %}
 {% translate "Записано." as saved %}
@@ -31,22 +38,104 @@
 {% notice "alert" title=not_saved %}{{ error }}{% endnotice %}
 {% endif %}
 
-<form class="card wide" method="post" enctype="multipart/form-data">{% csrf_token %}
+<form class="card expense-form" method="post" enctype="multipart/form-data">{% csrf_token %}
   <input type="hidden" name="entry_key" value="{{ entry_key }}">
-  {% include "web/directory/fields.html" with fields=fields %}
   {% comment %}
-  Чек снимается здесь же (T184). Управляющий отдаёт деньги, стоя у печи, и
-  второго захода «откройте расход и приложите фотографию» не будет никогда.
+  Чек снимается здесь же (T184), и стоит первым: управляющий отдаёт деньги,
+  стоя у печи, и второго захода «откройте расход и приложите фотографию» не
+  будет никогда. Поле необязательное намеренно: деньги уже потрачены, и отказать
+  в записи расхода из-за отсутствия снимка значило бы потерять сам расход.
+  Без чека строка сохранится и будет помечена в реестре.
 
-  Поле необязательное намеренно: деньги уже потрачены, и отказать в записи
-  расхода из-за отсутствия снимка значило бы потерять сам расход. Без чека
-  строка сохранится и будет помечена в реестре.
+  Оба поля называются `receipt`: приходит всегда одно (пустое поле браузер
+  присылает без имени файла, и сервер его отбрасывает), а скрипт ниже при выборе
+  в одном очищает другое.
   {% endcomment %}
+  <div class="shots" data-shots>
+    <p class="field-label">{% translate "Чек" %}</p>
+    <div class="shots__tiles" data-tiles>
+      <label class="shot-tile">
+        <input type="file" name="receipt" accept="image/*" capture="environment" data-shot-input>
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        <span class="shot-tile__title">{% translate "Сфотографировать" %}</span>
+      </label>
+      <label class="shot-tile">
+        <input type="file" name="receipt" accept="{{ receipt_accept }}" data-shot-input>
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m4 17 5-4 4 3 3-2 4 3"/></svg>
+        <span class="shot-tile__title">{% translate "Из галереи" %}</span>
+      </label>
+    </div>
+    <div class="shot-preview" data-preview hidden>
+      <img alt="{% translate 'Фотография чека' %}" data-preview-img hidden>
+      <p class="shot-preview__name" data-preview-name></p>
+      <p class="shot-preview__actions">
+        <button type="button" data-replace>{% translate "Заменить" %}</button>
+        <button type="button" data-remove>{% translate "Убрать" %}</button>
+      </p>
+    </div>
+    <span class="note">{% translate "Фотография бумажки. Без неё расход всё равно запишется — деньги уже отданы." %}</span>
+  </div>
+
+  {% comment %}Сумма с валютой партнёра рядом: валюта — из его настроек (`tenants.base_currency`), а не строка в коде.{% endcomment %}
   <p class="field">
-    {% translate "Чек" as receipt_label %}
-    {% translate "Фотография бумажки. Без неё расход всё равно запишется — деньги уже отданы." as receipt_help %}
-    {% include "web/components/field.html" with id="receipt" name="receipt" label=receipt_label type="file" accept=receipt_accept help=receipt_help %}
+    <label for="amount">{{ form.amount.label }}</label>
+    <span class="amount">
+      <input type="text" id="amount" name="amount" inputmode="decimal" autocomplete="off"
+             {% if form.amount.value %}value="{{ form.amount.value }}"{% endif %}
+             aria-describedby="amount_help" required>
+      {% if form.currency %}<span class="amount__cur">{{ form.currency }}</span>{% endif %}
+    </span>
+    <span class="note" id="amount_help">{{ form.amount.help }}</span>
   </p>
-  <p class="actions"><button type="submit" class="primary">{% translate "Записать расход" %}</button></p>
+
+  {% include "web/directory/fields.html" with fields=form.item_fields %}
+  {% if not form.item_fields %}<p class="note">{{ form.item_hint }}</p>{% endif %}
+  {% include "web/directory/fields.html" with fields=form.tail_fields %}
+
+  <details class="more"{% if form.more_open %} open{% endif %}>
+    <summary>{% translate "Ещё поля" %}</summary>
+    {% include "web/directory/fields.html" with fields=form.more %}
+  </details>
+
+  <p class="actions"><button type="submit" class="primary">{% translate "Сохранить расход" %}</button></p>
 </form>
+
+<script>
+(function () {
+  var box = document.querySelector("[data-shots]");
+  if (!box) return;
+  var inputs = box.querySelectorAll("[data-shot-input]");
+  var tiles = box.querySelector("[data-tiles]");
+  var preview = box.querySelector("[data-preview]");
+  var img = box.querySelector("[data-preview-img]");
+  var nameEl = box.querySelector("[data-preview-name]");
+  var url = null;
+
+  function clearPreview() {
+    if (url) { URL.revokeObjectURL(url); url = null; }
+    img.removeAttribute("src"); img.hidden = true;
+    preview.hidden = true; tiles.hidden = false;
+  }
+  function showPicked(input) {
+    var file = input.files && input.files[0];
+    if (!file) return;
+    inputs.forEach(function (other) { if (other !== input) other.value = ""; });
+    if (url) URL.revokeObjectURL(url);
+    nameEl.textContent = file.name;
+    // HEIC и PDF браузер внутри страницы не рисует: остаётся имя файла.
+    if (/^image\/(jpeg|png|webp)$/.test(file.type)) {
+      url = URL.createObjectURL(file); img.src = url; img.hidden = false;
+    } else { img.hidden = true; }
+    preview.hidden = false; tiles.hidden = true;
+  }
+  inputs.forEach(function (input) {
+    input.addEventListener("change", function () { showPicked(input); });
+  });
+  box.querySelector("[data-replace]").addEventListener("click", function () { inputs[1].click(); });
+  box.querySelector("[data-remove]").addEventListener("click", function () {
+    inputs.forEach(function (input) { input.value = ""; });
+    clearPreview();
+  });
+})();
+</script>
 {% endblock %}
