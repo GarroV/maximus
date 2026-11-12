@@ -155,7 +155,8 @@ def test_an_item_lives_inside_its_area(client, web_env):
 
     collect = shown["Сбор данных"]
     assert "Табель" in collect and "Наличные расходы" in collect
-    assert "Инбокс документов" in collect
+    assert "Входящие документы" in collect
+    assert "Счета" not in collect, "«Счета» снова отдельным пунктом (D100)"
     assert "Сотрудники" not in collect, "справочник заехал в сбор данных"
 
     # В области справочников стоит то, что роль ведёт: у директора это
@@ -192,9 +193,9 @@ def test_the_current_page_is_marked_inside_its_area(client, web_env):
 def test_an_area_a_role_does_not_lead_is_not_drawn_at_all(client, web_env):
     """Область без единого своего пункта в продукте не показывается.
 
-    Открыть её и увидеть пустоту хуже, чем не увидеть кнопку. В демо на этом
-    месте стоит предложение открыть раздел подходящей ролью — см.
-    `tests/test_demo_role_switch.py`.
+    Открыть её и увидеть пустоту хуже, чем не увидеть кнопку. Предложений
+    «открыть другой ролью» в меню больше нет (D100): демо переключает роль
+    кнопками на своей странице входа.
     """
     login_as(client, "manager")
     shown = areas_of(body(client.get("/periods/")))

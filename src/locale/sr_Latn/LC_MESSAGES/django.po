@@ -3315,9 +3315,9 @@ msgstr "Menadžer smene"
 msgid "Сбор данных"
 msgstr "Prikupljanje podataka"
 
-#: web/navigation.py:107
-msgid "Инбокс документов"
-msgstr "Prijemno sanduče dokumenata"
+#: web/navigation.py
+msgid "Входящие документы"
+msgstr "Dolazna dokumenta"
 
 #: web/navigation.py:109 web/navigation.py:114
 #: web/templates/web/directory/denied.html:13
@@ -5523,7 +5523,7 @@ msgstr ""
 msgid ""
 "В левой панели это два раздела: «Наличные расходы» — то, что вышло из кассы "
 "точки,\n"
-"  и «Инбокс документов» — очередь того, что продукт не смог отнести сам.\n"
+"  и «Входящие документы» — очередь того, что продукт не смог отнести сам.\n"
 "  Список счетов открывается из инбокса и живёт в том же разделе."
 msgstr ""
 "U levom panelu su to dva odeljka: „Gotovinski troškovi“ — ono što je izašlo "
@@ -8656,6 +8656,10 @@ msgstr "Prosečan radni staž onih koji su otišli: %(tenure)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Стоимость труда"
 msgstr "Trošak rada"
+
+#: web/navigation.py
+msgid "Аналитика по людям"
+msgstr "Analitika o ljudima"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Стоимость часа"

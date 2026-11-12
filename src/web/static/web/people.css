@@ -6,6 +6,7 @@
    собой они стоят с зазором, а от плиток отделены воздухом, как в эталоне.
    Без этого два ряда читались как один длинный переключатель, прилипший к
    плиткам. */
+.people-pages { display: flex; width: fit-content; margin: 0 0 var(--space-5); max-width: 100%; overflow-x: auto; }
 .people-switch {
   display: flex; flex-wrap: wrap; align-items: center;
   gap: var(--space-4) var(--space-6);
