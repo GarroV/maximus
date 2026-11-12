@@ -87,6 +87,30 @@ def test_an_empty_inbox_says_so(client, invoices_removed):  # noqa: F811
     assert "Инбокс пуст" in shown
 
 
+def test_without_a_hint_the_article_is_not_picked_for_the_person(
+    client, sql, unclassified,  # noqa: F811
+):
+    """Без подсказки статья в строке пустая, а не первая из справочника (#333).
+
+    Прежде список открывался на первой статье, и накладная уходила в чужую
+    статью одним нажатием «Разобрать».
+    """
+    import re
+
+    row_id = sql.execute(
+        "select id from facts where dedup_key = %s", (facts(sql)[0][0],)
+    ).fetchone()[0]
+    shown = body(client.get(INBOX))
+    select = re.search(rf'<select id="{row_id}-item"[^>]*>(.*?)</select>', shown, re.S)
+    assert select, "у строки нет выбора статьи"
+    assert " required" in select.group(0).split(">")[0], "пустую статью можно отправить"
+    options = re.findall(r'<option value="([^"]*)"( selected)?>', select.group(1))
+    assert options[0] == ("", " selected"), (
+        "без подсказки выбрана статья из справочника — уйдёт в неё одним нажатием"
+    )
+    assert all(not chosen for _, chosen in options[1:])
+
+
 # --- разбор -------------------------------------------------------------------
 
 

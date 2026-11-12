@@ -89,7 +89,7 @@
       <td>{% if row.suggested %}<span class="chip">{{ row.suggested }}</span>{% endif %}</td>
       <td>
         <form class="inline" method="post" action="{{ row.url }}">{% csrf_token %}
-          {% include "web/components/select.html" with id=row.id|add:"-item" name="item" label="" options=row.items required=1 empty_label="" empty_selected=1 %}
+          {% include "web/components/select.html" with id=row.id|add:"-item" name="item" label="" options=row.items required=1 empty_label=not_chosen empty_selected=row.item_unpicked %}
           {% if row.split %}<span class="hint">{% translate "разнесена по точкам — доли сохранятся" %}</span>{% else %}{% include "web/components/select.html" with id=row.id|add:"-unit" name="unit" label="" options=row.units required=1 %}{% endif %}
           <button type="submit">{% translate "Разобрать" %}</button>
         </form>
