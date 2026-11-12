@@ -1,4 +1,4 @@
-{% load ui i18n demo_ui %}{% comment %}
+{% load ui i18n %}{% comment %}
 Левая панель вошедшего человека (T222, D081; вид — по DECIMUS, T241, D098).
 
 До 29.09.2026 здесь была верхняя шапка с раскрывающимися меню; владелец снял
@@ -15,13 +15,12 @@
 самом экране пункт — `span[aria-current=page]`, на вложенном — подсвеченная
 ссылка `aria-current=location`, ведущая в начало раздела, как в DECIMUS.
 
-**Разделов ровно столько, сколько ведёт эта роль**; решает `web/navigation.py`.
-В демо на месте чужого раздела — предложение открыть его ролью, которая его
-ведёт (T163, тег `demo_switch`, класс `nav-offer` — контракт с
-`tests/test_demo_role_switch.py`).
+**Разделов ровно столько, сколько ведёт эта роль**; решает `web/navigation.py`:
+пункт виден, только если экран откроется (D100, #337). Предложений «открыть
+другой ролью» нет — демо переключает роль кнопками на странице входа.
 
-**Ненаписанный экран** — пункт тише остальных (`is-wip`), без точек и плашек
-стадии (#309): состояние стройки человеку за экраном не нужно.
+**Ненаписанный экран** — в продукте не показывается; в демо пункт тише остальных
+(`is-wip`), без точек и плашек стадии (#309).
 
 **Кто смотрит** — блок учётки внизу: инициал, имя, роль. Роль — **одна**: у
 учётной записи один уровень (решение владельца, расхождение с эталоном
@@ -38,17 +37,9 @@
     {% for area in nav_areas %}
       <span class="sidenav__group" id="nav-area-{{ area.number }}">{{ area.title }}</span>
       <ul class="sidenav__set" aria-labelledby="nav-area-{{ area.number }}">
-        {% if area.offer %}
-          <li>{% demo_switch area.offer.needs area.offer.route area.title %}</li>
-        {% else %}
-          {% for section in area.items %}
-            {% if section.allowed %}
-              <li>{% include "web/components/sidenav_item.html" %}</li>
-            {% elif section.offer %}
-              <li>{% demo_switch section.needs section.route section.title %}</li>
-            {% endif %}
-          {% endfor %}
-        {% endif %}
+        {% for section in area.items %}
+          <li>{% include "web/components/sidenav_item.html" %}</li>
+        {% endfor %}
       </ul>
     {% endfor %}
   </div>

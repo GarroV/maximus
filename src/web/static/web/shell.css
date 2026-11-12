@@ -77,17 +77,6 @@ a.sidenav__current:hover { text-decoration: none; color: var(--accent); }
 .sidenav__item.is-wip { color: var(--ink-empty); }
 .sidenav__item.is-wip:hover { color: var(--ink-3); }
 
-/* Раздел, который ведёт другая роль, в демо (T163): пунктир — это не раздел
-   человека, а предложение посмотреть продукт чужими глазами. */
-.sidenav .nav-offer {
-  display: flex; align-items: center; width: 100%; min-height: 34px;
-  padding: var(--space-2) var(--space-5); border: 1px dashed var(--line-strong);
-  border-radius: var(--r-control); color: var(--ink-3);
-  font-size: 13px; line-height: 1.25;
-}
-.sidenav .nav-offer:hover { color: var(--accent); border-color: var(--accent-line); text-decoration: none; }
-.sidenav .nav-offer:hover::after { content: " →"; opacity: .6; }
-
 /* ── Низ панели: тема, язык, настройки — одной строкой (DECIMUS D470) ── */
 
 .sidenav__prefs { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 0 var(--space-2); margin-bottom: 0; }

@@ -3356,9 +3356,9 @@ msgstr "Shift Manager"
 msgid "Сбор данных"
 msgstr "Data collection"
 
-#: web/navigation.py:107
-msgid "Инбокс документов"
-msgstr "Document inbox"
+#: web/navigation.py
+msgid "Входящие документы"
+msgstr "Incoming documents"
 
 #: web/navigation.py:109 web/navigation.py:114
 #: web/templates/web/directory/denied.html:13
@@ -5668,7 +5668,7 @@ msgstr ""
 msgid ""
 "В левой панели это два раздела: «Наличные расходы» — то, что вышло из кассы "
 "точки,\n"
-"  и «Инбокс документов» — очередь того, что продукт не смог отнести сам.\n"
+"  и «Входящие документы» — очередь того, что продукт не смог отнести сам.\n"
 "  Список счетов открывается из инбокса и живёт в том же разделе."
 msgstr ""
 "In the left panel these are two sections: “Cash expenses” — what left a "
@@ -8879,6 +8879,10 @@ msgstr "Average tenure of those who left: %(tenure)s"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Стоимость труда"
 msgstr "Labour cost"
+
+#: web/navigation.py
+msgid "Аналитика по людям"
+msgstr "People analytics"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Стоимость часа"

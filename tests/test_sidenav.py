@@ -141,7 +141,7 @@ def test_the_current_section_is_not_a_link(client, web_env):
 
 
 def test_a_nested_screen_keeps_its_section_highlighted(client, web_env):
-    """Карточка платежа лежит под своим корнем адреса, а раздел — счета.
+    """Карточка платежа лежит под своим корнем адреса, а раздел — «Входящие документы».
 
     На вложенном экране пункт подсвечен и остаётся ссылкой в начало раздела
     (`aria-current="location"`), как в DECIMUS.
@@ -149,7 +149,7 @@ def test_a_nested_screen_keeps_its_section_highlighted(client, web_env):
     login_as(client, "accountant")
     nav = sections_of(body(client.get("/payments/new/")))
 
-    assert '<a class="sidenav__current" href="/invoices/" aria-current="location"' in nav, (
+    assert '<a class="sidenav__current" href="/inbox/" aria-current="location"' in nav, (
         "на вложенном экране раздел не подсвечен"
     )
 
@@ -173,18 +173,18 @@ def test_the_section_of_another_root_is_not_highlighted(client, web_env):
     [
         ("/periods/", "/periods/", True),
         # Вложенные экраны остаются в своём разделе: след расчёта и табель
-        # открываются из ведомости, карточка платежа — из счетов. У инбокса и
-        # счетов с 30.09.2026 по пункту в панели (issue #268), и инбокс уже
-        # не выделяет счета.
+        # открываются из ведомости, а счета, платёж по счёту и бумаги — из
+        # «Входящих документов» (D100: отдельного пункта «Счета» больше нет).
         ("/periods/1234/", "/periods/", True),
         ("/payslips/1234/trace/", "/periods/", True),
         ("/timesheets/1234/", "/periods/", True),
-        ("/payments/new/", "/invoices/", True),
-        ("/inbox/", "/invoices/", False),
+        ("/payments/new/", "/inbox/", True),
+        ("/invoices/", "/inbox/", True),
+        ("/invoices/1234/", "/inbox/", True),
         ("/papers/1234/", "/inbox/", True),
         # Чужой раздел — не выделяется. `/expenses/` и `/invoices/` близкие по
         # смыслу, но это два разных экрана и два разных корня.
-        ("/expenses/", "/invoices/", False),
+        ("/expenses/", "/inbox/", False),
         ("/directory/employees/", "/periods/", False),
         ("/", "/periods/", False),
         # Пустой адрес раздела — не «совпало с корнем», а «сравнивать нечего».
@@ -485,18 +485,28 @@ def test_section_names_wrap_instead_of_ending_in_an_ellipsis():
     assert "text-overflow: clip" in label, "подпись снова режется многоточием"
 
 
-def test_an_unbuilt_screen_is_quieter_and_says_so(client, web_env):
-    """Ненаписанный экран — приглушённый пункт с подсказкой, без точек и плашек.
+def test_an_unbuilt_screen_is_absent_in_the_product_and_quiet_in_the_demo(client, web_env):
+    """Ненаписанный экран: в продукте пункта нет вовсе, в демо — тихий пункт.
 
     Как в DECIMUS (D098, #309): плашки «Доработка» с фразами из журнала стройки
     бухгалтер читал как поломку. Состояние модулей — в `docs/product-map.md`.
+    С D100 (#337) в продукте заглушки не показываются совсем.
     """
+    from django.test import override_settings
+
     login_as(client, "admin")
-    page = body(client.get("/periods/"))
+    with override_settings(DEMO_MODE=False):
+        product = sections_of(body(client.get("/periods/")))
+    assert "/payouts/" not in product and "/settings/" not in product, (
+        "заглушка попала в меню продукта"
+    )
+
+    with override_settings(DEMO_MODE=True):
+        page = body(client.get("/periods/"))
     nav = sections_of(page)
 
     wip = re.findall(r'<a class="sidenav__item is-wip" href="([^"]*)"[^>]*title="([^"]*)"', nav)
-    assert wip, "у ненаписанных разделов нет приглушения — проверка не о том"
+    assert wip, "у ненаписанных разделов в демо нет приглушения — проверка не о том"
     assert all(href.startswith(("/payouts/", "/settings/")) for href, _ in wip), wip
     assert all(" · " in title for _, title in wip), f"не сказано, что раздел строится: {wip}"
     assert "sidenav__stage" not in page and 'class="stage' not in page, (

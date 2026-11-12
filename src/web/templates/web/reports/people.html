@@ -29,6 +29,17 @@
 <div class="people-page">
 <h1>{{ page_title }}</h1>
 
+{% comment %}
+Три страницы аналитики — один пункт левой панели (D100, #337), поэтому
+переходы между ними — здесь, строкой ссылок. Текущая — не ссылка.
+{% endcomment %}
+<nav class="seg people-pages" aria-label="{% translate "Аналитика по людям" %}">
+  {% for item in people_pages %}
+  {% if item.selected %}<span class="seg__current" aria-current="page">{{ item.title }}</span>
+  {% else %}<a class="seg__item" href="{{ item.url }}">{{ item.title }}</a>{% endif %}
+  {% endfor %}
+</nav>
+
 {% if empty %}
   {% translate "Считать пока нечего" as nothing %}
   {% notice "empty" title=nothing %}{% blocktranslate %}Ни одного месяца с табелем или расчётом ещё нет. Аналитика появится, как только будет закрыт первый месяц.{% endblocktranslate %}{% endnotice %}

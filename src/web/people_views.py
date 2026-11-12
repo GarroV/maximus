@@ -162,6 +162,13 @@ def _frame(request, code: str):
 
     return report, {
         "page_title": _(title),
+        # Три страницы — один пункт меню (D100): переходы между ними — строкой
+        # ссылок сверху, точка переносится.
+        "people_pages": [
+            {"title": _(page_title), "selected": page == code,
+             "url": _url(page_route, unit=chosen)}
+            for page, (page_route, page_title) in PAGES.items()
+        ],
         "units": [
             {"code": ALL_UNITS, "title": _("Все точки"),
              "selected": chosen == ALL_UNITS, "url": _url(route, unit=ALL_UNITS)},

@@ -28,7 +28,7 @@ SCREEN = "/labor-cost/"
 PAGES = {"cost": "/labor-cost/", "churn": "/turnover/", "hours": "/work-hours/"}
 OLD_SCREEN = "/analytics/people/"
 CURRENT_ITEM = re.compile(
-    r'<span class="sidenav__current" aria-current="page"[^>]*>.*?'
+    r'<(?:span|a) class="sidenav__current"[^>]*>.*?'
     r'<span class="sidenav__label">([^<]+)</span>', re.S,
 )
 
@@ -159,9 +159,12 @@ def test_три_режима_эталона_три_страницы(client, calc
     login_as(client, "director")
     html = body(client.get(PAGES[page]))
     assert expected in html, f"страница {page} не показала того, ради чего она есть"
-    assert CURRENT_ITEM.findall(html) == [item], (
+    # Один пункт меню на три страницы (D100): выделен он, а какая из страниц
+    # открыта — видно по строке ссылок сверху.
+    assert CURRENT_ITEM.findall(html) == ["Аналитика по людям"], (
         f"на странице {page} выделены пункты {CURRENT_ITEM.findall(html)}"
     )
+    assert f'aria-current="page">{item}<' in html, "в строке ссылок не отмечена текущая страница"
     assert "<select" not in html, "выбор на странице — выпадающим списком (D081)"
 
 
