@@ -6266,10 +6266,6 @@ msgstr "Add"
 msgid "Часы"
 msgstr "Hours"
 
-#: web/templates/web/periods.html:52
-msgid "ФОТ"
-msgstr "Payroll cost"
-
 #: web/templates/web/periods.html:53
 msgid "Доля от выручки"
 msgstr "Share of revenue"
@@ -11213,10 +11209,6 @@ msgstr "Remark"
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Замечания"
 msgstr "Remarks"
-
-#: новые строки, добавлены tools/apply_translations.py
-msgid "Итого по ведомости"
-msgstr "Payroll total"
 
 #: новые строки, добавлены tools/apply_translations.py
 msgid ""

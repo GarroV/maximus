@@ -192,14 +192,22 @@ def _period_rows() -> list[dict]:
     # итог месяца есть у КАЖДОГО табеля. По дням картина выглядела бы пустой
     # ровно там, где данные внесены импортом, — проверено на стенде: 35
     # табелей и ноль дней.
+    # Ключ — партнёр и месяц, а не один месяц: человек, заведённый у двух
+    # партнёров, видит месяцы обоих, и по одной дате их суммы сложились бы.
     worked: dict = {}
-    for period_of, by_type in Timesheet.objects.values_list("period", "hours"):
+    for tenant_of, period_of, by_type in Timesheet.objects.values_list(
+        "tenant_id", "period", "hours",
+    ):
         total = sum(Decimal(str(value or 0)) for value in (by_type or {}).values())
-        worked[period_of] = worked.get(period_of, Decimal("0")) + total
+        key = (tenant_of, period_of)
+        worked[key] = worked.get(key, Decimal("0")) + total
+    # Бруто — начислено до удержаний. Подписано на экране именно так, а не
+    # «ФОТ»: на странице месяца итог — к выплате, и одно слово под двумя
+    # разными числами читалось как ошибка отчёта (разбор 12.11.2026, #330).
     payroll = {
-        row["payslip__payrun__period"]: row["total"]
+        (row["tenant_id"], row["payslip__payrun__period"]): row["total"]
         for row in PayslipTotals.objects
-        .values("payslip__payrun__period")
+        .values("tenant_id", "payslip__payrun__period")
         .annotate(total=Sum("gross"))
     }
     revenue = _revenue_by_period()
@@ -209,7 +217,7 @@ def _period_rows() -> list[dict]:
     # говорит об этом прямо: «тот, кто через год увидит расхождение в
     # отчётности, должен знать, что месяц пересчитывали».
     reopened = set(
-        Payrun.objects.filter(status="reopened").values_list("period", flat=True)
+        Payrun.objects.filter(status="reopened").values_list("tenant_id", "period")
     )
 
     return [
@@ -217,12 +225,14 @@ def _period_rows() -> list[dict]:
             "id": period.id,
             "title": month_title(period.period),
             "status": status_title(period.status),
-            "reopened": period.period in reopened,
+            "reopened": (period.tenant_id, period.period) in reopened,
             "tenant": period.tenant.title,
-            "hours": hours(worked[period.period]) if period.period in worked else EMPTY,
-            "payroll": money(payroll[period.period]) if period.period in payroll else EMPTY,
-            "share": _share_of_revenue(payroll.get(period.period),
-                                       revenue.get(period.period)),
+            "hours": (hours(worked[(period.tenant_id, period.period)])
+                      if (period.tenant_id, period.period) in worked else EMPTY),
+            "payroll": (money(payroll[(period.tenant_id, period.period)])
+                        if (period.tenant_id, period.period) in payroll else EMPTY),
+            "share": _share_of_revenue(payroll.get((period.tenant_id, period.period)),
+                                       revenue.get((period.tenant_id, period.period))),
             "may_do": _what_can_be_done(period.status),
         }
         for period in Period.objects.select_related("tenant").order_by("-period")
@@ -241,11 +251,11 @@ def _revenue_by_period() -> dict:
     from core.models import Fact
 
     return {
-        row["period"]: row["total"]
+        (row["tenant_id"], row["period"]): row["total"]
         for row in Fact.objects
         .filter(pnl_item__kind="revenue", superseded_at__isnull=True)
         .exclude(allocation="split")
-        .values("period")
+        .values("tenant_id", "period")
         .annotate(total=Sum("amount"))
         if row["total"]
     }

@@ -30,7 +30,7 @@
 {% if has_sheet and not payroll_denied %}
 <div class="stats">
   <a class="stat" href="{% url 'period-sheet' period.id %}">
-    <div class="stat__label">{% translate "Итого по ведомости" %}</div>
+    <div class="stat__label">{% translate "К выплате" %}</div>
     <div class="stat__value">{{ total }}</div>
     <div class="stat__delta">{% blocktranslate with count=sheet_employees %}{{ count }} чел.{% endblocktranslate %}</div>
   </a>
