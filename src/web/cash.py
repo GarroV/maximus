@@ -61,6 +61,12 @@ MANUAL_SOURCE = "manual"
 # и совпадение означало бы, что ручной расход заменил собой строку выписки.
 DEDUP_PREFIX = "manual:cash:"
 
+# Расход без статьи (#311): название в данных — комментарий человека, а если его
+# нет — это слово. Язык исходника, как и у названий статей: язык страницы в
+# данные не попадает.
+UNSORTED_TITLE = "Расход без статьи"
+TITLE_LIMIT = 80
+
 
 class CashRefused(Exception):
     """Расход не принят по состоянию данных. Сообщение показывается как есть.
@@ -219,7 +225,7 @@ def record_expense(
     *,
     on: date,
     amount,
-    item: ExpenseItem,
+    item: ExpenseItem | None,
     unit_id,
     till_id,
     ledger: str,
@@ -229,11 +235,27 @@ def record_expense(
 ) -> Recorded:
     """Записать расход из кассы. Единственный путь записи — `upsert_fact`.
 
+    **Статьи может не быть** (#311): управляющий не выдумывает её на месте, а
+    бухгалтер разносит расход позже. Такая строка ложится в служебную строку
+    P&L «Не разобрано» — ту же, что у счёта без статьи, — и стоит в инбоксе
+    (`suppliers.awaiting_an_article`). Это не второй механизм: расход без
+    статьи и счёт без статьи ждут одним и тем же способом.
+
     Своего `insert` здесь нет и быть не должно: идемпотентность, версионирование
     и защита закрытого месяца живут в этой функции базы, и второй путь записи
     обошёл бы их все сразу.
     """
     landing = landing_for(who.tenant_id, on)
+    if item is None:
+        from .suppliers import UNCLASSIFIED, line
+
+        pnl_item_id, expense_item_id = line(UNCLASSIFIED).id, None
+        # Снимок названия — то, по чему строку узнают в инбоксе: комментарий
+        # («кому и за что»), а при его отсутствии общее слово.
+        title = (note or "").strip()[:TITLE_LIMIT] or UNSORTED_TITLE
+    else:
+        pnl_item_id, expense_item_id = item.pnl_item_id, item.id
+        title = item_title(item.titles, language=settings.LANGUAGE_CODE)
     payload = {
         "tenant_id": str(who.tenant_id),
         "period": landing.period.isoformat(),
@@ -245,8 +267,8 @@ def record_expense(
         # состояние «сумма есть, точка ещё не решена», и в P&L она считается —
         # просто без разреза по точкам, пока правило не разнесёт.
         "unit_id": str(unit_id) if unit_id else None,
-        "pnl_item_id": str(item.pnl_item_id),
-        "expense_item_id": str(item.id),
+        "pnl_item_id": str(pnl_item_id),
+        "expense_item_id": str(expense_item_id) if expense_item_id else None,
         # Из какой кассы платили (T145). Уходит в базу как есть — ровно как
         # точка: чужую кассу отвергает политика `till_visibility` на `facts`, а
         # не проверка здесь (D014).
@@ -267,7 +289,7 @@ def record_expense(
         # статья попадала бы в данные то «Вода», то «Voda» в зависимости от того,
         # кто вносил расход, и в отчёте это выглядело бы двумя разными строками.
         # Читателю название всё равно показывается на его языке — из статьи.
-        "title": item_title(item.titles, language=settings.LANGUAGE_CODE),
+        "title": title,
         "note": note or None,
         "channel": CASH_CHANNEL,
         "source": MANUAL_SOURCE,
@@ -439,7 +461,7 @@ def revise_expense(
     *,
     on: date,
     amount,
-    item: ExpenseItem,
+    item: ExpenseItem | None,
     unit_id,
     till_id,
     ledger: str,

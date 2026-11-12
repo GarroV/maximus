@@ -1,6 +1,6 @@
 """Экран внесения расхода из кассы (T109).
 
-Форма одна и короткая: дата, сумма, статья, комментарий. Всё, что делает её
+Форма короткая: чек, сумма, статья, «кому и за что», дата; служебное — под «Ещё поля». Всё, что делает её
 непростой, живёт не здесь, а в `web/cash.py` — там правила и объяснения, почему
 они такие. Здесь только разбор ввода и показ.
 
@@ -84,7 +84,7 @@ def _save(request, who) -> str:
     готовой фразой, — фразу в адресе не перевести и подставить в неё можно что
     угодно.
     """
-    entered = parse_expense(request, who)
+    entered = parse_expense(request, who, item_required=False)
     entry_key = cash.parse_entry_key(request.POST.get("entry_key", ""))
 
     recorded = cash.record_expense(who, entry_key=entry_key, **entered)
@@ -116,13 +116,17 @@ def _save(request, who) -> str:
     return landed
 
 
-def parse_expense(request, who) -> dict:
+def parse_expense(request, who, *, item_required: bool = True) -> dict:
     """Разобрать форму расхода — одинаково для внесения и для правки.
 
     Одной функцией, а не двумя похожими: правила «статья обязана действовать на
     дату», «ноль не вносится» и «точку отвергает база» одни и те же, а две копии
     разъехались бы на первой правке — и разъехались бы молча, потому что каждая
     по отдельности осталась бы верной.
+
+    `item_required=False` — форма внесения (#311): статья необязательна, расход
+    без неё уходит бухгалтеру во «Входящие». Остальные пути (API, правка
+    расхода со статьёй) требуют её по-прежнему.
     """
     on = _date(request, "date", _("Дата расхода"), required=True)
     amount = _number(request, "amount", _("Сумма"))
@@ -133,12 +137,12 @@ def parse_expense(request, who) -> dict:
     return {
         "on": on,
         "amount": amount,
-        "item": _item(request, who, on),
+        "item": _item(request, who, on, required=item_required),
         "unit_id": _unit(request, who, till),
         "till_id": till_id,
         "ledger": _ledger(request, who, till),
         "vat_rate": _vat_rate(request),
-        "note": _text(request, "note", _("Комментарий"), required=False),
+        "note": _text(request, "note", _("Кому и за что"), required=False),
     }
 
 
@@ -189,8 +193,12 @@ def _till(request):
     return till_id, Till.objects.filter(pk=till_id).first()
 
 
-def _item(request, who, on: date):
-    """Статья расхода. Без неё расход не сохраняется — ему негде быть в P&L.
+def _item(request, who, on: date, *, required: bool = True):
+    """Статья расхода. Пусто допустимо только там, где `required=False` (#311).
+
+    Расход без статьи не теряется: он ложится в служебную строку «Не разобрано»
+    и ждёт бухгалтера во «Входящих». Там, где статья обязательна, без неё
+    расход не сохраняется.
 
     Проверяется и то, что статья действует на дату расхода: статья, заведённая
     в августе, не объясняет июньскую трату, и молча принять её значило бы
@@ -198,7 +206,9 @@ def _item(request, who, on: date):
     """
     raw = (request.POST.get("item") or "").strip()
     if not raw:
-        raise BadInput(_("Поле «%(label)s» обязательно.") % {"label": _("Статья расхода")})
+        if required:
+            raise BadInput(_("Поле «%(label)s» обязательно.") % {"label": _("Статья расхода")})
+        return None
 
     from core.models import ExpenseItem
 
@@ -297,74 +307,140 @@ def _context(request, who, entered, *, error: str) -> dict:
         "error": error,
         "notice": _notice(request),
         "entry_key": cash.new_entry_key(),
-        "fields": expense_fields(who, entered),
+        "form": expense_form(who, entered, has_error=bool(error)),
         # Чек снимается тем же движением, что вносится расход (T184).
         "receipt_accept": receipts.ACCEPT,
     }
 
 
+def expense_form(who, entered, *, has_error: bool = False) -> dict:
+    """Форма внесения под телефон управляющего (#311, #336).
+
+    Сверху то, ради чего человек открыл форму: фото чека, сумма, статья, «кому
+    и за что», дата. Служебное (касса, точка, регистр, ставка НДС) — под
+    «Ещё поля», со значениями по умолчанию: управляющему они не нужны, а
+    бухгалтеру и директору нужны, поэтому им раскрывашка открыта.
+
+    Кому открыта — решает право `suppliers.classify`: оно уже отделяет тех, кто
+    ведёт месяц, от управляющего точки (`core/roles.py`), и второго списка ролей
+    здесь заводить незачем. Открыта и тогда, когда точку нужно выбирать руками
+    (точек не одна), и после отказа: закрытая раскрывашка с обязательным полем
+    внутри не даёт отправить форму, не объяснив почему.
+    """
+    from .bank import home_currency
+
+    on = _entered_date(entered) or date.today()
+    one_unit = len(who.unit_ids) == 1
+    item = _item_field(who, entered, on, optional=True)
+    more = [
+        _vat_field(entered),
+        *_till_field(entered, preselect_single=one_unit),
+        *([] if one_unit else _unit_field(who, entered)),
+        _ledger_field(who, entered),
+    ]
+    return {
+        "currency": home_currency(who.tenant_id),
+        "amount": _amount_field(entered),
+        # Справочник пуст — поля нет вовсе (#311): выбирать не из чего, а пустой
+        # выбор из ничего только мешает. Подсказку шаблон тогда пишет сам.
+        "item_fields": [item] if item["options"] else [],
+        "item_hint": item["help"],
+        "tail_fields": [_note_field(entered), _date_field(who, entered, on)],
+        "more": more,
+        "more_open": has_error or "suppliers.classify" in (who.permissions or []) or not one_unit,
+    }
+
+
 def expense_fields(who, entered) -> list[dict]:
-    """Поля формы расхода — одни и те же на внесении и на правке (T110).
+    """Поля формы расхода для правки — те же, что у внесения, плоским списком (T110).
 
     Список статей берётся на дату расхода: статья, заведённая в августе, не
     объясняет июньскую трату, и предлагать её было бы обещанием, которое
     отвергнет разбор ввода.
     """
-    today = date.today()
-    on = _entered_date(entered) or today
+    on = _entered_date(entered) or date.today()
     return [
-        {"kind": "date", "name": "date", "label": _("Дата расхода"), "required": True,
-         "value": entered.get("date") or today.isoformat(),
-         "help": _("Когда деньги вышли из кассы.") + _closed_hint(who, on)},
-        {"kind": "number", "name": "amount", "label": _("Сумма"), "required": True,
-         "value": entered.get("amount", ""),
-         "help": _("Сумма из чека — с налогом, если он в ней есть.")},
-        # Ставка, а не сумма налога (T146, D042): в чеке напечатана ставка, а
-        # сумму из неё считает база. Спрашивать обе означало бы просить человека
-        # проверить работу продукта за него — и однажды получить пару, которая
-        # не сходится.
-        {"kind": "number", "name": "vat_rate", "label": _("Ставка НДС, %"),
-         "value": entered.get("vat_rate", ""),
-         "help": _("В Сербии 20 или 10. Пусто — налог не выделяем: в P&L такая "
-                   "трата пойдёт полной суммой. С заполненной ставкой в P&L по "
-                   "умолчанию поедет сумма без НДС.")},
-        _select(
-            "item", _("Статья расхода"),
-            [
-                (item.id, cash.item_title(item.titles))
-                # Только статьи с пометкой «расходы наличными» (T191): сорок
-                # строк управляющий на телефоне не читает, а выбирает первую
-                # похожую. Уже выбранная статья остаётся в списке всегда — иначе
-                # правка комментария у старого расхода молча переназначила бы
-                # ему статью, а с ней и строку P&L.
-                for item in cash.items_on(
-                    who.tenant_id, on, surface=CASH, keep=entered.get("item") or None,
-                )
-            ],
-            entered.get("item"), required=True,
-            help=_("Статьи ведёт администратор сети. Нужной нет — попросите завести: "
-                   "выдумывать название на месте нельзя, иначе одна трата "
-                   "назовётся по-разному."),
-        ),
+        _date_field(who, entered, on),
+        _amount_field(entered),
+        _vat_field(entered),
+        # Расход, у которого статьи не было, можно править и дальше без неё.
+        _item_field(who, entered, on, optional=not entered.get("item")),
         *_till_field(entered),
         *_unit_field(who, entered),
-        _select(
-            "ledger", _("Регистр учёта"),
-            [(code, ledger_title(code)) for code in LEDGER_CODES
-             if code in who.visible_ledgers],
-            entered.get("ledger") or "", required=False,
-            empty_label=_("Из кассы"),
-            help=_("Пусто — регистр берётся из выбранной кассы; без кассы это "
-                   "официальный. Выбранное здесь значение сильнее кассы."),
-        ),
-        {"kind": "text", "name": "note", "label": _("Комментарий"),
-         "value": entered.get("note", ""),
-         "help": _("Зачем потратили. Через месяц это единственное, по чему "
-                   "строку узнают.")},
+        _ledger_field(who, entered),
+        _note_field(entered),
     ]
 
 
-def _till_field(entered) -> list[dict]:
+def _date_field(who, entered, on: date) -> dict:
+    return {"kind": "date", "name": "date", "label": _("Дата расхода"), "required": True,
+            "value": entered.get("date") or date.today().isoformat(),
+            "help": _("Когда деньги вышли из кассы.") + _closed_hint(who, on)}
+
+
+def _amount_field(entered) -> dict:
+    return {"kind": "number", "name": "amount", "label": _("Сумма"), "required": True,
+            "value": entered.get("amount", ""),
+            "help": _("Сумма из чека — с налогом, если он в ней есть.")}
+
+
+def _vat_field(entered) -> dict:
+    # Ставка, а не сумма налога (T146, D042): в чеке напечатана ставка, а
+    # сумму из неё считает база. Спрашивать обе означало бы просить человека
+    # проверить работу продукта за него — и однажды получить пару, которая
+    # не сходится.
+    #
+    # Ставок страны в подсказке нет: в правилах страны их нет, а конкретные
+    # числа в тексте продукта — это страновая специфика в коде.
+    return {"kind": "number", "name": "vat_rate", "label": _("Ставка НДС, %"),
+            "value": entered.get("vat_rate", ""),
+            "help": _("Ставка, напечатанная в чеке. Пусто — налог не выделяем: в P&L "
+                      "такая трата пойдёт полной суммой. С заполненной ставкой в P&L "
+                      "по умолчанию поедет сумма без НДС.")}
+
+
+def _item_field(who, entered, on: date, *, optional: bool) -> dict:
+    return _select(
+        "item", _("Статья расхода"),
+        [
+            (item.id, cash.item_title(item.titles))
+            # Только статьи с пометкой «расходы наличными» (T191): сорок
+            # строк управляющий на телефоне не читает, а выбирает первую
+            # похожую. Уже выбранная статья остаётся в списке всегда — иначе
+            # правка комментария у старого расхода молча переназначила бы
+            # ему статью, а с ней и строку P&L.
+            for item in cash.items_on(
+                who.tenant_id, on, surface=CASH, keep=entered.get("item") or None,
+            )
+        ],
+        entered.get("item"), required=not optional,
+        empty_label=_("Не выбрана") if optional else "",
+        help=_("Не нашли статью — оставьте пустой, бухгалтер разнесёт.") if optional
+        else _("Статьи ведёт администратор сети. Нужной нет — попросите завести: "
+               "выдумывать название на месте нельзя, иначе одна трата "
+               "назовётся по-разному."),
+    )
+
+
+def _ledger_field(who, entered) -> dict:
+    return _select(
+        "ledger", _("Регистр учёта"),
+        [(code, ledger_title(code)) for code in LEDGER_CODES
+         if code in who.visible_ledgers],
+        entered.get("ledger") or "", required=False,
+        empty_label=_("Из кассы"),
+        help=_("Пусто — регистр берётся из выбранной кассы; без кассы это "
+               "официальный. Выбранное здесь значение сильнее кассы."),
+    )
+
+
+def _note_field(entered) -> dict:
+    return {"kind": "text", "name": "note", "label": _("Кому и за что"),
+            "value": entered.get("note", ""),
+            "help": _("Через месяц это единственное, по чему строку узнают.")}
+
+
+def _till_field(entered, *, preselect_single: bool = False) -> list[dict]:
     """Касса, из которой платили (T145). Список — только видимые роли кассы.
 
     Срез делает база: политики `unit_visibility` и `ledger_visibility` на
@@ -386,6 +462,10 @@ def _till_field(entered) -> list[dict]:
     ]
     if not rows:
         return []
+    # Управляющий с одной точкой и одной кассой: платит он из неё, и выбирать
+    # нечего — касса подставлена, а точку и регистр она задаёт сама.
+    if preselect_single and not entered and len(rows) == 1:
+        chosen = str(rows[0][0])
     return [_select(
         "till", _("Касса"), rows, chosen, required=False,
         empty_label=_("Без кассы"),

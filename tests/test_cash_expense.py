@@ -220,15 +220,40 @@ def test_the_accountant_and_the_director_record_for_any_unit(
         client.post("/logout/")
 
 
-def test_an_expense_without_an_item_is_refused(
+def test_an_expense_without_an_item_goes_to_the_unsorted_line(
     client, sql, item, units, facts_removed,  # noqa: F811
 ):
-    """Расход без статьи не сохраняется: иначе он не попадёт ни в одну строку P&L."""
+    """Форма пускает расход без статьи (#311): он ложится в «Не разобрано».
+
+    Раньше здесь был отказ. Он оставлял управляющего ни с чем на партнёре, у
+    которого справочник статей ещё пуст. Теперь расход не теряется и ждёт
+    бухгалтера во «Входящих» (`tests/test_expense_form_mobile.py`).
+    """
     login_as(client, "manager")
     try:
         key = entry_key()
         answer = client.post(URL, payload(item, units, item="", entry_key=key))
-        assert answer.status_code == 400, answer.status_code
+        assert answer.status_code == 302, answer.status_code
+        (row,) = facts_of(sql, key)
+        assert row[11] is None, "у расхода без статьи статьи быть не должно"
+        line = sql.execute(
+            "select p.code from facts f join pnl_items p on p.id = f.pnl_item_id "
+            "where f.id = %s", (row[12],),
+        ).fetchone()[0]
+        assert line == "unclassified"
+    finally:
+        client.post("/logout/")
+
+
+def test_the_api_still_requires_an_item(
+    client, sql, item, units, facts_removed,  # noqa: F811
+):
+    """Необязательна статья только у формы: другие пути записи требуют её по-прежнему."""
+    login_as(client, "manager")
+    try:
+        key = entry_key()
+        answer = client.post("/api/expenses/", payload(item, units, item="", entry_key=key))
+        assert answer.status_code == 400, (answer.status_code, answer.content[:200])
         assert facts_of(sql, key) == []
     finally:
         client.post("/logout/")

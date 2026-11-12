@@ -1500,15 +1500,6 @@ msgstr "The amount from the receipt — including tax, if the receipt has it."
 msgid "Ставка НДС, %"
 msgstr "VAT rate, %"
 
-#: web/cash_views.py:328
-msgid ""
-"В Сербии 20 или 10. Пусто — налог не выделяем: в P&L такая трата пойдёт "
-"полной суммой. С заполненной ставкой в P&L по умолчанию поедет сумма без НДС."
-msgstr ""
-"In Serbia it is 20 or 10. Empty — no tax is split out: the expense goes into "
-"the P&L at its full amount. With a rate set, the P&L defaults to the amount "
-"excluding VAT."
-
 #: web/cash_views.py:345
 msgid ""
 "Статьи ведёт администратор сети. Нужной нет — попросите завести: выдумывать "
@@ -1529,12 +1520,6 @@ msgid ""
 msgstr ""
 "Empty — the ledger is taken from the chosen till; without a till it is "
 "official. A value chosen here overrides the till."
-
-#: web/cash_views.py:362
-msgid "Зачем потратили. Через месяц это единственное, по чему строку узнают."
-msgstr ""
-"What the money was spent on. A month from now, this is the only thing the "
-"line will be recognized by."
 
 #: web/cash_views.py:390 web/suppliers_views.py:928
 #: web/templates/web/cash/expenses.html:129
@@ -4546,9 +4531,53 @@ msgstr ""
 "A photo of the slip. The expense is recorded without it too — the money is "
 "already handed over."
 
-#: web/templates/web/cash/expense.html:51
-msgid "Записать расход"
+#: web/templates/web/cash/expense.html
+msgid "Сфотографировать"
+msgstr "Take a photo"
+
+#: web/templates/web/cash/expense.html
+msgid "Из галереи"
+msgstr "From gallery"
+
+#: web/templates/web/cash/expense.html
+msgid "Заменить"
+msgstr "Replace"
+
+#: web/templates/web/cash/expense.html
+msgid "Убрать"
+msgstr "Remove"
+
+#: web/templates/web/cash/expense.html
+msgid "Ещё поля"
+msgstr "More fields"
+
+#: web/templates/web/cash/expense.html
+msgid "Сохранить расход"
 msgstr "Save expense"
+
+#: web/templates/web/cash/expense.html
+msgid "Кому и за что"
+msgstr "Paid to whom and for what"
+
+#: web/templates/web/cash/expense.html
+msgid "Через месяц это единственное, по чему строку узнают."
+msgstr ""
+"A month from now, this is the only thing the line will be recognized "
+"by."
+
+#: web/templates/web/cash/expense.html
+msgid "Не нашли статью — оставьте пустой, бухгалтер разнесёт."
+msgstr "Can't find the category? Leave it empty, the accountant will sort it."
+
+#: web/templates/web/cash/expense.html
+msgid ""
+"Ставка, напечатанная в чеке. Пусто — налог не выделяем: в P&L такая "
+"трата пойдёт полной суммой. С заполненной ставкой в P&L по умолчанию "
+"поедет сумма без НДС."
+msgstr ""
+"The rate printed on the receipt. Empty — no tax is split out: the "
+"expense goes into P&L in full. With a rate filled in, P&L shows the "
+"amount without VAT by default."
 
 #: web/templates/web/cash/expense_edit.html:28
 #: web/templates/web/cash/unallocated.html:15
