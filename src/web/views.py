@@ -402,6 +402,27 @@ def cut_url(period: Period, code: str) -> str:
     return base if not code else f"{base}?ledger={code}"
 
 
+# Куда идти, чтобы находку закрытия разобрать (разбор интерфейса 12.11.2026,
+# #331). Без ссылки находка — абзац текста, и человек ищет нужный экран сам.
+# Ключ — `Finding.code` из `payrun.readiness`.
+FIX_ROUTE = {
+    "unit_hours": ("timesheets", True),
+    "salary_hours": ("timesheets", True),
+    "papers": ("papers", False),
+    "inbox": ("inbox", False),
+    "variance": ("period-variance", True),
+}
+
+
+def _fix_url(code: str, period) -> str:
+    """Адрес экрана, где эта находка разбирается; пусто — такого экрана нет."""
+    route = FIX_ROUTE.get(code)
+    if route is None:
+        return ""
+    name, of_period = route
+    return reverse(name, args=[period.id]) if of_period else reverse(name)
+
+
 def _readiness_of(period):
     """Что мешает закрыть месяц — для показа рядом с кнопкой утверждения.
 
@@ -417,6 +438,7 @@ def _readiness_of(period):
         {
             "code": found.code, "kind": found.kind, "title": found.title,
             "detail": found.detail, "postponed": state.postponed.get(found.code, ""),
+            "fix_url": _fix_url(found.code, period),
         }
         for found in state.findings
     ]

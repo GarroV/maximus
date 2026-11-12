@@ -81,6 +81,35 @@ def test_open_unit_hours_block_the_approval_where_closing_is_used(client, calcul
     assert Period.objects.get(period=JUNE).status != "closed"
 
 
+def test_a_blocking_finding_leads_where_it_is_fixed_and_greys_the_button(
+    client, calculated,
+):
+    """У находки есть «Разобрать →», а «Утвердить» не нажимается (#331).
+
+    Прежде находка была абзацем текста, а кнопка нажималась и отвечала отказом
+    уже после нажатия: человек узнавал правило из ошибки и сам искал экран.
+    """
+    import re
+
+    from core.models import Period, Unit
+    from timesheets import closing
+
+    first = Unit.objects.order_by("code").first()
+    closing.close_unit(
+        tenant_id=first.tenant_id, period=JUNE, unit_id=first.id, actor_id=None,
+    )
+    period = Period.objects.get(period=JUNE)
+
+    html = body(client.get(calculated))
+    assert f'href="/timesheets/{period.id}/"' in html, (
+        "у незакрытых часов нет перехода в табель месяца"
+    )
+    button = re.search(r"<button[^>]*>Утвердить период</button>", html)
+    assert button, "кнопки утверждения нет на странице"
+    assert "disabled" in button.group(0), "при блокирующей находке кнопка нажимается"
+    assert "Сначала разберите блокирующие находки" in html, "не сказано, почему"
+
+
 def test_untouched_closing_does_not_lock_the_month(client, calculated):
     """А если точки никто не закрывал — месяц закрывается, и это не дыра."""
     from core.models import Period

@@ -6775,6 +6775,10 @@ msgstr "%(amount)s nije ušlo u izveštaj: %(counter)s redova bez stavke."
 msgid "Разобрать"
 msgstr "Razvrstaj"
 
+#: web/templates/web/period.html:367
+msgid "Сначала разберите блокирующие находки выше или отложите их с причиной."
+msgstr "Prvo rešite blokirajuće nalaze iznad ili ih odložite uz razlog."
+
 #: web/templates/web/reports/pnl.html:33
 msgid "Строка отчёта"
 msgstr "Red izveštaja"

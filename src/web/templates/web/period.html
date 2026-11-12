@@ -326,6 +326,7 @@
       {% else %}<span class="badge">{% translate "Замечание" %}</span>{% endif %}
     </p>
     {% if found.detail %}<p class="note">{{ found.detail }}</p>{% endif %}
+    {% if found.fix_url and not found.postponed %}<p><a href="{{ found.fix_url }}">{% translate "Разобрать" %} →</a></p>{% endif %}
     {% if found.postponed %}
       <p class="note">{% blocktranslate with reason=found.postponed %}Отложено: {{ reason }}{% endblocktranslate %}</p>
     {% elif found.kind == "blocking" %}
@@ -355,7 +356,19 @@
 {% translate "Зачем открываете период" as reopen_reason_label %}
 {% translate "например: ошиблись в часах за третью неделю" as reopen_reason_placeholder %}
 <div class="lifecycle">
+  {% if can_approve and readiness and not readiness.ready %}
+  {% comment %}
+  Пока есть неразобранные блокирующие находки, кнопка видна, но не нажимается,
+  и рядом сказано почему (#331). Прежде она нажималась и отвечала отказом уже
+  после нажатия — человек узнавал правило из ошибки.
+  {% endcomment %}
+  <form class="action">
+    <button type="button" class="primary" disabled aria-describedby="approve-blocked">{{ approve_label }}</button>
+    <span class="note" id="approve-blocked">{% translate "Сначала разберите блокирующие находки выше или отложите их с причиной." %}</span>
+  </form>
+  {% else %}
   {% include "web/components/action.html" with allowed=can_approve denied=approve_denied url=approve_url label=approve_label primary=True note=approve_note %}
+  {% endif %}
   {% comment %}
   Откат — то самое действие с обязательной причиной, которое в этом продукте
   заменяет диалог подтверждения: подтверждать нажатием нечего, если через
