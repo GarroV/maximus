@@ -11904,3 +11904,72 @@ msgstr "Uloge i prvi korisnik prave se zajedno sa radnim prostorom. Zatim možet
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Данные другого администратора платформы меняются им самим."
 msgstr "Drugi administratori platforme sami menjaju podatke svog naloga."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Без условий найма человек не попадает в табель: считать его нечем."
+msgstr "Bez uslova rada osoba ne ulazi u tabelu: nema na osnovu čega da se računa."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Бухгалтерия работает с юрлицом: к нему привязываются точки."
+msgstr "Računovodstvo radi sa pravnim licem: za njega se vezuju objekti."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Готово %(done)s из %(total)s"
+msgstr "Gotovo %(done)s od %(total)s"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Группа задаёт, как считается оплата и в каком регистре учёта она идёт."
+msgstr "Grupa određuje kako se računa plata i u kom registru evidencije ide."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Группа сотрудников"
+msgstr "Grupa zaposlenih"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Завести календарь"
+msgstr "Uneti kalendar"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Из него берётся норма часов месяца. Он общий для страны: если его уже "
+"завели, шаг сделан."
+msgstr "Iz njega se uzima norma sati meseca. Zajednički je za zemlju: ako je već unet, korak je gotov."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К месяцам"
+msgstr "Na mesece"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц, в котором вы вносите часы и считаете ведомость."
+msgstr "Mesec u kome unosite sate i računate platni spisak."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Настройка завершена — внесите часы первого месяца."
+msgstr "Podešavanje je završeno — unesite sate za prvi mesec."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Настройка партнёра"
+msgstr "Podešavanje partnera"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Первый месяц"
+msgstr "Prvi mesec"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сделать"
+msgstr "Urediti"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сотрудник с условиями найма"
+msgstr "Zaposleni sa uslovima rada"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часы и расходы вносятся на точку — пиццерию."
+msgstr "Sati i troškovi se unose po objektu — picerija."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сделано"
+msgstr "urađeno"

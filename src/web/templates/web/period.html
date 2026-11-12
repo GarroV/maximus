@@ -158,7 +158,7 @@
   она общая для всех ролей, и разное число у разных людей было дефектом (её
   брали из первого попавшегося табеля, где норма персональная).
   {% endcomment %}
-  <dt>{% translate "Норма часов" %} <span class="hint">{{ norm_hours_hint }}</span></dt>
+  <dt>{% translate "Норма часов" %} <span class="hint">{{ norm_hours_hint }}{% if calendar_url %} · <a href="{{ calendar_url }}">{% translate "Завести календарь" %}</a>{% endif %}</span></dt>
   <dd>{{ norm_hours }}</dd>
   <dt>{% translate "Последний расчёт" %}</dt>
   <dd>{% if calculated_at %}{{ calculated_at }}{% else %}{% translate "не считался" %}{% endif %}</dd>

@@ -12060,3 +12060,72 @@ msgstr "Roles and the first user are created with the workspace. You can then ad
 #: новые строки, добавлены tools/apply_translations.py
 msgid "Данные другого администратора платформы меняются им самим."
 msgstr "Other platform administrators manage their own account details."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Без условий найма человек не попадает в табель: считать его нечем."
+msgstr "Without hiring terms a person does not appear in the timesheet: there is nothing to calculate from."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Бухгалтерия работает с юрлицом: к нему привязываются точки."
+msgstr "Accounting works with the legal entity: units are attached to it."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Готово %(done)s из %(total)s"
+msgstr "%(done)s of %(total)s done"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Группа задаёт, как считается оплата и в каком регистре учёта она идёт."
+msgstr "The group sets how pay is calculated and which accounting register it goes to."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Группа сотрудников"
+msgstr "Employee group"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Завести календарь"
+msgstr "Set up the calendar"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid ""
+"Из него берётся норма часов месяца. Он общий для страны: если его уже "
+"завели, шаг сделан."
+msgstr "The month's hours norm comes from it. It is shared by the country: if it is already set up, this step is done."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "К месяцам"
+msgstr "To the months"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Месяц, в котором вы вносите часы и считаете ведомость."
+msgstr "The month in which you enter hours and calculate the payroll sheet."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Настройка завершена — внесите часы первого месяца."
+msgstr "Setup is complete — enter the hours for your first month."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Настройка партнёра"
+msgstr "Partner setup"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Первый месяц"
+msgstr "First month"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сделать"
+msgstr "Do it"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Сотрудник с условиями найма"
+msgstr "Employee with hiring terms"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Часы и расходы вносятся на точку — пиццерию."
+msgstr "Hours and expenses are entered per unit — a pizzeria."
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "сделано"
+msgstr "done"

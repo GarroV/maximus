@@ -1,0 +1,43 @@
+{% load i18n %}{% comment %}
+Карточка «Настройка партнёра» (D100): шесть шагов до первого месяца.
+
+Состояние шагов считает `web/setup_progress.py` по данным в базе; шаблон только
+показывает. Главная кнопка одна — на первый невыполненный шаг: «с чего
+начать» должно читаться без выбора. Остальные невыполненные — ссылки.
+
+Параметры: `setup` — результат `setup_card(who)`; пусто — карточки нет.
+{% endcomment %}{% if setup %}
+{% if setup.all_done %}
+<p class="note note--info setup-done">
+  {% translate "Настройка завершена — внесите часы первого месяца." %}
+  <a href="{% url 'periods' %}#open-month">{% translate "К месяцам" %}</a>
+</p>
+{% else %}
+<section class="card setup" aria-labelledby="setup-title">
+  <div class="card__head">
+    <div>
+      <div class="card__title" id="setup-title">{% translate "Настройка партнёра" %}</div>
+      <div class="card__meta">{% blocktranslate with done=setup.done_count total=setup.total %}Готово {{ done }} из {{ total }}{% endblocktranslate %}</div>
+    </div>
+  </div>
+  <ol class="setup__list">
+    {% for step in setup.steps %}
+    <li class="setup__step{% if step.done %} done{% endif %}">
+      <div class="setup__text">
+        <span class="setup__title">{{ step.title }}</span>
+        {% if step.done %}<span class="chip">{% translate "сделано" %}</span>{% endif %}
+        <span class="setup__why">{{ step.hint }}</span>
+      </div>
+      {% if not step.done %}
+        {% if step.key == setup.next_key %}
+        <a class="btn primary" href="{{ step.url }}">{% translate "Сделать" %}</a>
+        {% else %}
+        <a href="{{ step.url }}">{% translate "Открыть" %}</a>
+        {% endif %}
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endif %}
+{% endif %}

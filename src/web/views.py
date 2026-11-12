@@ -50,7 +50,7 @@ from reports.sheet import build_slice
 from reports.trace import TraceNotFound, build_trace
 from reports.variance import ThresholdsMissing, build_variance
 
-from . import auth, onboarding, permissions, runslice
+from . import auth, onboarding, permissions, runslice, setup_progress
 from .format import (
     EMPTY,
     CodedTitle,
@@ -156,6 +156,9 @@ def periods(request):
                 get_current_principal(request), permissions.PAYRUN_CALCULATE,
             ),
             "next_month": _next_month_hint(),
+            # Карточка настройки партнёра (D100): пусто, если человек не ведёт
+            # справочники или первый месяц уже утверждён.
+            "setup": setup_progress.setup_card(who) if who else None,
         },
     )
 
@@ -681,6 +684,16 @@ def period_page(
                 if norm_hours is not None
                 else _("календарь %(country)s на этот месяц не заведён")
                 % {"country": country}
+            ),
+            # Календаря нет — рядом с серым пояснением ссылка на его заведение
+            # (D100), но только тому, кто справочники ведёт: остальным она
+            # привела бы к отказу.
+            "calendar_url": (
+                reverse("directory-calendar-new")
+                if norm_hours is None and permissions.has(
+                    get_current_principal(request), permissions.DIRECTORY_MANAGE,
+                )
+                else ""
             ),
             # Порядок работы за месяц и то, где человек сейчас (T077). Шаги
             # считаются по фактам о данных, а не по разметке: «часы внесены» —
