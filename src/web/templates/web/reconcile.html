@@ -286,6 +286,31 @@
 </p>
 </div>
 
+{% if undecided %}
+{% comment %}
+Расхождения, по которым ещё нет решения (#332). Прежде история говорила «ждут
+решения: 12», а войти к решению было неоткуда. Решение пишется вместе с
+объяснением — без него «ошибка в файле» через полгода не отличить от «не
+разбирались».
+{% endcomment %}
+<h2 id="decide">{% blocktranslate with n=undecided|length %}Ждут решения: {{ n }}{% endblocktranslate %}</h2>
+<p class="note">{% translate "По каждому расхождению скажите, чья ошибка, и коротко почему." %}</p>
+{% for found in undecided %}
+<form class="card decide" method="post" action="{% url 'reconciliation-decide' found.id %}">{% csrf_token %}
+  <p><b>{{ found.person }}</b> · {{ found.component }}</p>
+  <p class="note">{% blocktranslate with ours=found.ours theirs=found.theirs diff=found.diff %}У нас {{ ours }}, в таблице {{ theirs }}, разница {{ diff }}{% endblocktranslate %}</p>
+  {% translate "Чья ошибка" as decision_label %}{% translate "Не выбрана" as not_chosen %}
+  <p class="field">{% include "web/components/select.html" with id="decision-"|add:found.id name="decision" label=decision_label options=decisions required=1 empty_label=not_chosen empty_selected=1 %}</p>
+  <p class="field">
+    <label for="note-{{ found.id }}">{% translate "Почему" %}</label>
+    <input type="text" id="note-{{ found.id }}" name="note" required
+           placeholder="{% translate "например: в таблице не учтена премия за июнь" %}">
+  </p>
+  <button type="submit">{% translate "Записать решение" %}</button>
+</form>
+{% endfor %}
+{% endif %}
+
 {% if past %}
 {% comment %}
 Прошлые сверки (#172). Эталон называет этот блок так же: без него через месяц
@@ -315,7 +340,7 @@
       <td class="{{ entry.differing|numclass }}">{{ entry.differing }}</td>
       <td>
         {% if entry.undecided %}
-          {% blocktranslate with left=entry.undecided %}ждут решения: {{ left }}{% endblocktranslate %}
+          <a href="#decide">{% blocktranslate with left=entry.undecided %}ждут решения: {{ left }}{% endblocktranslate %}</a>
         {% else %}
           {% translate "всё разобрано" %}
         {% endif %}

@@ -6779,6 +6779,42 @@ msgstr "Razvrstaj"
 msgid "Сначала разберите блокирующие находки выше или отложите их с причиной."
 msgstr "Prvo rešite blokirajuće nalaze iznad ili ih odložite uz razlog."
 
+#: web/templates/web/reconcile.html
+msgid "Ждут решения: %(n)s"
+msgstr "Čeka odluku: %(n)s"
+
+#: web/templates/web/reconcile.html
+msgid "По каждому расхождению скажите, чья ошибка, и коротко почему."
+msgstr "Za svako odstupanje navedite čija je greška i ukratko zašto."
+
+#: web/templates/web/reconcile.html
+msgid "У нас %(ours)s, в таблице %(theirs)s, разница %(diff)s"
+msgstr "Kod nas %(ours)s, u tabeli %(theirs)s, razlika %(diff)s"
+
+#: web/templates/web/reconcile.html
+msgid "Чья ошибка"
+msgstr "Čija greška"
+
+#: web/templates/web/reconcile.html
+msgid "например: в таблице не учтена премия за июнь"
+msgstr "npr. u tabeli nije uračunat bonus za jun"
+
+#: web/templates/web/reconcile.html
+msgid "Записать решение"
+msgstr "Zapiši odluku"
+
+#: web/templates/web/reconcile.html
+msgid "Ошибка у нас — поправим расчёт"
+msgstr "Naša greška — ispravićemo obračun"
+
+#: web/templates/web/reconcile.html
+msgid "Ошибка в файле бухгалтера"
+msgstr "Greška u fajlu računovođe"
+
+#: web/templates/web/reconcile.html
+msgid "Разная трактовка правила"
+msgstr "Različito tumačenje pravila"
+
 #: web/templates/web/reports/pnl.html:33
 msgid "Строка отчёта"
 msgstr "Red izveštaja"

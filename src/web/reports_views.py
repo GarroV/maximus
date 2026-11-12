@@ -31,7 +31,7 @@ from reports import pnl as pnl_report
 from reports.reconcile import reconcile
 from reports.sheet import build_slice
 
-from . import permissions, reconciliation_log, runslice
+from . import labels, permissions, reconciliation_log, runslice
 from .cash import item_title
 from .format import EMPTY, CodedTitle, day, exact, ledger_title, money
 from .labels import labeller
@@ -189,6 +189,14 @@ def _report(request, period, *, result=None, error=None, status=200):
             # расхождения разбирали — у бухгалтера остаётся её файл, у нас
             # ничего.
             "past": reconciliation_log.history(period.tenant_id, period.period),
+            "undecided": reconciliation_log.waiting(
+                period.tenant_id, period.period,
+                labels.labeller(period.tenant_id, period.tenant.country_code, period.period),
+            ),
+            "decisions": [
+                {"code": code, "title": title}
+                for code, title in reconciliation_log.DECISION_TITLES.items()
+            ],
             # Разделено на четыре списка здесь, а не условиями в разметке: у
             # разошедшегося, копеечного, несравнённого и сошедшегося разный
             # вес, и читают их в разном порядке. Смешанная таблица заставляла

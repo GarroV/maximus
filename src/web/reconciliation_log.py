@@ -19,10 +19,11 @@ from decimal import Decimal
 from uuid import UUID
 
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from core.models import Employee, Reconciliation, ReconciliationFinding
 
-__all__ = ["DECISIONS", "decide", "history", "record"]
+__all__ = ["DECISIONS", "DECISION_TITLES", "decide", "history", "record", "waiting"]
 
 # Решения человека по расхождению — из эталона: «три признаны нашей стороной,
 # одно — ошибкой в файле, одно — разной трактовкой правила».
@@ -30,6 +31,14 @@ DECISIONS = {
     "ours": "наша сторона",
     "theirs": "ошибка в файле",
     "rule": "разная трактовка правила",
+}
+
+# Подписи решений для экрана — переводимые. Ключи те же, что у `DECISIONS`:
+# запись в базу идёт кодом, человек видит слова.
+DECISION_TITLES = {
+    "ours": _("Ошибка у нас — поправим расчёт"),
+    "theirs": _("Ошибка в файле бухгалтера"),
+    "rule": _("Разная трактовка правила"),
 }
 
 
@@ -131,6 +140,37 @@ def history(tenant_id: UUID, period: date) -> list[dict]:
             Reconciliation.objects.filter(tenant_id=tenant_id, period=period)
             .order_by("-created_at")[:10]
         )
+    ]
+
+
+def waiting(tenant_id: UUID, period: date, label=None) -> list[dict]:
+    """Расхождения прошлых сверок месяца, по которым ещё нет решения (#332).
+
+    Раньше история говорила «ждут решения: 12», но войти к решению было
+    неоткуда: адрес решения существовал, а ссылки на него не было ни одной.
+    Имя — нашего сотрудника, а не из файла: ФИО из таблицы в систему не
+    переезжают (D028). Чьи строки видны, решает база.
+    """
+    from .format import money
+
+    label = label or (lambda code, stored="": code)
+    found = (
+        ReconciliationFinding.objects
+        .filter(tenant_id=tenant_id, record__period=period, decision__isnull=True)
+        .select_related("employee", "record")
+        .order_by("-record__created_at", "employee__last_name", "component")[:200]
+    )
+    return [
+        {
+            "id": str(item.id),
+            "person": f"{item.employee.last_name} {item.employee.first_name}".strip(),
+            "component": label(item.component),
+            "ours": money(item.ours),
+            "theirs": money(item.theirs),
+            "diff": money(item.theirs - item.ours),
+            "file_name": item.record.file_name,
+        }
+        for item in found
     ]
 
 

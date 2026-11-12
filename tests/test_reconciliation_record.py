@@ -143,6 +143,29 @@ def test_a_decision_can_be_recorded_and_stays(client, reconciled):
     assert "коэффициент" in found.note
 
 
+def test_an_undecided_difference_has_a_way_in(client, reconciled):
+    """У расхождения без решения на экране есть форма решения (#332).
+
+    Прежде история говорила «ждут решения: 12», а адрес решения существовал без
+    единой ссылки на него — человек упирался в число.
+    """
+    from core.models import Employee, ReconciliationFinding
+
+    record = our_record()
+    found = ReconciliationFinding.objects.filter(record=record, decision__isnull=True).first()
+    if found is None:
+        found = ReconciliationFinding.objects.create(
+            tenant_id=record.tenant_id, record=record, employee=Employee.objects.first(),
+            component="hours.regular", ours=Decimal("100.00"), theirs=Decimal("90.00"),
+        )
+
+    html = body(client.get(reconciled + "reconcile/"))
+    assert f'action="/reconciliations/findings/{found.id}/"' in html, (
+        "к решению по расхождению войти неоткуда"
+    )
+    assert 'href="#decide"' in html, "счётчик в истории не ведёт к решениям"
+
+
 def test_past_reconciliations_are_visible(client, reconciled):
     """Прошлые сверки видны списком — эталон называет это «Прошлые сверки»."""
     html = body(client.get(reconciled + "reconcile/"))
