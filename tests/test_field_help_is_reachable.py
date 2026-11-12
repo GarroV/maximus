@@ -62,12 +62,12 @@ def test_every_hint_is_tied_to_its_field(client, web_env):
             )
 
 
-def test_the_hint_is_hidden_from_eyes_but_not_from_the_tree(client, web_env):
-    """Прячет прозрачность, а не `display: none`.
+def test_the_hint_is_visible_and_stays_in_the_tree(client, web_env):
+    """Подсказка видна всегда и не выпадает из дерева доступности.
 
-    Разница не косметическая: `display: none` убирает узел из дерева
-    доступности, и подсказка перестаёт существовать для того, кто читает
-    страницу диктором.
+    Разбор 12.11.2026 (#334): спрятанная до фокуса подсказка оставляла пустой
+    провал под полем и не показывалась на телефоне вовсе. `display: none`
+    убирает узел из дерева доступности — диктор её тоже потеряет.
     """
     from django.contrib.staticfiles import finders
 
@@ -87,7 +87,6 @@ def test_the_hint_is_hidden_from_eyes_but_not_from_the_tree(client, web_env):
     assert "display: none" not in body_of_rule, (
         "подсказку снова прячут display: none — для диктора она исчезнет"
     )
-    assert "opacity: 0" in body_of_rule, "подсказка не спрятана вовсе — форма растянется"
-    assert "min-height" in body_of_rule, (
-        "под подсказку не зарезервировано место — форма будет дёргаться при табуляции"
+    assert "opacity: 0" not in body_of_rule, (
+        "подсказку снова прячут до фокуса — на телефоне её не увидят"
     )
