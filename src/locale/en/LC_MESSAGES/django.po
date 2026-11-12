@@ -4510,8 +4510,8 @@ msgid "Внести расход"
 msgstr "Record expense"
 
 #: web/templates/web/cash/expense.html:22
-msgid "Расход попадёт в P&L строкой своей статьи."
-msgstr "The expense goes into P&L as a line of its item."
+msgid "Чек и сумма — главное. Без статьи расход разнесёт бухгалтер."
+msgstr "The receipt and the amount matter most. Without an item, the accountant will sort the expense."
 
 #: web/templates/web/cash/expense.html:25
 msgid "Записано."

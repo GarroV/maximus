@@ -4428,8 +4428,8 @@ msgid "Внести расход"
 msgstr "Unesi trošak"
 
 #: web/templates/web/cash/expense.html:22
-msgid "Расход попадёт в P&L строкой своей статьи."
-msgstr "Trošak ulazi u P&L kao stavka svoje kategorije."
+msgid "Чек и сумма — главное. Без статьи расход разнесёт бухгалтер."
+msgstr "Račun i iznos su najvažniji. Bez stavke, trošak će razvrstati računovođa."
 
 #: web/templates/web/cash/expense.html:25
 msgid "Записано."
