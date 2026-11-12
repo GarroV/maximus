@@ -1681,3 +1681,19 @@ table.pages td.hint { color: var(--ink-2); font-size: var(--fs-meta); }
    в плотном списке, без отбивок между пунктами. */
 ol.steps-next { margin: 0 0 var(--space-6); padding-left: var(--space-8); color: var(--ink-2); }
 ol.steps-next li { margin: 0 0 var(--space-3); }
+
+/* Карточка «Настройка партнёра» на списке месяцев (D100). Шаг — строка:
+   слева что и зачем, справа единственное действие. Сделанный шаг приглушён,
+   чтобы взгляд шёл к первому несделанному. */
+.setup { max-width: 760px; margin: 0 0 var(--space-8); }
+.setup__list { list-style: none; margin: 0; padding: 0; }
+.setup__step {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-6);
+  padding: var(--space-5) var(--space-7); border-bottom: 1px solid var(--line);
+}
+.setup__step:last-child { border-bottom: 0; }
+.setup__step.done .setup__title { color: var(--ink-3); }
+.setup__text { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); min-width: 0; }
+.setup__title { font-weight: var(--w-semibold); margin-right: var(--space-3); }
+.setup__why { flex-basis: 100%; color: var(--ink-2); font-size: var(--fs-meta); }
+.setup-done { max-width: 760px; }
