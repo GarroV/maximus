@@ -176,6 +176,14 @@ def _line_view(line, hour_titles) -> dict:
 
 def _report(request, period, *, result=None, error=None, status=200):
     hour_titles = _hour_titles(period) if result is not None else {}
+    who = get_current_principal(request)
+    # Расхождения с суммами — только тому, кому суммы открыты и кто вправе
+    # по ним решать: у управляющего точки регистры урезаны, а сумма
+    # расхождения посчитана по всем.
+    deciding = (
+        not permissions.sums_denied(who)
+        and permissions.has(who, "payrun.calculate")
+    )
     lines = [_line_view(line, hour_titles) for line in result.lines] if result else []
     return render(
         request,
@@ -192,7 +200,7 @@ def _report(request, period, *, result=None, error=None, status=200):
             "undecided": reconciliation_log.waiting(
                 period.tenant_id, period.period,
                 labels.labeller(period.tenant_id, period.tenant.country_code, period.period),
-            ),
+            ) if deciding else [],
             "decisions": [
                 {"code": code, "title": title}
                 for code, title in reconciliation_log.DECISION_TITLES.items()
