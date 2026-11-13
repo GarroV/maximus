@@ -1337,6 +1337,23 @@ def _terms_fields(who, current: EmploymentTerm | None) -> list[dict]:
 WORK_MEASURE_PATH = "groups.%s.work_measure"
 
 
+def _raised_notice(request) -> str:
+    """Итог индексации ставок после перенаправления (issue #284).
+
+    Страница массового подъёма отправляет сюда с `?raised=N`. Раньше число
+    нигде не читалось, и «ничего не изменилось» выглядело так же, как
+    «изменилось у всех». Цифра в адресе — ввод человека: не число или
+    отрицательная — молчим, а не угадываем.
+    """
+    raw = request.GET.get("raised", "")
+    if not raw.isdigit():
+        return ""
+    count = int(raw)
+    if count == 0:
+        return _("Ставки не изменились: у всех в группе уже такие значения.")
+    return _("Ставки обновлены у сотрудников: %(count)s.") % {"count": count}
+
+
 @login_required
 def groups(request):
     who, denied = _guard(request)
@@ -1365,6 +1382,7 @@ def groups(request):
     ]
     return render(request, "web/directory/list.html", {
         "heading": _("Группы сотрудников"),
+        "notice": _raised_notice(request),
         "about": _(
             "Группа задаёт схему расчёта и регистр учёта по умолчанию. "
             "Отдельному человеку и то и другое переопределяется в условиях найма — с датой."

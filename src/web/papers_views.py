@@ -190,10 +190,40 @@ def paper_new(request):
     }, status=status)
 
 
+# Поля формы, кроме файла, занимают считанные килобайты: запас на них сверх
+# потолка файла. Тело больше — это не бумага, и разбирать его незачем.
+_BODY_SLACK = 64 * 1024
+
+
+def _too_big_words() -> str:
+    return _(
+        "Файл больше %(limit)s МБ. Сфотографируйте бумагу ещё раз "
+        "или уменьшите снимок."
+    ) % {"limit": papers.MAX_BYTES // (1024 * 1024)}
+
+
+def _refuse_oversized_body(request) -> None:
+    """Отказать по заявленной длине тела, не читая его (issue #148).
+
+    `request.FILES` разбирает тело целиком и складывает файл во временное
+    хранилище, поэтому проверка размера после этого тратит диск и память на
+    каждый заведомо лишний запрос. `Content-Length` известен до разбора.
+    """
+    try:
+        declared = int(request.META.get("CONTENT_LENGTH") or 0)
+    except ValueError:
+        declared = 0
+    if declared > papers.MAX_BYTES + _BODY_SLACK:
+        raise BadInput(_too_big_words())
+
+
 def parse_paper(request, who) -> dict:
     """Разобрать форму бумаги. Ничего, кроме того, что человек видит на экране."""
+    _refuse_oversized_body(request)
     on = _required_date(request, "date", _("Дата на бумаге"))
     upload = request.FILES.get("scan")
+    if upload is not None and upload.size > papers.MAX_BYTES:
+        raise BadInput(_too_big_words())
     amount = _number(request, "amount", _("Сумма с бумаги"), required=False)
     if amount == 0:
         # Ноль в поле суммы — это не «сумма неизвестна», а опечатка: неизвестную

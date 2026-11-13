@@ -11977,3 +11977,12 @@ msgstr "Sati i troškovi se unose po objektu — picerija."
 #: новые строки, добавлены tools/apply_translations.py
 msgid "сделано"
 msgstr "urađeno"
+
+#: новые строки, добавлены tools/apply_translations.py
+msgid "Ставки не изменились: у всех в группе уже такие значения."
+msgstr "Stope se nisu promenile: svi u grupi već imaju ove vrednosti."
+
+#: новые строки, добавлены tools/apply_translations.py
+#, python-format
+msgid "Ставки обновлены у сотрудников: %(count)s."
+msgstr "Stope su ažurirane za zaposlene: %(count)s."
